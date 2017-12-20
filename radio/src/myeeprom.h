@@ -137,7 +137,7 @@
 #define CFN_GVAR_CST_MAX    125
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
   enum SwitchConfig {
     SWITCH_NONE,
     SWITCH_TOGGLE,

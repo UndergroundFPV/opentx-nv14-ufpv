@@ -272,3 +272,9 @@ void menuRadioHardware(event_t event)
   }
 }
 #endif // PCBSKY9X
+
+#if defined(PCBI8)
+void menuRadioHardware(event_t event)
+{
+}
+#endif

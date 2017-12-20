@@ -58,6 +58,18 @@
   #define MAX_INPUTS                   32
   #define MAX_TRAINER_CHANNELS         16
   #define MAX_TELEMETRY_SENSORS        32
+#elif defined(PCBI8)
+  #define MAX_MODELS                   60
+  #define MAX_OUTPUT_CHANNELS          32 // number of real output channels CH1-CH32
+  #define MAX_FLIGHT_MODES             9
+  #define MAX_MIXERS                   64
+  #define MAX_EXPOS                    64
+  #define MAX_LOGICAL_SWITCHES         64
+  #define MAX_SPECIAL_FUNCTIONS        64 // number of functions assigned to switches
+  #define MAX_SCRIPTS                  7
+  #define MAX_INPUTS                   32
+  #define MAX_TRAINER_CHANNELS         16
+  #define MAX_TELEMETRY_SENSORS        32
 #elif defined(PCBSKY9X)
   #define MAX_MODELS                   60
   #define MAX_OUTPUT_CHANNELS          32 // number of real output channels CH1-CH32
@@ -136,7 +148,7 @@ enum CurveType {
   #define LEN_FUNCTION_NAME            6
   #define MAX_CURVES                   32
   #define MAX_CURVE_POINTS             512
-#elif defined(PCBSKY9X) || defined(PCBX7)
+#elif defined(PCBSKY9X) || defined(PCBX7) || defined(PCBI8)
   #define LEN_MODEL_NAME               10
   #define LEN_TIMER_NAME               3
   #define LEN_FLIGHT_MODE_NAME         6
@@ -166,7 +178,7 @@ enum CurveType {
   #define MAX_CURVE_POINTS             (112-MAX_CURVES)
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBSKY9X) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBSKY9X) || defined(PCBHORUS) || defined(PCBI8)
   #define NUM_MODULES                  2
 #else
   #define NUM_MODULES                  1
@@ -237,7 +249,7 @@ enum BeeperMode {
   e_mode_all
 };
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
   enum ModuleIndex {
     INTERNAL_MODULE,
     EXTERNAL_MODULE,
@@ -246,7 +258,7 @@ enum BeeperMode {
   enum TrainerMode {
     TRAINER_MODE_MASTER_TRAINER_JACK,
     TRAINER_MODE_SLAVE,
-#if defined(PCBTARANIS)
+#if defined(PCBTARANIS) || defined(PCBI8)
     TRAINER_MODE_MASTER_SBUS_EXTERNAL_MODULE,
     TRAINER_MODE_MASTER_CPPM_EXTERNAL_MODULE,
 #endif
@@ -255,6 +267,12 @@ enum BeeperMode {
     TRAINER_MODE_MASTER_BLUETOOTH,
     TRAINER_MODE_SLAVE_BLUETOOTH,
 #endif
+  };
+#elif defined(PCBI8)
+enum ModuleIndex {
+    INTERNAL_MODULE,
+    EXTERNAL_MODULE,
+    TRAINER_MODULE
   };
 #elif defined(PCBSKY9X)
   enum ModuleIndex {
@@ -272,7 +290,7 @@ enum BeeperMode {
   #define TRAINER_MODE_MAX()             HAS_WIRELESS_TRAINER_HARDWARE() ? TRAINER_MODE_MASTER_BATTERY_COMPARTMENT : TRAINER_MODE_MASTER_CPPM_EXTERNAL_MODULE
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
 #define IS_INTERNAL_MODULE_ENABLED() (g_model.moduleData[INTERNAL_MODULE].type != MODULE_TYPE_NONE)
 #elif defined(PCBSKY9X)
   #define IS_INTERNAL_MODULE_ENABLED() (false)

@@ -51,7 +51,7 @@ void menuRadioDiagKeys(event_t event)
 
     if (i < 6) {
       y = MENU_HEADER_HEIGHT + FH + FH*i;
-#if defined(PCBX7)
+#if defined(PCBX7) || defined(PCBI8)
       if (i > 1) {
         lcdDrawTextAtIndex(0, y, STR_VKEYS, (5-i), 0);
         displayKeyState(5*FW+4, y, KEY_MENU+(5-i));
@@ -62,7 +62,7 @@ void menuRadioDiagKeys(event_t event)
 #endif
     }
 
-#if defined(PCBTARANIS)
+#if defined(PCBTARANIS) || defined(PCBI8)
     if (i < NUM_SWITCHES) {
       if (SWITCH_EXISTS(i)) {
         getvalue_t val = getValue(MIXSRC_FIRST_SWITCH+i);

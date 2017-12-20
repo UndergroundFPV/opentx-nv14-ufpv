@@ -67,7 +67,7 @@ volatile GETSWITCH_RECURSIVE_TYPE s_last_switch_value = 0;
 
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
 #if defined(PCBX9E)
 tmr10ms_t switchesMidposStart[16];
 #else
@@ -139,6 +139,15 @@ uint64_t check3PosSwitchPosition(uint8_t idx, uint8_t sw, bool startup)
 void getSwitchesPosition(bool startup)
 {
   uint64_t newPos = 0;
+
+#if defined(PCBI8)
+  CHECK_2POS(SW_SA);
+  CHECK_2POS(SW_SB);
+  CHECK_2POS(SW_SC);
+  CHECK_2POS(SW_SD);
+  CHECK_2POS(SW_SE);
+  CHECK_2POS(SW_SF);
+#else
   CHECK_3POS(0, SW_SA);
   CHECK_3POS(1, SW_SB);
   CHECK_3POS(2, SW_SC);
@@ -162,6 +171,7 @@ void getSwitchesPosition(bool startup)
   CHECK_3POS(13, SW_SP);
   CHECK_3POS(14, SW_SQ);
   CHECK_3POS(15, SW_SR);
+#endif
 #endif
 
   switchesPos = newPos;
@@ -460,7 +470,7 @@ bool getSwitch(swsrc_t swtch)
     result = true;
   }
   else if (cs_idx <= SWSRC_LAST_SWITCH) {
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
     if (flags & GETSWITCH_MIDPOS_DELAY)
       result = SWITCH_POSITION(cs_idx-SWSRC_FIRST_SWITCH);
     else

@@ -309,8 +309,10 @@ void menuStatisticsDebug2(event_t event)
   lcdDrawTextAlignedLeft(MENU_DEBUG_ROW1, "Tlm RX Err");
   lcdDrawNumber(MENU_DEBUG_COL1_OFS, MENU_DEBUG_ROW1, telemetryErrors, RIGHT);
 
+#if defined(BLUETOOTH)
   lcdDrawTextAlignedLeft(MENU_DEBUG_ROW2, "BT status");
   lcdDrawNumber(MENU_DEBUG_COL1_OFS, MENU_DEBUG_ROW2, btChipPresent, RIGHT);
+#endif
 
   lcdDrawText(4*FW, 7*FH+1, STR_MENUTORESET);
   lcdInvertLastLine();
