@@ -198,15 +198,6 @@
 #define TELEMETRY_USART_IRQHandler      USART2_IRQHandler
 #define TELEMETRY_USART_IRQn            USART2_IRQn
 
-// PCBREV
-#if defined(PCBX7)
-#define PCBREV_RCC_AHB1Periph           RCC_AHB1Periph_GPIOA
-#define PCBREV_GPIO                     GPIOA
-#define PCBREV_GPIO_PIN                 GPIO_Pin_14  // PA.14
-#else
-#define PCBREV_RCC_AHB1Periph           0
-#endif
-
 // SPORT update connector
 #if defined(PCBX7)
 #define SPORT_UPDATE_RCC_AHB1Periph     RCC_AHB1Periph_GPIOB
@@ -254,6 +245,7 @@
 // LCD driver
 #define LCD_RCC_AHB1Periph             (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE | RCC_APB1Periph_SPI2 | RCC_AHB1Periph_DMA1)
 #define LCD_RCC_APB1Periph             RCC_APB1Periph_SPI2
+#define LCD_RCC_APB2Periph             0
 #define LCD_SPI_GPIO                   GPIOB
 #define LCD_MOSI_GPIO_PIN              GPIO_Pin_15 // PB.15
 #define LCD_MOSI_GPIO_PinSource        GPIO_PinSource15

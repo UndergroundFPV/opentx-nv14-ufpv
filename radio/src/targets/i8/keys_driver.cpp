@@ -24,7 +24,7 @@
 uint32_t readKeys()
 {
   uint32_t result = 0;
-
+/*
   if (~KEYS_GPIO_REG_ENTER & KEYS_GPIO_PIN_ENTER)
     result |= 1 << KEY_ENTER;
   if (~KEYS_GPIO_REG_MENU & KEYS_GPIO_PIN_MENU)
@@ -33,7 +33,7 @@ uint32_t readKeys()
     result |= 1 << KEY_PAGE;
   if (~KEYS_GPIO_REG_EXIT & KEYS_GPIO_PIN_EXIT)
     result |= 1 << KEY_EXIT;
-
+*/
   // if (result != 0) TRACE("readKeys(): result=0x%02x", result);
 
   return result;
@@ -108,7 +108,7 @@ uint32_t switchState(uint8_t index)
 {
   uint32_t xxx = 0;
 
-  switch (index) {
+/*  switch (index) {
     ADD_2POS_CASE(A);
     ADD_2POS_CASE(B);
     ADD_2POS_CASE(C);
@@ -119,7 +119,7 @@ uint32_t switchState(uint8_t index)
     default:
       break;
   }
-
+*/
   // TRACE("switch %d => %d", index, xxx);
   return xxx;
 }
@@ -133,15 +133,9 @@ void keysInit()
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
 
-  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOA_PINS;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOC_PINS;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOB_PINS;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
 
   GPIO_InitStructure.GPIO_Pin = KEYS_GPIOD_PINS;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOE_PINS;
-  GPIO_Init(GPIOE, &GPIO_InitStructure);
 }
