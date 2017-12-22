@@ -39,32 +39,40 @@
 #define TRIMS_GPIO_REG_RHR            GPIOD->IDR
 #define TRIMS_GPIO_PIN_RHR            GPIO_Pin_3  // PD.03
 
-// Switches
-#define SWITCHES_GPIO_REG_E           GPIOD->IDR
-#define SWITCHES_GPIO_PIN_E           GPIO_Pin_8  // PD.08
-#define SWITCHES_GPIO_REG_F           GPIOD->IDR
-#define SWITCHES_GPIO_PIN_F           GPIO_Pin_9  // PD.09
-
 #define KEYS_RCC_AHB1Periph           (RCC_AHB1Periph_GPIOB|RCC_AHB1Periph_GPIOD)
 #define KEYS_GPIOB_PINS               (TRIMS_GPIO_PIN_LVU | TRIMS_GPIO_PIN_LHL)
-#define KEYS_GPIOD_PINS               (TRIMS_GPIO_PIN_LHR | TRIMS_GPIO_PIN_LVD | TRIMS_GPIO_PIN_RVD | TRIMS_GPIO_PIN_RHL | TRIMS_GPIO_PIN_RVU | TRIMS_GPIO_PIN_RHR | SWITCHES_GPIO_PIN_E | SWITCHES_GPIO_PIN_F)
+#define KEYS_GPIOD_PINS               (TRIMS_GPIO_PIN_LHR | TRIMS_GPIO_PIN_LVD | TRIMS_GPIO_PIN_RVD | TRIMS_GPIO_PIN_RHL | TRIMS_GPIO_PIN_RVU | TRIMS_GPIO_PIN_RHR)
 
 // ADC
 #define ADC_RCC_AHB1Periph            (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA2)  // TODO switches may need analogs too
 #define ADC_RCC_APB2Periph            (RCC_APB2Periph_ADC1)
+
+#define ADC_GPIO_PIN_SWA              GPIO_Pin_2  // PA.03
+#define ADC_GPIO_PIN_SWB              GPIO_Pin_6  // PA.06
+#define ADC_GPIO_PIN_SWC              GPIO_Pin_7  // PA.07
+#define ADC_GPIO_PIN_SWD              GPIO_Pin_4  // PC.04
+#define ADC_GPIO_PIN_SWE              GPIO_Pin_3  // PC.03
+#define ADC_GPIO_PIN_SWF              GPIO_Pin_2  // PA.02
 
 #define ADC_GPIO_PIN_VRA              GPIO_Pin_5  // PC.05
 #define ADC_GPIO_PIN_VRB              GPIO_Pin_0  // PB.00
 #define ADC_GPIO_PIN_BATT             GPIO_Pin_0  // PC.00
 #define ADC_GPIO_PIN_DRYBATT          GPIO_Pin_2  // PC.02
 
+#define ADC_GPIOA_PINS                (ADC_GPIO_PIN_SWA | ADC_GPIO_PIN_SWB | ADC_GPIO_PIN_SWC | ADC_GPIO_PIN_SWF)
 #define ADC_GPIOB_PINS                (ADC_GPIO_PIN_VRB)
-#define ADC_GPIOC_PINS                (ADC_GPIO_PIN_VRA | ADC_GPIO_PIN_BATT | ADC_GPIO_PIN_DRYBATT)
+#define ADC_GPIOC_PINS                (ADC_GPIO_PIN_SWD | ADC_GPIO_PIN_SWE | ADC_GPIO_PIN_VRA | ADC_GPIO_PIN_BATT | ADC_GPIO_PIN_DRYBATT)
 
-#define ADC_CHANNEL_VRA               ADC_Channel_15 // ADC1_IN15
-#define ADC_CHANNEL_VRB               ADC_Channel_8  // ADC1_IN8
-#define ADC_CHANNEL_BATT              ADC_Channel_10 // ADC1_IN10
-#define ADC_CHANNEL_DRYBATT           ADC_Channel_12 // ADC1_IN12
+#define ADC_CHANNEL_SWA               ADC_Channel_3 // ADC123_IN3
+#define ADC_CHANNEL_SWB               ADC_Channel_6 // ADC12_IN6
+#define ADC_CHANNEL_SWC               ADC_Channel_7 // ADC12_IN7
+#define ADC_CHANNEL_SWD               ADC_Channel_14 // ADC12_IN14
+#define ADC_CHANNEL_SWE               ADC_Channel_13 // ADC123_IN13
+#define ADC_CHANNEL_SWF               ADC_Channel_2 // ADC123_IN2
+#define ADC_CHANNEL_VRA               ADC_Channel_15 // ADC12_IN15
+#define ADC_CHANNEL_VRB               ADC_Channel_8  // ADC12_IN8
+#define ADC_CHANNEL_BATT              ADC_Channel_10 // ADC123_IN10
+#define ADC_CHANNEL_DRYBATT           ADC_Channel_12 // ADC123_IN12
   
 #define ADC_MAIN                      ADC1
 #define ADC_DMA                       DMA2
