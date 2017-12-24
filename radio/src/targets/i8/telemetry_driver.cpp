@@ -50,11 +50,17 @@ void telemetryPortInit(uint32_t baudrate, uint8_t mode)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_Init(TELEMETRY_GPIO, &GPIO_InitStructure);
 
-  GPIO_InitStructure.GPIO_Pin = TELEMETRY_DIR_GPIO_PIN;
+  GPIO_InitStructure.GPIO_Pin = TELEMETRY_TXEN_GPIO_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_Init(TELEMETRY_DIR_GPIO, &GPIO_InitStructure);
-  GPIO_ResetBits(TELEMETRY_DIR_GPIO, TELEMETRY_DIR_GPIO_PIN);
+  GPIO_Init(TELEMETRY_TXEN_GPIO, &GPIO_InitStructure);
+  GPIO_ResetBits(TELEMETRY_TXEN_GPIO, TELEMETRY_TXEN_GPIO_PIN);
+  
+  GPIO_InitStructure.GPIO_Pin = TELEMETRY_RXEN_GPIO_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_Init(TELEMETRY_RXEN_GPIO, &GPIO_InitStructure);
+  GPIO_ResetBits(TELEMETRY_RXEN_GPIO, TELEMETRY_RXEN_GPIO_PIN);
 
   USART_InitStructure.USART_BaudRate = baudrate;
   if (mode & TELEMETRY_SERIAL_8E2) {
@@ -79,13 +85,15 @@ void telemetryPortInit(uint32_t baudrate, uint8_t mode)
 
 void telemetryPortSetDirectionOutput()
 {
-  TELEMETRY_DIR_GPIO->BSRRL = TELEMETRY_DIR_GPIO_PIN;     // output enable
+  TELEMETRY_TXEN_GPIO->BSRRL = TELEMETRY_TXEN_GPIO_PIN;   // output enable
+  TELEMETRY_RXEN_GPIO->BSRRH = TELEMETRY_RXEN_GPIO_PIN;   // input disable
   TELEMETRY_USART->CR1 &= ~USART_CR1_RE;                  // turn off receiver
 }
 
 void telemetryPortSetDirectionInput()
 {
-  TELEMETRY_DIR_GPIO->BSRRH = TELEMETRY_DIR_GPIO_PIN;     // output disable
+  TELEMETRY_TXEN_GPIO->BSRRH = TELEMETRY_TXEN_GPIO_PIN;   // output disable
+  TELEMETRY_RXEN_GPIO->BSRRL = TELEMETRY_RXEN_GPIO_PIN;   // input enable
   TELEMETRY_USART->CR1 |= USART_CR1_RE;                   // turn on receiver
 }
 

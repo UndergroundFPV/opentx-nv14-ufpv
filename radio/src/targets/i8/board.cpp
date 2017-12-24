@@ -147,13 +147,13 @@ void sportUpdatePowerOff()
 void boardInit()
 {
 #if !defined(SIMU)
-  RCC_AHB1PeriphClockCmd(PWR_RCC_AHB1Periph | PCBREV_RCC_AHB1Periph |
+  RCC_AHB1PeriphClockCmd(PWR_RCC_AHB1Periph | 
                          KEYS_RCC_AHB1Periph | LCD_RCC_AHB1Periph |
                          AUDIO_RCC_AHB1Periph | BACKLIGHT_RCC_AHB1Periph |
                          ADC_RCC_AHB1Periph | I2C_RCC_AHB1Periph |
                          SD_RCC_AHB1Periph | HAPTIC_RCC_AHB1Periph |
                          INTMODULE_RCC_AHB1Periph | EXTMODULE_RCC_AHB1Periph |
-                         TELEMETRY_RCC_AHB1Periph | SPORT_UPDATE_RCC_AHB1Periph |
+                         TELEMETRY_RCC_AHB1Periph |
                          SERIAL_RCC_AHB1Periph | TRAINER_RCC_AHB1Periph |
                          HEARTBEAT_RCC_AHB1Periph | BT_RCC_AHB1Periph, ENABLE);
 
@@ -161,13 +161,13 @@ void boardInit()
                          BACKLIGHT_RCC_APB1Periph | INTERRUPT_xMS_RCC_APB1Periph |
                          TIMER_2MHz_RCC_APB1Periph | I2C_RCC_APB1Periph |
                          SD_RCC_APB1Periph | TRAINER_RCC_APB1Periph |
-                         TELEMETRY_RCC_APB1Periph | SERIAL_RCC_APB1Periph |
+                         SERIAL_RCC_APB1Periph |
                          BT_RCC_APB1Periph, ENABLE);
 
   RCC_APB2PeriphClockCmd(BACKLIGHT_RCC_APB2Periph | ADC_RCC_APB2Periph |
                          HAPTIC_RCC_APB2Periph | INTMODULE_RCC_APB2Periph |
                          EXTMODULE_RCC_APB2Periph | HEARTBEAT_RCC_APB2Periph |
-                         BT_RCC_APB2Periph, ENABLE);
+                         BT_RCC_APB2Periph | TELEMETRY_RCC_APB2Periph, ENABLE);
 
   pwrInit();
 
@@ -183,9 +183,9 @@ void boardInit()
   i2cInit();
   usbInit();
 
-#if defined(DEBUG) && !defined(PCBX7)
+#if defined(DEBUG)
   serial2Init(0, 0); // default serial mode (None if DEBUG not defined)
-  TRACE("\nTaranis board started :)");
+  TRACE("\nI8 board started :)");
 #endif
 
 #if defined(HAPTIC)

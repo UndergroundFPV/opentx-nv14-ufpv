@@ -159,44 +159,41 @@
 #define TRAINER_TIMER_FREQ              (PERI1_FREQUENCY * TIMER_MULT_APB1)
 
 // Serial Port
-#if defined(PCBX7)
-#define SERIAL_RCC_AHB1Periph           0
-#define SERIAL_RCC_APB1Periph           0
-#else
-#define SERIAL_RCC_AHB1Periph           (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA1)
-#define SERIAL_RCC_APB1Periph           RCC_APB1Periph_USART3
-#define SERIAL_GPIO                     GPIOB
-#define SERIAL_GPIO_PIN_TX              GPIO_Pin_10 // PB.10
-#define SERIAL_GPIO_PIN_RX              GPIO_Pin_11 // PB.11
-#define SERIAL_GPIO_PinSource_TX        GPIO_PinSource10
-#define SERIAL_GPIO_PinSource_RX        GPIO_PinSource11
-#define SERIAL_GPIO_AF                  GPIO_AF_USART3
-#define SERIAL_USART                    USART3
-#define SERIAL_USART_IRQHandler         USART3_IRQHandler
-#define SERIAL_USART_IRQn               USART3_IRQn
-#define SERIAL_DMA_Stream_RX            DMA1_Stream1
+#define SERIAL_RCC_AHB1Periph           (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA1)
+#define SERIAL_RCC_APB1Periph           RCC_APB1Periph_USART2
+#define SERIAL_GPIO                     GPIOD
+#define SERIAL_GPIO_PIN_TX              GPIO_Pin_5 // PD.05
+#define SERIAL_GPIO_PIN_RX              GPIO_Pin_6 // PD.06
+#define SERIAL_GPIO_PinSource_TX        GPIO_PinSource5
+#define SERIAL_GPIO_PinSource_RX        GPIO_PinSource6
+#define SERIAL_GPIO_AF                  GPIO_AF_USART2
+#define SERIAL_USART                    USART2
+#define SERIAL_USART_IRQHandler         USART2_IRQHandler
+#define SERIAL_USART_IRQn               USART2_IRQn
+#define SERIAL_DMA_Stream_RX            DMA1_Stream5
 #define SERIAL_DMA_Channel_RX           DMA_Channel_4
-#endif
 
 // Telemetry
-#define TELEMETRY_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA1)
-#define TELEMETRY_RCC_APB1Periph        RCC_APB1Periph_USART2
-#define TELEMETRY_DIR_GPIO              GPIOD
-#define TELEMETRY_DIR_GPIO_PIN          GPIO_Pin_4  // PD.04
-#define TELEMETRY_GPIO                  GPIOD
-#define TELEMETRY_TX_GPIO_PIN           GPIO_Pin_5  // PD.05
-#define TELEMETRY_RX_GPIO_PIN           GPIO_Pin_6  // PD.06
-#define TELEMETRY_GPIO_PinSource_TX     GPIO_PinSource5
-#define TELEMETRY_GPIO_PinSource_RX     GPIO_PinSource6
-#define TELEMETRY_GPIO_AF               GPIO_AF_USART2
-#define TELEMETRY_USART                 USART2
-#define TELEMETRY_DMA_Stream_TX         DMA1_Stream6
-#define TELEMETRY_DMA_Channel_TX        DMA_Channel_4
-#define TELEMETRY_DMA_TX_Stream_IRQ     DMA1_Stream6_IRQn
-#define TELEMETRY_DMA_TX_IRQHandler     DMA1_Stream6_IRQHandler
-#define TELEMETRY_DMA_TX_FLAG_TC        DMA_IT_TCIF6
-#define TELEMETRY_USART_IRQHandler      USART2_IRQHandler
-#define TELEMETRY_USART_IRQn            USART2_IRQn
+#define TELEMETRY_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA2)
+#define TELEMETRY_RCC_APB2Periph        RCC_APB2Periph_USART6
+#define TELEMETRY_TXEN_GPIO             GPIOC
+#define TELEMETRY_TXEN_GPIO_PIN         GPIO_Pin_1  // PC.01
+#define TELEMETRY_RXEN_GPIO             GPIOC
+#define TELEMETRY_RXEN_GPIO_PIN         GPIO_Pin_13 // PC.13
+#define TELEMETRY_GPIO                  GPIOC
+#define TELEMETRY_TX_GPIO_PIN           GPIO_Pin_6  // PC.06
+#define TELEMETRY_RX_GPIO_PIN           GPIO_Pin_7  // PC.07
+#define TELEMETRY_GPIO_PinSource_TX     GPIO_PinSource6
+#define TELEMETRY_GPIO_PinSource_RX     GPIO_PinSource7
+#define TELEMETRY_GPIO_AF               GPIO_AF_USART6
+#define TELEMETRY_USART                 USART6
+#define TELEMETRY_DMA_Stream_TX         DMA1_Stream7
+#define TELEMETRY_DMA_Channel_TX        DMA_Channel_5
+#define TELEMETRY_DMA_TX_Stream_IRQ     DMA1_Stream7_IRQn
+#define TELEMETRY_DMA_TX_IRQHandler     DMA1_Stream7_IRQHandler
+#define TELEMETRY_DMA_TX_FLAG_TC        DMA_IT_TCIF7
+#define TELEMETRY_USART_IRQHandler      USART6_IRQHandler
+#define TELEMETRY_USART_IRQn            USART6_IRQn
 
 // SPORT update connector
 #if defined(PCBX7)
