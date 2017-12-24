@@ -262,7 +262,7 @@
 #define LCD_SPI                        SPI2
 #define LCD_GPIO_AF                    GPIO_AF_SPI2
 
-// I2C Bus: EEPROM and CAT5137 digital pot for volume control
+// I2C Bus: EEPROM
 #define I2C_RCC_AHB1Periph              RCC_AHB1Periph_GPIOB
 #define I2C_RCC_APB1Periph              RCC_APB1Periph_I2C1
 #define I2C                             I2C1
@@ -273,8 +273,7 @@
 #define I2C_SCL_GPIO_PinSource          GPIO_PinSource8
 #define I2C_SDA_GPIO_PinSource          GPIO_PinSource9
 #define I2C_SPEED                       400000
-#define I2C_ADDRESS_EEPROM              0xA2
-#define I2C_ADDRESS_VOLUME              0x5C
+#define I2C_ADDRESS_EEPROM              0xA0
 #define I2C_FLASH_PAGESIZE              64
 
 // SD - SPI2

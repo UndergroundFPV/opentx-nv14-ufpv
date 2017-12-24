@@ -41,12 +41,12 @@ void lcdWriteCommand(uint8_t byte)
 {
   LCD_A0_LOW();
   LCD_NCS_LOW();
-  while ((SPI3->SR & SPI_SR_TXE) == 0) {
+  while ((LCD_SPI->SR & SPI_SR_TXE) == 0) {
     // Wait
   }
-  (void) SPI3->DR; // Clear receive
+  (void) LCD_SPI->DR; // Clear receive
   LCD_SPI->DR = byte;
-  while ((SPI3->SR & SPI_SR_RXNE) == 0) {
+  while ((LCD_SPI->SR & SPI_SR_RXNE) == 0) {
     // Wait
   }
   LCD_NCS_HIGH();
@@ -77,7 +77,7 @@ void lcdHardwareInit()
 
   GPIO_InitStructure.GPIO_Pin = LCD_A0_GPIO_PIN;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init(LCD_SPI_GPIO, &GPIO_InitStructure);
+  GPIO_Init(LCD_A0_GPIO, &GPIO_InitStructure);
 
   GPIO_InitStructure.GPIO_Pin = LCD_CLK_GPIO_PIN | LCD_MOSI_GPIO_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
@@ -98,17 +98,20 @@ void lcdHardwareInit()
 
 void lcdStart()
 {
-  lcdWriteCommand(0xe2); // (14) Soft reset
-  lcdWriteCommand(0xa1); // Set seg
-  lcdWriteCommand(0xc0); // Set com
-  lcdWriteCommand(0xf8); // Set booster
-  lcdWriteCommand(0x00); // 5x
-  lcdWriteCommand(0xa3); // Set bias=1/6
-  lcdWriteCommand(0x22); // Set internal rb/ra=5.0
-  lcdWriteCommand(0x2f); // All built-in power circuits on
-  lcdWriteCommand(0x81); // Set contrast
-  lcdWriteCommand(0x36); // Set Vop
-  lcdWriteCommand(0xa6); // Set display mode
+  lcdWriteCommand(0xA1);  //ADC select segment direction 
+  lcdWriteCommand(0xC0);  //Common direction              
+  lcdWriteCommand(0xA6);  //reverse display
+  lcdWriteCommand(0xA4);  //normal display
+  lcdWriteCommand(0xA2);  //bias set 1/9
+  lcdWriteCommand(0xF8);  //Boost ratio set
+  lcdWriteCommand(0x01);  //x4
+  lcdWriteCommand(0x81);  //V0 a set
+  lcdWriteCommand(0x23);
+  lcdWriteCommand(0x25);  //Ra/Rb set
+  lcdWriteCommand(0x2F);
+  delay_ms(1);
+  lcdWriteCommand(0x40);  //start line
+  delay_ms(1);
 }
 
 volatile bool lcd_busy;
