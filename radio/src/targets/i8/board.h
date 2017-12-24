@@ -343,13 +343,8 @@ void backlightInit(void);
 void backlightDisable(void);
 #define BACKLIGHT_DISABLE()            backlightDisable()
 uint8_t isBacklightEnabled(void);
-#if defined(PCBX9E) || defined(PCBX9DP)
-  void backlightEnable(uint8_t level, uint8_t color);
-  #define BACKLIGHT_ENABLE()           backlightEnable(g_eeGeneral.backlightBright, g_eeGeneral.backlightColor)
-#else
-  void backlightEnable(uint8_t level);
-  #define BACKLIGHT_ENABLE()           backlightEnable(g_eeGeneral.backlightBright)
-#endif
+void backlightEnable(void);
+#define BACKLIGHT_ENABLE()             backlightEnable()
 
 #if !defined(SIMU)
   void usbJoystickUpdate();

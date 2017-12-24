@@ -228,15 +228,11 @@
 #define USB_GPIO_AF                     GPIO_AF_OTG1_FS
 
 // BackLight
-#define BACKLIGHT_RCC_AHB1Periph      RCC_AHB1Periph_GPIOE
+#define BACKLIGHT_RCC_AHB1Periph      0
 #define BACKLIGHT_RCC_APB1Periph      0
-#define BACKLIGHT_RCC_APB2Periph      RCC_APB2Periph_TIM1
-#define BACKLIGHT_TIMER_FREQ          (PERI1_FREQUENCY * TIMER_MULT_APB1)
-#define BACKLIGHT_TIMER               TIM1
+#define BACKLIGHT_RCC_APB2Periph      0
 #define BACKLIGHT_GPIO                GPIOE
 #define BACKLIGHT_GPIO_PIN            GPIO_Pin_7  // PE.07
-#define BACKLIGHT_GPIO_PinSource      GPIO_PinSource7
-#define BACKLIGHT_GPIO_AF             GPIO_AF_TIM1
 
 // LCD driver
 #define LCD_RCC_AHB1Periph             (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE | RCC_APB1Periph_SPI2 | RCC_AHB1Periph_DMA1)
