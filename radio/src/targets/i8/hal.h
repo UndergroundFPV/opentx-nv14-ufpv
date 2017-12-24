@@ -69,8 +69,8 @@
 #define ADC_CHANNEL_SWD               ADC_Channel_14 // ADC12_IN14
 #define ADC_CHANNEL_SWE               ADC_Channel_13 // ADC123_IN13
 #define ADC_CHANNEL_SWF               ADC_Channel_2 // ADC123_IN2
-#define ADC_CHANNEL_VRA               ADC_Channel_15 // ADC12_IN15
-#define ADC_CHANNEL_VRB               ADC_Channel_8  // ADC12_IN8
+#define ADC_CHANNEL_POT1              ADC_Channel_15 // ADC12_IN15
+#define ADC_CHANNEL_POT2              ADC_Channel_8  // ADC12_IN8
 #define ADC_CHANNEL_BATT              ADC_Channel_10 // ADC123_IN10
 #define ADC_CHANNEL_DRYBATT           ADC_Channel_12 // ADC123_IN12
   
@@ -81,6 +81,14 @@
 #define ADC_SET_DMA_FLAGS()           ADC_DMA->HIFCR = (DMA_HIFCR_CTCIF4 | DMA_HIFCR_CHTIF4 | DMA_HIFCR_CTEIF4 | DMA_HIFCR_CDMEIF4 | DMA_HIFCR_CFEIF4)
 #define ADC_TRANSFER_COMPLETE()       (ADC_DMA->HISR & DMA_HISR_TCIF4)
 #define ADC_SAMPTIME                  2   // sample time = 28 cycles
+
+#define ADC_CHANNEL_STICK_LV          0
+#define ADC_CHANNEL_STICK_LH          0
+#define ADC_CHANNEL_STICK_RV          0
+#define ADC_CHANNEL_STICK_RH          0
+#define ADC_CHANNEL_POT3              0
+#define ADC_CHANNEL_SLIDER1           0
+#define ADC_CHANNEL_SLIDER2           0
 
 // PWR and LED driver
 #define PWR_RCC_AHB1Periph              (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOE)
@@ -194,15 +202,6 @@
 #define TELEMETRY_DMA_TX_FLAG_TC        DMA_IT_TCIF7
 #define TELEMETRY_USART_IRQHandler      USART6_IRQHandler
 #define TELEMETRY_USART_IRQn            USART6_IRQn
-
-// SPORT update connector
-#if defined(PCBX7)
-#define SPORT_UPDATE_RCC_AHB1Periph     RCC_AHB1Periph_GPIOB
-#define SPORT_UPDATE_PWR_GPIO           GPIOB
-#define SPORT_UPDATE_PWR_GPIO_PIN       GPIO_Pin_2  // PB.02
-#else
-#define SPORT_UPDATE_RCC_AHB1Periph     0
-#endif
 
 // Heartbeat
 #define HEARTBEAT_RCC_AHB1Periph        RCC_AHB1Periph_GPIOC
