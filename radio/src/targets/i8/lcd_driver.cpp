@@ -27,8 +27,8 @@
 #define LCD_NCS_HIGH()                 LCD_NCS_GPIO->BSRRL = LCD_NCS_GPIO_PIN
 #define LCD_NCS_LOW()                  LCD_NCS_GPIO->BSRRH = LCD_NCS_GPIO_PIN
 
-#define LCD_A0_HIGH()                  LCD_SPI_GPIO->BSRRL = LCD_A0_GPIO_PIN
-#define LCD_A0_LOW()                   LCD_SPI_GPIO->BSRRH = LCD_A0_GPIO_PIN
+#define LCD_A0_HIGH()                  LCD_A0_GPIO->BSRRL = LCD_A0_GPIO_PIN
+#define LCD_A0_LOW()                   LCD_A0_GPIO->BSRRH = LCD_A0_GPIO_PIN
 
 #define LCD_RST_HIGH()                 LCD_RST_GPIO->BSRRL = LCD_RST_GPIO_PIN
 #define LCD_RST_LOW()                  LCD_RST_GPIO->BSRRH = LCD_RST_GPIO_PIN
@@ -98,20 +98,24 @@ void lcdHardwareInit()
 
 void lcdStart()
 {
-  lcdWriteCommand(0xA1);  //ADC select segment direction 
-  lcdWriteCommand(0xC0);  //Common direction              
-  lcdWriteCommand(0xA6);  //reverse display
-  lcdWriteCommand(0xA4);  //normal display
-  lcdWriteCommand(0xA2);  //bias set 1/9
-  lcdWriteCommand(0xF8);  //Boost ratio set
-  lcdWriteCommand(0x01);  //x4
-  lcdWriteCommand(0x81);  //V0 a set
+  lcdWriteCommand(0xE2);  // Reset
+  delay_ms(1);
+  lcdWriteCommand(0xA1);  // ADC select segment direction 
+  lcdWriteCommand(0xC0);  // Common direction              
+  lcdWriteCommand(0xA6);  // reverse display
+  lcdWriteCommand(0xA4);  // normal display
+  lcdWriteCommand(0xA2);  // bias set 1/9
+  lcdWriteCommand(0xF8);  // Boost ratio set
+  lcdWriteCommand(0x01);  // x4
+  lcdWriteCommand(0x81);  // V0 a set
   lcdWriteCommand(0x23);
-  lcdWriteCommand(0x25);  //Ra/Rb set
+  lcdWriteCommand(0x25);  // Ra/Rb set
   lcdWriteCommand(0x2F);
   delay_ms(1);
-  lcdWriteCommand(0x40);  //start line
+  lcdWriteCommand(0x40);  // start line
   delay_ms(1);
+  lcdWriteCommand(0x81);
+  lcdWriteCommand(0x1C);  // Default contrast level
 }
 
 volatile bool lcd_busy;
@@ -128,26 +132,41 @@ void lcdRefresh(bool wait)
   }
 
   uint8_t * p = displayBuf;
-  for (uint8_t y = 0; y < 8; y++, p += LCD_W) {
-    lcdWriteCommand(0x10); // Column addr 0
+  for (uint8_t y = 0; y < LCD_H/8; y++, p += LCD_W) {
     lcdWriteCommand(0xB0 | y); // Page addr y
     lcdWriteCommand(0x04);
+    lcdWriteCommand(0x10); // Column addr 0
 
     LCD_NCS_LOW();
     LCD_A0_HIGH();
 
+/* TODO: find why DMA doesn't work
     lcd_busy = true;
     LCD_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
     LCD_DMA->HIFCR = LCD_DMA_FLAGS; // Write ones to clear bits
     LCD_DMA_Stream->M0AR = (uint32_t) p;
     LCD_DMA_Stream->CR |= DMA_SxCR_EN | DMA_SxCR_TCIE; // Enable DMA & TC interrupts
     LCD_SPI->CR2 |= SPI_CR2_TXDMAEN;
-
     WAIT_FOR_DMA_END();
-
+*/
+// TEMPORARY
+    uint8_t * q = p; 
+    for (uint16_t z = 0; z < LCD_W; z++) {
+      while ((LCD_SPI->SR & SPI_SR_TXE) == 0) {
+        // Wait
+      }
+      (void) LCD_SPI->DR; // Clear receive
+      LCD_SPI->DR = *q;
+      while ((LCD_SPI->SR & SPI_SR_RXNE) == 0) {
+        // Wait
+      }
+      q++;
+    }
     LCD_NCS_HIGH();
     LCD_A0_HIGH();
+// END TEMPORARY
   }
+lcd_busy = false; // TODO: Remove
 }
 
 extern "C" void LCD_DMA_Stream_IRQHandler()
