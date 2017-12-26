@@ -39,9 +39,15 @@
 #define TRIMS_GPIO_REG_RHR            GPIOD->IDR
 #define TRIMS_GPIO_PIN_RHR            GPIO_Pin_3  // PD.03
 
+// Keys
+#define KEYS_GPIO_REG_K1              GPIOD->IDR
+#define KEYS_GPIO_PIN_K1              GPIO_Pin_8  // PD.08
+#define KEYS_GPIO_REG_K2              GPIOD->IDR
+#define KEYS_GPIO_PIN_K2              GPIO_Pin_9  // PD.09
+
 #define KEYS_RCC_AHB1Periph           (RCC_AHB1Periph_GPIOB|RCC_AHB1Periph_GPIOD)
 #define KEYS_GPIOB_PINS               (TRIMS_GPIO_PIN_LVU | TRIMS_GPIO_PIN_LHL)
-#define KEYS_GPIOD_PINS               (TRIMS_GPIO_PIN_LHR | TRIMS_GPIO_PIN_LVD | TRIMS_GPIO_PIN_RVD | TRIMS_GPIO_PIN_RHL | TRIMS_GPIO_PIN_RVU | TRIMS_GPIO_PIN_RHR)
+#define KEYS_GPIOD_PINS               (TRIMS_GPIO_PIN_LHR | TRIMS_GPIO_PIN_LVD | TRIMS_GPIO_PIN_RVD | TRIMS_GPIO_PIN_RHL | TRIMS_GPIO_PIN_RVU | TRIMS_GPIO_PIN_RHR | KEYS_GPIO_PIN_K1 | KEYS_GPIO_PIN_K2)
 
 // ADC
 #define ADC_RCC_AHB1Periph            (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA2)  // TODO switches may need analogs too
