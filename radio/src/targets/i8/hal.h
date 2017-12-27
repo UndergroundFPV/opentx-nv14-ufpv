@@ -22,14 +22,14 @@
 #define _HAL_H_
 
 // Trims
-#define TRIMS_GPIO_REG_LHL            GPIOB->IDR
-#define TRIMS_GPIO_PIN_LHL            GPIO_Pin_6  // PB.06
+#define TRIMS_GPIO_REG_LHL            GPIOE->IDR
+#define TRIMS_GPIO_PIN_LHL            GPIO_Pin_0  // PE.00
 #define TRIMS_GPIO_REG_LHR            GPIOD->IDR
 #define TRIMS_GPIO_PIN_LHR            GPIO_Pin_14 // PD.14
 #define TRIMS_GPIO_REG_LVD            GPIOD->IDR
 #define TRIMS_GPIO_PIN_LVD            GPIO_Pin_1  // PD.01
-#define TRIMS_GPIO_REG_LVU            GPIOB->IDR
-#define TRIMS_GPIO_PIN_LVU            GPIO_Pin_7  // PB.07
+#define TRIMS_GPIO_REG_LVU            GPIOE->IDR
+#define TRIMS_GPIO_PIN_LVU            GPIO_Pin_1  // PE.01
 #define TRIMS_GPIO_REG_RVD            GPIOD->IDR
 #define TRIMS_GPIO_PIN_RVD            GPIO_Pin_15 // PD.15
 #define TRIMS_GPIO_REG_RHL            GPIOD->IDR
@@ -45,8 +45,8 @@
 #define KEYS_GPIO_REG_K2              GPIOD->IDR
 #define KEYS_GPIO_PIN_K2              GPIO_Pin_9  // PD.09
 
-#define KEYS_RCC_AHB1Periph           (RCC_AHB1Periph_GPIOB|RCC_AHB1Periph_GPIOD)
-#define KEYS_GPIOB_PINS               (TRIMS_GPIO_PIN_LVU | TRIMS_GPIO_PIN_LHL)
+#define KEYS_RCC_AHB1Periph           (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE)
+#define KEYS_GPIOE_PINS               (TRIMS_GPIO_PIN_LHL | TRIMS_GPIO_PIN_LVU)
 #define KEYS_GPIOD_PINS               (TRIMS_GPIO_PIN_LHR | TRIMS_GPIO_PIN_LVD | TRIMS_GPIO_PIN_RVD | TRIMS_GPIO_PIN_RHL | TRIMS_GPIO_PIN_RVU | TRIMS_GPIO_PIN_RHR | KEYS_GPIO_PIN_K1 | KEYS_GPIO_PIN_K2)
 
 // ADC
@@ -114,7 +114,7 @@
   #define INTMODULE_PWR_GPIO_PIN        GPIO_Pin_6  // PC.06
 #else
   #define INTMODULE_PWR_GPIO            GPIOD
-  #define INTMODULE_PWR_GPIO_PIN        GPIO_Pin_15 // PD.15
+  #define INTMODULE_PWR_GPIO_PIN        0 // PD.15
 #endif
 #define INTMODULE_PPM_GPIO              GPIOA
 #define INTMODULE_PPM_GPIO_PIN          GPIO_Pin_10 // PA.10
@@ -134,7 +134,7 @@
 #define EXTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)
 #define EXTMODULE_RCC_APB2Periph        RCC_APB2Periph_TIM8
 #define EXTMODULE_PWR_GPIO              GPIOD
-#define EXTMODULE_PWR_GPIO_PIN          GPIO_Pin_8  // PD.08
+#define EXTMODULE_PWR_GPIO_PIN          0
 #define EXTMODULE_PPM_GPIO              GPIOA
 #define EXTMODULE_PPM_GPIO_PIN          GPIO_Pin_7  // PA.07
 #define EXTMODULE_PPM_GPIO_PinSource    GPIO_PinSource7

@@ -1103,6 +1103,7 @@ void checkAll()
 #if defined(CPUARM)
   if (!clearKeyEvents()) {
     showMessageBox(STR_KEYSTUCK);
+    TRACE("Keys stuck: 0x%x", readKeys());
     tmr10ms_t tgtime = get_tmr10ms() + 500;
     while (tgtime != get_tmr10ms()) {
 #if defined(SIMU)
