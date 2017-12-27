@@ -29,7 +29,7 @@ if(SPLASH STREQUAL OFF)
 endif()
 
 add_definitions(-DPCBI8 -DPPM_PIN_TIMER)
-add_definitions(-DAUDIO -DVOICE -DRTCLOCK)
+add_definitions(-DAUDIO -DVOICE -DRTCLOCK -DSOFTWARE_VOLUME)
 
 set(GUI_SRC ${GUI_SRC}
   model_input_edit.cpp
