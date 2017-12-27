@@ -20,20 +20,23 @@
 
 #include "opentx.h"
 
-
 uint32_t readKeys()
 {
   uint32_t result = 0;
-/*
-  if (~KEYS_GPIO_REG_ENTER & KEYS_GPIO_PIN_ENTER)
-    result |= 1 << KEY_ENTER;
-  if (~KEYS_GPIO_REG_MENU & KEYS_GPIO_PIN_MENU)
+// TODO: Remove once touch is there
+  if (~TRIMS_GPIO_REG_RVU & TRIMS_GPIO_PIN_RVU)
     result |= 1 << KEY_MENU;
-  if (~KEYS_GPIO_REG_PAGE & KEYS_GPIO_PIN_PAGE)
-    result |= 1 << KEY_PAGE;
-  if (~KEYS_GPIO_REG_EXIT & KEYS_GPIO_PIN_EXIT)
+  if (~TRIMS_GPIO_REG_RVD & TRIMS_GPIO_PIN_RVD)
     result |= 1 << KEY_EXIT;
-*/
+  if (~TRIMS_GPIO_REG_RHR & TRIMS_GPIO_PIN_RHR)
+    result |= 1 << KEY_ENTER;
+  if (~TRIMS_GPIO_REG_RHL & TRIMS_GPIO_PIN_RHL)
+    result |= 1 << KEY_PAGE;
+  if (~TRIMS_GPIO_REG_LVU & TRIMS_GPIO_PIN_LVU)
+    result |= 1 << KEY_PLUS;
+  if (~TRIMS_GPIO_REG_LVD & TRIMS_GPIO_PIN_LVD)
+    result |= 1 << KEY_MINUS;
+
   // if (result != 0) TRACE("readKeys(): result=0x%02x", result);
 
   return result;

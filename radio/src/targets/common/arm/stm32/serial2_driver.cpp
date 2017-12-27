@@ -26,6 +26,10 @@ DMAFifo<32> serial2RxFifo __DMA (SERIAL_DMA_Stream_RX);
 
 void uart3Setup(unsigned int baudrate, bool dma)
 {
+#if defined(PCBI8)
+dma = false;
+#endif
+  
   USART_InitTypeDef USART_InitStructure;
   GPIO_InitTypeDef GPIO_InitStructure;
 
