@@ -245,6 +245,11 @@ int main()
 
   lcdInit();
   backlightInit();
+  
+#if defined(PCBI8)
+  hapticInit();
+  BACKLIGHT_ENABLE();
+#endif
 
 #if defined(PCBTARANIS)
   i2cInit();

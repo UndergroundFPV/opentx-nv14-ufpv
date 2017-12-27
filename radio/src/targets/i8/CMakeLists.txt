@@ -16,6 +16,7 @@ set(GUI_DIR 128x64)
 set(BITMAPS_TARGET 9x_bitmaps)
 set(FONTS_TARGET 9x_fonts_1bit)
 set(LCD_DRIVER lcd_driver.cpp)
+set(DISK_CACHE NO)
 
 set(HSE_VALUE 12000000)
 set(SDCARD YES)
@@ -59,10 +60,15 @@ set(TARGET_SRC
 set(FIRMWARE_TARGET_SRC
   ${FIRMWARE_TARGET_SRC}
   startup_stm32f40_41xxx.s
+  ../common/arm/stm32/sdio_sd.c
   ${LCD_DRIVER}
   i2c_driver.cpp
   pwr_driver.cpp
   ../common/arm/loadboot.cpp
+  )
+
+set(STM32LIB_SRC
+  STM32F4xx_StdPeriph_Driver/src/stm32f4xx_sdio.c
   )
 
 if(LCD_DUAL_BUFFER)

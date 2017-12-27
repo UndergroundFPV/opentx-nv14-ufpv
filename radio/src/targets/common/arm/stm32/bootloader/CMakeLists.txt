@@ -17,7 +17,20 @@ if(PCB STREQUAL X12S OR PCB STREQUAL X10)
     ../../../../../${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_sdio.c
     ../../../../../${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/src/misc.c
     )
-elseif(PCB STREQUAL X9E OR PCB STREQUAL I8)
+elseif(PCB STREQUAL I8)
+  set(BOOTLOADER_SRC
+    ${BOOTLOADER_SRC}
+    ../f4/system_stm32f4xx.c
+    ../../../../../${STM32LIB_DIR}/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f40_41xxx.s
+    ../../../../../${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c
+    ../../../../../${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c
+    ../../../../../${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_spi.c
+    ../../../../../${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c
+    ../../../../../${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_sdio.c
+    ../../../../../${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_i2c.c
+    ../../../../../${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/src/misc.c
+    )
+elseif(PCB STREQUAL X9E)
   set(BOOTLOADER_SRC
     ${BOOTLOADER_SRC}
     ../f4/system_stm32f4xx.c
@@ -78,7 +91,17 @@ set(BOOTLOADER_SRC
   bin_files.cpp
   )
 
-if(NOT (PCB STREQUAL X10 OR PCB STREQUAL X12S))
+if(PCB STREQUAL I8)
+  set(BOOTLOADER_SRC
+    ${BOOTLOADER_SRC}
+    ../../../../../targets/${TARGET_DIR}/i2c_driver.cpp
+    ../../../../../targets/${TARGET_DIR}/haptic_driver.cpp
+    ../../../../../targets/common/arm/stm32/sdio_sd.c
+    )
+    
+    remove_definitions(-DDEBUG)
+    
+elseif(NOT (PCB STREQUAL X10 OR PCB STREQUAL X12S))
   set(BOOTLOADER_SRC
     ${BOOTLOADER_SRC}
     ../../../../../targets/${TARGET_DIR}/i2c_driver.cpp
