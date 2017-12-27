@@ -140,7 +140,6 @@ void lcdRefresh(bool wait)
     LCD_NCS_LOW();
     LCD_A0_HIGH();
 
-/* TODO: find why DMA doesn't work
     lcd_busy = true;
     LCD_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
     LCD_DMA->HIFCR = LCD_DMA_FLAGS; // Write ones to clear bits
@@ -148,25 +147,10 @@ void lcdRefresh(bool wait)
     LCD_DMA_Stream->CR |= DMA_SxCR_EN | DMA_SxCR_TCIE; // Enable DMA & TC interrupts
     LCD_SPI->CR2 |= SPI_CR2_TXDMAEN;
     WAIT_FOR_DMA_END();
-*/
-// TEMPORARY
-    uint8_t * q = p; 
-    for (uint16_t z = 0; z < LCD_W; z++) {
-      while ((LCD_SPI->SR & SPI_SR_TXE) == 0) {
-        // Wait
-      }
-      (void) LCD_SPI->DR; // Clear receive
-      LCD_SPI->DR = *q;
-      while ((LCD_SPI->SR & SPI_SR_RXNE) == 0) {
-        // Wait
-      }
-      q++;
-    }
+
     LCD_NCS_HIGH();
     LCD_A0_HIGH();
-// END TEMPORARY
   }
-lcd_busy = false; // TODO: Remove
 }
 
 extern "C" void LCD_DMA_Stream_IRQHandler()
