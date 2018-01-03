@@ -49,16 +49,23 @@ void menuRadioDiagKeys(event_t event)
       displayKeyState(i&1? 20*FW : 18*FW, y, TRM_BASE+i);
     }
 
-    if (i < 6) {
+    if (i < TRM_BASE) {
+#if defined(PCBX7)
       y = MENU_HEADER_HEIGHT + FH + FH*i;
 #if defined(PCBX7) || defined(PCBI8)
-      if (i > 1) {
-        lcdDrawTextAtIndex(0, y, STR_VKEYS, (5-i), 0);
-        displayKeyState(5*FW+4, y, KEY_MENU+(5-i));
+      if (i >= 2) {
+        // hide PLUS and MINUS virtual buttons
+        lcdDrawTextAtIndex(0, y, STR_VKEYS, (TRM_BASE-1-i), 0);
+        displayKeyState(5*FW+4, y, KEY_MENU+(TRM_BASE-1-i));
       }
+#elif defined(PCBXLITE)
+      y = MENU_HEADER_HEIGHT + FH*i;
+      lcdDrawTextAtIndex(0, y, STR_VKEYS, (TRM_BASE-1-i), 0);
+      displayKeyState(5*FW+2, y, KEY_MENU+(TRM_BASE-1-i));
 #else
-      lcdDrawTextAtIndex(0, y, STR_VKEYS, (5-i), 0);
-      displayKeyState(5*FW+2, y, KEY_MENU+(5-i));
+      y = MENU_HEADER_HEIGHT + FH + FH*i;
+      lcdDrawTextAtIndex(0, y, STR_VKEYS, (TRM_BASE-1-i), 0);
+      displayKeyState(5*FW+2, y, KEY_MENU+(TRM_BASE-1-i));
 #endif
     }
 

@@ -1670,7 +1670,7 @@ OPTIMIZE("O0") static SD_Error CmdResp1Error(uint8_t cmd)
   if (response_r1 & SD_OCR_AKE_SEQ_ERROR) {
     return SD_AKE_SEQ_ERROR;
   }
-  
+
   return errorstatus;
 }
 

@@ -112,7 +112,10 @@ GeneralSettings::GeneralSettings()
     speakerVolume = 12;
   }
 
-  if (IS_HORUS(board) || IS_TARANIS_X9E(board) || IS_TARANIS_X7(board)) {
+  if (IS_HORUS(board)) {
+    strcpy(bluetoothName, "Horus");
+  }
+  else if (IS_TARANIS_X9E(board) || IS_TARANIS_SMALL(board)) {
     strcpy(bluetoothName, "Taranis");
   }
 
@@ -234,7 +237,7 @@ void GeneralSettings::setDefaultControlTypes(Board::Type board)
     potConfig[1] = Board::POT_MULTIPOS_SWITCH;
     potConfig[2] = Board::POT_WITH_DETENT;
   }
-  else if (IS_TARANIS_X7(board)) {
+  else if (IS_TARANIS_SMALL(board)) {
     potConfig[0] = Board::POT_WITHOUT_DETENT;
     potConfig[1] = Board::POT_WITH_DETENT;
   }
@@ -290,7 +293,7 @@ void GeneralSettings::convert(RadioDataConversionState & cstate)
 {
   // Here we can add explicit conversions when moving from one board to another
 
-  cstate.setOrigin(QObject::tr("Radio Settings"));
+  cstate.setOrigin(tr("Radio Settings"));
 
   setDefaultControlTypes(cstate.toType);  // start with default switches/pots/sliders
 

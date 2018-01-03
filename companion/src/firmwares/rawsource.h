@@ -106,7 +106,7 @@ enum TelemetrySource {
   TELEMETRY_SOURCE_TIMER1,
   TELEMETRY_SOURCE_TIMER2,
   TELEMETRY_SOURCE_TIMER3,
-  TELEMETRY_SOURCE_SWR,
+  TELEMETRY_SOURCE_RAS,
   TELEMETRY_SOURCE_RSSI_TX,
   TELEMETRY_SOURCE_RSSI_RX,
   TELEMETRY_SOURCE_A1,
@@ -184,6 +184,8 @@ enum RawSourceType {
 
 class RawSourceRange
 {
+  Q_DECLARE_TR_FUNCTIONS(RawSourceRange)
+
   public:
     RawSourceRange():
       decimals(0),
@@ -208,6 +210,8 @@ class RawSourceRange
 #define RANGE_ABS_FUNCTION        2
 
 class RawSource {
+  Q_DECLARE_TR_FUNCTIONS(RawSource)
+
   public:
     RawSource():
       type(SOURCE_TYPE_NONE),

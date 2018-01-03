@@ -53,12 +53,12 @@ enum MenuModelSetupItems {
   CASE_CPUARM(ITEM_MODEL_CHECKLIST_DISPLAY)
   ITEM_MODEL_THROTTLE_WARNING,
   ITEM_MODEL_SWITCHES_WARNING,
-#if defined(PCBX7)
+#if defined(PCBTARANIS)
   ITEM_MODEL_POTS_WARNING,
 #endif
   ITEM_MODEL_BEEP_CENTER,
   CASE_CPUARM(ITEM_MODEL_USE_GLOBAL_FUNCTIONS)
-#if defined(PCBX7)
+#if defined(PCBTARANIS)
   ITEM_MODEL_INTERNAL_MODULE_LABEL,
   ITEM_MODEL_INTERNAL_MODULE_MODE,
   ITEM_MODEL_INTERNAL_MODULE_CHANNELS,
@@ -80,6 +80,7 @@ enum MenuModelSetupItems {
 #endif
   ITEM_MODEL_EXTERNAL_MODULE_FAILSAFE,
   ITEM_MODEL_EXTERNAL_MODULE_OPTIONS,
+  ITEM_MODEL_EXTERNAL_MODULE_BIND_OPTIONS,
 #if defined(MULTIMODULE)
   ITEM_MODEL_EXTERNAL_MODULE_AUTOBIND,
 #endif
@@ -116,7 +117,9 @@ enum MenuModelSetupItems {
 #define MODEL_SETUP_RANGE_OFS            4*FW+3
 #define MODEL_SETUP_SET_FAILSAFE_OFS     7*FW-2
 
-#if defined(PCBX7)
+#if defined(PCBXLITE)
+  #define CURRENT_MODULE_EDITED(k)       (k>=ITEM_MODEL_EXTERNAL_MODULE_LABEL ? EXTERNAL_MODULE : INTERNAL_MODULE)
+#elif defined(PCBX7)
   #define CURRENT_MODULE_EDITED(k)       (k>=ITEM_MODEL_TRAINER_LABEL ? TRAINER_MODULE : (k>=ITEM_MODEL_EXTERNAL_MODULE_LABEL ? EXTERNAL_MODULE : INTERNAL_MODULE))
 #elif defined(PCBSKY9X) && !defined(REVA)
   #define CURRENT_MODULE_EDITED(k)       (k>=ITEM_MODEL_EXTRA_MODULE_LABEL ? EXTRA_MODULE : EXTERNAL_MODULE)
@@ -230,7 +233,7 @@ void onBindMenu(const char * result)
 
 void menuModelSetup(event_t event)
 {
-#if defined(PCBX7)
+#if defined(PCBTARANIS)
   MENU_TAB({ HEADER_LINE_COLUMNS 0, TIMER_ROWS, TIMER_ROWS, TIMER_ROWS, 0, 1, 0, 0, 0, 0, 0, CASE_CPUARM(LABEL(PreflightCheck)) CASE_CPUARM(0) 0, NUM_SWITCHES-1,  NUM_POTS, NUM_STICKS+NUM_POTS+NUM_SLIDERS+NUM_ROTARY_ENCODERS-1, 0,
   LABEL(InternalModule),
   INTERNAL_MODULE_MODE_ROWS,
@@ -246,6 +249,7 @@ void menuModelSetup(event_t event)
   OUTPUT_TYPE_ROWS()
   FAILSAFE_ROWS(EXTERNAL_MODULE),
   EXTERNAL_MODULE_OPTION_ROW,
+  (IS_MODULE_R9M_LBT(EXTERNAL_MODULE) ? (uint8_t)0 : HIDDEN_ROW),
   MULTIMODULE_MODULE_ROWS
   EXTERNAL_MODULE_POWER_ROW,
   EXTRA_MODULE_ROWS
@@ -261,6 +265,7 @@ void menuModelSetup(event_t event)
   OUTPUT_TYPE_ROWS()
   FAILSAFE_ROWS(EXTERNAL_MODULE),
   EXTERNAL_MODULE_OPTION_ROW,
+  (IS_MODULE_R9M_LBT(EXTERNAL_MODULE) ? (uint8_t)0 : HIDDEN_ROW),
   MULTIMODULE_MODULE_ROWS
   EXTERNAL_MODULE_POWER_ROW,
   EXTRA_MODULE_ROWS
@@ -534,7 +539,7 @@ void menuModelSetup(event_t event)
                 g_model.switchWarningEnable ^= (1 << menuHorizontalPosition);
                 storageDirty(EE_MODEL);
 #else
-#if defined(PCBX7)
+#if defined(PCBTARANIS)
                 if (menuHorizontalPosition < NUM_SWITCHES) {
                   g_model.switchWarningEnable ^= (1 << (menuHorizontalPosition-1));
 #else
@@ -552,7 +557,7 @@ void menuModelSetup(event_t event)
                 g_model.switchWarningState = switches_states;
                 AUDIO_WARNING1();
                 storageDirty(EE_MODEL);
-#elif defined(PCBX7)
+#elif defined(PCBTARANIS)
                 if (attr && menuHorizontalPosition == 0) {
                   getMovedSwitch();
                   g_model.switchWarningState = switches_states;
@@ -574,7 +579,7 @@ void menuModelSetup(event_t event)
           }
         }
         LcdFlags line = attr;
-#if defined(PCBX7)
+#if defined(PCBTARANIS)
         int current = 0;
         for (int i=0; i<NUM_SWITCHES-1; i++) {
           if (SWITCH_WARNING_ALLOWED(i)) {
@@ -590,7 +595,7 @@ void menuModelSetup(event_t event)
         if (attr && menuHorizontalPosition == 0) {
           lcdDrawFilledRect(MODEL_SETUP_2ND_COLUMN-1, y-1, (NUM_SWITCHES-1)*(2*FW), 1+FH*((current+7)/8));
         }
-#else // PCBX7
+#else
         for (uint8_t i=0; i<NUM_SWITCHES-1/*not on TRN switch*/; i++) {
           uint8_t swactive = !(g_model.switchWarningEnable & 1 << i);
           attr = 0;
@@ -617,10 +622,10 @@ void menuModelSetup(event_t event)
           lcdDrawText(MODEL_SETUP_2ND_COLUMN+(NUM_SWITCHES*FW), y, PSTR("<]"), (menuHorizontalPosition == NUM_SWITCHES-1 && !NO_HIGHLIGHT()) ? line : 0);
 #endif
         }
-#endif // PCBX7
+#endif
         break;
       }
-#if defined(PCBX7)
+#if defined(PCBTARANIS)
       case ITEM_MODEL_POTS_WARNING:
         lcdDrawTextAlignedLeft(y, STR_POTWARNING);
         lcdDrawTextAtIndex(MODEL_SETUP_2ND_COLUMN, y, PSTR("\004""OFF\0""Man\0""Auto"), g_model.potsWarnMode, (menuHorizontalPosition == 0) ? attr : 0);
@@ -667,7 +672,7 @@ void menuModelSetup(event_t event)
           }
         }
         break;
-#endif // PCBX7
+#endif
 
       case ITEM_MODEL_BEEP_CENTER:
         lcdDrawTextAlignedLeft(y, STR_BEEPCTR);
@@ -695,7 +700,7 @@ void menuModelSetup(event_t event)
         break;
 #endif
 
-#if defined(PCBX7)
+#if defined(PCBTARANIS)
       case ITEM_MODEL_INTERNAL_MODULE_LABEL:
         lcdDrawTextAlignedLeft(y, TR_INTERNALRF);
         break;
@@ -898,6 +903,8 @@ void menuModelSetup(event_t event)
 
 #if defined(PCBX7)
       case ITEM_MODEL_TRAINER_CHANNELS:
+#endif
+#if defined(PCBTARANIS)
       case ITEM_MODEL_INTERNAL_MODULE_CHANNELS:
 #endif
 #if defined(PCBSKY9X)
@@ -934,6 +941,8 @@ void menuModelSetup(event_t event)
 
 #if defined(PCBX7)
       case ITEM_MODEL_TRAINER_PARAMS:
+#endif
+#if defined(PCBTARANIS)
       case ITEM_MODEL_INTERNAL_MODULE_BIND:
 #endif
 #if defined(PCBSKY9X)
@@ -1093,7 +1102,7 @@ void menuModelSetup(event_t event)
       }
 #endif
 
-#if defined(PCBX7)
+#if defined(PCBTARANIS)
       case ITEM_MODEL_INTERNAL_MODULE_FAILSAFE:
 #endif
 #if defined(CPUARM)
@@ -1154,23 +1163,13 @@ void menuModelSetup(event_t event)
           }
         }
 #endif
-        if (IS_MODULE_R9M_FCC(moduleIdx)) {
+        if (IS_MODULE_R9M(moduleIdx)) {
+          lcdDrawTextAlignedLeft(y, STR_MODULE_TELEMETRY);
           if (IS_TELEMETRY_INTERNAL_MODULE()) {
-            lcdDrawTextAlignedLeft(y, STR_MODULE_TELEMETRY);
             lcdDrawText(MODEL_SETUP_2ND_COLUMN, y, STR_DISABLE_INTERNAL);
           }
           else {
-            g_model.moduleData[moduleIdx].pxx.sport_out = editCheckBox(g_model.moduleData[EXTERNAL_MODULE].pxx.sport_out, MODEL_SETUP_2ND_COLUMN, y, STR_MODULE_TELEMETRY, attr, event);
-          }
-        }
-        else if (IS_MODULE_R9M_LBT(moduleIdx)) {
-          if (IS_TELEMETRY_INTERNAL_MODULE()) {
-            lcdDrawTextAlignedLeft(y, STR_MODULE_TELEMETRY);
-            lcdDrawText(MODEL_SETUP_2ND_COLUMN, y, STR_DISABLE_INTERNAL);
-          }
-          else {
-            lcdDrawTextAlignedLeft(y, STR_MODULE_TELEMETRY);
-            lcdDrawText(MODEL_SETUP_2ND_COLUMN, y, STR_BINDING_OPTION);
+            lcdDrawText(MODEL_SETUP_2ND_COLUMN, y, STR_MODULE_TELEM_ON);
           }
         }
         else if (IS_MODULE_SBUS(moduleIdx)) {
@@ -1179,6 +1178,27 @@ void menuModelSetup(event_t event)
         }
         break;
       }
+
+      case ITEM_MODEL_EXTERNAL_MODULE_BIND_OPTIONS:
+      {
+        uint8_t moduleIdx = CURRENT_MODULE_EDITED(k);
+
+        lcdDrawTextAlignedLeft(y, INDENT "Mode:");
+        if (g_model.moduleData[moduleIdx].pxx.power == R9M_LBT_POWER_25) {
+          if(g_model.moduleData[moduleIdx].pxx.receiver_telem_off == true)
+            lcdDrawText(lcdLastRightPos+1, y, STR_BINDING_25MW_CH1_8_TELEM_OFF);
+          else
+            lcdDrawText(lcdLastRightPos+1, y, STR_BINDING_25MW_CH1_8_TELEM_ON);
+        }
+        else {
+          if(g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 == true)
+            lcdDrawText(lcdLastRightPos+1, y, STR_BINDING_500MW_CH9_16_TELEM_OFF);
+          else
+            lcdDrawText(lcdLastRightPos+1, y, STR_BINDING_500MW_CH1_8_TELEM_OFF);
+        }
+        if (attr) REPEAT_LAST_CURSOR_MOVE();
+      }
+
 
       case ITEM_MODEL_EXTERNAL_MODULE_POWER:
       {

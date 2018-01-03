@@ -18,12 +18,14 @@
  * GNU General Public License for more details.
  */
 
-#include <stdint.h>
 #include "telemetrysimu.h"
 #include "ui_telemetrysimu.h"
+#include "appdata.h"
 #include "simulatorinterface.h"
 #include "radio/src/telemetry/frsky.h"
+
 #include <QRegularExpression>
+#include <stdint.h>
 
 TelemetrySimulator::TelemetrySimulator(QWidget * parent, SimulatorInterface * simulator):
   QWidget(parent),
@@ -187,7 +189,7 @@ void TelemetrySimulator::setupDataFields()
 {
   SET_INSTANCE(rxbt_inst,     BATT_ID,                0);
   SET_INSTANCE(rssi_inst,     RSSI_ID,                24);
-  SET_INSTANCE(swr_inst,      SWR_ID,                 24);
+  SET_INSTANCE(swr_inst,      RAS_ID,                 24);
   SET_INSTANCE(a1_inst,       ADC1_ID,                0);
   SET_INSTANCE(a2_inst,       ADC2_ID,                0);
   SET_INSTANCE(a3_inst,       A3_FIRST_ID,            0);
@@ -290,7 +292,7 @@ void TelemetrySimulator::generateTelemetryFrame()
 
     case 3:
       if (ui->Swr->text().length())
-        generateSportPacket(buffer, ui->swr_inst->text().toInt(&ok, 0) - 1, DATA_FRAME, SWR_ID, LIMIT<uint32_t>(0, ui->Swr->text().toInt(&ok, 0), 0xFFFF));
+        generateSportPacket(buffer, ui->swr_inst->text().toInt(&ok, 0) - 1, DATA_FRAME, RAS_ID, LIMIT<uint32_t>(0, ui->Swr->text().toInt(&ok, 0), 0xFFFF));
       break;
 
     case 4:
@@ -633,7 +635,7 @@ TelemetrySimulator::LogPlaybackController::LogPlaybackController(Ui::TelemetrySi
   colToFuncMap.clear();
   colToFuncMap.insert("RxBt(V)", RXBT_V);
   colToFuncMap.insert("RSSI(dB)", RSSI);
-  colToFuncMap.insert("SWR", SWR);
+  colToFuncMap.insert("RAS", RAS);
   colToFuncMap.insert("A1", A1);
   colToFuncMap.insert("A1(V)", A1);
   colToFuncMap.insert("A2", A2);
@@ -744,6 +746,12 @@ bool TelemetrySimulator::LogPlaybackController::isReady()
 
 void TelemetrySimulator::LogPlaybackController::loadLogFile()
 {
+  QString logFileNameAndPath = QFileDialog::getOpenFileName(NULL, tr("Log File"), g.logDir(), tr("LOG Files (*.csv)"));
+  if (logFileNameAndPath.isEmpty())
+    return;
+
+  g.logDir(logFileNameAndPath);
+
   // reset the playback ui
   ui->play->setEnabled(false);
   ui->rewind->setEnabled(false);
@@ -757,8 +765,6 @@ void TelemetrySimulator::LogPlaybackController::loadLogFile()
   // clear existing data
   csvRecords.clear();
 
-  QString logFileNameAndPath = QFileDialog::getOpenFileName(NULL, tr("Log File"), ".", tr("LOG Files (*.csv)"));
-  QFileInfo fileInfo(logFileNameAndPath);
   QFile file(logFileNameAndPath);
   if (!file.open(QIODevice::ReadOnly)) {
     ui->logFileLabel->setText(tr("ERROR - invalid file"));
@@ -768,6 +774,7 @@ void TelemetrySimulator::LogPlaybackController::loadLogFile()
     QByteArray line = file.readLine();
     csvRecords.append(line.simplified());
   }
+  file.close();
   if (csvRecords.count() > 1) {
     columnNames.clear();
     QStringList keys = csvRecords[0].split(',');
@@ -944,7 +951,7 @@ void TelemetrySimulator::LogPlaybackController::setUiDataValues()
       case RSSI:
         ui->Rssi->setValue(columnData[info.dataIndex].toDouble());
         break;
-      case SWR:
+      case RAS:
         ui->Swr->setValue(columnData[info.dataIndex].toDouble());
         break;
       case A1:

@@ -470,18 +470,9 @@ void ModulePanel::update()
   ui->antennaMode->setCurrentIndex(module.pxx.external_antenna);
 
   // R9M options
-  ui->sportOut->setVisible(mask & MASK_R9M);
   ui->r9mPower->setVisible((mask & MASK_R9M) && module.subType == 0);
   ui->label_r9mPower->setVisible((mask & MASK_R9M) && module.subType == 0);
   if (mask & MASK_R9M) {
-    if (model->moduleData[0].protocol >= PULSES_PXX_XJT_X16 && model->moduleData[0].protocol <= PULSES_PXX_XJT_LR12) {
-      module.pxx.sport_out = false;
-      ui->sportOut->setDisabled(true);
-    }
-    else {
-      ui->sportOut->setEnabled(true);
-    }
-    ui->sportOut->setChecked(module.pxx.sport_out);
     ui->r9mPower->setCurrentIndex(module.pxx.power);
   }
 
@@ -493,11 +484,12 @@ void ModulePanel::update()
     if (mask & MASK_MULTIMODULE)
       numEntries = (module.multi.customProto ? 8 : multiProtocols.getProtocol(module.multi.rfProtocol).numSubytes());
 
-    const QSignalBlocker blocker(ui->multiSubType);
+    bool blocker = ui->multiSubType->blockSignals(true);
     ui->multiSubType->clear();
     for (unsigned i=0; i < numEntries; i++)
       ui->multiSubType->addItem(ModelPrinter::printModuleSubType(protocol, i, module.multi.rfProtocol, module.multi.customProto), i);
     ui->multiSubType->setCurrentIndex(module.subType);
+    ui->multiSubType->blockSignals(blocker);
   }
 
   // Multi settings fields
@@ -589,14 +581,6 @@ void ModulePanel::on_antennaMode_currentIndexChanged(int index)
 {
   module.pxx.external_antenna = index;
   emit modified();
-}
-
-void ModulePanel::on_sportOut_toggled(bool checked)
-{
-  if (module.pxx.sport_out != checked) {
-    module.pxx.sport_out = checked;
-    emit modified();
-  }
 }
 
 void ModulePanel::on_r9mPower_currentIndexChanged(int index)
@@ -1160,7 +1144,7 @@ void SetupPanel::populateThrottleSourceCB()
   Board::Type board = firmware->getBoard();
   lock = true;
   ui->throttleSource->clear();
-  ui->throttleSource->addItem(QObject::tr("THR"));
+  ui->throttleSource->addItem(tr("THR"));
   for (int i=0; i<getBoardCapability(board, Board::Pots)+getBoardCapability(board, Board::Sliders); i++) {
     ui->throttleSource->addItem(firmware->getAnalogInputName(4+i), i);
   }

@@ -347,14 +347,14 @@
 #if defined(CPUARM)
   #define TR_TELEM_RESERVE     TR("[--]", "[---]")
   #define TR_TELEM_TIME        TR("Time", "Time\0")
-  #define TR_SWR               TR("SWR\0", "SWR\0 ")
+  #define TR_RAS               TR("SWR\0", "SWR\0 ")
   #define TR_RX_BATT           TR("[NA]", "[NA]\0")
   #define TR_A3_A4             TR("A3\0 ""A4\0 ", "A3\0  ""A4\0  ")
   #define TR_A3_A4_MIN         TR("A3-\0""A4-\0", "A3-\0 ""A4-\0 ")
 #else
   #define TR_TELEM_RESERVE
   #define TR_TELEM_TIME
-  #define TR_SWR
+  #define TR_RAS
   #define TR_RX_BATT
   #define TR_A3_A4
   #define TR_A3_A4_MIN
@@ -492,6 +492,8 @@
 
 #if defined(PCBHORUS)
   #define TR_TRIMS_SWITCHES    "\313Rl""\313Rr""\313Ed""\313Eu""\313Td""\313Tu""\313Al""\313Ar""\3135d""\3135u""\3136d""\3136u"
+#elif defined(PCBXLITE)
+  #define TR_TRIMS_SWITCHES            "tRl""tRr""tEd""tEu"
 #else
   #define TR_TRIMS_SWITCHES    TR("tRl""tRr""tEd""tEu""tTd""tTu""tAl""tAr", "\313Rl""\313Rr""\313Ed""\313Eu""\313Eu""\313Td""\313Tu""\313Al""\313Ar")
 #endif
@@ -573,8 +575,13 @@
 #define LEN_VCELLINDEX         "\007"
 #define TR_VCELLINDEX          "Lowest\0""1\0     ""2\0     ""3\0     ""4\0     ""5\0     ""6\0     ""Highest""Delta\0"
 
+#if defined(PCBX10)
 #define LEN_VANTENNATYPES      "\010"
-#define TR_VANTENNATYPES        "Internal""Ext+Int\0"
+#define TR_VANTENNATYPES       "Internal""External"
+#else
+#define LEN_VANTENNATYPES      "\010"
+#define TR_VANTENNATYPES       "Internal""Ext+Int\0"
+#endif
 
 // ZERO TERMINATED STRINGS
 #if defined(COLORLCD)
@@ -837,7 +844,8 @@
 #define TR_MULTI_AUTOBIND      TR(INDENT "Autobind",INDENT "Bind on powerup")
 #define TR_MULTI_DSM_AUTODTECT TR(INDENT "Autodetect", INDENT "Autodetect format")
 #define TR_MULTI_LOWPOWER      TR(INDENT "Low power", INDENT "Low power mode")
-#define TR_MODULE_TELEMETRY            TR(INDENT "Mod telem.", INDENT "Module telemetry")
+#define TR_MODULE_TELEMETRY            TR(INDENT "S.Port", INDENT "S.Port link")
+#define TR_MODULE_TELEM_ON             TR("ON", "Enabled")
 #define TR_DISABLE_INTERNAL         TR("Disable int. RF", "Disable internal RF")
 #define TR_MODULE_NO_SERIAL_MODE       TR("!serial mode", "Not in serial mode")
 #define TR_MODULE_NO_INPUT             TR("No input", "No serial input")
@@ -848,11 +856,10 @@
 #define TR_BINDING_CH1_8_TELEM_OFF               "Ch1-8 Telem OFF"
 #define TR_BINDING_CH9_16_TELEM_ON               "Ch9-16 Telem ON"
 #define TR_BINDING_CH9_16_TELEM_OFF               "Ch9-16 Telem OFF"
-#define TR_BINDING_25MW_CH1_8_TELEM_OFF   TR("25mW Ch1-8 Tel OFF", "25mW Ch1-8 Telem OFF")
-#define TR_BINDING_25MW_CH1_8_TELEM_ON    TR("25mW Ch1-8 Tel ON", "25mW Ch1-8 Telem ON")
-#define TR_BINDING_500MW_CH1_8_TELEM_OFF  TR("500mW Ch1-8 Tel OFF", "500mW Ch1-8 Telem OFF")
-#define TR_BINDING_500MW_CH9_16_TELEM_OFF TR("500mW Ch9-16 Tel OFF", "500mW Ch9-16 Telem OFF")
-#define TR_BINDING_OPTION              "Set at bind"
+#define TR_BINDING_25MW_CH1_8_TELEM_OFF   TR("25mW Ch1-8 Tel OFF", "25mW Ch1-8 Tel. OFF")
+#define TR_BINDING_25MW_CH1_8_TELEM_ON    TR("25mW Ch1-8 Tel ON", "25mW Ch1-8 Tel. ON")
+#define TR_BINDING_500MW_CH1_8_TELEM_OFF  TR("0.5W Ch1-8 Tel OFF", "500mW Ch1-8 Tel. OFF")
+#define TR_BINDING_500MW_CH9_16_TELEM_OFF TR("0.5W Ch9-16 Tel OFF", "500mW Ch9-16 Tel. OFF")
 #define TR_PROTOCOL_INVALID            TR("Prot. invalid", "Protocol invalid")
 #define TR_MODULE_STATUS                TR(INDENT "Status", INDENT "Module Status")
 #define TR_MODULE_SYNC                 TR(INDENT "Sync", INDENT "Module Sync")
@@ -937,6 +944,7 @@
 #define TR_COPY_FILE           "Copiar"
 #define TR_RENAME_FILE         "Renomear"
 #define TR_ASSIGN_BITMAP       "Assign Bitmap"
+#define TR_ASSIGN_SPLASH       "Splash screen"
 #define TR_EXECUTE_FILE        "Execute"
 #define TR_REMOVED             "Remover"
 #define TR_SD_INFO             "Dados SD"
@@ -1272,7 +1280,7 @@
 #define TR_JITTER_FILTER       "ADC Filter"
 
 #define ZSTR_RSSI              "RSSI"
-#define ZSTR_SWR               "SWR"
+#define ZSTR_RAS               "SWR"
 #define ZSTR_A1                "A1"
 #define ZSTR_A2                "A2"
 #define ZSTR_A3                "A3"

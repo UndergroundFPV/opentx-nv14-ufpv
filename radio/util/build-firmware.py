@@ -190,6 +190,10 @@ def build_firmware(path):
     srcdir = os.path.dirname(os.path.realpath(__file__)) + "/../.."
     outpath = path + ".out"
 
+    # cmake 3.7.2 cannot work from / so we need to go into a subdir
+    os.mkdir("/build")
+    os.chdir("/build")
+
     # Launch CMake
     cmd = ["cmake"]
     for opt, value in command_options.items():
@@ -210,7 +214,7 @@ def build_firmware(path):
         exit(COMPILATION_ERROR)
 
     # Launch make
-    cmd = ["make", what]
+    cmd = ["make", "-j2", what]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = proc.communicate()
     if proc.returncode == 0:

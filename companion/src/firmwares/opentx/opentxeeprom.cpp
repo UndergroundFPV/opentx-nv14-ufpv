@@ -18,6 +18,7 @@
  * GNU General Public License for more details.
  */
 
+#include "boards.h"
 #include "helpers.h"
 #include "opentxeeprom.h"
 #include "customdebug.h"
@@ -32,18 +33,18 @@ using namespace Board;
 
 #define HAS_PERSISTENT_TIMERS(board)          (IS_ARM(board) || IS_2560(board))
 #define MAX_VIEWS(board)                      (HAS_LARGE_LCD(board) ? 2 : 256)
-#define MAX_POTS(board, version)              (IS_HORUS(board) ? 3 : (IS_TARANIS_X7(board) ? 2 : (IS_TARANIS(board) ? (IS_TARANIS_X9E(board) ? 4 : (version >= 216 ? 3 : 2)) : 3)))
-#define MAX_SLIDERS(board)                    (IS_HORUS(board) ? 4 : (IS_TARANIS_X7(board) ? 0 : (IS_TARANIS(board) ? (IS_TARANIS_X9E(board) ? 4 : 2) : 0)))
-#define MAX_MOUSE_ANALOGS(board)              (IS_HORUS(board) ? 2 : 0)
-#define MAX_SWITCHES(board, version)          (IS_HORUS(board) ? 8 : (IS_TARANIS_X7(board) ? 6 : (IS_TARANIS(board) ? (IS_TARANIS_X9E(board) ? 18 : 8) : 7)))
-#define MAX_SWITCH_SLOTS(board, version)      (IS_TARANIS_X9E(board) ? 32 : 8)
-#define MAX_SWITCHES_POSITION(board, version) (IS_TARANIS_X7(board) ? 6*3 : (IS_TARANIS_X9E(board) ? 18*3 : (IS_HORUS_OR_TARANIS(board) ? 8*3 : 9)))
+#define MAX_POTS(board, version)              (IS_TARANIS_NOT_X9E(board) && version < 216 ? 2 : Boards::getCapability(board, Board::Pots))
+#define MAX_SLIDERS(board)                    (Boards::getCapability(board, Board::Sliders))
+#define MAX_MOUSE_ANALOGS(board)              (Boards::getCapability(board, Board::MouseAnalogs))
+#define MAX_SWITCHES(board, version)          (Boards::getCapability(board, Board::Switches))
+#define MAX_SWITCH_SLOTS(board, version)      (IS_TARANIS_X9E(board) ? 32 : 8)  // bitsize of swconfig_t / 2 (see radio/src/datastructs.h)
+#define MAX_SWITCHES_POSITION(board, version) (Boards::getCapability(board, Board::SwitchPositions))
 #define MAX_ROTARY_ENCODERS(board)            (IS_2560(board) ? 2 : (IS_SKY9X(board) ? 1 : 0))
 #define MAX_FLIGHT_MODES(board, version)      (IS_ARM(board) ? 9 :  (IS_DBLRAM(board, version) ? 6 :  5))
 #define MAX_TIMERS(board, version)            ((IS_ARM(board) && version >= 217) ? 3 : 2)
 #define MAX_MIXERS(board, version)            (IS_ARM(board) ? 64 : 32)
 #define MAX_CHANNELS(board, version)          (IS_ARM(board) ? 32 : 16)
-#define MAX_TRIMS(board)                      (IS_HORUS(board) ? 6 : 4)
+#define MAX_TRIMS(board)                      (Boards::getCapability(board, Board::NumTrims))
 #define MAX_EXPOS(board, version)             (IS_ARM(board) ? ((IS_HORUS_OR_TARANIS(board) && version >= 216) ? 64 : 32) : (IS_DBLRAM(board, version) ? 16 : 14))
 #define MAX_LOGICAL_SWITCHES(board, version)  (IS_ARM(board) ? (version >= 218 ? 64 : 32) : ((IS_DBLEEPROM(board, version) && version<217) ? 15 : 12))
 #define MAX_CUSTOM_FUNCTIONS(board, version)  (IS_ARM(board) ? (version >= 216 ? 64 : 32) : (IS_DBLEEPROM(board, version) ? 24 : 16))
@@ -348,11 +349,11 @@ class SourcesConversionTable: public ConversionTable {
 
           for (int i=0; i<TELEMETRY_SOURCE_ACC; i++) {
             if (version < 216) {
-              if (i==TELEMETRY_SOURCE_TX_TIME || i==TELEMETRY_SOURCE_SWR || i==TELEMETRY_SOURCE_A3 || i==TELEMETRY_SOURCE_A4 || i==TELEMETRY_SOURCE_ASPEED || i==TELEMETRY_SOURCE_DTE || i==TELEMETRY_SOURCE_CELL_MIN || i==TELEMETRY_SOURCE_CELLS_MIN || i==TELEMETRY_SOURCE_VFAS_MIN)
+              if (i==TELEMETRY_SOURCE_TX_TIME || i==TELEMETRY_SOURCE_RAS || i==TELEMETRY_SOURCE_A3 || i==TELEMETRY_SOURCE_A4 || i==TELEMETRY_SOURCE_ASPEED || i==TELEMETRY_SOURCE_DTE || i==TELEMETRY_SOURCE_CELL_MIN || i==TELEMETRY_SOURCE_CELLS_MIN || i==TELEMETRY_SOURCE_VFAS_MIN)
                 continue;
             }
             if (!IS_ARM(board)) {
-              if (i==TELEMETRY_SOURCE_TX_TIME || i==TELEMETRY_SOURCE_SWR || i==TELEMETRY_SOURCE_A3 || i==TELEMETRY_SOURCE_A4 || i==TELEMETRY_SOURCE_A3_MIN || i==TELEMETRY_SOURCE_A4_MIN)
+              if (i==TELEMETRY_SOURCE_TX_TIME || i==TELEMETRY_SOURCE_RAS || i==TELEMETRY_SOURCE_A3 || i==TELEMETRY_SOURCE_A4 || i==TELEMETRY_SOURCE_A3_MIN || i==TELEMETRY_SOURCE_A4_MIN)
                 continue;
             }
             addConversion(RawSource(SOURCE_TYPE_TELEMETRY, i), val++);
@@ -433,8 +434,8 @@ template <int N>
 class SwitchField: public ConversionField< SignedField<N> > {
   public:
     SwitchField(DataField * parent, RawSwitch & sw, Board::Type board, unsigned int version, unsigned long flags=0):
-      ConversionField< SignedField<N> >(parent, _switch, SwitchesConversionTable::getInstance(board, version, flags), QObject::tr("Switch").toLatin1(),
-          QObject::tr("Switch ").toLatin1() + sw.toString(board) + QObject::tr(" cannot be exported on this board!").toLatin1()),
+      ConversionField< SignedField<N> >(parent, _switch, SwitchesConversionTable::getInstance(board, version, flags), DataField::tr("Switch").toLatin1(),
+          DataField::tr("Switch ").toLatin1() + sw.toString(board) + DataField::tr(" cannot be exported on this board!").toLatin1()),
       sw(sw),
       _switch(0),
       board(board)
@@ -486,7 +487,7 @@ class TelemetrySourcesConversionTable: public ConversionTable {
       if (IS_ARM(board) && version >= 217)
         addConversion(1+TELEMETRY_SOURCE_TIMER3, val++);
       if (IS_ARM(board) && version >= 216)
-        addConversion(1+TELEMETRY_SOURCE_SWR, val++);
+        addConversion(1+TELEMETRY_SOURCE_RAS, val++);
       addConversion(1+TELEMETRY_SOURCE_RSSI_TX, val++);
       addConversion(1+TELEMETRY_SOURCE_RSSI_RX, val++);
       if (IS_ARM(board) && version >= 216)
@@ -597,7 +598,7 @@ class SourceField: public ConversionField< UnsignedField<N> > {
   public:
     SourceField(DataField * parent, RawSource & source, Board::Type board, unsigned int version, unsigned int variant, unsigned long flags=0):
       ConversionField< UnsignedField<N> >(parent, _source, SourcesConversionTable::getInstance(board, version, variant, flags),
-            "Source", QObject::tr("Source %1 cannot be exported on this board!").arg(source.toString())),
+            DataField::tr("Source").toLatin1(), DataField::tr("Source %1 cannot be exported on this board!").arg(source.toString())),
       source(source),
       _source(0)
     {
@@ -1569,14 +1570,14 @@ class CurvesField: public TransformedField {
         if (IS_STM32(board) && version >= 216) {
           offset += (curve->type == CurveData::CURVE_TYPE_CUSTOM ? curve->count * 2 - 2 : curve->count);
           if (offset > maxPoints) {
-            setError(QObject::tr("OpenTX only accepts %1 points in all curves").arg(maxPoints));
+            setError(DataField::tr("OpenTX only accepts %1 points in all curves").arg(maxPoints));
             break;
           }
         }
         else {
           offset += (curve->type == CurveData::CURVE_TYPE_CUSTOM ? curve->count * 2 - 2 : curve->count) - 5;
           if (offset > maxPoints - 5 * maxCurves) {
-            setError(QObject::tr("OpenTx only accepts %1 points in all curves").arg(maxPoints));
+            setError(DataField::tr("OpenTx only accepts %1 points in all curves").arg(maxPoints));
             break;
           }
           _curves[i] = offset;
@@ -2154,11 +2155,11 @@ class ArmCustomFunctionField: public TransformedField {
 
       if (version >= 218) {
         internalField.Append(new SwitchField<9>(this, fn.swtch, board, version));
-        internalField.Append(new ConversionField< UnsignedField<7> >(this, _func, &functionsConversionTable, "Function", ::QObject::tr("OpenTX on this board doesn't accept this function")));
+        internalField.Append(new ConversionField< UnsignedField<7> >(this, _func, &functionsConversionTable, "Function", DataField::tr("OpenTX on this board doesn't accept this function")));
       }
       else {
         internalField.Append(new SwitchField<8>(this, fn.swtch, board, version));
-        internalField.Append(new ConversionField< UnsignedField<8> >(this, _func, &functionsConversionTable, "Function", ::QObject::tr("OpenTX on this board doesn't accept this function")));
+        internalField.Append(new ConversionField< UnsignedField<8> >(this, _func, &functionsConversionTable, "Function", DataField::tr("OpenTX on this board doesn't accept this function")));
       }
 
       if (IS_TARANIS(board) && version >= 216)
@@ -2394,7 +2395,7 @@ class AvrCustomFunctionField: public TransformedField {
     {
       if (version >= 217 && IS_2560(board)) {
         internalField.Append(new SwitchField<8>(this, fn.swtch, board, version));
-        internalField.Append(new ConversionField< UnsignedField<8> >(this, (unsigned int &)fn.func, &functionsConversionTable, "Function", ::QObject::tr("OpenTX on this board doesn't accept this function")));
+        internalField.Append(new ConversionField< UnsignedField<8> >(this, (unsigned int &)fn.func, &functionsConversionTable, "Function", DataField::tr("OpenTX on this board doesn't accept this function")));
         internalField.Append(new UnsignedField<2>(this, fn.adjustMode));
         internalField.Append(new UnsignedField<4>(this, _union_param));
         internalField.Append(new UnsignedField<1>(this, _active));
@@ -2402,18 +2403,18 @@ class AvrCustomFunctionField: public TransformedField {
       }
       else if (version >= 216) {
         internalField.Append(new SwitchField<6>(this, fn.swtch, board, version));
-        internalField.Append(new ConversionField< UnsignedField<4> >(this, (unsigned int &)fn.func, &functionsConversionTable, "Function", ::QObject::tr("OpenTX on this board doesn't accept this function")));
+        internalField.Append(new ConversionField< UnsignedField<4> >(this, (unsigned int &)fn.func, &functionsConversionTable, "Function", DataField::tr("OpenTX on this board doesn't accept this function")));
         internalField.Append(new UnsignedField<5>(this, _union_param));
         internalField.Append(new UnsignedField<1>(this, _active));
       }
       else if (version >= 213) {
         internalField.Append(new SwitchField<8>(this, fn.swtch, board, version));
         internalField.Append(new UnsignedField<3>(this, _union_param));
-        internalField.Append(new ConversionField< UnsignedField<5> >(this, (unsigned int &)fn.func, &functionsConversionTable, "Function", ::QObject::tr("OpenTX on this board doesn't accept this function")));
+        internalField.Append(new ConversionField< UnsignedField<5> >(this, (unsigned int &)fn.func, &functionsConversionTable, "Function", DataField::tr("OpenTX on this board doesn't accept this function")));
       }
       else {
         internalField.Append(new SwitchField<8>(this, fn.swtch, board, version));
-        internalField.Append(new ConversionField< UnsignedField<7> >(this, (unsigned int &)fn.func, &functionsConversionTable, "Function", ::QObject::tr("OpenTX on this board doesn't accept this function")));
+        internalField.Append(new ConversionField< UnsignedField<7> >(this, (unsigned int &)fn.func, &functionsConversionTable, "Function", DataField::tr("OpenTX on this board doesn't accept this function")));
         internalField.Append(new BoolField<1>(this, (bool &)fn.enabled));
       }
       internalField.Append(new UnsignedField<8>(this, _param));
@@ -3137,7 +3138,7 @@ OpenTxModelData::OpenTxModelData(ModelData & modelData, Board::Type board, unsig
   if (IS_ARM(board))
     internalField.Append(new UnsignedField<3>(this, modelData.telemetryProtocol));
   else
-    internalField.Append(new ConversionField< UnsignedField<3> >(this, (unsigned int &)modelData.moduleData[0].protocol, &protocolsConversionTable, "Protocol", ::QObject::tr("OpenTX doesn't accept this telemetry protocol")));
+    internalField.Append(new ConversionField< UnsignedField<3> >(this, (unsigned int &)modelData.moduleData[0].protocol, &protocolsConversionTable, "Protocol", DataField::tr("OpenTX doesn't accept this telemetry protocol")));
 
   internalField.Append(new BoolField<1>(this, modelData.thrTrim));
 
@@ -3150,7 +3151,7 @@ OpenTxModelData::OpenTxModelData(ModelData & modelData, Board::Type board, unsig
     internalField.Append(new SpareBitsField<4>(this));
   }
   else {
-    internalField.Append(new ConversionField< SignedField<4> >(this, modelData.moduleData[0].channelsCount, &channelsConversionTable, "Channels number", ::QObject::tr("OpenTX doesn't allow this number of channels")));
+    internalField.Append(new ConversionField< SignedField<4> >(this, modelData.moduleData[0].channelsCount, &channelsConversionTable, "Channels number", DataField::tr("OpenTX doesn't allow this number of channels")));
   }
 
   if (version >= 216)
@@ -3272,7 +3273,7 @@ OpenTxModelData::OpenTxModelData(ModelData & modelData, Board::Type board, unsig
       internalField.Append(new UnsignedField<2>(this, modelData.potsWarningMode));
     }
     else {
-      internalField.Append(new ConversionField< SignedField<8> >(this, modelData.moduleData[1].protocol, &protocolsConversionTable, "Protocol", ::QObject::tr("OpenTX doesn't accept this radio protocol")));
+      internalField.Append(new ConversionField< SignedField<8> >(this, modelData.moduleData[1].protocol, &protocolsConversionTable, "Protocol", DataField::tr("OpenTX doesn't accept this radio protocol")));
       internalField.Append(new UnsignedField<8>(this, modelData.trainerMode));
     }
   }
@@ -3284,14 +3285,14 @@ OpenTxModelData::OpenTxModelData(ModelData & modelData, Board::Type board, unsig
     }
     else if (version >= 216) {
       modulesCount = 3;
-      internalField.Append(new ConversionField< SignedField<8> >(this, modelData.moduleData[0].protocol, &protocolsConversionTable, "Protocol", ::QObject::tr("OpenTX doesn't accept this radio protocol")));
+      internalField.Append(new ConversionField< SignedField<8> >(this, modelData.moduleData[0].protocol, &protocolsConversionTable, "Protocol", DataField::tr("OpenTX doesn't accept this radio protocol")));
     }
   }
 
   if (IS_ARM(board) && version >= 215) {
     for (int module=0; module<modulesCount; module++) {
       if (version >= 217) {
-        internalField.Append(new ConversionField<SignedField<4> >(this, modelData.moduleData[module].protocol, &protocolsConversionTable, "Protocol", ::QObject::tr("OpenTX doesn't accept this radio protocol")));
+        internalField.Append(new ConversionField<SignedField<4> >(this, modelData.moduleData[module].protocol, &protocolsConversionTable, "Protocol", DataField::tr("OpenTX doesn't accept this radio protocol")));
         internalField.Append(new SignedField<4>(this, subprotocols[module]));
       }
       else {
