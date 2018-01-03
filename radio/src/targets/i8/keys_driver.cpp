@@ -25,17 +25,17 @@ uint32_t readKeys()
   uint32_t result = 0;
 // TODO: Remove once touch is there
   if (~TRIMS_GPIO_REG_RVU & TRIMS_GPIO_PIN_RVU)
-    result |= 1 << KEY_MENU;
+    result |= 1 << KEY_UP;
   if (~TRIMS_GPIO_REG_RVD & TRIMS_GPIO_PIN_RVD)
-    result |= 1 << KEY_EXIT;
+    result |= 1 << KEY_DOWN;
   if (~TRIMS_GPIO_REG_RHR & TRIMS_GPIO_PIN_RHR)
-    result |= 1 << KEY_ENTER;
-  if (~TRIMS_GPIO_REG_RHL & TRIMS_GPIO_PIN_RHL)
-    result |= 1 << KEY_PAGE;
-  if (~TRIMS_GPIO_REG_LVU & TRIMS_GPIO_PIN_LVU)
-    result |= 1 << KEY_PLUS;
-  if (~TRIMS_GPIO_REG_LVD & TRIMS_GPIO_PIN_LVD)
-    result |= 1 << KEY_MINUS;
+    result |= 1 << KEY_RIGHT;
+  if (~TRIMS_GPIO_REG_LHL & TRIMS_GPIO_PIN_LHL)
+    result |= 1 << KEY_LEFT;
+  if (~KEYS_GPIO_REG_K2 & KEYS_GPIO_PIN_K2)
+    result |= 1 << KEY_EXIT;
+  if (~KEYS_GPIO_REG_K1 & KEYS_GPIO_PIN_K1)
+    result |= 1 << KEY_MENU;  
 
   // if (result != 0) TRACE("readKeys(): result=0x%02x", result);
 
@@ -46,22 +46,23 @@ uint32_t readTrims()
 {
   uint32_t result = 0;
 
-  if (~TRIMS_GPIO_REG_LHL & TRIMS_GPIO_PIN_LHL)
-    result |= 0x01;
+// TODO: Reenable once touch is there
+//  if (~TRIMS_GPIO_REG_LHL & TRIMS_GPIO_PIN_LHL)
+//    result |= 0x01;
   if (~TRIMS_GPIO_REG_LHR & TRIMS_GPIO_PIN_LHR)
     result |= 0x02;
-  if (~TRIMS_GPIO_REG_LVD & TRIMS_GPIO_PIN_LVD)
-    result |= 0x04;
-  if (~TRIMS_GPIO_REG_LVU & TRIMS_GPIO_PIN_LVU)
-    result |= 0x08;
-  if (~TRIMS_GPIO_REG_RVD & TRIMS_GPIO_PIN_RVD)
-    result |= 0x10;
-  if (~TRIMS_GPIO_REG_RVU & TRIMS_GPIO_PIN_RVU)
-    result |= 0x20;
+//  if (~TRIMS_GPIO_REG_LVD & TRIMS_GPIO_PIN_LVD)
+//    result |= 0x04;
+//  if (~TRIMS_GPIO_REG_LVU & TRIMS_GPIO_PIN_LVU)
+//    result |= 0x08;
+//  if (~TRIMS_GPIO_REG_RVD & TRIMS_GPIO_PIN_RVD)
+//    result |= 0x10;
+//  if (~TRIMS_GPIO_REG_RVU & TRIMS_GPIO_PIN_RVU)
+//    result |= 0x20;
   if (~TRIMS_GPIO_REG_RHL & TRIMS_GPIO_PIN_RHL)
     result |= 0x40;
-  if (~TRIMS_GPIO_REG_RHR & TRIMS_GPIO_PIN_RHR)
-    result |= 0x80;
+//  if (~TRIMS_GPIO_REG_RHR & TRIMS_GPIO_PIN_RHR)
+//    result |= 0x80;
 
   // TRACE("readTrims(): result=0x%02x", result);
 

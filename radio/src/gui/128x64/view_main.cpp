@@ -239,11 +239,7 @@ void displayVoltageOrAlarm()
   #define displayVoltageOrAlarm() displayBattVoltage()
 #endif
 
-#if defined(PCBI8)
-#define EVT_KEY_NEXT_PAGE              EVT_KEY_LONG(KEY_RIGHT)
-#define EVT_KEY_PREVIOUS_PAGE          EVT_KEY_BREAK(KEY_LEFT)
-#define EVT_KEY_CONTEXT_MENU           EVT_KEY_BREAK(KEY_ENTER)
-#elif defined(PCBX7)
+#if defined(PCBX7)
 #define EVT_KEY_CONTEXT_MENU           EVT_KEY_LONG(KEY_ENTER)
 #define EVT_KEY_NEXT_VIEW              EVT_KEY_BREAK(KEY_PAGE)
 #define EVT_KEY_NEXT_PAGE              EVT_ROTARY_RIGHT
@@ -405,12 +401,12 @@ void menuMainView(event_t event)
 #if defined(EVT_KEY_PREVIOUS_VIEW)
       // TODO try to split those 2 cases on 9X
     case EVT_KEY_PREVIOUS_VIEW:
-    case EVT_KEY_NEXT_VIEW:
       // TODO try to split those 2 cases on 9X
-      g_eeGeneral.view = (event == EVT_KEY_PREVIOUS_VIEW ? (view_base == VIEW_COUNT-1 ? 0 : view_base+1) : (view_base == 0 ? VIEW_COUNT-1 : view_base-1));
+      g_eeGeneral.view = (view_base == VIEW_COUNT-1 ? 0 : view_base+1);
       storageDirty(EE_GENERAL);
       break;
-#elif defined(EVT_KEY_NEXT_VIEW)
+#endif
+#if defined(EVT_KEY_NEXT_VIEW)
     case EVT_KEY_NEXT_VIEW:
       g_eeGeneral.view = (view_base == 0 ? VIEW_COUNT-1 : view_base-1);
       storageDirty(EE_GENERAL);

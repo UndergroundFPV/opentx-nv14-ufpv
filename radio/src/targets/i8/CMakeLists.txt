@@ -17,6 +17,7 @@ set(BITMAPS_TARGET 9x_bitmaps)
 set(FONTS_TARGET 9x_fonts_1bit)
 set(LCD_DRIVER lcd_driver.cpp)
 set(DISK_CACHE NO)
+set(DBLKEYS OFF)
 
 set(HSE_VALUE 12000000)
 set(SDCARD YES)

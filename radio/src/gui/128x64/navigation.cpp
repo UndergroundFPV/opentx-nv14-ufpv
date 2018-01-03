@@ -37,7 +37,7 @@ int8_t p2valdiff;
 
 int8_t  checkIncDec_Ret;
 
-#if defined(PCBX7) || defined(PCBI8)
+#if defined(PCBX7)
 #define DBLKEYS_PRESSED_RGT_LFT(in)    (false)
 #define DBLKEYS_PRESSED_UP_DWN(in)     (false)
 #define DBLKEYS_PRESSED_RGT_UP(in)     (false)
@@ -1008,7 +1008,7 @@ void check(event_t event, uint8_t curr, const MenuHandlerFunc *menuTab, uint8_t 
       break;
 #endif
 
-#if !defined(PCBX7) && !defined(PCBI8)
+#if !defined(PCBX7)
     case EVT_KEY_REPT(KEY_DOWN):
       if (!IS_ROTARY_RIGHT(event) && l_posVert==maxrow) break;
       // no break
@@ -1053,7 +1053,7 @@ void check(event_t event, uint8_t curr, const MenuHandlerFunc *menuTab, uint8_t 
       break;
 #endif
 
-#if !defined(PCBX7) && !defined(PCBI8)
+#if !defined(PCBX7)
     case EVT_KEY_REPT(KEY_UP):
       if (!IS_ROTARY_LEFT(event) && l_posVert==0) break;
       // no break

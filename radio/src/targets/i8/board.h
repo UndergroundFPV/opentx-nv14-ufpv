@@ -192,9 +192,10 @@ enum EnumKeys
   KEY_MENU,
   KEY_EXIT,
   KEY_ENTER,
-  KEY_PAGE,
-  KEY_PLUS,
-  KEY_MINUS,
+  KEY_DOWN,
+  KEY_UP,
+  KEY_RIGHT,
+  KEY_LEFT,
 
   TRM_BASE,
   TRM_LH_DWN = TRM_BASE,
@@ -210,10 +211,8 @@ enum EnumKeys
   NUM_KEYS
 };
 
-#define KEY_UP                       KEY_PLUS
-#define KEY_DOWN                     KEY_MINUS
-#define KEY_RIGHT                    KEY_MINUS
-#define KEY_LEFT                     KEY_PLUS
+#define KEY_PLUS                      KEY_RIGHT
+#define KEY_MINUS                     KEY_LEFT
 
 enum EnumSwitches
 {
@@ -260,12 +259,6 @@ uint32_t readKeys(void);
 uint32_t readTrims(void);
 #define TRIMS_PRESSED()            (readTrims())
 #define KEYS_PRESSED()             (readKeys())
-
-#if defined(PCBX9E) || defined(PCBX7)
-// Rotary Encoder driver
-#define ROTARY_ENCODER_NAVIGATION
-void checkRotaryEncoder(void);
-#endif
 
 // WDT driver
 #define WDTO_500MS                            500
