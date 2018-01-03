@@ -107,6 +107,7 @@
 #define LED_RED_GPIO_PIN                GPIO_Pin_1  // PB.01
 
 // Internal Module
+#define INTMODULE_PULSES
 #define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)
 #define INTMODULE_RCC_APB2Periph        RCC_APB2Periph_TIM1
 #if defined(PCBX9E) || defined(PCBX9DP) || defined(PCBX7)

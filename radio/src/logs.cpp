@@ -348,7 +348,7 @@ void logsWrite()
           GET_3POS_STATE(SB),
           getLogicalSwitchesStates(32),
           getLogicalSwitchesStates(0));
-#elif defined(PCBX7) || defined(PCBI8)
+#elif defined(PCBX7)
       f_printf(&g_oLogFile, "%d,%d,%d,%d,%d,%d,0x%08X%08X,",
           GET_3POS_STATE(SA),
           GET_3POS_STATE(SB),
@@ -368,6 +368,16 @@ void logsWrite()
           GET_2POS_STATE(SF),
           GET_3POS_STATE(SG),
           GET_2POS_STATE(SH),
+          getLogicalSwitchesStates(32),
+          getLogicalSwitchesStates(0));
+#elif defined(PCBI8)
+      f_printf(&g_oLogFile, "%d,%d,%d,%d,%d,%d,0x%08X%08X,",
+          GET_3POS_STATE(SA),
+          GET_3POS_STATE(SB),
+          GET_3POS_STATE(SC),
+          GET_3POS_STATE(SD),
+          GET_2POS_STATE(SE),
+          GET_2POS_STATE(SF),
           getLogicalSwitchesStates(32),
           getLogicalSwitchesStates(0));
 #else
