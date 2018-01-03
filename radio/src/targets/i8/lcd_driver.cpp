@@ -56,9 +56,9 @@ void lcdHardwareInit()
 {
   GPIO_InitTypeDef GPIO_InitStructure;
 
-  // APB1 clock / 2 = 133nS per clock
   LCD_SPI->CR1 = 0; // Clear any mode error
   LCD_SPI->CR1 = SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_CPOL | SPI_CR1_CPHA;
+  LCD_SPI->CR1 |= SPI_CR1_BR_1 | SPI_CR1_BR_0; // APB1 clock / 8 = 380uS per clock
   LCD_SPI->CR2 = 0;
   LCD_SPI->CR1 |= SPI_CR1_MSTR;        // Make sure in case SSM/SSI needed to be set first
   LCD_SPI->CR1 |= SPI_CR1_SPE;
