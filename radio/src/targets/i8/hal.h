@@ -21,6 +21,15 @@
 #ifndef _HAL_H_
 #define _HAL_H_
 
+/* DMA Allocation:
+   DMA/Stream/Channel
+   1/4/0 SPI2_TX / LCD
+   1/5/4 Serial2 RX (disabled)
+   2/0/3 SPI1_RX / Gimbals
+   2/4/0 ADC1
+   2/5/3 SPI1_TX / Gimbals
+*/
+
 // Trims
 #define TRIMS_GPIO_REG_LHL            GPIOE->IDR
 #define TRIMS_GPIO_PIN_LHL            GPIO_Pin_0  // PE.00
@@ -95,6 +104,33 @@
 #define ADC_CHANNEL_POT3              0
 #define ADC_CHANNEL_SLIDER1           0
 #define ADC_CHANNEL_SLIDER2           0
+
+// Gimbals
+#define GIMBALS_RCC_AHB1Periph        RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_DMA2
+#define GIMBALS_RCC_APB2Periph        RCC_APB2Periph_SPI1
+#define GIMBALS_SPI                   SPI1
+#define GIMBALS_GPIO_AF               GPIO_AF_SPI1
+#define GIMBALS_SPI_GPIO              GPIOB
+#define GIMBALS_MOSI_PIN              GPIO_Pin_5 // PB.05
+#define GIMBALS_MISO_PIN              GPIO_Pin_4 // PB.04
+#define GIMBALS_SCK_PIN               GPIO_Pin_3 // PB.03
+#define GIMBALS_CS_INT_GPIO           GPIOE
+#define GIMBALS_LEFT_CS_GPIO_PIN      GPIO_Pin_9 // PE.09
+#define GIMBALS_RIGHT_CS_GPIO_PIN     GPIO_Pin_10 // PE.10
+#define GIMBALS_LEFT_INT_GPIO_PIN     GPIO_Pin_6 // PE.06
+#define GIMBALS_RIGHT_INT_GPIO_PIN    GPIO_Pin_8 // PE.08
+#define GIMBALS_DMA                   DMA2
+#define GIMBALS_DMA_Stream_TX         DMA2_Stream5
+#define GIMBALS_DMA_Stream_RX         DMA2_Stream0
+#define GIMBALS_DMA_Stream_TX_IRQn    DMA2_Stream5_IRQn
+#define GIMBALS_DMA_Stream_RX_IRQn    DMA2_Stream0_IRQn
+#define GIMBALS_DMA_Stream_TX_IRQHandler  DMA2_Stream5_IRQHandler
+#define GIMBALS_DMA_Stream_RX_IRQHandler  DMA2_Stream0_IRQHandler
+// TODO: Check
+#define GIMBALS_TX_DMA_FLAGS          (DMA_HIFCR_CTCIF5 | DMA_HIFCR_CHTIF5 | DMA_HIFCR_CTEIF5 | DMA_HIFCR_CDMEIF5 | DMA_HIFCR_CFEIF5)
+#define GIMBALS_TX_DMA_FLAG_INT       DMA_HIFCR_CTCIF5
+#define GIMBALS_RX_DMA_FLAGS          (DMA_HIFCR_CTCIF0 | DMA_HIFCR_CHTIF0 | DMA_HIFCR_CTEIF0 | DMA_HIFCR_CDMEIF0 | DMA_HIFCR_CFEIF0)
+#define GIMBALS_RX_DMA_FLAG_INT       DMA_HIFCR_CTCIF0
 
 // PWR and LED driver
 #define PWR_RCC_AHB1Periph              (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOE)
