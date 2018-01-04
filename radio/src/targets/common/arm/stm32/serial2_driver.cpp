@@ -22,14 +22,15 @@
 
 uint8_t serial2Mode = 0;
 Fifo<uint8_t, 512> serial2TxFifo;
+
+#if defined(SERIAL_DMA_Stream_RX)
 DMAFifo<32> serial2RxFifo __DMA (SERIAL_DMA_Stream_RX);
+#else
+Fifo<uint8_t, 32> serial2RxFifo;
+#endif
 
 void uart3Setup(unsigned int baudrate, bool dma)
 {
-#if defined(PCBI8)
-dma = false;
-#endif
-  
   USART_InitTypeDef USART_InitStructure;
   GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -51,6 +52,7 @@ dma = false;
   USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
   USART_Init(SERIAL_USART, &USART_InitStructure);
 
+#if defined(SERIAL_DMA_Stream_RX)
   if (dma) {
     DMA_InitTypeDef DMA_InitStructure;
     serial2RxFifo.clear();
@@ -75,14 +77,16 @@ dma = false;
     USART_DMACmd(SERIAL_USART, USART_DMAReq_Rx, ENABLE);
     USART_Cmd(SERIAL_USART, ENABLE);
     DMA_Cmd(SERIAL_DMA_Stream_RX, ENABLE);
+    return;
   }
-  else {
-    USART_Cmd(SERIAL_USART, ENABLE);
-    USART_ITConfig(SERIAL_USART, USART_IT_RXNE, ENABLE);
-    USART_ITConfig(SERIAL_USART, USART_IT_TXE, DISABLE);
-    NVIC_SetPriority(SERIAL_USART_IRQn, 7);
-    NVIC_EnableIRQ(SERIAL_USART_IRQn);
-  }
+#endif
+
+  // no DMA ...
+  USART_Cmd(SERIAL_USART, ENABLE);
+  USART_ITConfig(SERIAL_USART, USART_IT_RXNE, ENABLE);
+  USART_ITConfig(SERIAL_USART, USART_IT_TXE, DISABLE);
+  NVIC_SetPriority(SERIAL_USART_IRQn, 7);
+  NVIC_EnableIRQ(SERIAL_USART_IRQn);
 }
 
 void serial2Init(unsigned int mode, unsigned int protocol)
@@ -129,7 +133,9 @@ void serial2SbusInit()
 
 void serial2Stop()
 {
+#if defined(SERIAL_DMA_Stream_RX)
   DMA_DeInit(SERIAL_DMA_Stream_RX);
+#endif
   USART_DeInit(SERIAL_USART);
 }
 

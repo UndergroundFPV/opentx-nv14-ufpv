@@ -221,8 +221,9 @@
 #define SERIAL_USART                    USART2
 #define SERIAL_USART_IRQHandler         USART2_IRQHandler
 #define SERIAL_USART_IRQn               USART2_IRQn
-#define SERIAL_DMA_Stream_RX            DMA1_Stream5
-#define SERIAL_DMA_Channel_RX           DMA_Channel_4
+// DMA conflict with Audio
+// #define SERIAL_DMA_Stream_RX            DMA1_Stream5
+// #define SERIAL_DMA_Channel_RX           DMA_Channel_4
 
 // Telemetry
 #define TELEMETRY_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA2)

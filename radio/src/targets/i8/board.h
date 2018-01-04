@@ -490,7 +490,7 @@ void checkTrainerSettings(void);
 #endif
 
 extern Fifo<uint8_t, TELEMETRY_FIFO_SIZE> telemetryFifo;
-extern DMAFifo<32> serial2RxFifo;
+extern Fifo<uint8_t, 32> serial2RxFifo;
 #endif
 
 #endif // _BOARD_H_
