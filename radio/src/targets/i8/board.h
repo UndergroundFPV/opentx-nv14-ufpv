@@ -213,6 +213,7 @@ enum EnumKeys
 
 #define KEY_PLUS                      KEY_RIGHT
 #define KEY_MINUS                     KEY_LEFT
+#define KEY_ENTER                     KEY_MENU
 
 enum EnumSwitches
 {
