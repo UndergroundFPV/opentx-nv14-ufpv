@@ -495,6 +495,7 @@ uint8_t isBacklightEnabled(void);
 #if !defined(SIMU)
   void usbJoystickUpdate();
 #endif
+#define USBD_MANUFACTURER_STRING        "FrSky"
 #define USB_NAME                        "FrSky Taranis"
 #define USB_MANUFACTURER                'F', 'r', 'S', 'k', 'y', ' ', ' ', ' '  /* 8 bytes */
 #define USB_PRODUCT                     'T', 'a', 'r', 'a', 'n', 'i', 's', ' '  /* 8 Bytes */

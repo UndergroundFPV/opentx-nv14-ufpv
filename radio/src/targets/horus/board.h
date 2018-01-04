@@ -471,6 +471,7 @@ void backlightEnable(uint8_t dutyCycle);
 #if !defined(SIMU)
 void usbJoystickUpdate();
 #endif
+#define USBD_MANUFACTURER_STRING       "FrSky"
 #if defined(PCBX12S)
   #define USB_NAME                     "FrSky Horus"
   #define USB_MANUFACTURER             'F', 'r', 'S', 'k', 'y', ' ', ' ', ' '  /* 8 bytes */

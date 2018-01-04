@@ -348,6 +348,7 @@ void backlightEnable(void);
 #if !defined(SIMU)
   void usbJoystickUpdate();
 #endif
+#define USBD_MANUFACTURER_STRING       "FlySky"
 #define USB_NAME                       "FlySky I8"
 #define USB_MANUFACTURER               'F', 'l', 'y', 'S', 'k', 'y', ' ', ' '  /* 8 bytes */
 #define USB_PRODUCT                    'I', '8', ' ', ' ', ' ', ' ', ' ', ' '  /* 8 Bytes */
@@ -356,7 +357,7 @@ void backlightEnable(void);
 }
 #endif
 
-// I2C driver: EEPROM + Audio Volume
+// I2C driver: EEPROM
 #define EEPROM_SIZE    (32*1024)
 
 void i2cInit(void);
