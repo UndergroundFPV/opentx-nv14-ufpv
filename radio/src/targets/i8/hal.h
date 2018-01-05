@@ -60,7 +60,7 @@
 #define KEYS_GPIOD_PINS               (TRIMS_GPIO_PIN_LHR | TRIMS_GPIO_PIN_LVD | TRIMS_GPIO_PIN_RVD | TRIMS_GPIO_PIN_RHL | TRIMS_GPIO_PIN_RVU | TRIMS_GPIO_PIN_RHR | KEYS_GPIO_PIN_K1 | KEYS_GPIO_PIN_K2)
 
 // ADC
-#define ADC_RCC_AHB1Periph            (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA2)  // TODO switches may need analogs too
+#define ADC_RCC_AHB1Periph            (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA2)
 #define ADC_RCC_APB2Periph            (RCC_APB2Periph_ADC1)
 
 #define ADC_GPIO_PIN_SWA              GPIO_Pin_3  // PA.03
@@ -167,18 +167,18 @@
 #define EXTMODULE_RCC_APB2Periph        RCC_APB2Periph_TIM8
 #define EXTMODULE_PWR_GPIO              GPIOD
 #define EXTMODULE_PWR_GPIO_PIN          0
-#define EXTMODULE_PPM_GPIO              GPIOA
-#define EXTMODULE_PPM_GPIO_PIN          GPIO_Pin_7  // PA.07
-#define EXTMODULE_PPM_GPIO_PinSource    GPIO_PinSource7
-#define EXTMODULE_TIMER                 TIM8
-#define EXTMODULE_PPM_GPIO_AF           GPIO_AF_TIM8
+// #define EXTMODULE_PPM_GPIO              GPIOA
+// #define EXTMODULE_PPM_GPIO_PIN          GPIO_Pin_7  // PA.07
+// #define EXTMODULE_PPM_GPIO_PinSource    GPIO_PinSource7
+// #define EXTMODULE_TIMER                 TIM8
+// #define EXTMODULE_PPM_GPIO_AF           GPIO_AF_TIM8
 #define EXTMODULE_TIMER_CC_IRQn         TIM8_CC_IRQn
 #define EXTMODULE_TIMER_CC_IRQHandler   TIM8_CC_IRQHandler
-#define EXTMODULE_DMA_CHANNEL           DMA_Channel_7
-#define EXTMODULE_DMA_STREAM            DMA2_Stream1
-#define EXTMODULE_DMA_IRQn              DMA2_Stream1_IRQn
-#define EXTMODULE_DMA_IRQHandler        DMA2_Stream1_IRQHandler
-#define EXTMODULE_DMA_FLAG_TC           DMA_IT_TCIF1
+// #define EXTMODULE_DMA_CHANNEL           DMA_Channel_7
+// #define EXTMODULE_DMA_STREAM            DMA2_Stream1
+// #define EXTMODULE_DMA_IRQn              DMA2_Stream1_IRQn
+// #define EXTMODULE_DMA_IRQHandler        DMA2_Stream1_IRQHandler
+// #define EXTMODULE_DMA_FLAG_TC           DMA_IT_TCIF1
 #define EXTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
 
 // Trainer Port

@@ -35,7 +35,7 @@ void menuRadioDiagAnalogs(event_t event)
 
   STICK_SCROLL_DISABLE();
 
-  for (uint8_t i=0; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS; i++) {
+  for (uint8_t i=0; i<8; i++) {
 #if (NUM_STICKS+NUM_POTS+NUM_SLIDERS) > 9
     coord_t y = MENU_HEADER_HEIGHT + 1 + (i/3)*FH;
     const uint8_t x_coord[] = {0, 70, 154};
@@ -98,7 +98,7 @@ void menuRadioDiagAnalogs(event_t event)
   adcBatt = ((adcBatt * 7) + anaIn(TX_VOLTAGE)) / 8; // running average, sourced directly (to avoid unending debate :P)
   uint32_t batCalV = ((uint32_t)adcBatt*1390 + (10*(int32_t)adcBatt*g_eeGeneral.txVoltageCalibration)/8) / BandGap;
   lcdDrawNumber(LEN_CALIB_FIELDS*FW+4*FW, 6*FH-2, batCalV, PREC2|(menuVerticalPosition==HEADER_LINE ? INVERS : 0));
-#else
+#elif !defined(PCBI8)
   lcdDrawTextAlignedLeft(MENU_HEADER_HEIGHT + 1 + (NUM_STICKS+NUM_POTS+NUM_SLIDERS+1)/2 * FH, STR_BATT_CALIB);
   putsVolts(LEN_CALIB_FIELDS*FW+4*FW, MENU_HEADER_HEIGHT + 1 + (NUM_STICKS+NUM_POTS+NUM_SLIDERS+1)/2 * FH, g_vbat100mV, (menuVerticalPosition==HEADER_LINE ? INVERS : 0));
 #endif
