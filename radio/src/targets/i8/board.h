@@ -186,6 +186,10 @@ void init_sbus_on_heartbeat_capture(void);
 void stop_sbus_on_heartbeat_capture(void);
 int sbusGetByte(uint8_t * byte);
 
+// Gimbals driver
+void gimbalsInit(void);
+void gimbalsRead(void);
+
 // Keys driver
 enum EnumKeys
 {

@@ -105,7 +105,7 @@ extern "C" void INTERRUPT_xMS_IRQHandler()
 void boardInit()
 {
 #if !defined(SIMU)
-  RCC_AHB1PeriphClockCmd(PWR_RCC_AHB1Periph | 
+  RCC_AHB1PeriphClockCmd(PWR_RCC_AHB1Periph | GIMBALS_RCC_AHB1Periph |
                          KEYS_RCC_AHB1Periph | LCD_RCC_AHB1Periph |
                          AUDIO_RCC_AHB1Periph | BACKLIGHT_RCC_AHB1Periph |
                          ADC_RCC_AHB1Periph | I2C_RCC_AHB1Periph |
@@ -125,7 +125,8 @@ void boardInit()
   RCC_APB2PeriphClockCmd(BACKLIGHT_RCC_APB2Periph | ADC_RCC_APB2Periph |
                          HAPTIC_RCC_APB2Periph | INTMODULE_RCC_APB2Periph |
                          EXTMODULE_RCC_APB2Periph | HEARTBEAT_RCC_APB2Periph |
-                         BT_RCC_APB2Periph | TELEMETRY_RCC_APB2Periph, ENABLE);
+                         BT_RCC_APB2Periph | TELEMETRY_RCC_APB2Periph |
+                         GIMBALS_RCC_APB2Periph, ENABLE);
 
   pwrInit();
 
@@ -139,6 +140,7 @@ void boardInit()
   init5msTimer();
   __enable_irq();
   i2cInit();
+  gimbalsInit();
   usbInit();
 
 #if defined(DEBUG)
@@ -275,6 +277,5 @@ uint16_t getBatteryVoltage()
 {
   int32_t instant_vbat = anaIn(TX_VOLTAGE); // using filtered ADC value on purpose
   instant_vbat = (instant_vbat * BATT_SCALE * (128 + g_eeGeneral.txVoltageCalibration) ) / 26214;
-  instant_vbat += 20; // add 0.2V because of the diode TODO check if this is needed, but removal will beak existing calibrations!!!
   return (uint16_t)instant_vbat;
 }

@@ -24,6 +24,7 @@
 /* DMA Allocation:
    DMA/Stream/Channel
    1/4/0 SPI2_TX / LCD
+   1/5/7 DAC/Audio
    1/5/4 Serial2 RX (disabled)
    2/0/3 SPI1_RX / Gimbals
    2/4/0 ADC1
@@ -114,6 +115,9 @@
 #define GIMBALS_MOSI_PIN              GPIO_Pin_5 // PB.05
 #define GIMBALS_MISO_PIN              GPIO_Pin_4 // PB.04
 #define GIMBALS_SCK_PIN               GPIO_Pin_3 // PB.03
+#define GIMBALS_MOSI_PinSource        GPIO_PinSource5
+#define GIMBALS_MISO_PinSource        GPIO_PinSource4
+#define GIMBALS_SCK_PinSource         GPIO_PinSource3
 #define GIMBALS_CS_INT_GPIO           GPIOE
 #define GIMBALS_LEFT_CS_GPIO_PIN      GPIO_Pin_9 // PE.09
 #define GIMBALS_RIGHT_CS_GPIO_PIN     GPIO_Pin_10 // PE.10
