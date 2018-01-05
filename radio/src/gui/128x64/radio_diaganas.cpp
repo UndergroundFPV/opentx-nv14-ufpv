@@ -48,7 +48,7 @@ void menuRadioDiagAnalogs(event_t event)
     drawStringWithIndex(x, y, PSTR("A"), i+1);
     lcdDrawChar(lcdNextPos, y, ':');
 #endif
-    lcdDrawHexNumber(x+3*FW-1, y, anaIn(i));
+    lcdDrawHexNumber(x+3*FW-1, y, anaIn(i+4));
 #if defined(CPUARM)
     lcdDrawNumber(x+10*FW-1, y, (int16_t)calibratedAnalogs[CONVERT_MODE(i)]*25/256, RIGHT);
 #else

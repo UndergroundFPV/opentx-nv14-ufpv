@@ -39,14 +39,17 @@
 #elif defined(PCBX7) || defined(PCBXLITE)
   const int8_t ana_direction[NUM_ANALOGS] = {-1,1,-1,1,  1,1,  1};
 #elif defined(PCBI8)
-  const int8_t ana_direction[NUM_ANALOGS] = {-1,1,-1,1,  1,1,  1};
+  const int8_t ana_direction[NUM_ANALOGS] = {/*sticks*/1,1,1,1, /*pots*/1,1, /*switches*/1,1,1,1,1,1, /*batt*/1,1};
 #elif defined(REV4a)
   const int8_t ana_direction[NUM_ANALOGS] = {1,-1,1,-1,  1,-1,0,  1,1,  1};
 #else
   const int8_t ana_direction[NUM_ANALOGS] = {1,-1,1,-1,  1,1,0,   1,1,  1};
 #endif
 
-#if NUM_PWMANALOGS > 0
+#if defined(PCBI8)
+  #define FIRST_ANALOG_ADC             NUM_PWMANALOGS
+  #define NUM_ANALOGS_ADC              (NUM_ANALOGS - NUM_PWMANALOGS)
+#elif NUM_PWMANALOGS > 0
   #define FIRST_ANALOG_ADC             (ANALOGS_PWM_ENABLED() ? NUM_PWMANALOGS : 0)
   #define NUM_ANALOGS_ADC              (ANALOGS_PWM_ENABLED() ? (NUM_ANALOGS - NUM_PWMANALOGS) : NUM_ANALOGS)
 #elif defined(PCBX9E)
@@ -110,6 +113,9 @@ void adcInit()
 #elif defined(PCBX7)
   ADC_MAIN->SQR2 = (ADC_CHANNEL_BATT<<0); // conversions 7 and more
   ADC_MAIN->SQR3 = (ADC_CHANNEL_STICK_LH<<0) + (ADC_CHANNEL_STICK_LV<<5) + (ADC_CHANNEL_STICK_RV<<10) + (ADC_CHANNEL_STICK_RH<<15) + (ADC_CHANNEL_POT1<<25) + (ADC_CHANNEL_POT2<<20); // conversions 1 to 6
+#elif defined(PCBI8)
+  ADC_MAIN->SQR2 = (ADC_CHANNEL_SWE<<0) + (ADC_CHANNEL_SWF<<5) + (ADC_CHANNEL_LIBATT<<10) + (ADC_CHANNEL_DRYBATT<<15); // conversions 7 and more
+  ADC_MAIN->SQR3 = (ADC_CHANNEL_POT1<<0) + (ADC_CHANNEL_POT2<<5) + (ADC_CHANNEL_SWA<<10) + (ADC_CHANNEL_SWB<<15) + (ADC_CHANNEL_SWC<<20) + (ADC_CHANNEL_SWD<<25); // conversions 1 to 6
 #else
   ADC_MAIN->SQR2 = (ADC_CHANNEL_POT3<<0) + (ADC_CHANNEL_SLIDER1<<5) + (ADC_CHANNEL_SLIDER2<<10) + (ADC_CHANNEL_BATT<<15); // conversions 7 and more
   ADC_MAIN->SQR3 = (ADC_CHANNEL_STICK_LH<<0) + (ADC_CHANNEL_STICK_LV<<5) + (ADC_CHANNEL_STICK_RV<<10) + (ADC_CHANNEL_STICK_RH<<15) + (ADC_CHANNEL_POT1<<20) + (ADC_CHANNEL_POT2<<25); // conversions 1 to 6
@@ -142,7 +148,7 @@ void adcInit()
   ADC_EXT_DMA_Stream->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0;
 #endif
 
-#if NUM_PWMANALOGS > 0
+#if NUM_PWMANALOGS > 0 && !defined(PCBI8)
   if (ANALOGS_PWM_ENABLED()) {
     pwmInit();
   }
@@ -204,7 +210,7 @@ void adcRead()
     adcValues[x] = temp[x] >> 2;
   }
 
-#if NUM_PWMANALOGS > 0
+#if NUM_PWMANALOGS > 0 && !defined(PCBI8)
   if (ANALOGS_PWM_ENABLED()) {
     pwmRead(adcValues);
   }
@@ -219,6 +225,9 @@ void adcStop()
 #if !defined(SIMU)
 uint16_t getAnalogValue(uint8_t index)
 {
+  return adcValues[index];
+
+
   if (IS_POT(index) && !IS_POT_SLIDER_AVAILABLE(index)) {
     // Use fixed analog value for non-existing and/or non-connected pots.
     // Non-connected analog inputs will slightly follow the adjacent connected analog inputs, 

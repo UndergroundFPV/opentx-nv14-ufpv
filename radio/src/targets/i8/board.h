@@ -290,13 +290,24 @@ enum Analogs {
   POT1 = POT_FIRST,
   POT2,
   POT_LAST = POT2,
+  SWITCH_FIRST,
+  SWITCH_SA = SWITCH_FIRST,
+  SWITCH_SB,
+  SWITCH_SC,
+  SWITCH_SD,
+  SWITCH_SE,
+  SWITCH_SF,
+  SWITCH_LAST = SWITCH_SF,
   TX_VOLTAGE,
+  LIBATT_VOLTAGE = TX_VOLTAGE,
+  DRYBATT_VOLTAGE,
   NUM_ANALOGS
 };
 
 #define NUM_POTS                       2
 #define NUM_XPOTS                      NUM_POTS
 #define NUM_SLIDERS                    0
+#define NUM_PWMANALOGS                 4
 
 enum CalibratedAnalogs {
   CALIBRATED_STICK1,
@@ -465,19 +476,6 @@ void lcdRefresh(bool wait=true); // TODO uint8_t wait to simplify this
 #endif
 void lcdSetRefVolt(unsigned char val);
 void lcdSetContrast(void);
-
-// Top LCD driver
-#if defined(PCBX9E)
-void toplcdInit(void);
-void toplcdOff(void);
-void toplcdRefreshStart(void);
-void toplcdRefreshEnd(void);
-void setTopFirstTimer(int32_t value);
-void setTopSecondTimer(uint32_t value);
-void setTopRssi(uint32_t rssi);
-void setTopBatteryState(int state, uint8_t blinking);
-void setTopBatteryValue(uint32_t volts);
-#endif
 
 #define USART_FLAG_ERRORS (USART_FLAG_ORE | USART_FLAG_NE | USART_FLAG_FE | USART_FLAG_PE)
 
