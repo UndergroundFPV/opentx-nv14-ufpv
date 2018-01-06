@@ -33,10 +33,6 @@ void pwrInit()
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
   GPIO_Init(PWR_ON_GPIO, &GPIO_InitStructure);
   
-  GPIO_ResetBits(INTMODULE_PWR_GPIO, INTMODULE_PWR_GPIO_PIN);
-  GPIO_InitStructure.GPIO_Pin = INTMODULE_PWR_GPIO_PIN;
-  GPIO_Init(INTMODULE_PWR_GPIO, &GPIO_InitStructure);
-  
   GPIO_ResetBits(EXTMODULE_PWR_GPIO, EXTMODULE_PWR_GPIO_PIN);
   GPIO_InitStructure.GPIO_Pin = EXTMODULE_PWR_GPIO_PIN;
   GPIO_Init(EXTMODULE_PWR_GPIO, &GPIO_InitStructure);

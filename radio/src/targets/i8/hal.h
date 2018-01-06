@@ -23,12 +23,16 @@
 
 /* DMA Allocation:
    DMA/Stream/Channel
+   1/0/1 or 1/5/1 I2C1_RX (EEPROM, touch)
+   1/1/4 USART3_RX (Internal module)
+   1/3/4 USART3_TX (Internal module)
+   1/6/1 or 1/7/1 I2C1_TX (EEPROM, touch)
    1/4/0 SPI2_TX / LCD
    1/5/7 DAC/Audio
-   1/5/4 Serial2 RX (disabled)
-   2/0/3 SPI1_RX / Gimbals
+   1/5/4 Serial2 RX (disabled because of Audio)
+   2/0/3 or 2/2/3 SPI1_RX / Gimbals
    2/4/0 ADC1
-   2/5/3 SPI1_TX / Gimbals
+   2/5/3 or 2/3/3 SPI1_TX / Gimbals
 */
 
 // Trims
@@ -138,31 +142,25 @@
 #define LED_RED_GPIO_PIN                GPIO_Pin_1  // PB.01
 
 // Internal Module
-#define INTMODULE_PULSES
-#define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)
-#define INTMODULE_RCC_APB2Periph        RCC_APB2Periph_TIM1
-#if defined(PCBX9E) || defined(PCBX9DP) || defined(PCBX7)
-  #define INTMODULE_PWR_GPIO            GPIOC
-  #define INTMODULE_PWR_GPIO_PIN        GPIO_Pin_6  // PC.06
-#else
-  #define INTMODULE_PWR_GPIO            GPIOD
-  #define INTMODULE_PWR_GPIO_PIN        0 // PD.15
-#endif
-#define INTMODULE_PPM_GPIO              GPIOA
-#define INTMODULE_PPM_GPIO_PIN          GPIO_Pin_10 // PA.10
-#define INTMODULE_PPM_GPIO_PinSource    GPIO_PinSource10
-#define INTMODULE_TIMER                 TIM1
-#define INTMODULE_TIMER_CC_IRQn         TIM1_CC_IRQn
-#define INTMODULE_TIMER_CC_IRQHandler   TIM1_CC_IRQHandler
-#define INTMODULE_PPM_GPIO_AF           GPIO_AF_TIM1
-#define INTMODULE_DMA_CHANNEL           DMA_Channel_6
-#define INTMODULE_DMA_STREAM            DMA2_Stream5
-#define INTMODULE_DMA_IRQn              DMA2_Stream5_IRQn
-#define INTMODULE_DMA_IRQHandler        DMA2_Stream5_IRQHandler
-#define INTMODULE_DMA_FLAG_TC           DMA_IT_TCIF5
-#define INTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
+#define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA1)
+#define INTMODULE_RCC_APB1Periph        RCC_APB1Periph_USART3
+#define INTMODULE_GPIO                  GPIOB
+#define INTMODULE_TX_GPIO_PIN           GPIO_Pin_10 // PB.10
+#define INTMODULE_RX_GPIO_PIN           GPIO_Pin_11 // PB.11
+#define INTMODULE_GPIO_PinSources       GPIO_PinSource10 | GPIO_PinSource11
+#define INTMODULE_GPIOB_PINS            (GPIO_Pin_10 | GPIO_Pin_11)
+#define INTMODULE_GPIO_AF               GPIO_AF_USART3
+#define INTMODULE_USART                 USART3
+#define INTMODULE_DMA                   DMA1
+#define INTMODULE_DMA_CHANNEL           DMA_Channel_4
+#define INTMODULE_TX_DMA_STREAM         DMA1_Stream3
+#define INTMODULE_RX_DMA_STREAM         DMA1_Stream1
+#define INTMODULE_TX_DMA_IRQn           DMA1_Stream3_IRQn
+#define INTMODULE_TX_DMA_IRQHandler     DMA1_Stream3_IRQHandler
+#define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF3
 
 // External Module
+#define EXTMODULE_PULSES
 #define EXTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)
 #define EXTMODULE_RCC_APB2Periph        RCC_APB2Periph_TIM8
 #define EXTMODULE_PWR_GPIO              GPIOD
