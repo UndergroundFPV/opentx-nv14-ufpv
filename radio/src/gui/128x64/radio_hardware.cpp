@@ -46,7 +46,7 @@ void menuRadioHardware(event_t event)
     uint8_t blink = ((s_editMode>0) ? BLINK|INVERS : INVERS);
     uint8_t attr = (sub == k ? blink : 0);
 
-    switch(k) {
+    switch (k) {
       case ITEM_RADIO_HARDWARE_OPTREX_DISPLAY:
         g_eeGeneral.optrexDisplay = editChoice(HW_SETTINGS_COLUMN, y, STR_LCD, STR_VLCD, g_eeGeneral.optrexDisplay, 0, 1, attr, event);
         break;
@@ -94,7 +94,7 @@ void menuRadioHardware(event_t event)
 }
 #endif // PCBSKY9X
 
-#if defined(PCBTARANIS)
+#if defined(PCBTARANIS) || defined(PCBI8)
 enum MenuRadioHardwareItems {
   ITEM_RADIO_HARDWARE_LABEL_STICKS,
   ITEM_RADIO_HARDWARE_STICK1,
@@ -105,12 +105,12 @@ enum MenuRadioHardwareItems {
   ITEM_RADIO_HARDWARE_POT1,
   ITEM_RADIO_HARDWARE_POT2,
   ITEM_RADIO_HARDWARE_LABEL_SWITCHES,
-  ITEM_RADIO_HARDWARE_SA,
-  ITEM_RADIO_HARDWARE_SB,
-  ITEM_RADIO_HARDWARE_SC,
-  ITEM_RADIO_HARDWARE_SD,
-  ITEM_RADIO_HARDWARE_SF,
-  ITEM_RADIO_HARDWARE_SH,
+  ITEM_RADIO_HARDWARE_SWITCH1,
+  ITEM_RADIO_HARDWARE_SWITCH2,
+  ITEM_RADIO_HARDWARE_SWITCH3,
+  ITEM_RADIO_HARDWARE_SWITCH4,
+  ITEM_RADIO_HARDWARE_SWITCH5,
+  ITEM_RADIO_HARDWARE_SWITCH6,
   ITEM_RADIO_HARDWARE_SERIAL_BAUDRATE,
 #if defined(BLUETOOTH)
   ITEM_RADIO_HARDWARE_BLUETOOTH_MODE,
@@ -132,7 +132,7 @@ enum MenuRadioHardwareItems {
 #else
 #define BLUETOOTH_ROWS
 #endif
-#if defined(PCBXLITE)
+#if defined(PCBXLITE) || defined(PCBI8)
 #define SWITCH_TYPE_MAX(sw)            SWITCH_3POS
 #else
 #define SWITCH_TYPE_MAX(sw)            ((MIXSRC_SF-MIXSRC_FIRST_SWITCH == sw || MIXSRC_SH-MIXSRC_FIRST_SWITCH == sw) ? SWITCH_2POS : SWITCH_3POS)
@@ -142,13 +142,13 @@ enum MenuRadioHardwareItems {
 
 void menuRadioHardware(event_t event)
 {
-  MENU(STR_HARDWARE, menuTabGeneral, MENU_RADIO_HARDWARE, ITEM_RADIO_HARDWARE_MAX, { LABEL(Sticks), 0, 0, 0, 0, LABEL(Pots), POTS_ROWS, LABEL(Switches), SWITCHES_ROWS, 0, BLUETOOTH_ROWS 0 });
+  MENU(STR_HARDWARE, menuTabGeneral, MENU_RADIO_HARDWARE, HEADER_LINE+ITEM_RADIO_HARDWARE_MAX, { HEADER_LINE_COLUMNS LABEL(Sticks), 0, 0, 0, 0, LABEL(Pots), POTS_ROWS, LABEL(Switches), SWITCHES_ROWS, 0, BLUETOOTH_ROWS 0 });
 
-  uint8_t sub = menuVerticalPosition;
+  uint8_t sub = menuVerticalPosition - HEADER_LINE;
 
   for (uint8_t i=0; i<LCD_LINES-1; i++) {
     coord_t y = MENU_HEADER_HEIGHT + 1 + i*FH;
-    uint8_t k = i+menuVerticalOffset;
+    uint8_t k = i + menuVerticalOffset;
     for (int j=0; j<=k; j++) {
       if (mstate_tab[j] == HIDDEN_ROW)
         k++;
@@ -156,7 +156,7 @@ void menuRadioHardware(event_t event)
     uint8_t blink = ((s_editMode>0) ? BLINK|INVERS : INVERS);
     uint8_t attr = (sub == k ? blink : 0);
 
-    switch(k) {
+    switch (k) {
       case ITEM_RADIO_HARDWARE_LABEL_STICKS:
         lcdDrawTextAlignedLeft(y, STR_STICKS);
         break;
@@ -193,14 +193,14 @@ void menuRadioHardware(event_t event)
         lcdDrawTextAlignedLeft(y, STR_SWITCHES);
         break;
 
-      case ITEM_RADIO_HARDWARE_SA:
-      case ITEM_RADIO_HARDWARE_SB:
-      case ITEM_RADIO_HARDWARE_SC:
-      case ITEM_RADIO_HARDWARE_SD:
-      case ITEM_RADIO_HARDWARE_SF:
-      case ITEM_RADIO_HARDWARE_SH:
+      case ITEM_RADIO_HARDWARE_SWITCH1:
+      case ITEM_RADIO_HARDWARE_SWITCH2:
+      case ITEM_RADIO_HARDWARE_SWITCH3:
+      case ITEM_RADIO_HARDWARE_SWITCH4:
+      case ITEM_RADIO_HARDWARE_SWITCH5:
+      case ITEM_RADIO_HARDWARE_SWITCH6:
       {
-        int index = k-ITEM_RADIO_HARDWARE_SA;
+        int index = k - ITEM_RADIO_HARDWARE_SWITCH1;
         int config = SWITCH_CONFIG(index);
         lcdDrawTextAtIndex(INDENT_WIDTH, y, STR_VSRCRAW, MIXSRC_FIRST_SWITCH-MIXSRC_Rud+index+1, menuHorizontalPosition < 0 ? attr : 0);
         if (ZEXIST(g_eeGeneral.switchNames[index]) || (attr && s_editMode > 0 && menuHorizontalPosition == 0))
@@ -276,9 +276,3 @@ void menuRadioHardware(event_t event)
   }
 }
 #endif // PCBSKY9X
-
-#if defined(PCBI8)
-void menuRadioHardware(event_t event)
-{
-}
-#endif
