@@ -24,6 +24,8 @@ DMAFifo<32> heartbeatFifo __DMA (HEARTBEAT_DMA_Stream);
 
 void trainerSendNextFrame();
 
+#warning "TODO all TRAINER_TIMER_IRQn, the timer is also used by trainer"
+
 void init_trainer_ppm()
 {
   GPIO_PinAFConfig(TRAINER_GPIO, TRAINER_OUT_GPIO_PinSource, TRAINER_GPIO_AF);
@@ -37,7 +39,7 @@ void init_trainer_ppm()
   GPIO_Init(TRAINER_GPIO, &GPIO_InitStructure);
 
   TRAINER_TIMER->CR1 &= ~TIM_CR1_CEN;
-  TRAINER_TIMER->PSC = TRAINER_TIMER_FREQ / 2000000 - 1; // 0.5uS
+  TRAINER_TIMER->PSC = TRAINER_EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS
   TRAINER_TIMER->ARR = 45000;
   TRAINER_TIMER->CCMR2 = TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2 | TIM_CCMR2_OC4PE; // PWM mode 1
   TRAINER_TIMER->BDTR = TIM_BDTR_MOE;
@@ -48,18 +50,18 @@ void init_trainer_ppm()
   setupPulsesPPMTrainer();
   trainerSendNextFrame();
 
-  NVIC_EnableIRQ(TRAINER_DMA_IRQn);
-  NVIC_SetPriority(TRAINER_DMA_IRQn, 7);
+  NVIC_EnableIRQ(TRAINER_OUT_DMA_IRQn);
+  NVIC_SetPriority(TRAINER_OUT_DMA_IRQn, 7);
   NVIC_EnableIRQ(TRAINER_TIMER_IRQn);
   NVIC_SetPriority(TRAINER_TIMER_IRQn, 7);
 }
 
 void stop_trainer_ppm()
 {
-  NVIC_DisableIRQ(TRAINER_DMA_IRQn);
+  NVIC_DisableIRQ(TRAINER_OUT_DMA_IRQn);
   NVIC_DisableIRQ(TRAINER_TIMER_IRQn);
 
-  TRAINER_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
+  TRAINER_OUT_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
   TRAINER_TIMER->DIER = 0;
   TRAINER_TIMER->CR1 &= ~TIM_CR1_CEN; // Stop counter
 }
@@ -103,24 +105,27 @@ void trainerSendNextFrame()
   TRAINER_TIMER->CCER = TIM_CCER_CC4E | (GET_PPM_POLARITY(TRAINER_MODULE) ? 0 : TIM_CCER_CC4P);
   TRAINER_TIMER->CCR1 = *(trainerPulsesData.ppm.ptr - 1) - 4000; // 2mS in advance
 
-  TRAINER_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
-  TRAINER_DMA_STREAM->CR |= TRAINER_DMA_CHANNEL | DMA_SxCR_DIR_0 | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0 | DMA_SxCR_MSIZE_0 | DMA_SxCR_PL_0 | DMA_SxCR_PL_1;
-  TRAINER_DMA_STREAM->PAR = CONVERT_PTR_UINT(&TRAINER_TIMER->ARR);
-  TRAINER_DMA_STREAM->M0AR = CONVERT_PTR_UINT(trainerPulsesData.ppm.pulses);
-  TRAINER_DMA_STREAM->NDTR = trainerPulsesData.ppm.ptr - trainerPulsesData.ppm.pulses;
-  TRAINER_DMA_STREAM->CR |= DMA_SxCR_EN | DMA_SxCR_TCIE; // Enable DMA
+  TRAINER_OUT_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
+  TRAINER_OUT_DMA_STREAM->CR |= TRAINER_OUT_DMA_CHANNEL | DMA_SxCR_DIR_0 | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0 | DMA_SxCR_MSIZE_0 | DMA_SxCR_PL_0 | DMA_SxCR_PL_1;
+  TRAINER_OUT_DMA_STREAM->PAR = CONVERT_PTR_UINT(&TRAINER_TIMER->ARR);
+  TRAINER_OUT_DMA_STREAM->M0AR = CONVERT_PTR_UINT(trainerPulsesData.ppm.pulses);
+  TRAINER_OUT_DMA_STREAM->NDTR = trainerPulsesData.ppm.ptr - trainerPulsesData.ppm.pulses;
+  TRAINER_OUT_DMA_STREAM->CR |= DMA_SxCR_EN | DMA_SxCR_TCIE; // Enable DMA
 }
 
-extern "C" void TRAINER_DMA_IRQHandler()
+#warning "TODO merge this with Extmodule DMA_IRQHandler as they share the same timer channel and DMA stream"
+/*
+extern "C" void TRAINER_OUT_DMA_IRQHandler()
 {
-  if (!DMA_GetITStatus(TRAINER_DMA_STREAM, TRAINER_DMA_FLAG_TC))
+  if (!DMA_GetITStatus(TRAINER_OUT_DMA_STREAM, TRAINER_OUT_DMA_FLAG_TC))
     return;
 
-  DMA_ClearITPendingBit(TRAINER_DMA_STREAM, TRAINER_DMA_FLAG_TC);
+  DMA_ClearITPendingBit(TRAINER_OUT_DMA_STREAM, TRAINER_OUT_DMA_FLAG_TC);
 
   TRAINER_TIMER->SR &= ~TIM_SR_CC1IF; // Clear flag
   TRAINER_TIMER->DIER |= TIM_DIER_CC1IE; // Enable this interrupt
 }
+*/
 
 extern "C" void TRAINER_TIMER_IRQHandler()
 {
@@ -158,6 +163,14 @@ extern "C" void TRAINER_TIMER_IRQHandler()
     setupPulsesPPMTrainer();
     trainerSendNextFrame();
   }
+
+#warning "TODO we have to do something with ext module which uses the same timer"
+#if 0
+  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE; // Stop this interrupt
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;
+  setupPulses(EXTERNAL_MODULE);
+  extmoduleSendNextFrame();
+#endif
 }
 
 void init_cppm_on_heartbeat_capture(void)

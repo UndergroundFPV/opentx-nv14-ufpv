@@ -679,12 +679,12 @@
   #define TRAINER_TIMER                 TIM3
   #define TRAINER_TIMER_IRQn            TIM3_IRQn
   #define TRAINER_GPIO_AF               GPIO_AF_TIM3
-  #define TRAINER_DMA                   DMA1
-  #define TRAINER_DMA_CHANNEL           DMA_Channel_5
-  #define TRAINER_DMA_STREAM            DMA1_Stream2
-  #define TRAINER_DMA_IRQn              DMA1_Stream2_IRQn
-  #define TRAINER_DMA_IRQHandler        DMA1_Stream2_IRQHandler
-  #define TRAINER_DMA_FLAG_TC           DMA_IT_TCIF2
+  #define TRAINER_OUT_DMA               DMA1
+  #define TRAINER_OUT_DMA_CHANNEL       DMA_Channel_5
+  #define TRAINER_OUT_DMA_STREAM        DMA1_Stream2
+  #define TRAINER_OUT_DMA_IRQn          DMA1_Stream2_IRQn
+  #define TRAINER_OUT_DMA_IRQHandler    DMA1_Stream2_IRQHandler
+  #define TRAINER_OUT_DMA_FLAG_TC       DMA_IT_TCIF2
   #define TRAINER_TIMER_IRQn            TIM3_IRQn
   #define TRAINER_TIMER_IRQHandler      TIM3_IRQHandler
   #define TRAINER_TIMER_FREQ            (PERI1_FREQUENCY * TIMER_MULT_APB1)

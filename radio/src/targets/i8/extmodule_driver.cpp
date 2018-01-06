@@ -22,14 +22,16 @@
 
 void extmoduleSendNextFrame();
 
+#warning "TODO check TRAINER_EXTMODULE_TIMER_IRQn, the timer is also used by trainer"
+
 void extmoduleStop()
 {
-  // NVIC_DisableIRQ(EXTMODULE_DMA_IRQn);
-  NVIC_DisableIRQ(EXTMODULE_TIMER_CC_IRQn);
+  NVIC_DisableIRQ(EXTMODULE_DMA_IRQn);
+  NVIC_DisableIRQ(TRAINER_EXTMODULE_TIMER_IRQn);
 
-  // EXTMODULE_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
-  // EXTMODULE_TIMER->DIER &= ~(TIM_DIER_CC2IE | TIM_DIER_UDE);
-  // EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
+  EXTMODULE_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
+  EXTMODULE_TIMER->DIER &= ~(TIM_DIER_CC2IE | TIM_DIER_UDE);
+  EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
 
   if (!IS_TRAINER_EXTERNAL_MODULE()) {
     EXTERNAL_MODULE_OFF();
@@ -42,7 +44,7 @@ void extmoduleNoneStart()
     EXTERNAL_MODULE_OFF();
   }
 
-  /*GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, 0);
+  GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, 0);
 
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = EXTMODULE_PPM_GPIO_PIN;
@@ -54,7 +56,7 @@ void extmoduleNoneStart()
   GPIO_SetBits(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PIN); // Set high
 
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
-  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS from 30MHz
+  EXTMODULE_TIMER->PSC = TRAINER_EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS from 30MHz
   EXTMODULE_TIMER->ARR = 36000; // 18mS
   EXTMODULE_TIMER->CCR2 = 32000; // Update time
   EXTMODULE_TIMER->EGR = 1; // Restart
@@ -62,14 +64,14 @@ void extmoduleNoneStart()
   EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE; // Enable this interrupt
   EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
 
-  NVIC_EnableIRQ(EXTMODULE_TIMER_CC_IRQn);
-  NVIC_SetPriority(EXTMODULE_TIMER_CC_IRQn, 7);*/
+  NVIC_EnableIRQ(TRAINER_EXTMODULE_TIMER_IRQn);
+  NVIC_SetPriority(TRAINER_EXTMODULE_TIMER_IRQn, 7);
 }
 
 void extmodulePpmStart()
 {
   EXTERNAL_MODULE_ON();
-/*
+
   GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, EXTMODULE_PPM_GPIO_AF);
 
   GPIO_InitTypeDef GPIO_InitStructure;
@@ -81,7 +83,7 @@ void extmodulePpmStart()
   GPIO_Init(EXTMODULE_PPM_GPIO, &GPIO_InitStructure);
 
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
-  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS from 30MHz
+  EXTMODULE_TIMER->PSC = TRAINER_EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS from 30MHz
   EXTMODULE_TIMER->ARR = 45000;
   EXTMODULE_TIMER->CCR1 = GET_PPM_DELAY(EXTERNAL_MODULE)*2;
   EXTMODULE_TIMER->CCER = TIM_CCER_CC1NE | (GET_PPM_POLARITY(EXTERNAL_MODULE) ? TIM_CCER_CC1NP : 0); //     // we are using complementary output so logic has to be reversed here
@@ -96,15 +98,15 @@ void extmodulePpmStart()
 
   NVIC_EnableIRQ(EXTMODULE_DMA_IRQn);
   NVIC_SetPriority(EXTMODULE_DMA_IRQn, 7);
-  NVIC_EnableIRQ(EXTMODULE_TIMER_CC_IRQn);
-  NVIC_SetPriority(EXTMODULE_TIMER_CC_IRQn, 7);*/
+  NVIC_EnableIRQ(TRAINER_EXTMODULE_TIMER_IRQn);
+  NVIC_SetPriority(TRAINER_EXTMODULE_TIMER_IRQn, 7);
 }
 
 void extmodulePxxStart()
 {
   EXTERNAL_MODULE_ON();
 
-  /*GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, EXTMODULE_PPM_GPIO_AF);
+  GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, EXTMODULE_PPM_GPIO_AF);
 
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = EXTMODULE_PPM_GPIO_PIN;
@@ -115,7 +117,7 @@ void extmodulePxxStart()
   GPIO_Init(EXTMODULE_PPM_GPIO, &GPIO_InitStructure);
 
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
-  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
+  EXTMODULE_TIMER->PSC = TRAINER_EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
   EXTMODULE_TIMER->ARR = 18000;
   EXTMODULE_TIMER->CCER = TIM_CCER_CC1E | TIM_CCER_CC1NE;    //polarity, default low
   EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE; // Enable outputs
@@ -130,8 +132,8 @@ void extmodulePxxStart()
 
   NVIC_EnableIRQ(EXTMODULE_DMA_IRQn);
   NVIC_SetPriority(EXTMODULE_DMA_IRQn, 7);
-  NVIC_EnableIRQ(EXTMODULE_TIMER_CC_IRQn);
-  NVIC_SetPriority(EXTMODULE_TIMER_CC_IRQn, 7);*/
+  NVIC_EnableIRQ(TRAINER_EXTMODULE_TIMER_IRQn);
+  NVIC_SetPriority(TRAINER_EXTMODULE_TIMER_IRQn, 7);
 }
 
 #if defined(DSM2) || defined(MULTIMODULE)
@@ -139,7 +141,7 @@ void extmoduleDsm2Start()
 {
   EXTERNAL_MODULE_ON();
 
-  /*GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, EXTMODULE_PPM_GPIO_AF);
+  GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, EXTMODULE_PPM_GPIO_AF);
 
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = EXTMODULE_PPM_GPIO_PIN;
@@ -150,7 +152,7 @@ void extmoduleDsm2Start()
   GPIO_Init(EXTMODULE_PPM_GPIO, &GPIO_InitStructure);
 
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
-  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS from 30MHz
+  EXTMODULE_TIMER->PSC = TRAINER_EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS from 30MHz
   EXTMODULE_TIMER->ARR = 44000; // 22mS
   EXTMODULE_TIMER->CCER = TIM_CCER_CC1NE | TIM_CCER_CC1NP;
   EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE; // Enable outputs
@@ -165,8 +167,8 @@ void extmoduleDsm2Start()
 
   NVIC_EnableIRQ(EXTMODULE_DMA_IRQn);
   NVIC_SetPriority(EXTMODULE_DMA_IRQn, 7);
-  NVIC_EnableIRQ(EXTMODULE_TIMER_CC_IRQn);
-  NVIC_SetPriority(EXTMODULE_TIMER_CC_IRQn, 7);*/
+  NVIC_EnableIRQ(TRAINER_EXTMODULE_TIMER_IRQn);
+  NVIC_SetPriority(TRAINER_EXTMODULE_TIMER_IRQn, 7);
 }
 #endif
 
@@ -174,7 +176,7 @@ void extmoduleCrossfireStart()
 {
   EXTERNAL_MODULE_ON();
 
-  /*GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, 0);
+  GPIO_PinAFConfig(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PinSource, 0);
 
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = EXTMODULE_PPM_GPIO_PIN;
@@ -186,7 +188,7 @@ void extmoduleCrossfireStart()
   GPIO_SetBits(EXTMODULE_PPM_GPIO, EXTMODULE_PPM_GPIO_PIN); // Set high
 
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
-  EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS from 30MHz
+  EXTMODULE_TIMER->PSC = TRAINER_EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS from 30MHz
   EXTMODULE_TIMER->ARR = (2000 * CROSSFIRE_FRAME_PERIOD);
   EXTMODULE_TIMER->CCR2 = (2000 * CROSSFIRE_FRAME_PERIOD) - 1000;
   EXTMODULE_TIMER->EGR = 1; // Restart
@@ -194,13 +196,13 @@ void extmoduleCrossfireStart()
   EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE; // Enable this interrupt
   EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
 
-  NVIC_EnableIRQ(EXTMODULE_TIMER_CC_IRQn);
-  NVIC_SetPriority(EXTMODULE_TIMER_CC_IRQn, 7);*/
+  NVIC_EnableIRQ(TRAINER_EXTMODULE_TIMER_IRQn);
+  NVIC_SetPriority(TRAINER_EXTMODULE_TIMER_IRQn, 7);
 }
 
 void extmoduleSendNextFrame()
 {
-  /*if (s_current_protocol[EXTERNAL_MODULE] == PROTO_PPM) {
+  if (s_current_protocol[EXTERNAL_MODULE] == PROTO_PPM) {
     EXTMODULE_TIMER->CCR1 = GET_PPM_DELAY(EXTERNAL_MODULE)*2;
     EXTMODULE_TIMER->CCER = TIM_CCER_CC1NE | (GET_PPM_POLARITY(EXTERNAL_MODULE) ? TIM_CCER_CC1NP : 0); //     // we are using complementary output so logic has to be reversed here
     EXTMODULE_TIMER->CCR2 = *(modulePulsesData[EXTERNAL_MODULE].ppm.ptr - 1) - 4000; // 2mS in advance
@@ -233,24 +235,18 @@ void extmoduleSendNextFrame()
   }
   else {
     EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;
-  }*/
+  }
 }
 
 extern "C" void EXTMODULE_DMA_IRQHandler()
 {
-/*  if (!DMA_GetITStatus(EXTMODULE_DMA_STREAM, EXTMODULE_DMA_FLAG_TC))
+  if (!DMA_GetITStatus(EXTMODULE_DMA_STREAM, EXTMODULE_DMA_FLAG_TC))
     return;
 
   DMA_ClearITPendingBit(EXTMODULE_DMA_STREAM, EXTMODULE_DMA_FLAG_TC);
 
   EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF; // Clear flag
-  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE; // Enable this interrupt*/
+  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE; // Enable this interrupt
 }
 
-extern "C" void EXTMODULE_TIMER_CC_IRQHandler()
-{
-  /*EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE; // Stop this interrupt
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;
-  setupPulses(EXTERNAL_MODULE);
-  extmoduleSendNextFrame();*/
-}
+// The Timer interrupt code is inside the Trainer driver (same timer)

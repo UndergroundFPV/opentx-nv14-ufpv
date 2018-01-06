@@ -24,15 +24,17 @@
 /* DMA Allocation:
    DMA/Stream/Channel
    1/0/1 or 1/5/1 I2C1_RX (EEPROM, touch)
+   1/0/1 or 1/5/1 I2C1_RX (EEPROM, touch)
    1/1/4 USART3_RX (Internal module)
+   1/2/0 TIM4_CH1 (Ext module PPM)
    1/3/4 USART3_TX (Internal module)
    1/6/1 or 1/7/1 I2C1_TX (EEPROM, touch)
-   1/4/0 SPI2_TX / LCD
+   1/4/0 SPI2_TX (LCD)
    1/5/7 DAC/Audio
    1/5/4 Serial2 RX (disabled because of Audio)
-   2/0/3 or 2/2/3 SPI1_RX / Gimbals
+   2/0/3 or 2/2/3 (Gimbals)
    2/4/0 ADC1
-   2/5/3 or 2/3/3 SPI1_TX / Gimbals
+   2/5/3 or 2/3/3 SPI1_TX (Gimbals)
 */
 
 // Trims
@@ -161,46 +163,44 @@
 
 // External Module
 #define EXTMODULE_PULSES
-#define EXTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)
-#define EXTMODULE_RCC_APB2Periph        RCC_APB2Periph_TIM8
-#define EXTMODULE_PWR_GPIO              GPIOD
-#define EXTMODULE_PWR_GPIO_PIN          0
-// #define EXTMODULE_PPM_GPIO              GPIOA
-// #define EXTMODULE_PPM_GPIO_PIN          GPIO_Pin_7  // PA.07
-// #define EXTMODULE_PPM_GPIO_PinSource    GPIO_PinSource7
-// #define EXTMODULE_TIMER                 TIM8
-// #define EXTMODULE_PPM_GPIO_AF           GPIO_AF_TIM8
-#define EXTMODULE_TIMER_CC_IRQn         TIM8_CC_IRQn
-#define EXTMODULE_TIMER_CC_IRQHandler   TIM8_CC_IRQHandler
-// #define EXTMODULE_DMA_CHANNEL           DMA_Channel_7
-// #define EXTMODULE_DMA_STREAM            DMA2_Stream1
-// #define EXTMODULE_DMA_IRQn              DMA2_Stream1_IRQn
-// #define EXTMODULE_DMA_IRQHandler        DMA2_Stream1_IRQHandler
-// #define EXTMODULE_DMA_FLAG_TC           DMA_IT_TCIF1
-#define EXTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
+#define EXTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_DMA1)
+#define EXTMODULE_RCC_APB1Periph        RCC_APB1Periph_TIM4
+#define EXTMODULE_PWR_GPIO              GPIOE
+#define EXTMODULE_PWR_GPIO_PIN          GPIO_Pin_15 // PE.15
+#define EXTMODULE_PPM_GPIO              GPIOB
+#define EXTMODULE_PPM_GPIO_PIN          GPIO_Pin_6  // PB.06
+#define EXTMODULE_PPM_GPIO_PinSource    GPIO_PinSource6
+#define EXTMODULE_TIMER                 TIM4
+#define EXTMODULE_PPM_GPIO_AF           GPIO_AF_TIM4 // TIM4_CH1
+#define EXTMODULE_TIMER_IRQn            TIM4_IRQn
+#define EXTMODULE_TIMER_IRQHandler      TIM4_IRQHandler
+#define EXTMODULE_DMA_CHANNEL           DMA_Channel_2
+#define EXTMODULE_DMA_STREAM            DMA1_Stream0
+#define EXTMODULE_DMA_IRQn              DMA1_Stream0_IRQn
+#define EXTMODULE_DMA_IRQHandler        DMA1_Stream0_IRQHandler
+#define EXTMODULE_DMA_FLAG_TC           DMA_IT_TCIF0
+#define EXTMODULE_TIMER_FREQ            (PERI1_FREQUENCY * TIMER_MULT_APB1)
 
 // Trainer Port
-#define TRAINER_RCC_AHB1Periph          (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC)
+#define TRAINER_RCC_AHB1Periph          (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOC)
 #define TRAINER_RCC_APB1Periph          RCC_APB1Periph_TIM4
 #define TRAINER_GPIO                    GPIOD
 #define TRAINER_IN_GPIO_PIN             GPIO_Pin_13 // PD.13
 #define TRAINER_IN_GPIO_PinSource       GPIO_PinSource13
-#define TRAINER_OUT_GPIO_PIN            GPIO_Pin_9  // PC.09
-#define TRAINER_OUT_GPIO_PinSource      GPIO_PinSource9
-#define TRAINER_DETECT_GPIO             GPIOA
-#define TRAINER_DETECT_GPIO_PIN         GPIO_Pin_8  // PA.08
+#define TRAINER_OUT_GPIO_PIN            GPIO_Pin_9  // PD.12
+#define TRAINER_OUT_GPIO_PinSource      GPIO_PinSource12
 #define TRAINER_TIMER                   TIM4
 #define TRAINER_TIMER_IRQn              TIM4_IRQn
-#define TRAINER_GPIO_AF                 GPIO_AF_TIM4
-#define TRAINER_DMA                     DMA1
-#define TRAINER_DMA_CHANNEL             DMA_Channel_5
-#define TRAINER_DMA_STREAM              DMA1_Stream2
-#define TRAINER_DMA_IRQn                DMA1_Stream2_IRQn
-#define TRAINER_DMA_IRQHandler          DMA1_Stream2_IRQHandler
-#define TRAINER_DMA_FLAG_TC             DMA_IT_TCIF2
-#define TRAINER_TIMER_IRQn              TIM4_IRQn
-#define TRAINER_TIMER_IRQHandler        TIM4_IRQHandler
-#define TRAINER_TIMER_FREQ              (PERI1_FREQUENCY * TIMER_MULT_APB1)
+#define TRAINER_GPIO_AF                 GPIO_AF_TIM4 // TIM4_CH2 (in) + TIM4_CH1 (out)
+#define TRAINER_OUT_DMA                 DMA1
+#define TRAINER_OUT_DMA_CHANNEL         DMA_Channel_2
+#define TRAINER_OUT_DMA_STREAM          DMA1_Stream3
+#define TRAINER_OUT_DMA_IRQn            DMA1_Stream3_IRQn
+#define TRAINER_OUT_DMA_IRQHandler      DMA1_Stream3_IRQHandler
+#define TRAINER_OUT_DMA_FLAG_TC         DMA_IT_TCIF3
+#define TRAINER_EXTMODULE_TIMER_IRQn    TIM4_IRQn
+#define TRAINER_EXTMODULE_TIMER_IRQHandler  TIM4_IRQHandler
+#define TRAINER_EXTMODULE_TIMER_FREQ    (PERI1_FREQUENCY * TIMER_MULT_APB1)
 
 // Serial Port
 #define SERIAL_RCC_AHB1Periph           (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA1)
