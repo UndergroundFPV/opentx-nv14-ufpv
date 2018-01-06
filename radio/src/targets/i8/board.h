@@ -227,9 +227,7 @@ enum EnumSwitches
   SW_SC,
   SW_SD,
   SW_SE,
-  SW_SF,
-  SW_SG,
-  SW_SH
+  SW_SF
 };
 
 #define IS_3POS(x)                     (false)

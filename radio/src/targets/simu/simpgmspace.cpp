@@ -58,7 +58,7 @@ uint32_t Peri1_frequency, Peri2_frequency;
 GPIO_TypeDef gpioa, gpiob, gpioc, gpiod, gpioe, gpiof, gpiog, gpioh, gpioi, gpioj;
 TIM_TypeDef tim1, tim2, tim3, tim4, tim5, tim6, tim7, tim8, tim9, tim10;
 RCC_TypeDef rcc;
-DMA_Stream_TypeDef dma1_stream2, dma1_stream5, dma1_stream7, dma2_stream1, dma2_stream2, dma2_stream5, dma2_stream6, dma2_stream7;
+DMA_Stream_TypeDef dma1_stream0, dma1_stream2, dma1_stream5, dma1_stream7, dma2_stream1, dma2_stream2, dma2_stream5, dma2_stream6, dma2_stream7;
 DMA_TypeDef dma2;
 USART_TypeDef Usart0, Usart1, Usart2, Usart3, Usart4;
 SysTick_Type systick;
@@ -231,6 +231,12 @@ void simuSetKey(uint8_t key, bool state)
     KEY_CASE(KEY_PLUS, KEYS_GPIO_REG_PLUS, KEYS_GPIO_PIN_PLUS)
   #endif
 #elif defined(PCBI8)
+    KEY_CASE(KEY_UP, TRIMS_GPIO_REG_RVU, TRIMS_GPIO_PIN_RVU)
+    KEY_CASE(KEY_DOWN, TRIMS_GPIO_REG_RVD, TRIMS_GPIO_PIN_RVD)
+    KEY_CASE(KEY_RIGHT, TRIMS_GPIO_REG_RHR, TRIMS_GPIO_PIN_RHR)
+    KEY_CASE(KEY_LEFT, TRIMS_GPIO_REG_LHL, TRIMS_GPIO_PIN_LHL)
+    KEY_CASE(KEY_EXIT, KEYS_GPIO_REG_K2, KEYS_GPIO_PIN_K2)
+    KEY_CASE(KEY_MENU, KEYS_GPIO_REG_K1, KEYS_GPIO_PIN_K1)
 #else
     KEY_CASE(KEY_MENU, KEYS_GPIO_REG_MENU, KEYS_GPIO_PIN_MENU)
     KEY_CASE(KEY_EXIT, KEYS_GPIO_REG_EXIT, KEYS_GPIO_PIN_EXIT)
