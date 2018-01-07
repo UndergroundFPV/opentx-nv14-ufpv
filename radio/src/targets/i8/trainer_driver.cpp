@@ -127,8 +127,11 @@ extern "C" void TRAINER_OUT_DMA_IRQHandler()
 }
 */
 
-extern "C" void TRAINER_TIMER_IRQHandler()
+extern "C" void TRAINER_EXTMODULE_TIMER_IRQHandler()
 {
+  #warning "TODO remove this"
+  TRAINER_TIMER->DIER = 0;
+
   DEBUG_INTERRUPT(INT_TRAINER);
 
   uint16_t capture = 0;

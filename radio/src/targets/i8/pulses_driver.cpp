@@ -175,6 +175,4 @@ extern "C" void INTMODULE_TX_DMA_IRQHandler()
     return;
 
   DMA_ClearITPendingBit(INTMODULE_TX_DMA_STREAM, INTMODULE_TX_DMA_FLAG_TC);
-
-
 }

@@ -94,14 +94,6 @@ void readKeysAndTrims()
   }
 }
 
-#define ADD_2POS_CASE(x) \
-  case SW_S ## x ## 0: \
-    xxx = SWITCHES_GPIO_REG_ ## x  & SWITCHES_GPIO_PIN_ ## x ; \
-    break; \
-  case SW_S ## x ## 2: \
-    xxx = ~SWITCHES_GPIO_REG_ ## x  & SWITCHES_GPIO_PIN_ ## x ; \
-    break;
-
 uint8_t keyState(uint8_t index)
 {
   return keys[index].state();
@@ -110,22 +102,17 @@ uint8_t keyState(uint8_t index)
 #if !defined(BOOT)
 uint32_t switchState(uint8_t index)
 {
-  uint32_t xxx = 0;
+  uint16_t value = adcValues[index / 3];
+  uint8_t position;
 
-/*  switch (index) {
-    ADD_2POS_CASE(A);
-    ADD_2POS_CASE(B);
-    ADD_2POS_CASE(C);
-    ADD_2POS_CASE(D);
-    ADD_2POS_CASE(E);
-    ADD_2POS_CASE(F);
+  if (value < 512)
+    position = 0;
+  else if (value > 1024+512)
+    position = 2;
+  else
+    position = 1;
 
-    default:
-      break;
-  }
-*/
-  // TRACE("switch %d => %d", index, xxx);
-  return xxx;
+  return position == index % 3;
 }
 #endif
 
