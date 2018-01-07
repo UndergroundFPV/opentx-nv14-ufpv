@@ -24,6 +24,8 @@
 #define GIMBAL_READ_REG_LEN      3
 #define GIMBAL_DATA_BUFFER_LEN   9
 
+uint8_t gimbalBuffer[GIMBAL_DATA_BUFFER_LEN] = {0};
+
 enum gimbals {
   GIMBAL_FIRST,
   GIMBAL_LAST
@@ -193,7 +195,7 @@ void gimbalsInit(void)
 
   for (uint8_t i = GIMBAL_FIRST; i <= GIMBAL_LAST; i++) {
     gimbalWriteReg(MLX90393_REG_CR0,
-      (0x00 << MLX90393_CR0_GAIN_SEL) |
+      (0x07 << MLX90393_CR0_GAIN_SEL) |
       (0x0C << MLX90393_CR0_HALLCONF), i);
 
     gimbalWriteReg(MLX90393_REG_CR1,
@@ -203,9 +205,9 @@ void gimbalsInit(void)
 
     gimbalWriteReg(MLX90393_REG_CR2,
       (0x00 << MLX90393_CR2_OSR2) |
-      (0x00 << MLX90393_CR2_RES_Z) |
-      (0x00 << MLX90393_CR2_RES_Y) |
-      (0x00 << MLX90393_CR2_RES_X) |
+      (0x03 << MLX90393_CR2_RES_Z) |
+      (0x03 << MLX90393_CR2_RES_Y) |
+      (0x03 << MLX90393_CR2_RES_X) |
       (0x02 << MLX90393_CR2_DIG_FILT) |
       (0x00 << MLX90393_CR2_OSR), i);
   }
@@ -218,8 +220,6 @@ void gimbalsInit(void)
 
 void gimbalsRead(void)
 {
-  uint8_t rxBuffer[GIMBAL_DATA_BUFFER_LEN] = {0};
-
   gimbalSendCommand(MLX90393_CMD_SNGLE_MEAS | MLX90393_CHANNEL_X | MLX90393_CHANNEL_Y | MLX90393_CHANNEL_Z | MLX90393_CHANNEL_T, GIMBAL_FIRST);
 
   while (gimbalSendCommand(MLX90393_CMD_NOP, GIMBAL_FIRST) & MLX90393_STATUS_SINGLE) {
@@ -227,9 +227,10 @@ void gimbalsRead(void)
   }
 
   gimbalSendCommand(MLX90393_CMD_READ_MEAS | MLX90393_CHANNEL_X | MLX90393_CHANNEL_Y | MLX90393_CHANNEL_Z | MLX90393_CHANNEL_T, GIMBAL_FIRST);
-  gimbalReceivePacket(rxBuffer, GIMBAL_DATA_BUFFER_LEN, GIMBAL_FIRST);
-
+  gimbalReceivePacket(gimbalBuffer, GIMBAL_DATA_BUFFER_LEN, GIMBAL_FIRST);
+/*
   for (uint8_t i=0; i<GIMBAL_DATA_BUFFER_LEN; i++) {
-    TRACE("Gimbal byte %d: 0x%02X", i, rxBuffer[i]);
+    TRACE("Gimbal byte %d: 0x%02X", i, gimbalBuffer[i]);
   }
+*/
 }

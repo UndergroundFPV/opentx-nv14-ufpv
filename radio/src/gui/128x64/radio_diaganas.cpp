@@ -73,6 +73,12 @@ void menuRadioDiagAnalogs(event_t event)
   }
 #endif
 
+#if defined(PCBI8)
+  for (uint8_t i = 0; i<4; i++) {
+    lcdDrawHexNumber(i*25, 6*FH, (gimbalBuffer[(2*i)+1]<<8)|gimbalBuffer[(2*i)+2]);
+  }
+#endif
+
 #if !defined(CPUARM)
   // Display raw BandGap result (debug)
   lcdDrawText(64+5, MENU_HEADER_HEIGHT+1+3*FH, STR_BG);

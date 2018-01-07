@@ -506,6 +506,10 @@ typedef struct {
 extern const pm_uint8_t bchout_ar[];
 extern const pm_uint8_t modn12x3[];
 
+#if defined(PCBI8)
+extern uint8_t gimbalBuffer[9];
+#endif
+
 //convert from mode 1 to mode stickMode
 //NOTICE!  =>  0..3 -> 0..3
 #define RUD_STICK 0
