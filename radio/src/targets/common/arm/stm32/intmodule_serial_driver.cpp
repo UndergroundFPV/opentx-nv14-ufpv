@@ -26,7 +26,7 @@ void intmoduleStop()
 
   NVIC_DisableIRQ(INTMODULE_TIMER_IRQn);
 
-  INTMODULE_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
+  INTMODULE_TX_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
   INTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE;
   INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
 }
@@ -61,7 +61,7 @@ void intmodulePxxStart()
   INTERNAL_MODULE_ON();
 
   NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannel = INTMODULE_DMA_STREAM_IRQ;
+  NVIC_InitStructure.NVIC_IRQChannel = INTMODULE_TX_DMA_Stream_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; /* Not used as 4 bits are used for the pre-emption priority. */;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -113,12 +113,12 @@ void intmodulePxxStart()
   NVIC_SetPriority(INTMODULE_TIMER_IRQn, 7);
 }
 
-extern "C" void INTMODULE_DMA_STREAM_IRQHandler(void)
+extern "C" void INTMODULE_TX_DMA_Stream_IRQnHandler(void)
 {
   DEBUG_INTERRUPT(INT_DMA2S7);
-  if (DMA_GetITStatus(INTMODULE_DMA_STREAM, INTMODULE_DMA_FLAG_TC)) {
+  if (DMA_GetITStatus(INTMODULE_TX_DMA_STREAM, INTMODULE_TX_DMA_FLAG_TC)) {
     // TODO we could send the 8 next channels here (when needed)
-    DMA_ClearITPendingBit(INTMODULE_DMA_STREAM, INTMODULE_DMA_FLAG_TC);
+    DMA_ClearITPendingBit(INTMODULE_TX_DMA_STREAM, INTMODULE_TX_DMA_FLAG_TC);
   }
 }
 
@@ -126,7 +126,7 @@ void intmoduleSendNextFrame()
 {
   if (s_current_protocol[INTERNAL_MODULE] == PROTO_PXX) {
     DMA_InitTypeDef DMA_InitStructure;
-    DMA_DeInit(INTMODULE_DMA_STREAM);
+    DMA_DeInit(INTMODULE_TX_DMA_STREAM);
     DMA_InitStructure.DMA_Channel = INTMODULE_DMA_CHANNEL;
     DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&INTMODULE_USART->DR);
     DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
@@ -142,9 +142,9 @@ void intmoduleSendNextFrame()
     DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
     DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-    DMA_Init(INTMODULE_DMA_STREAM, &DMA_InitStructure);
+    DMA_Init(INTMODULE_TX_DMA_STREAM, &DMA_InitStructure);
 
-    DMA_Cmd(INTMODULE_DMA_STREAM, ENABLE);
+    DMA_Cmd(INTMODULE_TX_DMA_STREAM, ENABLE);
     USART_DMACmd(INTMODULE_USART, USART_DMAReq_Tx, ENABLE);
   }
 }

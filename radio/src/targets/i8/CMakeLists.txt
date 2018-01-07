@@ -56,6 +56,7 @@ set(TARGET_SRC
   extmodule_driver.cpp
   trainer_driver.cpp
   gimbals_driver.cpp
+  ../common/arm/stm32/intmodule_serial_driver.cpp
   ../common/arm/stm32/audio_dac_driver.cpp
   ../common/arm/stm32/adc_driver.cpp
   )

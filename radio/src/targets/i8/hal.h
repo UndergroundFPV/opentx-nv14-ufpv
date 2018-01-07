@@ -27,7 +27,7 @@
    1/0/1 or 1/5/1 I2C1_RX (EEPROM, touch)
    1/1/4 USART3_RX (Internal module)
    1/2/0 TIM4_CH1 (Ext module PPM)
-   1/3/4 USART3_TX (Internal module)
+   1/4/7 USART3_TX (Internal module)
    1/6/1 or 1/7/1 I2C1_TX (EEPROM, touch)
    1/4/0 SPI2_TX (LCD)
    1/5/7 DAC/Audio
@@ -145,21 +145,26 @@
 
 // Internal Module
 #define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA1)
-#define INTMODULE_RCC_APB1Periph        RCC_APB1Periph_USART3
-#define INTMODULE_GPIO                  GPIOB
+#define INTMODULE_RCC_APB1Periph        (RCC_APB1Periph_USART3 | RCC_APB1Periph_TIM2)
+#define INTMODULE_TX_GPIO               GPIOB
 #define INTMODULE_TX_GPIO_PIN           GPIO_Pin_10 // PB.10
+#define INTMODULE_RX_GPIO               GPIOB
 #define INTMODULE_RX_GPIO_PIN           GPIO_Pin_11 // PB.11
-#define INTMODULE_GPIO_PinSources       GPIO_PinSource10 | GPIO_PinSource11
+#define INTMODULE_TX_GPIO_PinSource     GPIO_PinSource10
+#define INTMODULE_RX_GPIO_PinSource     GPIO_PinSource11
 #define INTMODULE_GPIOB_PINS            (GPIO_Pin_10 | GPIO_Pin_11)
-#define INTMODULE_GPIO_AF               GPIO_AF_USART3
+#define INTMODULE_TX_GPIO_AF            GPIO_AF_USART3
 #define INTMODULE_USART                 USART3
 #define INTMODULE_DMA                   DMA1
-#define INTMODULE_DMA_CHANNEL           DMA_Channel_4
-#define INTMODULE_TX_DMA_STREAM         DMA1_Stream3
-#define INTMODULE_RX_DMA_STREAM         DMA1_Stream1
-#define INTMODULE_TX_DMA_IRQn           DMA1_Stream3_IRQn
-#define INTMODULE_TX_DMA_IRQHandler     DMA1_Stream3_IRQHandler
-#define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF3
+#define INTMODULE_DMA_CHANNEL           DMA_Channel_7
+#define INTMODULE_TX_DMA_STREAM         DMA1_Stream4
+#define INTMODULE_TX_DMA_Stream_IRQn    DMA1_Stream4_IRQn
+#define INTMODULE_TX_DMA_IRQHandler     DMA1_Stream4_IRQHandler
+#define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF4
+#define INTMODULE_TIMER                 TIM2
+#define INTMODULE_TIMER_IRQn            TIM2_IRQn
+#define INTMODULE_TIMER_IRQHandler      TIM2_IRQHandler
+#define INTMODULE_TIMER_FREQ            (PERI1_FREQUENCY * TIMER_MULT_APB1)
 
 // External Module
 #define EXTMODULE_PULSES

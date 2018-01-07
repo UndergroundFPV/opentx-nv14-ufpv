@@ -25,9 +25,6 @@ void extmoduleStop(void);
 
 void intmoduleNoneStart(void);
 void intmoduleStart(void);
-#if defined(TARANIS_INTERNAL_PPM)
-void intmodulePpmStart(void);
-#endif
 
 void extmoduleNoneStart(void);
 void extmodulePpmStart(void);
@@ -92,11 +89,6 @@ void disable_ppm(uint32_t port)
   if (port == EXTERNAL_MODULE) {
     extmoduleStop();
   }
-#if defined(TARANIS_INTERNAL_PPM)
-  else if (port == INTERNAL_MODULE) {
-    intmoduleStop();
-  }
-#endif
 }
 
 void init_no_pulses(uint32_t port)
@@ -127,52 +119,4 @@ void disable_crossfire(uint32_t port)
   if (port == EXTERNAL_MODULE) {
     extmoduleStop();
   }
-}
-
-void intmoduleStop()
-{
-  INTERNAL_MODULE_OFF();
-
-  NVIC_DisableIRQ(INTMODULE_TX_DMA_IRQn);
-
-  INTMODULE_TX_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
-}
-
-void intmoduleNoneStart()
-{
-
-}
-
-void intmoduleStart()
-{
-  INTERNAL_MODULE_ON();
-
-  GPIO_PinAFConfig(INTMODULE_GPIO, INTMODULE_GPIO_PinSources , INTMODULE_GPIO_AF);
-
-  GPIO_InitTypeDef GPIO_InitStructure;
-  GPIO_InitStructure.GPIO_Pin = INTMODULE_GPIOB_PINS;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_Init(INTMODULE_GPIO, &GPIO_InitStructure);
-
-  intmoduleSendNextFrame();
-
-  NVIC_EnableIRQ(INTMODULE_TX_DMA_IRQn);
-  NVIC_SetPriority(INTMODULE_TX_DMA_IRQn, 7);
-}
-
-void intmoduleSendNextFrame()
-{
-
-
-}
-
-extern "C" void INTMODULE_TX_DMA_IRQHandler()
-{
-  if (!DMA_GetITStatus(INTMODULE_TX_DMA_STREAM, INTMODULE_TX_DMA_FLAG_TC))
-    return;
-
-  DMA_ClearITPendingBit(INTMODULE_TX_DMA_STREAM, INTMODULE_TX_DMA_FLAG_TC);
 }
