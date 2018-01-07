@@ -1500,10 +1500,6 @@ void getADC()
   DEBUG_TIMER_START(debugTimerAdcRead);
   adcRead();
   DEBUG_TIMER_STOP(debugTimerAdcRead);
-  
-#if defined(PCBI8)
-  gimbalsRead();
-#endif
 
   for (uint8_t x=0; x<NUM_ANALOGS; x++) {
     uint16_t v = getAnalogValue(x) >> (1 - ANALOG_SCALE);

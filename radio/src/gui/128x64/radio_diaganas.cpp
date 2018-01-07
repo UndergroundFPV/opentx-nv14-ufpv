@@ -75,7 +75,8 @@ void menuRadioDiagAnalogs(event_t event)
 
 #if defined(PCBI8)
   for (uint8_t i = 0; i<4; i++) {
-    lcdDrawHexNumber(i*25, 6*FH, (gimbalBuffer[(2*i)+1]<<8)|gimbalBuffer[(2*i)+2]);
+    lcdDrawText(0, 7*FH, "HALL:");
+    lcdDrawHexNumber(30+i*25, 7*FH, anaIn(i));
   }
 #endif
 

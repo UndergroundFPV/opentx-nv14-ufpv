@@ -214,6 +214,8 @@ void adcRead()
   if (ANALOGS_PWM_ENABLED()) {
     pwmRead(adcValues);
   }
+#elif defined(PCBI8)
+  gimbalsRead(adcValues);
 #endif
 }
 
