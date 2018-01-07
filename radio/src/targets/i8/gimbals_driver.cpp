@@ -20,13 +20,11 @@
 
 #include "opentx.h"
 
-#define GIMBAL_WRITE_REG_LEN     4
-#define GIMBAL_READ_REG_LEN      3
-#define GIMBAL_DATA_BUFFER_LEN   9
+#define GIMBAL_BUFFER_LEN        5
 
 enum gimbals {
-  GIMBAL_FIRST,
-  GIMBAL_LAST
+  GIMBAL_LEFT,
+  GIMBAL_RIGHT
 };
 
 // Commands
@@ -55,8 +53,7 @@ enum gimbals {
 #define MLX90393_STATUS_ERROR    0x10
 #define MLX90393_STATUS_SED      0x08
 #define MLX90393_STATUS_RES      0x04
-
-#define MLX90393_STATUS_BYTES    0x03    // Mask for number of bytes to read
+#define MLX90393_STATUS_NBYTES   0x03    // Mask for number of bytes to read
 
 // Registers
 #define MLX90393_REG_CR0         0x00
@@ -82,8 +79,8 @@ enum gimbals {
 #define MLX90393_CR2_RES_Z        0x09  // 2 bits
 #define MLX90393_CR2_OSR2         0x0B  // 2 bits
 
-#define GIMBALS_NCS_HIGH(x)      (GIMBALS_CS_INT_GPIO->BSRRL = (x == GIMBAL_FIRST ? GIMBALS_LEFT_CS_GPIO_PIN : GIMBALS_RIGHT_CS_GPIO_PIN))
-#define GIMBALS_NCS_LOW(x)       (GIMBALS_CS_INT_GPIO->BSRRH = (x == GIMBAL_FIRST ? GIMBALS_LEFT_CS_GPIO_PIN : GIMBALS_RIGHT_CS_GPIO_PIN))
+#define GIMBALS_NCS_HIGH(x)      (GIMBALS_CS_INT_GPIO->BSRRL = (x == GIMBAL_LEFT ? GIMBALS_LEFT_CS_GPIO_PIN : GIMBALS_RIGHT_CS_GPIO_PIN))
+#define GIMBALS_NCS_LOW(x)       (GIMBALS_CS_INT_GPIO->BSRRH = (x == GIMBAL_LEFT ? GIMBALS_LEFT_CS_GPIO_PIN : GIMBALS_RIGHT_CS_GPIO_PIN))
 
 uint8_t gimbalSendPacket(uint8_t * packet, uint8_t len, uint8_t target)
 {
@@ -129,21 +126,21 @@ uint8_t gimbalReceivePacket(uint8_t * packet, uint8_t len, uint8_t target)
 
 uint16_t gimbalReadReg(uint8_t reg, uint8_t target)
 {
-  uint8_t txBuffer[GIMBAL_READ_REG_LEN] = {0};
-  uint8_t rxBuffer[GIMBAL_READ_REG_LEN] = {0};
+  uint8_t txBuffer[GIMBAL_BUFFER_LEN] = {0};
+  uint8_t rxBuffer[GIMBAL_BUFFER_LEN] = {0};
 
   txBuffer[0] = MLX90393_CMD_REG_RD;
   txBuffer[1] = reg << 2;
 
   gimbalSendPacket(txBuffer, 2, target);
-  gimbalReceivePacket(rxBuffer, GIMBAL_READ_REG_LEN, target);
+  gimbalReceivePacket(rxBuffer, GIMBAL_BUFFER_LEN, target);
 
   return rxBuffer[1]<<8 | rxBuffer[2];
 }
 
 uint8_t gimbalWriteReg(uint8_t reg, uint16_t data, uint8_t target)
 {
-  uint8_t txBuffer[GIMBAL_WRITE_REG_LEN] = {0};
+  uint8_t txBuffer[GIMBAL_BUFFER_LEN] = {0};
 
   txBuffer[0] = MLX90393_CMD_REG_WR;
   txBuffer[1] = (uint8_t)((data >> 8) & 0xFF);
@@ -191,45 +188,47 @@ void gimbalsInit(void)
 
   GIMBALS_CS_INT_GPIO->BSRRL = GIMBALS_LEFT_CS_GPIO_PIN | GIMBALS_RIGHT_CS_GPIO_PIN;
 
-  for (uint8_t i = GIMBAL_FIRST; i <= GIMBAL_LAST; i++) {
+  for (uint8_t i = GIMBAL_LEFT; i <= GIMBAL_RIGHT; i++) {
     gimbalWriteReg(MLX90393_REG_CR0,
-      (0x00 << MLX90393_CR0_GAIN_SEL) |
+      (0x05 << MLX90393_CR0_GAIN_SEL) |
       (0x0C << MLX90393_CR0_HALLCONF), i);
 
     gimbalWriteReg(MLX90393_REG_CR1,
       (0x01 << MLX90393_CR1_TRIG_INT_SEL) |
-      (0x03 << MLX90393_CR1_COMM_MODE) |
-      (0x01 << MLX90393_CR1_TCMP_EN), i);
+      (0x02 << MLX90393_CR1_COMM_MODE) |
+      (0x00 << MLX90393_CR1_TCMP_EN), i);
 
     gimbalWriteReg(MLX90393_REG_CR2,
       (0x00 << MLX90393_CR2_OSR2) |
-      (0x00 << MLX90393_CR2_RES_Z) |
-      (0x00 << MLX90393_CR2_RES_Y) |
-      (0x00 << MLX90393_CR2_RES_X) |
+      (0x02 << MLX90393_CR2_RES_Z) |
+      (0x02 << MLX90393_CR2_RES_Y) |
+      (0x02 << MLX90393_CR2_RES_X) |
       (0x02 << MLX90393_CR2_DIG_FILT) |
       (0x00 << MLX90393_CR2_OSR), i);
-  }
 
-  // Test
-  if (gimbalSendCommand(MLX90393_CMD_NOP, GIMBAL_FIRST) == 0x03) {
-    gimbalsRead();
+    gimbalSendCommand(MLX90393_CMD_MEM_STO, i);
   }
 }
 
-void gimbalsRead(void)
+void gimbalsRead(uint16_t * values)
 {
-  uint8_t rxBuffer[GIMBAL_DATA_BUFFER_LEN] = {0};
+  uint8_t rxBuffer[GIMBAL_BUFFER_LEN] = {0};
+  
+  gimbalSendCommand(MLX90393_CMD_SNGLE_MEAS | MLX90393_CHANNEL_X | MLX90393_CHANNEL_Y, GIMBAL_LEFT);
+  gimbalSendCommand(MLX90393_CMD_SNGLE_MEAS | MLX90393_CHANNEL_X | MLX90393_CHANNEL_Y, GIMBAL_RIGHT);
 
-  gimbalSendCommand(MLX90393_CMD_SNGLE_MEAS | MLX90393_CHANNEL_X | MLX90393_CHANNEL_Y | MLX90393_CHANNEL_Z | MLX90393_CHANNEL_T, GIMBAL_FIRST);
-
-  while (gimbalSendCommand(MLX90393_CMD_NOP, GIMBAL_FIRST) & MLX90393_STATUS_SINGLE) {
+  while (gimbalSendCommand(MLX90393_CMD_NOP, GIMBAL_LEFT) & MLX90393_STATUS_SINGLE) {
+    // wait
+  }
+  while (gimbalSendCommand(MLX90393_CMD_NOP, GIMBAL_RIGHT) & MLX90393_STATUS_SINGLE) {
     // wait
   }
 
-  gimbalSendCommand(MLX90393_CMD_READ_MEAS | MLX90393_CHANNEL_X | MLX90393_CHANNEL_Y | MLX90393_CHANNEL_Z | MLX90393_CHANNEL_T, GIMBAL_FIRST);
-  gimbalReceivePacket(rxBuffer, GIMBAL_DATA_BUFFER_LEN, GIMBAL_FIRST);
+  for (uint8_t i = GIMBAL_LEFT; i <= GIMBAL_RIGHT; i++) {
+    gimbalSendCommand(MLX90393_CMD_READ_MEAS | MLX90393_CHANNEL_X | MLX90393_CHANNEL_Y, i);
+    gimbalReceivePacket(rxBuffer, GIMBAL_BUFFER_LEN, i);
 
-  for (uint8_t i=0; i<GIMBAL_DATA_BUFFER_LEN; i++) {
-    TRACE("Gimbal byte %d: 0x%02X", i, rxBuffer[i]);
+    values[2*i]     = ((rxBuffer[1]<<8) | rxBuffer[2]) >> 4;
+    values[(2*i)+1] = ((rxBuffer[3]<<8) | rxBuffer[4]) >> 4;
   }
 }

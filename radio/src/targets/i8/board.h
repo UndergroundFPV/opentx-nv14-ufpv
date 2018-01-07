@@ -189,7 +189,7 @@ int sbusGetByte(uint8_t * byte);
 
 // Gimbals driver
 void gimbalsInit(void);
-void gimbalsRead(void);
+void gimbalsRead(uint16_t * values);
 
 // Keys driver
 enum EnumKeys
