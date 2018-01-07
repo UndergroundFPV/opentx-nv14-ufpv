@@ -555,6 +555,26 @@ enum SwitchSources {
   SWSRC_SB1,
   SWSRC_SB2,
   SWSRC_LAST_SWITCH = SWSRC_SB2,
+#elif defined(PCBI8)
+  SWSRC_SA0 = SWSRC_FIRST_SWITCH,
+  SWSRC_SA1,
+  SWSRC_SA2,
+  SWSRC_SB0,
+  SWSRC_SB1,
+  SWSRC_SB2,
+  SWSRC_SC0,
+  SWSRC_SC1,
+  SWSRC_SC2,
+  SWSRC_SD0,
+  SWSRC_SD1,
+  SWSRC_SD2,
+  SWSRC_SE0,
+  SWSRC_SE1,
+  SWSRC_SE2,
+  SWSRC_SF0,
+  SWSRC_SF1,
+  SWSRC_SF2,
+  SWSRC_LAST_SWITCH = SWSRC_SF2,
 #elif defined(PCBTARANIS) || defined(PCBHORUS)
   SWSRC_SA0 = SWSRC_FIRST_SWITCH,
   SWSRC_SA1,
@@ -568,7 +588,7 @@ enum SwitchSources {
   SWSRC_SD0,
   SWSRC_SD1,
   SWSRC_SD2,
-#if !defined(PCBX7) && !defined(PCBXLITE)
+#if !defined(PCBX7)
   SWSRC_SE0,
   SWSRC_SE1,
   SWSRC_SE2,
@@ -576,7 +596,7 @@ enum SwitchSources {
   SWSRC_SF0,
   SWSRC_SF1,
   SWSRC_SF2,
-#if !defined(PCBX7) && !defined(PCBXLITE)
+#if !defined(PCBX7)
   SWSRC_SG0,
   SWSRC_SG1,
   SWSRC_SG2,

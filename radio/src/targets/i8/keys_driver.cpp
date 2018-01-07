@@ -102,12 +102,12 @@ uint8_t keyState(uint8_t index)
 #if !defined(BOOT)
 uint32_t switchState(uint8_t index)
 {
-  uint16_t value = adcValues[index / 3];
+  uint16_t value = adcValues[SWITCH_FIRST + (index / 3)];
   uint8_t position;
 
-  if (value < 512)
+  if (value < 1024)
     position = 0;
-  else if (value > 1024+512)
+  else if (value > 3*1024)
     position = 2;
   else
     position = 1;
