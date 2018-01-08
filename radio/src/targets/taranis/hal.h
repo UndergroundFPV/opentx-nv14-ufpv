@@ -573,7 +573,7 @@
   #define INTMODULE_USART_IRQn          USART1_IRQn
   #define INTMODULE_TX_DMA_STREAM       DMA2_Stream7
   #define INTMODULE_TX_DMA_Stream_IRQn  DMA2_Stream7_IRQn
-  #define INTMODULE_TX_DMA_Stream_IRQnHandler DMA2_Stream7_IRQHandler
+  #define INTMODULE_TX_DMA_Stream_IRQHandler DMA2_Stream7_IRQHandler
   #define INTMODULE_TX_DMA_FLAG_TC      DMA_IT_TCIF7
   #define INTMODULE_DMA_CHANNEL         DMA_Channel_4
   #define INTMODULE_TIMER               TIM3
@@ -597,7 +597,7 @@
   #define INTMODULE_DMA_CHANNEL         DMA_Channel_6
   #define INTMODULE_TX_DMA_STREAM       DMA2_Stream5
   #define INTMODULE_TX_DMA_Stream_IRQnn DMA2_Stream5_IRQn
-  #define INTMODULE_TX_DMA_Stream_IRQnHandler DMA2_Stream5_IRQHandler
+  #define INTMODULE_TX_DMA_Stream_IRQHandler DMA2_Stream5_IRQHandler
   #define INTMODULE_TX_DMA_FLAG_TC      DMA_IT_TCIF5
   #define INTMODULE_TIMER_FREQ          (PERI2_FREQUENCY * TIMER_MULT_APB2)
 #else
@@ -617,7 +617,7 @@
   #define INTMODULE_DMA_CHANNEL         DMA_Channel_6
   #define INTMODULE_TX_DMA_STREAM       DMA2_Stream5
   #define INTMODULE_TX_DMA_Stream_IRQnn DMA2_Stream5_IRQn
-  #define INTMODULE_TX_DMA_Stream_IRQnHandler DMA2_Stream5_IRQHandler
+  #define INTMODULE_TX_DMA_Stream_IRQHandler DMA2_Stream5_IRQHandler
   #define INTMODULE_TX_DMA_FLAG_TC      DMA_IT_TCIF5
   #define INTMODULE_TIMER_FREQ          (PERI2_FREQUENCY * TIMER_MULT_APB2)
 #endif

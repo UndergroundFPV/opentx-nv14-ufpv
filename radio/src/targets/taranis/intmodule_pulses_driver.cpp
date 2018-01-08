@@ -154,7 +154,7 @@ void intmodulePpmStart()
 }
 #endif // defined(TARANIS_INTERNAL_PPM)
 
-extern "C" void INTMODULE_TX_DMA_Stream_IRQnHandler()
+extern "C" void INTMODULE_TX_DMA_Stream_IRQHandler()
 {
   if (!DMA_GetITStatus(INTMODULE_TX_DMA_STREAM, INTMODULE_TX_DMA_FLAG_TC))
     return;

@@ -50,18 +50,22 @@ void init_trainer_ppm()
   setupPulsesPPMTrainer();
   trainerSendNextFrame();
 
+#if 0
   NVIC_EnableIRQ(TRAINER_OUT_DMA_IRQn);
   NVIC_SetPriority(TRAINER_OUT_DMA_IRQn, 7);
   NVIC_EnableIRQ(TRAINER_TIMER_IRQn);
   NVIC_SetPriority(TRAINER_TIMER_IRQn, 7);
+#endif
 }
 
 void stop_trainer_ppm()
 {
+#if 0
   NVIC_DisableIRQ(TRAINER_OUT_DMA_IRQn);
   NVIC_DisableIRQ(TRAINER_TIMER_IRQn);
 
   TRAINER_OUT_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
+#endif
   TRAINER_TIMER->DIER = 0;
   TRAINER_TIMER->CR1 &= ~TIM_CR1_CEN; // Stop counter
 }
@@ -105,12 +109,14 @@ void trainerSendNextFrame()
   TRAINER_TIMER->CCER = TIM_CCER_CC4E | (GET_PPM_POLARITY(TRAINER_MODULE) ? 0 : TIM_CCER_CC4P);
   TRAINER_TIMER->CCR1 = *(trainerPulsesData.ppm.ptr - 1) - 4000; // 2mS in advance
 
+#if 0
   TRAINER_OUT_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
   TRAINER_OUT_DMA_STREAM->CR |= TRAINER_OUT_DMA_CHANNEL | DMA_SxCR_DIR_0 | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0 | DMA_SxCR_MSIZE_0 | DMA_SxCR_PL_0 | DMA_SxCR_PL_1;
   TRAINER_OUT_DMA_STREAM->PAR = CONVERT_PTR_UINT(&TRAINER_TIMER->ARR);
   TRAINER_OUT_DMA_STREAM->M0AR = CONVERT_PTR_UINT(trainerPulsesData.ppm.pulses);
   TRAINER_OUT_DMA_STREAM->NDTR = trainerPulsesData.ppm.ptr - trainerPulsesData.ppm.pulses;
   TRAINER_OUT_DMA_STREAM->CR |= DMA_SxCR_EN | DMA_SxCR_TCIE; // Enable DMA
+#endif
 }
 
 #warning "TODO merge this with Extmodule DMA_IRQHandler as they share the same timer channel and DMA stream"

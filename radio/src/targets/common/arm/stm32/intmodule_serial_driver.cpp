@@ -113,7 +113,7 @@ void intmodulePxxStart()
   NVIC_SetPriority(INTMODULE_TIMER_IRQn, 7);
 }
 
-extern "C" void INTMODULE_TX_DMA_Stream_IRQnHandler(void)
+extern "C" void INTMODULE_TX_DMA_Stream_IRQHandler(void)
 {
   DEBUG_INTERRUPT(INT_DMA2S7);
   if (DMA_GetITStatus(INTMODULE_TX_DMA_STREAM, INTMODULE_TX_DMA_FLAG_TC)) {

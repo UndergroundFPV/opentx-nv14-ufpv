@@ -156,11 +156,11 @@
 #define INTMODULE_TX_GPIO_AF            GPIO_AF_USART3
 #define INTMODULE_USART                 USART3
 #define INTMODULE_DMA                   DMA1
-#define INTMODULE_DMA_CHANNEL           DMA_Channel_7
-#define INTMODULE_TX_DMA_STREAM         DMA1_Stream4
-#define INTMODULE_TX_DMA_Stream_IRQn    DMA1_Stream4_IRQn
-#define INTMODULE_TX_DMA_IRQHandler     DMA1_Stream4_IRQHandler
-#define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF4
+#define INTMODULE_DMA_CHANNEL           DMA_Channel_4
+#define INTMODULE_TX_DMA_STREAM         DMA1_Stream3
+#define INTMODULE_TX_DMA_Stream_IRQn    DMA1_Stream3_IRQn
+#define INTMODULE_TX_DMA_Stream_IRQHandler DMA1_Stream3_IRQHandler
+#define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF3
 #define INTMODULE_TIMER                 TIM2
 #define INTMODULE_TIMER_IRQn            TIM2_IRQn
 #define INTMODULE_TIMER_IRQHandler      TIM2_IRQHandler
@@ -198,11 +198,11 @@
 #define TRAINER_TIMER_IRQn              TIM4_IRQn
 #define TRAINER_GPIO_AF                 GPIO_AF_TIM4 // TIM4_CH2 (in) + TIM4_CH1 (out)
 #define TRAINER_OUT_DMA                 DMA1
-#define TRAINER_OUT_DMA_CHANNEL         DMA_Channel_2
-#define TRAINER_OUT_DMA_STREAM          DMA1_Stream3
-#define TRAINER_OUT_DMA_IRQn            DMA1_Stream3_IRQn
-#define TRAINER_OUT_DMA_IRQHandler      DMA1_Stream3_IRQHandler
-#define TRAINER_OUT_DMA_FLAG_TC         DMA_IT_TCIF3
+// #define TRAINER_OUT_DMA_CHANNEL         DMA_Channel_2
+// #define TRAINER_OUT_DMA_STREAM          DMA1_Stream3
+// #define TRAINER_OUT_DMA_IRQn            DMA1_Stream3_IRQn
+// #define TRAINER_OUT_DMA_IRQHandler      DMA1_Stream3_IRQHandler
+// #define TRAINER_OUT_DMA_FLAG_TC         DMA_IT_TCIF3
 #define TRAINER_EXTMODULE_TIMER_IRQn    TIM4_IRQn
 #define TRAINER_EXTMODULE_TIMER_IRQHandler  TIM4_IRQHandler
 #define TRAINER_EXTMODULE_TIMER_FREQ    (PERI1_FREQUENCY * TIMER_MULT_APB1)
