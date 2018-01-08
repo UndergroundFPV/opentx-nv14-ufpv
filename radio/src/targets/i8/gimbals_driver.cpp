@@ -169,7 +169,7 @@ void gimbalsInit(void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
   GPIO_Init(GIMBALS_SPI_GPIO, &GPIO_InitStructure);
 
   GPIO_PinAFConfig(GIMBALS_SPI_GPIO, GIMBALS_MOSI_PinSource, GIMBALS_GPIO_AF);
