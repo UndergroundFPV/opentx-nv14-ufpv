@@ -19,6 +19,7 @@
  */
 
 #include "opentx.h"
+#include "debug.h"
 
 void intmoduleStop()
 {
@@ -158,6 +159,6 @@ extern "C" void INTMODULE_TIMER_IRQHandler()
   INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;           // clear flag
   setupPulses(INTERNAL_MODULE);
   intmoduleSendNextFrame();
-  
+
   DEBUG_TIMER_STOP(debugTimerIntPulsesDuration);
 }

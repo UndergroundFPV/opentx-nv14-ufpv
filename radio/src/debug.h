@@ -157,27 +157,27 @@ void dumpTraceBuffer();
 
 #else  // #if defined(DEBUG_TRACE_BUFFER)
 
-#define TRACE_EVENT(condition, event, data)  
-#define TRACEI_EVENT(condition, event, data)  
+#define TRACE_EVENT(condition, event, data)
+#define TRACEI_EVENT(condition, event, data)
 
 #endif // #if defined(DEBUG_TRACE_BUFFER)
 
 #if defined(TRACE_SD_CARD)
   #define TRACE_SD_CARD_EVENT(condition, event, data)  TRACE_EVENT(condition, event, data)
 #else
-  #define TRACE_SD_CARD_EVENT(condition, event, data)  
+  #define TRACE_SD_CARD_EVENT(condition, event, data)
 #endif
 #if defined(TRACE_FATFS)
   #define TRACE_FATFS_EVENT(condition, event, data)  TRACE_EVENT(condition, event, data)
 #else
-  #define TRACE_FATFS_EVENT(condition, event, data)  
+  #define TRACE_FATFS_EVENT(condition, event, data)
 #endif
 #if defined(TRACE_AUDIO)
   #define TRACE_AUDIO_EVENT(condition, event, data)  TRACE_EVENT(condition, event, data)
   #define TRACEI_AUDIO_EVENT(condition, event, data) TRACEI_EVENT(condition, event, data)
 #else
-  #define TRACE_AUDIO_EVENT(condition, event, data)  
-  #define TRACEI_AUDIO_EVENT(condition, event, data)  
+  #define TRACE_AUDIO_EVENT(condition, event, data)
+  #define TRACEI_AUDIO_EVENT(condition, event, data)
 #endif
 
 
@@ -214,54 +214,27 @@ public:
 
 #if defined(DEBUG_INTERRUPTS) && !defined(BOOT)
 
-#if defined(PCBHORUS)
 enum InterruptNames {
   INT_TICK,
   INT_1MS,
-  INT_SER2,
-  INT_TELEM_DMA,
-  INT_TELEM_USART,
-  INT_SDIO,
-  INT_SDIO_DMA,
-  INT_DMA2S7,
-  INT_TIM1CC,
-  INT_TIM2,
-  INT_TRAINER,
-  INT_BLUETOOTH,
-  INT_OTG_FS,
-#if defined(DEBUG_USB_INTERRUPTS)
-  INT_OTG_FS_SPURIOUS,
-  INT_OTG_FS_OUT_EP,
-  INT_OTG_FS_IN_EP,
-  INT_OTG_FS_MODEMISMATCH,
-  INT_OTG_FS_WAKEUP,
-  INT_OTG_FS_SUSPEND,
-  INT_OTG_FS_SOF,
-  INT_OTG_FS_RX_STAT,
-  INT_OTG_FS_RESET,
-  INT_OTG_FS_ENUM,
-  INT_OTG_FS_INCOMPLETE_IN,
-  INT_OTG_FS_INCOMPLETE_OUT,
-  INT_OTG_FS_SESSION,
-  INT_OTG_FS_OTG,
-  INT_OTG_FS_RX_NOT_DEVICE,
-#endif // #if defined(DEBUG_USB_INTERRUPTS)
-  INT_LAST
-};
-#elif defined(PCBTARANIS)
-enum InterruptNames {
-  INT_TICK,
   INT_5MS,
   INT_AUDIO,
   INT_BLUETOOTH,
   INT_LCD,
   INT_TIM1CC,
   INT_TIM1,
+  INT_TIM2,
   INT_TIM8,
   INT_SER2,
   INT_TELEM_DMA,
   INT_TELEM_USART,
+  INT_SDIO,
+  INT_SDIO_DMA,
+  INT_DMA2S7,
   INT_TRAINER,
+  INT_EXTI0,
+  INT_I2C_DMA_RX,
+  INT_I2C_DMA_TX,
   INT_OTG_FS,
 #if defined(DEBUG_USB_INTERRUPTS)
   INT_OTG_FS_SPURIOUS,
@@ -282,7 +255,6 @@ enum InterruptNames {
 #endif // #if defined(DEBUG_USB_INTERRUPTS)
   INT_LAST
 };
-#endif
 
 struct InterruptCounters
 {
