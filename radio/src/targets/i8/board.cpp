@@ -142,6 +142,7 @@ void boardInit()
   init5msTimer();
   __enable_irq();
   i2cInit();
+  touchInit();
   gimbalsInit();
   usbInit();
 

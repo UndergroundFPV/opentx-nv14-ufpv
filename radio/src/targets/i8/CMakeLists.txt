@@ -69,11 +69,14 @@ set(FIRMWARE_TARGET_SRC
   ../common/arm/stm32/i2c_driver.cpp
   ../common/arm/stm32/eeprom_driver.cpp
   pwr_driver.cpp
+  touch_driver.cpp
   ../common/arm/loadboot.cpp
   )
 
 set(STM32LIB_SRC
   STM32F4xx_StdPeriph_Driver/src/stm32f4xx_sdio.c
+  STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.c
+  STM32F4xx_StdPeriph_Driver/src/stm32f4xx_syscfg.c
   )
 
 if(LCD_DUAL_BUFFER)

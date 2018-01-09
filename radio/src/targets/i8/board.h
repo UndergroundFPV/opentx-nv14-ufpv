@@ -49,6 +49,8 @@ extern "C" {
 #include "STM32F4xx_DSP_StdPeriph_Lib_V1.4.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_flash.h"
 #include "STM32F4xx_DSP_StdPeriph_Lib_V1.4.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_sdio.h"
 #include "STM32F4xx_DSP_StdPeriph_Lib_V1.4.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_dbgmcu.h"
+#include "STM32F4xx_DSP_StdPeriph_Lib_V1.4.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_exti.h"
+#include "STM32F4xx_DSP_StdPeriph_Lib_V1.4.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_syscfg.h"
 #include "STM32F4xx_DSP_StdPeriph_Lib_V1.4.0/Libraries/STM32F4xx_StdPeriph_Driver/inc/misc.h"
 
 #if __clang__
@@ -370,6 +372,25 @@ void backlightEnable(void);
 #if defined(__cplusplus) && !defined(SIMU)
 }
 #endif
+
+// Touch driver FT6236
+typedef struct
+{
+  // TODO: remove/consolidate these as needed
+  bool dataReady;
+  uint8_t  gid;       // gesture ID
+  uint8_t  status;    // number of points touched
+  uint16_t x[2];
+  uint16_t y[2];
+  uint8_t  z[2];     // Touch Weight
+  uint8_t  evt[2];   // Event Flag (2b)
+  uint8_t  tid[2];   // Touch ID   (4b)
+  uint8_t  area[2];  // Touch Area (4b)
+} touchPointRef_t;
+extern touchPointRef_t touchData;
+
+bool touchInit(void);
+void touchReadData(void);
 
 // Debug driver
 void debugPutc(const char c);
