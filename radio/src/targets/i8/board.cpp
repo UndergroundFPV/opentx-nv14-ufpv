@@ -18,7 +18,9 @@
  * GNU General Public License for more details.
  */
 
+#include "board.h"
 #include "opentx.h"
+#include "i2c_driver.h"
 
 #if defined(__cplusplus) && !defined(SIMU)
 extern "C" {
@@ -108,10 +110,11 @@ void boardInit()
   RCC_AHB1PeriphClockCmd(PWR_RCC_AHB1Periph | GIMBALS_RCC_AHB1Periph |
                          KEYS_RCC_AHB1Periph | LCD_RCC_AHB1Periph |
                          AUDIO_RCC_AHB1Periph | BACKLIGHT_RCC_AHB1Periph |
-                         ADC_RCC_AHB1Periph | I2C_RCC_AHB1Periph |
+                         ADC_RCC_AHB1Periph |
+                         I2C_RCC_AHB1Periph | I2C_DMA_RCC_AHB1Periph |
                          SD_RCC_AHB1Periph | HAPTIC_RCC_AHB1Periph |
                          INTMODULE_RCC_AHB1Periph | EXTMODULE_RCC_AHB1Periph |
-                         TELEMETRY_RCC_AHB1Periph |
+                         TELEMETRY_RCC_AHB1Periph | TOUCH_RCC_AHB1Periph |
                          SERIAL_RCC_AHB1Periph | TRAINER_RCC_AHB1Periph |
                          HEARTBEAT_RCC_AHB1Periph | BT_RCC_AHB1Periph, ENABLE);
 
@@ -125,7 +128,7 @@ void boardInit()
   RCC_APB2PeriphClockCmd(BACKLIGHT_RCC_APB2Periph | ADC_RCC_APB2Periph |
                          HAPTIC_RCC_APB2Periph | HEARTBEAT_RCC_APB2Periph |
                          BT_RCC_APB2Periph | TELEMETRY_RCC_APB2Periph |
-                         GIMBALS_RCC_APB2Periph, ENABLE);
+                         TOUCH_RCC_APB2Periph | GIMBALS_RCC_APB2Periph, ENABLE);
 
   pwrInit();
 

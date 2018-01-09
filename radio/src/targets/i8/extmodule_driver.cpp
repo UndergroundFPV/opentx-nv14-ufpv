@@ -238,6 +238,7 @@ void extmoduleSendNextFrame()
   }
 }
 
+#if defined(EXTMODULE_DMA_IRQHandler)
 extern "C" void EXTMODULE_DMA_IRQHandler()
 {
   if (!DMA_GetITStatus(EXTMODULE_DMA_STREAM, EXTMODULE_DMA_FLAG_TC))
@@ -248,5 +249,6 @@ extern "C" void EXTMODULE_DMA_IRQHandler()
   EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF; // Clear flag
   EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE; // Enable this interrupt
 }
+#endif
 
 // The Timer interrupt code is inside the Trainer driver (same timer)

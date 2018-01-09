@@ -19,6 +19,7 @@
  */
 
 #include "opentx.h"
+#include "i2c_driver.h"
 
 #if defined(__cplusplus) && !defined(SIMU)
 extern "C" {
@@ -354,3 +355,29 @@ uint16_t getBatteryVoltage()
   instant_vbat += 20; // add 0.2V because of the diode TODO check if this is needed, but removal will beak existing calibrations!!!
   return (uint16_t)instant_vbat;
 }
+
+#if !defined(BOOT) && !defined(SOFTWARE_VOLUME) && !defined(SIMU)
+const uint8_t volumeScale[VOLUME_LEVEL_MAX+1] = {
+  0,  1,  2,  3,  5,  9,  13,  17,  22,  27,  33,  40,
+  64, 82, 96, 105, 112, 117, 120, 122, 124, 125, 126, 127
+};
+
+void setScaledVolume(uint8_t volume)
+{
+  if (volume > VOLUME_LEVEL_MAX) {
+    volume = VOLUME_LEVEL_MAX;
+  }
+
+  setVolume(volumeScale[volume]);
+}
+
+void setVolume(uint8_t volume)
+{
+	i2cWriteByte(VOLUME_I2C_ADDRESS, 0, 8, volume);
+}
+
+int32_t getVolume()
+{
+  return -1; // TODO
+}
+#endif

@@ -19,6 +19,7 @@
  */
 
 #include "opentx.h"
+#include "eeprom_driver.h"
 
 const char * eepromFile = NULL;
 FILE * fp = NULL;

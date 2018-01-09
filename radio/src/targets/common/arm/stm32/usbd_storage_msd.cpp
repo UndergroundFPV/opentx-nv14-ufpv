@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -22,6 +22,7 @@
 #include "opentx.h"
 #include "FatFs/diskio.h"
 #include "stamp.h"
+#include "eeprom_driver.h"
 
 #if defined(__cplusplus) && !defined(SIMU)
 extern "C" {
@@ -39,26 +40,26 @@ enum MassstorageLuns {
 /* USB Mass storage Standard Inquiry Data */
 const unsigned char STORAGE_Inquirydata[] = { //36
   /* LUN 0 */
-  0x00,		
-  0x80,		
-  0x02,		
+  0x00,
+  0x80,
+  0x02,
   0x02,
   (USBD_STD_INQUIRY_LENGTH - 5),
   0x00,
-  0x00,	
+  0x00,
   0x00,
   USB_MANUFACTURER,                        /* Manufacturer : 8 bytes */
   USB_PRODUCT,                             /* Product      : 16 Bytes */
   'R', 'a', 'd', 'i', 'o', ' ', ' ', ' ',
   '1', '.', '0', '0',                      /* Version      : 4 Bytes */
   /* LUN 1 */
-  0x00,		
-  0x80,		
-  0x02,		
+  0x00,
+  0x80,
+  0x02,
   0x02,
   (USBD_STD_INQUIRY_LENGTH - 5),
   0x00,
-  0x00,	
+  0x00,
   0x00,
   USB_MANUFACTURER,                        /* Manufacturer : 8 bytes */
   USB_PRODUCT,                             /* Product      : 16 Bytes */
@@ -73,21 +74,21 @@ int32_t fat12Read(uint8_t * buffer, uint16_t sector, uint16_t count );
 
 int8_t STORAGE_Init (uint8_t lun);
 
-int8_t STORAGE_GetCapacity (uint8_t lun, 
-                           uint32_t *block_num, 
+int8_t STORAGE_GetCapacity (uint8_t lun,
+                           uint32_t *block_num,
                            uint32_t *block_size);
 
 int8_t  STORAGE_IsReady (uint8_t lun);
 
 int8_t  STORAGE_IsWriteProtected (uint8_t lun);
 
-int8_t STORAGE_Read (uint8_t lun, 
-                        uint8_t *buf, 
+int8_t STORAGE_Read (uint8_t lun,
+                        uint8_t *buf,
                         uint32_t blk_addr,
                         uint16_t blk_len);
 
-int8_t STORAGE_Write (uint8_t lun, 
-                        uint8_t *buf, 
+int8_t STORAGE_Write (uint8_t lun,
+                        uint8_t *buf,
                         uint32_t blk_addr,
                         uint16_t blk_len);
 
@@ -122,8 +123,8 @@ int8_t STORAGE_Init (uint8_t lun)
 
 /* TODO if no SD ... if( SD_Init() != 0)
   {
-    return (-1); 
-  } 
+    return (-1);
+  }
 */
   return (0);
 }
@@ -149,7 +150,7 @@ int8_t STORAGE_GetCapacity (uint8_t lun, uint32_t *block_num, uint32_t *block_si
 
   if (!SD_CARD_PRESENT())
     return -1;
-  
+
   *block_size = BLOCK_SIZE;
 
   static DWORD sector_count = 0;
@@ -179,7 +180,7 @@ void usbPluggedIn()
   * @retval Status
   */
 int8_t  STORAGE_IsReady (uint8_t lun)
-{ 
+{
 #if defined(EEPROM)
   if (lun == STORAGE_EEPROM_LUN) {
     return (lunReady[STORAGE_EEPROM_LUN] != 0) ? 0 : -1;
@@ -208,13 +209,13 @@ int8_t  STORAGE_IsWriteProtected (uint8_t lun)
   * @retval Status
   */
 
-int8_t STORAGE_Read (uint8_t lun, 
-                 uint8_t *buf, 
-                 uint32_t blk_addr,                       
+int8_t STORAGE_Read (uint8_t lun,
+                 uint8_t *buf,
+                 uint32_t blk_addr,
                  uint16_t blk_len)
 {
   WATCHDOG_SUSPEND(100/*1s*/);
-  
+
   if (lun == STORAGE_EEPROM_LUN) {
     return (fat12Read(buf, blk_addr, blk_len) == 0) ? 0 : -1;
   }
@@ -231,13 +232,13 @@ int8_t STORAGE_Read (uint8_t lun,
   * @retval Status
   */
 
-int8_t STORAGE_Write (uint8_t lun, 
-                  uint8_t *buf, 
+int8_t STORAGE_Write (uint8_t lun,
+                  uint8_t *buf,
                   uint32_t blk_addr,
                   uint16_t blk_len)
 {
   WATCHDOG_SUSPEND(100/*1s*/);
-  
+
   if (lun == STORAGE_EEPROM_LUN)	{
     return (fat12Write(buf, blk_addr, blk_len) == 0) ? 0 : -1;
   }

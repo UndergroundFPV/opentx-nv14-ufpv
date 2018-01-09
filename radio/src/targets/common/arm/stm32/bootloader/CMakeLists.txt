@@ -94,17 +94,16 @@ set(BOOTLOADER_SRC
 if(PCB STREQUAL I8)
   set(BOOTLOADER_SRC
     ${BOOTLOADER_SRC}
-    ../../../../../targets/${TARGET_DIR}/i2c_driver.cpp
     ../../../../../targets/${TARGET_DIR}/haptic_driver.cpp
     ../../../../../targets/common/arm/stm32/sdio_sd.c
     )
-    
-    remove_definitions(-DDEBUG)
-    
-elseif(NOT (PCB STREQUAL X10 OR PCB STREQUAL X12S))
+endif()
+
+if(NOT (PCB STREQUAL X10 OR PCB STREQUAL X12S))
   set(BOOTLOADER_SRC
     ${BOOTLOADER_SRC}
-    ../../../../../targets/${TARGET_DIR}/i2c_driver.cpp
+    ../i2c_driver.cpp
+    ../eeprom_driver.cpp
     )
 
   remove_definitions(-DDEBUG)

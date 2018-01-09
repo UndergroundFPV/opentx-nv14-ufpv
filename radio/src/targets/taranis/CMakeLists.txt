@@ -164,7 +164,8 @@ set(TARGET_SRC
 set(FIRMWARE_TARGET_SRC
   ${FIRMWARE_TARGET_SRC}
   ${LCD_DRIVER}
-  i2c_driver.cpp
+  ../common/arm/stm32/i2c_driver.cpp
+  ../common/arm/stm32/eeprom_driver.cpp
   pwr_driver.cpp
   ../common/arm/loadboot.cpp
   )

@@ -940,8 +940,8 @@
   #define I2C_SPI_GPIO                  GPIOB
   #define I2C_SDA_GPIO_PIN              GPIO_Pin_9  // PB.09
   #define I2C_SCL_GPIO_PIN              GPIO_Pin_8  // PB.08
-  #define I2C_WP_GPIO                   GPIOD
-  #define I2C_WP_GPIO_PIN               GPIO_Pin_7  // PD.07
+  #define I2C_GPIO                      GPIOD
+  #define I2C_GPIO_PIN                  GPIO_Pin_7  // PD.07
   #define I2C_SCL_GPIO_PinSource        GPIO_PinSource8
   #define I2C_SDA_GPIO_PinSource        GPIO_PinSource9
 #else
@@ -949,8 +949,8 @@
   #define I2C_SPI_GPIO                  GPIOB
   #define I2C_SCL_GPIO_PIN              GPIO_Pin_6  // PB.06
   #define I2C_SDA_GPIO_PIN              GPIO_Pin_7  // PB.07
-  #define I2C_WP_GPIO                   GPIOB
-  #define I2C_WP_GPIO_PIN               GPIO_Pin_9  // PB.09
+  #define I2C_GPIO                      GPIOB
+  #define I2C_GPIO_PIN                  GPIO_Pin_9  // PB.09
   #define I2C_SCL_GPIO_PinSource        GPIO_PinSource6
   #define I2C_SDA_GPIO_PinSource        GPIO_PinSource7
 #endif
@@ -959,9 +959,16 @@
 #else
   #define I2C_SPEED                     400000
 #endif
-#define I2C_ADDRESS_EEPROM              0xA2
-#define I2C_ADDRESS_VOLUME              0x5C
-#define I2C_FLASH_PAGESIZE              64
+#define VOLUME_I2C_ADDRESS              0x5C
+
+// EEPROM
+#if defined(REV4a)
+  #define EEPROM_SIZE                   (64*1024)
+#else
+  #define EEPROM_SIZE                   (32*1024)
+#endif
+#define EEPROM_PAGESIZE                 64
+#define EEPROM_I2C_ADDRESS              0xA2
 
 // SD - SPI2
 #define SD_RCC_AHB1Periph               (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA1)

@@ -22,6 +22,7 @@
 
 #include "boot.h"
 #include "bin_files.h"
+#include "i2c_driver.h"
 
 #define APP_START_ADDRESS (uint32_t)(FIRMWARE_ADDRESS + BOOTLOADER_SIZE)
 
@@ -245,7 +246,7 @@ int main()
 
   lcdInit();
   backlightInit();
-  
+
 #if defined(PCBI8)
   hapticInit();
   BACKLIGHT_ENABLE();
@@ -269,7 +270,7 @@ int main()
       wdt_reset();
   }
 #endif
-  
+
   for (;;) {
     wdt_reset();
 

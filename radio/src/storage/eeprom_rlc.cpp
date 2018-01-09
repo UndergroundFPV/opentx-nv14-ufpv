@@ -22,6 +22,7 @@
 #include <string.h>
 #include "opentx.h"
 #include "timers.h"
+#include "eeprom_driver.h"
 
 uint8_t   s_write_err = 0;    // error reasons
 RlcFile   theFile;  //used for any file operation

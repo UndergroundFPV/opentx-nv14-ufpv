@@ -23,15 +23,14 @@
 
 /* DMA Allocation:
    DMA/Stream/Channel
-   1/0/1 or 1/5/1 I2C1_RX (EEPROM, touch)
+   1/0/0 TIM4_CH1 (Ext module PPM)
    1/0/1 or 1/5/1 I2C1_RX (EEPROM, touch)
    1/1/4 USART3_RX (Internal module)
-   1/2/0 TIM4_CH1 (Ext module PPM)
-   1/4/7 USART3_TX (Internal module)
-   1/6/1 or 1/7/1 I2C1_TX (EEPROM, touch)
+   1/3/7 USART3_TX (Internal module)
    1/4/0 SPI2_TX (LCD)
-   1/5/7 DAC/Audio
    1/5/4 Serial2 RX (disabled because of Audio)
+   1/5/7 DAC/Audio
+   1/6/1 or 1/7/1 I2C1_TX (EEPROM, touch)  - NOT USED
    2/0/3 or 2/2/3 (Gimbals)
    2/4/0 ADC1
    2/5/3 or 2/3/3 SPI1_TX (Gimbals)
@@ -94,7 +93,7 @@
 #define ADC_CHANNEL_POT2              ADC_Channel_8  // ADC12_IN8
 #define ADC_CHANNEL_LIBATT            ADC_Channel_10 // ADC123_IN10
 #define ADC_CHANNEL_DRYBATT           ADC_Channel_12 // ADC123_IN12
-  
+
 #define ADC_MAIN                      ADC1
 #define ADC_DMA                       DMA2
 #define ADC_DMA_SxCR_CHSEL            0
@@ -304,7 +303,7 @@
 #define LCD_SPI                        SPI2
 #define LCD_GPIO_AF                    GPIO_AF_SPI2
 
-// I2C Bus: EEPROM
+// I2C Bus: EEPROM and FT6236 (touch)
 #define I2C_RCC_AHB1Periph              RCC_AHB1Periph_GPIOB
 #define I2C_RCC_APB1Periph              RCC_APB1Periph_I2C1
 #define I2C                             I2C1
@@ -315,8 +314,50 @@
 #define I2C_SCL_GPIO_PinSource          GPIO_PinSource8
 #define I2C_SDA_GPIO_PinSource          GPIO_PinSource9
 #define I2C_SPEED                       400000
-#define I2C_ADDRESS_EEPROM              0xA0
-#define I2C_FLASH_PAGESIZE              64
+#define I2C_DMA_RCC_AHB1Periph          RCC_AHB1Periph_DMA1
+// Could use DMA to read touch panel, but stream conflict with Ext. module PPM TIM4_CH1
+//#define I2C_DMA                         DMA1
+#define I2C_DMA_RX_Channel              DMA_Channel_1
+#define I2C_DMA_RX_Stream               DMA1_Stream0
+#define I2C_DMA_RX_IRQn                 DMA1_Stream0_IRQn
+#define I2C_DMA_RX_IRQHandler           DMA1_Stream0_IRQHandler
+#define I2C_DMA_RX_IRQPriority          7
+#define I2C_DMA_RX_FLAG_FEIF            DMA_FLAG_FEIF0
+#define I2C_DMA_RX_FLAG_DMEIF           DMA_FLAG_DMEIF0
+#define I2C_DMA_RX_FLAG_TEIF            DMA_FLAG_TEIF0
+#define I2C_DMA_RX_FLAG_HTIF            DMA_FLAG_HTIF0
+#define I2C_DMA_RX_FLAG_TCIF            DMA_FLAG_TCIF0
+// I2C DMA TX unused
+//#define I2C_DMA_TX_Channel              DMA1_Channel_1
+//#define I2C_DMA_TX_Stream               DMA1_Stream6
+//#define I2C_DMA_TX_IRQn                 DMA1_Stream6_IRQn
+//#define I2C_DMA_TX_IRQHandler           DMA1_Stream6_IRQHandler
+//#define I2C_DMA_TX_FLAG_FEIF            DMA_FLAG_FEIF6
+//#define I2C_DMA_TX_FLAG_DMEIF           DMA_FLAG_DMEIF6
+//#define I2C_DMA_TX_FLAG_TEIF            DMA_FLAG_TEIF6
+//#define I2C_DMA_TX_FLAG_HTIF            DMA_FLAG_HTIF6
+//#define I2C_DMA_TX_FLAG_TCIF            DMA_FLAG_TCIF6
+
+// EEPROM
+#define EEPROM_SIZE                     (32*1024)
+#define EEPROM_PAGESIZE                 64
+#define EEPROM_I2C_ADDRESS              0xA0
+
+// FT6236 touch
+#define TOUCH_RCC_AHB1Periph            RCC_AHB1Periph_GPIOD
+#define TOUCH_RCC_APB2Periph            RCC_APB2Periph_SYSCFG
+#define TOUCH_INT_GPIO                  GPIOD
+#define TOUCH_INT_GPIO_PIN              GPIO_Pin_0
+#define TOUCH_INT_GPIO_PinSource        GPIO_PinSource0
+#define TOUCH_INT_EXTI_PortSource       EXTI_PortSourceGPIOD
+#define TOUCH_INT_EXTI_Line             EXTI_Line0
+#define TOUCH_INT_EXTI_IRQ              EXTI0_IRQn
+#define TOUCH_INT_EXTI_IRQHandler       EXTI0_IRQHandler
+#define TOUCH_INT_EXTI_IRQPriority      5
+#define TOUCH_RST_GPIO                  GPIOA
+#define TOUCH_RST_GPIO_PIN              GPIO_Pin_15
+#define TOUCH_RST_GPIO_PinSource        GPIO_PinSource15
+#define TOUCH_I2C_ADDRESS               0x70
 
 // SD
 #define SD_RCC_AHB1Periph               (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)

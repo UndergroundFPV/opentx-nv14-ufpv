@@ -66,7 +66,8 @@ set(FIRMWARE_TARGET_SRC
   startup_stm32f40_41xxx.s
   ../common/arm/stm32/sdio_sd.c
   ${LCD_DRIVER}
-  i2c_driver.cpp
+  ../common/arm/stm32/i2c_driver.cpp
+  ../common/arm/stm32/eeprom_driver.cpp
   pwr_driver.cpp
   ../common/arm/loadboot.cpp
   )
