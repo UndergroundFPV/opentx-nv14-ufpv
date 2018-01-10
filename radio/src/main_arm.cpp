@@ -406,6 +406,10 @@ void perMain()
   handleUsbConnection();
   checkTrainerSettings();
   periodicTick();
+#if defined(TOUCH_SCREEN) && !defined(SIMU)
+  // TODO: might be a better place for this, and also need to deal with SIMU
+  touchReadData();
+#endif
   DEBUG_TIMER_STOP(debugTimerPerMain1);
 
   if (mainRequestFlags & (1 << REQUEST_FLIGHT_RESET)) {

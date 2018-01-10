@@ -33,8 +33,8 @@
   */
 void eepromReadBlock(uint8_t * buffer, size_t address, size_t size)
 {
-  if (!i2cRead(EEPROM_I2C_ADDRESS, address, 16, buffer, size))
-    TRACE_ERROR("eeprom: I2C read failed in eepromReadBlock()!");
+  if (!i2cRead(EEPROM_I2C_ADDRESS, (uint16_t)address, 16, buffer, (uint16_t)size))
+    TRACE_ERROR("eeprom: I2C read failed in eepromReadBlock()!\r\n");
 }
 
 uint8_t eepromIsTransferComplete()
@@ -54,7 +54,7 @@ uint8_t eepromIsTransferComplete()
 void eepromPageWrite(uint8_t* pBuffer, uint16_t WriteAddr, uint8_t NumByteToWrite)
 {
   if (!i2cWrite(EEPROM_I2C_ADDRESS, WriteAddr, 16, pBuffer, NumByteToWrite))
-    TRACE_ERROR("eeprom: I2C write failed in eepromPageWrite()!");
+    TRACE_ERROR("eeprom: I2C write failed in eepromPageWrite()!\r\n");
 }
 
 /**
@@ -75,7 +75,7 @@ void eepromWriteBlock(uint8_t * buffer, size_t address, size_t size)
   while (count > 0) {
     eepromPageWrite(buffer, address, count);
     if (!i2cWaitStandbyState(EEPROM_I2C_ADDRESS)) {
-      TRACE_WARNING("eeprom: eepromWriteBlock() I2C standby state failed, write may be incomplete.");
+      TRACE_WARNING("eeprom: eepromWriteBlock() I2C standby state failed, write may be incomplete.\r\n");
     }
     address += count;
     buffer += count;

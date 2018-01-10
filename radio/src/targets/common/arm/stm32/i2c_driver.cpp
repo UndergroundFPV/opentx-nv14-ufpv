@@ -26,8 +26,63 @@
 #define UNUSED(x)	((void)(x))
 #endif
 
-i2cDmaCallback_t * i2cDmaRxCallback = 0;
-i2cDmaCallback_t * i2cDmaTxCallback = 0;
+i2cData_t i2cData;
+
+bool i2cErrorHandler()
+{
+  return i2cInit();
+}
+
+bool i2cWaitEvent(uint32_t event)
+{
+  uint32_t timeout = I2C_TIMEOUT_MAX;
+  while (!I2C_CheckEvent(I2C_I2Cx, event)) {
+    if (!(--timeout))
+      return false;
+  }
+  return true;
+}
+
+bool i2cWaitEventCleared(uint32_t event)
+{
+  uint32_t timeout = I2C_TIMEOUT_MAX;
+  while (I2C_CheckEvent(I2C_I2Cx, event)) {
+    if (!(--timeout))
+      return false;
+  }
+  return true;
+}
+
+bool i2cWaitFlagCleared(uint32_t flag)
+{
+  uint32_t timeout = I2C_TIMEOUT_MAX;
+  while (I2C_GetFlagStatus(I2C_I2Cx, flag)) {
+    if (!(--timeout))
+      return false;
+  }
+  return true;
+
+}
+
+bool i2cWaitBusReady()
+{
+  if (!i2cWaitFlagCleared(I2C_FLAG_BUSY)) {
+    TRACE_I2C_ERR("i2cWaitBusReady(): Bus timeout, I2C_FLAG_BUSY still set.");
+    return I2C_ERROR_HANDLER();
+  }
+
+  return true;
+}
+
+void i2cDataInit() {
+  if (i2cData.dataInit)
+    return;
+
+  i2cData.dataInit = true;
+  i2cData.hwInit = false;
+  i2cData.dmaRxCallback = NULL;
+  i2cData.dmaTxCallback = NULL;
+}
 
 void i2cDmaInit(uint32_t direction)
 {
@@ -70,6 +125,7 @@ void i2cDmaInit(uint32_t direction)
 
 bool i2cHwInit()
 {
+  i2cData.hwInit = false;
   I2C_Cmd(I2C_I2Cx, DISABLE);
   I2C_DeInit(I2C_I2Cx);
 
@@ -106,11 +162,14 @@ bool i2cHwInit()
   I2C_Init(I2C_I2Cx, &I2C_InitStructure);
 
   delay_us(100);
-  return i2cWaitEventCleared(I2C_FLAG_BUSY);
+  i2cData.hwInit = i2cWaitBusReady();
+  return i2cData.hwInit;
 }
 
 bool i2cInit()
 {
+  i2cDataInit();
+
   uint16_t maxTries = I2C_BUS_RST_MAX;
   while (!i2cHwInit()) {
     // if recovering from an error, we may need to retry the bus several times
@@ -128,48 +187,17 @@ bool i2cInit()
   return true;
 }
 
-bool i2cErrorHandler() {
-  TRACE_I2C_ERR("Bus timeout error.");
-  return i2cInit();
-}
-
-bool i2cWaitEvent(uint32_t event)
-{
-  uint32_t timeout = I2C_TIMEOUT_MAX;
-  while (!I2C_CheckEvent(I2C_I2Cx, event)) {
-    if ((timeout--) == 0)
-      return false;
-  }
-  return true;
-}
-
-bool i2cWaitEventCleared(uint32_t event)
-{
-  uint32_t timeout = I2C_TIMEOUT_MAX;
-  while (I2C_CheckEvent(I2C_I2Cx, event)) {
-    if ((timeout--) == 0)
-      return false;
-  }
-  return true;
-}
-
-bool i2cWaitBusReady()
-{
-  if (!i2cWaitEventCleared(I2C_FLAG_BUSY))
-    return I2C_ERROR_HANDLER();
-
-  return true;
-}
-
 bool i2cWaitStandbyState(uint8_t addr)
 {
   if (!i2cWaitBusReady())
     return false;
 
-  uint32_t maxTries = I2C_BUS_RST_MAX;
+  uint32_t maxTries = I2C_TIMEOUT_MAX;
   do {
-    if (!(--maxTries))
+    if (!(--maxTries)) {
+      TRACE_I2C_ERR("i2cWaitStandbyState(): Maximum tries exceeded.");
       return I2C_ERROR_HANDLER();
+    }
 
     I2C_GenerateSTART(I2C_I2Cx, ENABLE);
     if (!i2cWaitEvent(I2C_EVENT_MASTER_MODE_SELECT)) {
@@ -296,7 +324,7 @@ uint8_t i2cReadByte(uint8_t addr, uint16_t loc, uint8_t regSz)
 bool i2cDmaWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t * callback)
 {
 #if defined(I2C_DMA) && defined(I2C_DMA_TX_Stream)
-  if (len < 2 || !i2cPrepareWrite(addr, loc, regSz))
+  if (!i2cPrepareWrite(addr, loc, regSz))
     return false;
 
   I2C_DMA_TX_Stream->NDTR = (uint32_t)len;  // BufferSize;
@@ -315,7 +343,7 @@ bool i2cDmaWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, u
   else {
     DMA_ITConfig(I2C_DMA_TX_Stream, DMA_IT_TC, DISABLE);
   }
-  i2cDmaTxCallback = callback;
+  i2cData.i2cDmaTxCallback = callback;
 
   I2C_DMALastTransferCmd(I2C_I2Cx, ENABLE);
   DMA_Cmd(I2C_DMA_TX_Stream, ENABLE);
@@ -330,7 +358,7 @@ bool i2cDmaWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, u
 bool i2cDmaRead(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t * callback)
 {
 #if defined(I2C_DMA) && defined(I2C_DMA_RX_Stream)
-  if (len < 2 || !i2cPrepareRead(addr, loc, regSz))
+  if (!i2cPrepareRead(addr, loc, regSz))
     return false;
 
   I2C_DMA_RX_Stream->NDTR = (uint32_t)len;  // BufferSize;
@@ -349,9 +377,10 @@ bool i2cDmaRead(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, ui
   else {
     DMA_ITConfig(I2C_DMA_RX_Stream, DMA_IT_TC, DISABLE);
   }
-  i2cDmaRxCallback = callback;
+  i2cData.dmaRxCallback = callback;
 
-  I2C_AcknowledgeConfig(I2C_I2Cx, ENABLE);
+  if (len > 1)
+    I2C_AcknowledgeConfig(I2C_I2Cx, ENABLE);
   I2C_DMALastTransferCmd(I2C_I2Cx, ENABLE);
   DMA_Cmd(I2C_DMA_RX_Stream, ENABLE);
   I2C_DMACmd(I2C_I2Cx, ENABLE);
@@ -372,8 +401,8 @@ extern "C" void I2C_DMA_RX_IRQHandler(void)
     //I2C_DMACmd(I2C_I2Cx, DISABLE);
     DMA_ClearFlag(I2C_DMA_RX_Stream, I2C_DMA_RX_FLAG_TCIF);
 
-    if (i2cDmaRxCallback)
-      i2cDmaRxCallback();
+    if (i2cData.dmaRxCallback)
+      i2cData.dmaRxCallback();
   }
 }
 #endif  // defined(I2C_DMA) && defined(I2C_DMA_RX_IRQHandler)
@@ -395,8 +424,8 @@ extern "C" void I2C_DMA_TX_IRQHandler(void)
 
     I2C_GenerateSTOP(I2C_I2Cx, ENABLE);
 
-    if (i2cDmaTxCallback)
-      i2cDmaTxCallback();
+    if (i2cData.i2cDmaTxCallback)
+      i2cData.i2cDmaTxCallback();
   }
 }
 #endif  // defined(I2C_DMA) && defined(I2C_DMA_TX_IRQHandler)

@@ -130,11 +130,6 @@ void per10ms()
   }
 #endif
 
-// TODO
-#if defined(PCBI8) && !defined(SIMU)
-  touchReadData();
-#endif
-
   readKeysAndTrims();
 
 #if defined(ROTARY_ENCODER_NAVIGATION)

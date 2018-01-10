@@ -344,6 +344,7 @@
 #define EEPROM_I2C_ADDRESS              0xA0
 
 // FT6236 touch
+#define TOUCH_SCREEN
 #define TOUCH_RCC_AHB1Periph            RCC_AHB1Periph_GPIOD
 #define TOUCH_RCC_APB2Periph            RCC_APB2Periph_SYSCFG
 #define TOUCH_INT_GPIO                  GPIOD
@@ -358,6 +359,11 @@
 #define TOUCH_RST_GPIO_PIN              GPIO_Pin_15
 #define TOUCH_RST_GPIO_PinSource        GPIO_PinSource15
 #define TOUCH_I2C_ADDRESS               0x70
+#if defined(I2C_DMA)
+  #define TOUCH_USE_DMA           1
+#else
+  #define TOUCH_USE_DMA           0
+#endif
 
 // SD
 #define SD_RCC_AHB1Periph               (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)

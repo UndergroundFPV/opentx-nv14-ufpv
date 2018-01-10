@@ -24,13 +24,7 @@
 
 // FT6236 touch driver
 
-#if defined(I2C_DMA)
-  #define TOUCH_READ_MODE              0     // DMA mode:
-#else
-  #define TOUCH_READ_MODE              1     // 0 = DMA mode: 1 = polled mode (read data on demand); 2 = immediate (read data as soon as ready, in IRQ)
-#endif
-
-#define TOUCH_USE_DMA           (TOUCH_READ_MODE == 0)
+#define TOUCH_READ_MODE           1     // 1 = polled mode (read data on demand); 2 = immediate (read data as soon as ready, in IRQ)
 
 #define DEVICE_MODE_VALUE       (00)        // Device WORKING mode
 #define TOUCH_THRESHOLD_VALUE   (22)        // Touch threshold value
@@ -67,16 +61,15 @@
 
 #define FT6236_READ_DATA_LEN    14  // total bytes to read at a time into buffer
 
-#if defined(TOUCH_USE_DMA)
-  #define FT6236_BUFFER_LOC     __DMA  // if available
+#if TOUCH_USE_DMA
+  #define FT6236_BUFFER_LOC     __DMA
 #else
   #define FT6236_BUFFER_LOC
 #endif
 
 touchPointRef_t touchData;
-static bool busDataReady = false;
-//static bool bufferDataReady = false;
-static bool dataMutex = false;
+volatile bool busDataReady = false;
+volatile bool dataMutex = false;
 uint8_t touchBuffer[FT6236_READ_DATA_LEN] FT6236_BUFFER_LOC;
 
 void touchParsePoint(uint8_t * pBuffer, uint8_t idx)
@@ -156,7 +149,7 @@ static void EXTILine0_Config(void)
 
 bool touchInit()
 {
-  if (!i2cWaitEventCleared(I2C_FLAG_BUSY)) {
+  if (!i2cWaitBusReady()) {
     if (!i2cInit()) {
       TRACE_ERROR("Touch Driver: Init failed, I2C bus not ready.");
       return false;
@@ -206,25 +199,31 @@ bool touchInit()
   // enable external interrupt
   EXTILine0_Config();
 
-	return true;
-}
-
-void touchReadData()
-{
-  if (!busDataReady || dataMutex || TOUCH_USE_DMA)
-    return;
-
-  dataMutex = true;
-  i2cRead(TOUCH_I2C_ADDRESS, FT6236_GEST_ID, 8, touchBuffer, FT6236_READ_DATA_LEN);
-  busDataReady = false;
-  dataMutex = false;
-  touchParseData();
+  return true;
 }
 
 void touchDmaRxComplete()
 {
   dataMutex = false;
+  busDataReady = false;
   touchParseData();
+}
+
+void touchReadData()
+{
+  if (!busDataReady || dataMutex)
+    return;
+
+  dataMutex = true;
+  if (TOUCH_USE_DMA) {
+    i2cDmaRead(TOUCH_I2C_ADDRESS, FT6236_GEST_ID, 8, touchBuffer, FT6236_READ_DATA_LEN, true, &touchDmaRxComplete);
+  }
+  else {
+    i2cRead(TOUCH_I2C_ADDRESS, FT6236_GEST_ID, 8, touchBuffer, FT6236_READ_DATA_LEN);
+    busDataReady = false;
+    dataMutex = false;
+    touchParseData();
+  }
 }
 
 extern "C" void TOUCH_INT_EXTI_IRQHandler(void)
@@ -232,16 +231,9 @@ extern "C" void TOUCH_INT_EXTI_IRQHandler(void)
   DEBUG_INTERRUPT(INT_EXTI0);
 
   if (EXTI_GetITStatus(TOUCH_INT_EXTI_Line) != RESET) {
-
-    if (TOUCH_USE_DMA) {
-      dataMutex = true;
-      i2cDmaRead(TOUCH_I2C_ADDRESS, FT6236_GEST_ID, 8, touchBuffer, FT6236_READ_DATA_LEN, true, &touchDmaRxComplete);
-    }
-    else {
-      busDataReady = true;
-      if (TOUCH_READ_MODE == 2)
-        touchReadData();
-    }
+    busDataReady = true;
+    if (TOUCH_READ_MODE == 2)
+      touchReadData();
     EXTI_ClearITPendingBit(TOUCH_INT_EXTI_Line);
   }
 }

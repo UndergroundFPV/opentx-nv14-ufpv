@@ -22,15 +22,13 @@
 #define I2C_DRIVER_H
 
 #include <stdint.h>
+#include <atomic>
 
 #ifndef   I2C_I2Cx
   #define I2C_I2Cx             I2C  // I2C peripheral
 #endif
 #ifndef   I2C_TIMEOUT
-  #define I2C_TIMEOUT          0x3000
-#endif
-#ifndef   I2C_TIMEOUT_MAX
-  #define I2C_TIMEOUT_MAX      3 * I2C_TIMEOUT
+  #define I2C_TIMEOUT_MAX      1000
 #endif
 #ifndef   I2C_BUS_RST_MAX
   #define I2C_BUS_RST_MAX      300  // maximum attempts to reset a hung bus before giving up
@@ -46,11 +44,15 @@ extern "C" {
 #endif
 
 typedef void i2cDmaCallback_t (void);
+typedef struct {
+  bool dataInit;
+  bool hwInit;
+  i2cDmaCallback_t * dmaRxCallback;
+  i2cDmaCallback_t * dmaTxCallback;
+} i2cData_t;
 
 bool i2cInit();
 bool i2cWaitBusReady();
-bool i2cWaitEvent(uint32_t event);
-bool i2cWaitEventCleared(uint32_t event);
 bool i2cWaitStandbyState(uint8_t addr);
 bool i2cWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len);
 bool i2cWriteByte(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t data);
