@@ -175,6 +175,11 @@ void boardInit()
   pwrInit();
 #endif
 
+#if defined(DEBUG) && defined(SERIAL_GPIO)
+  serial2Init(0, 0); // default serial mode (None if DEBUG not defined)
+  TRACE("\nTaranis board starting...");
+#endif
+
 #if defined(STATUS_LEDS)
   ledInit();
   ledGreen();
@@ -192,7 +197,6 @@ void boardInit()
   usbInit();
 
 #if defined(DEBUG) && defined(SERIAL_GPIO)
-  serial2Init(0, 0); // default serial mode (None if DEBUG not defined)
   TRACE("\nTaranis board started :)");
 #endif
 

@@ -132,6 +132,11 @@ void boardInit()
 
   pwrInit();
 
+#if defined(DEBUG)
+  serial2Init(0, 0); // default serial mode (None if DEBUG not defined)
+  TRACE("\nI8 board starting...");
+#endif
+
   ledInit();
   keysInit();
   adcInit();
@@ -146,11 +151,6 @@ void boardInit()
   gimbalsInit();
   usbInit();
 
-#if defined(DEBUG)
-  serial2Init(0, 0); // default serial mode (None if DEBUG not defined)
-  TRACE("\nI8 board started :)");
-#endif
-
 #if defined(HAPTIC)
   hapticInit();
 #endif
@@ -161,6 +161,7 @@ void boardInit()
 
 #if defined(DEBUG)
   DBGMCU_APB1PeriphConfig(DBGMCU_IWDG_STOP|DBGMCU_TIM1_STOP|DBGMCU_TIM2_STOP|DBGMCU_TIM3_STOP|DBGMCU_TIM6_STOP|DBGMCU_TIM8_STOP|DBGMCU_TIM10_STOP|DBGMCU_TIM13_STOP|DBGMCU_TIM14_STOP, ENABLE);
+  TRACE("\nI8 board started :)");
 #endif
 
 /*
