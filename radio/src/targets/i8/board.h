@@ -380,12 +380,12 @@ typedef struct
   bool dataReady;
   uint8_t  gid;       // gesture ID
   uint8_t  status;    // number of points touched
-  uint16_t x[2];
-  uint16_t y[2];
-  uint8_t  z[2];     // Touch Weight
-  uint8_t  evt[2];   // Event Flag (2b)
-  uint8_t  tid[2];   // Touch ID   (4b)
-  uint8_t  area[2];  // Touch Area (4b)
+  uint16_t x[TOUCH_POINTS];
+  uint16_t y[TOUCH_POINTS];
+  uint8_t  z[TOUCH_POINTS];     // Touch Weight
+  uint8_t  evt[TOUCH_POINTS];   // Event Flag (2b)
+  uint8_t  tid[TOUCH_POINTS];   // Touch ID   (4b)
+  uint8_t  area[TOUCH_POINTS];  // Touch Area (4b)
 } touchPointRef_t;
 extern touchPointRef_t touchData;
 

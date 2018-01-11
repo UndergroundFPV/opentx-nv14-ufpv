@@ -359,6 +359,7 @@
 #define TOUCH_RST_GPIO_PIN              GPIO_Pin_15
 #define TOUCH_RST_GPIO_PinSource        GPIO_PinSource15
 #define TOUCH_I2C_ADDRESS               0x70
+#define TOUCH_POINTS                    2
 #if defined(I2C_DMA)
   #define TOUCH_USE_DMA           1
 #else
