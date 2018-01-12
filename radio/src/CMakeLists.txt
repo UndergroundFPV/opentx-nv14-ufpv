@@ -123,7 +123,7 @@ else()
   message(FATAL_ERROR "Unknown PCB '${PCB}'")
 endif()
 
-if(NOT PCB STREQUAL 9XR AND NOT PCB STREQUAL 9XRPRO)
+if(NOT PCB STREQUAL 9XR AND NOT PCB STREQUAL 9XRPRO AND NOT PCB STREQUAL I8)
   option(DBLKEYS "Double Keys" ON)
   if(DBLKEYS)
     add_definitions(-DDBLKEYS)
