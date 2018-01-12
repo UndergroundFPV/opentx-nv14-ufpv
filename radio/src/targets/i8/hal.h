@@ -143,6 +143,7 @@
 #define LED_RED_GPIO_PIN                GPIO_Pin_1  // PB.01
 
 // Internal Module
+#define INTMODULE
 #define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA1)
 #define INTMODULE_RCC_APB1Periph        (RCC_APB1Periph_USART3 | RCC_APB1Periph_TIM2)
 #define INTMODULE_TX_GPIO               GPIOB

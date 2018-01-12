@@ -156,12 +156,11 @@ inline void startPulses()
 {
   s_pulses_paused = false;
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(INTMODULE)
   setupPulses(INTERNAL_MODULE);
-  setupPulses(EXTERNAL_MODULE);
-#else
-  setupPulses(EXTERNAL_MODULE);
 #endif
+
+  setupPulses(EXTERNAL_MODULE);
 
 #if defined(HUBSAN)
   Hubsan_Init();

@@ -58,7 +58,7 @@ enum MenuModelSetupItems {
 #endif
   ITEM_MODEL_BEEP_CENTER,
   CASE_CPUARM(ITEM_MODEL_USE_GLOBAL_FUNCTIONS)
-#if defined(PCBTARANIS)
+#if defined(INTMODULE)
   ITEM_MODEL_INTERNAL_MODULE_LABEL,
   ITEM_MODEL_INTERNAL_MODULE_MODE,
   ITEM_MODEL_INTERNAL_MODULE_CHANNELS,
@@ -700,20 +700,20 @@ void menuModelSetup(event_t event)
         break;
 #endif
 
-#if defined(PCBTARANIS)
+#if defined(INTMODULE)
       case ITEM_MODEL_INTERNAL_MODULE_LABEL:
         lcdDrawTextAlignedLeft(y, TR_INTERNALRF);
         break;
 
       case ITEM_MODEL_INTERNAL_MODULE_MODE:
         lcdDrawTextAlignedLeft(y, STR_MODE);
-        lcdDrawTextAtIndex(MODEL_SETUP_2ND_COLUMN, y, STR_XJT_PROTOCOLS, 1+g_model.moduleData[0].rfProtocol, attr);
+        lcdDrawTextAtIndex(MODEL_SETUP_2ND_COLUMN, y, STR_XJT_PROTOCOLS, 1+g_model.moduleData[INTERNAL_MODULE].rfProtocol, attr);
         if (attr) {
           g_model.moduleData[INTERNAL_MODULE].rfProtocol = checkIncDec(event, g_model.moduleData[INTERNAL_MODULE].rfProtocol, RF_PROTO_OFF, RF_PROTO_LAST, EE_MODEL, isRfProtocolAvailable);
           if (checkIncDec_Ret) {
-            g_model.moduleData[0].type = MODULE_TYPE_XJT;
-            g_model.moduleData[0].channelsStart = 0;
-            g_model.moduleData[0].channelsCount = DEFAULT_CHANNELS(INTERNAL_MODULE);
+            g_model.moduleData[INTERNAL_MODULE].type = MODULE_TYPE_XJT;
+            g_model.moduleData[INTERNAL_MODULE].channelsStart = 0;
+            g_model.moduleData[INTERNAL_MODULE].channelsCount = DEFAULT_CHANNELS(INTERNAL_MODULE);
             if (g_model.moduleData[INTERNAL_MODULE].rfProtocol == RF_PROTO_OFF)
               g_model.moduleData[INTERNAL_MODULE].type = MODULE_TYPE_NONE;
           }
@@ -904,7 +904,7 @@ void menuModelSetup(event_t event)
 #if defined(PCBX7)
       case ITEM_MODEL_TRAINER_CHANNELS:
 #endif
-#if defined(PCBTARANIS)
+#if defined(INTMODULE)
       case ITEM_MODEL_INTERNAL_MODULE_CHANNELS:
 #endif
 #if defined(PCBSKY9X)
@@ -942,7 +942,7 @@ void menuModelSetup(event_t event)
 #if defined(PCBX7)
       case ITEM_MODEL_TRAINER_PARAMS:
 #endif
-#if defined(PCBTARANIS)
+#if defined(INTMODULE)
       case ITEM_MODEL_INTERNAL_MODULE_BIND:
 #endif
 #if defined(PCBSKY9X)
@@ -1102,7 +1102,7 @@ void menuModelSetup(event_t event)
       }
 #endif
 
-#if defined(PCBTARANIS)
+#if defined(INTMODULE)
       case ITEM_MODEL_INTERNAL_MODULE_FAILSAFE:
 #endif
 #if defined(CPUARM)

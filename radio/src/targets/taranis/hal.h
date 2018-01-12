@@ -556,6 +556,7 @@
 #endif
 
 // Internal Module
+#define INTMODULE
 #if defined(PCBXLITE)
   #define INTMODULE_RCC_AHB1Periph      (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)
   #define INTMODULE_RCC_APB1Periph      RCC_APB1Periph_TIM3

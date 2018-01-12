@@ -156,7 +156,7 @@ extern "C" void INTMODULE_TIMER_IRQHandler()
   DEBUG_TIMER_SAMPLE(debugTimerIntPulses);
   DEBUG_TIMER_START(debugTimerIntPulsesDuration);
 
-  INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;           // clear flag
+  INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF; // clear flag
   setupPulses(INTERNAL_MODULE);
   intmoduleSendNextFrame();
 

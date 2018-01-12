@@ -24,6 +24,7 @@ void intmoduleStop(void);
 void extmoduleStop(void);
 
 void intmoduleNoneStart(void);
+void intmodulePxxStart(void);
 void intmoduleStart(void);
 
 void extmoduleNoneStart(void);
@@ -40,6 +41,8 @@ void init_pxx(uint32_t port)
 {
   if (port == EXTERNAL_MODULE)
     extmodulePxxStart();
+  else
+    intmodulePxxStart();
 }
 
 void disable_pxx(uint32_t port)

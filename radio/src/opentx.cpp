@@ -284,6 +284,11 @@ void generalDefault()
   g_eeGeneral.vBatWarn = 66;
   g_eeGeneral.vBatMin = -28; // 6.2V
   g_eeGeneral.vBatMax = -38;   // 8.2V
+#elif defined(PCBI8)
+  // TODO
+  g_eeGeneral.vBatWarn = 40;
+  g_eeGeneral.vBatMin = -30; //6V
+  g_eeGeneral.vBatMax = -40; //8V
 #elif defined(PCBTARANIS)
   // NI-MH 7.2V, X9D, X9D+ and X7
   g_eeGeneral.vBatWarn = 65;
@@ -469,7 +474,7 @@ void modelDefault(uint8_t id)
   }
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
   g_model.moduleData[INTERNAL_MODULE].type = MODULE_TYPE_XJT;
   g_model.moduleData[INTERNAL_MODULE].channelsCount = DEFAULT_CHANNELS(INTERNAL_MODULE);
 #elif defined(PCBSKY9X)

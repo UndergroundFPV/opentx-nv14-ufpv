@@ -37,7 +37,7 @@ uint8_t getRequiredProtocol(uint8_t port)
   uint8_t required_protocol;
 
   switch (port) {
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(INTMODULE)
     case INTERNAL_MODULE:
       switch (g_model.moduleData[INTERNAL_MODULE].type) {
 #if defined(TARANIS_INTERNAL_PPM)

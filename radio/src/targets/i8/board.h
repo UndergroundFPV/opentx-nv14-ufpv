@@ -158,7 +158,7 @@ uint32_t isFirmwareStart(const uint8_t * buffer);
 uint32_t isBootloaderStart(const uint8_t * buffer);
 
 // Pulses driver
-#define IS_UART_MODULE(port)      false // TODO: Remove
+#define IS_UART_MODULE(port)      (port == INTERNAL_MODULE)
 #define INTERNAL_MODULE_ON()      do {} while (0)
 #define INTERNAL_MODULE_OFF()     do {} while (0)
 #define EXTERNAL_MODULE_ON()      GPIO_SetBits(EXTMODULE_PWR_GPIO, EXTMODULE_PWR_GPIO_PIN)
