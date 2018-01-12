@@ -20,7 +20,7 @@
 
 #include "opentx.h"
 
-// for the  MULTI protocol definition
+// for the MULTI protocol definition
 // see https://github.com/pascallanger/DIY-Multiprotocol-TX-Module
 // file Multiprotocol/multiprotocol.h
 
@@ -40,7 +40,6 @@ void sendChannels(uint8_t port);
 
 static void sendSetupFrame()
 {
-
   // Old multi firmware will mark config messsages as invalid frame and throw them away
   sendByteSbus('M');
   sendByteSbus('P');
@@ -68,7 +67,6 @@ static void sendFailsafeChannels(uint8_t port)
     if (g_model.moduleData[port].failsafeMode == FAILSAFE_NOPULSES)
       failsafeValue = FAILSAFE_CHANNEL_NOPULSE;
 
-
     if (failsafeValue == FAILSAFE_CHANNEL_HOLD) {
       pulseValue = 0;
     }
@@ -87,13 +85,13 @@ static void sendFailsafeChannels(uint8_t port)
       bits >>= 8;
       bitsavailable -= 8;
     }
-
   }
 }
 
 void setupPulsesMultimodule(uint8_t port)
 {
-  static int counter=0;
+  static int counter = 0;
+
 #if defined(PPM_PIN_SERIAL)
   modulePulsesData[EXTERNAL_MODULE].dsm2.serialByte = 0 ;
   modulePulsesData[EXTERNAL_MODULE].dsm2.serialBitCount = 0 ;
@@ -106,12 +104,14 @@ void setupPulsesMultimodule(uint8_t port)
 
   // Every 1000 cycles (=9s) send a config packet that configures the multimodule (inversion, telemetry type)
   counter++;
-  if (counter  % 1000== 500) {
+  if (counter % 1000 == 500) {
     sendSetupFrame();
-  } else if (counter % 1000 == 0 && g_model.moduleData[port].failsafeMode != FAILSAFE_NOT_SET && g_model.moduleData[port].failsafeMode != FAILSAFE_RECEIVER) {
+  }
+  else if (counter % 1000 == 0 && g_model.moduleData[port].failsafeMode != FAILSAFE_NOT_SET && g_model.moduleData[port].failsafeMode != FAILSAFE_RECEIVER) {
     sendFrameProtocolHeader(port, true);
     sendFailsafeChannels(port);
-  } else {
+  }
+  else {
     // Normal Frame
     sendFrameProtocolHeader(port, false);
     sendChannels(port);
@@ -184,14 +184,16 @@ void sendFrameProtocolHeader(uint8_t port, bool failsafe)
 
   if (g_model.moduleData[port].getMultiProtocol(true) == MM_RF_PROTO_FRSKY) {
     if (subtype == MM_RF_FRSKY_SUBTYPE_D8) {
-      //D8
+      // D8
       type = 3;
       subtype = 0;
-    } else if (subtype == MM_RF_FRSKY_SUBTYPE_V8) {
-      //V8
+    }
+    else if (subtype == MM_RF_FRSKY_SUBTYPE_V8) {
+      // V8
       type = 25;
       subtype = 0;
-    } else {
+    }
+    else {
       type = 15;
       if (subtype == MM_RF_FRSKY_SUBTYPE_D16_8CH) // D16 8ch
         subtype = 1;
