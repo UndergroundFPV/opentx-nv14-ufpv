@@ -21,6 +21,7 @@
 #include "board.h"
 #include "opentx.h"
 #include "i2c_driver.h"
+#include "touch_driver.h"
 
 #if defined(__cplusplus) && !defined(SIMU)
 extern "C" {

@@ -647,6 +647,10 @@ int lcdRestoreBackupBuffer()
   return 1;
 }
 
+#if defined(TOUCH_SCREEN)
+#include "touch_driver.h"
+touchPointRef_t touchData;
+#endif
 
 #if defined(CPUARM)
 void pwrOff()

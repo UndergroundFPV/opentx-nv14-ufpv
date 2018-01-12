@@ -18,86 +18,10 @@
  * GNU General Public License for more details.
  */
 
-#include "board.h"
+#include "touch_driver.h"
 #include "i2c_driver.h"
 #include "debug.h"
-#include "opentx.h"
-
-// FT6236 touch driver
-
-// device registers
-#define FT6236_DEV_MODE         (0x00)      // device mode (R/W) 0=WORKING; 100b=FACTORY
-#define FT6236_GEST_ID          (0x01)      // Gesture ID (R) 0x10: Mv U; 0x14 Mv R; 0x18: Mv D; 0x1C Mv L; 0x48 Zm In; 0x49: Zm Out
-#define FT6236_TD_STATUS        (0x02)      // Number of touch points detected (1 or 2) (R)
-#define FT6236_P1_XH            (0X03)      // 1st Touch X Position High 4b & Event Flag 2b (R)
-#define FT6236_P1_XL            (0X04)      // 1st Touch X Position Low Byte (R)
-#define FT6236_P1_YH            (0X05)      // 1st Touch Y Position High 4b & Touch ID 4b (R)
-#define FT6236_P1_YL            (0X06)      // 1st Touch Y Position Low Byte (R)
-#define FT6236_P1_WEIGHT        (0X07)      // 1st Touch Weight (R)
-#define FT6236_P1_AREA          (0X08)      // 1st Touch Area (R)
-#define FT6236_P2_XH            (0X09)      // 2nd Touch X Position High 4b & Event Flag 2b (R)
-#define FT6236_P2_XL            (0X0A)      // 2nd Touch X Position Low Byte (R)
-#define FT6236_P2_YH            (0X0B)      // 2nd Touch Y Position High 4b & Touch ID 4b (R)
-#define FT6236_P2_YL            (0X0C)      // 2nd Touch Y Position Low Byte (R)
-#define FT6236_P2_WEIGHT        (0X0D)      // 2nd Touch Weight (R)
-#define FT6236_P2_AREA          (0X0E)      // 2nd Touch Area (R)
-
-#define FT6236_TH_GROUP         (0x80)      // Threshold for touch detection (R/W)
-#define FT6236_TH_DIFF          (0x85)      // Filter function coefficient (R/W)
-#define FT6236_CTRL             (0x86)      // 0: will keep active mode. 1: switch to monitor mode when idle (R/W)
-#define FT6236_TIMEENTERMONITOR (0x87)      // Idle timeout before switching to monitor mode (R/W)
-#define FT6236_PERIODACTIVE     (0x88)      // Report rate in active mode (R/W)
-#define FT6236_PERIODMONITOR    (0x89)      // Report rate in monitor mode (R/W)
-
-#define FT6236_RADIAN_VALUE     (0x91)      // Min. allowed angle for rotate gesture (R/W)
-#define FT6236_OFFSET_LFT_RGT   (0x92)      // Max. offset for moving left/right gesture (R/W)
-#define FT6236_OFFSET_UP_DN     (0x93)      // Max. offset for moving up/down gesture (R/W)
-#define FT6236_DISTANCE_LFT_RGT (0x94)      // Min. distance for moving left/right gesture (R/W)
-#define FT6236_DISTANCE_UP_DN   (0x95)      // Min. distance for moving up/down gesture (R/W)
-#define FT6236_DISTANCE_ZOOM    (0x96)      // Max. distance for zoom in/out gesture (R/W)
-
-#define FT6236_LIB_VER_H        (0xA1)      // LIB version high byte (R)
-#define FT6236_LIB_VER_L        (0xA2)      // LIB version low byte (R)
-#define FT6236_CIPHER           (0xA3)      // Chip Selecting (R)
-#define FT6236_G_MODE           (0xA4)      // Interrupt mode regitster (R/W)
-#define FT6236_PWR_MODE         (0xA5)      // Current power mode (R/W)
-#define FT6236_FIRMID           (0xA6)      // Firmware version (R)
-#define FT6236_FOCALTECH_ID     (0xA8)      // FT Panel ID (R)
-#define FT6236_RELEASE_CODE_ID  (0xAF)      // Release code version (R)
-#define FT6236_STATE            (0xBC)      // Current Operating mode (R/W)
-
-// register values
-#define TOUCH_INT_MODE_POLL     (0x00)      // Interrupt polling mode
-#define TOUCH_INT_MODE_TRIG     (0x01)      // Interrupt trigger mode
-#define TOUCH_CTRL_MODE_ACT     (0x00)      // Keep active mode
-#define TOUCH_CTRL_MODE_MON     (0x01)      // Switch from active to monitor mode after timeout in TIMEENTERMONITOR
-
-// expected device ID
-#define FT6236_VENDOR_ID        (0x11)      // Value of FT Panel ID
-
-// read value masks
-#define FT6236_STATUS(v)        (v & 0x0F)
-#define FT6236_EVENT_FLAG(v)    ((v & 0xC0) >> 6)
-#define FT6236_TOUCH_ID(v)      ((v & 0xF0) >> 4)
-#define FT6236_COORD_MSB(v)     ((v & 0x0F) << 8)
-#define FT6236_TOUCH_AREA(v)    ((v & 0xF0) >> 4)
-
-// setup
-#define TOUCH_READ_MODE         1           // 1 = polled mode (read data on demand); 2 = immediate (read data as soon as ready, in ISR)
-#define FT6236_READ_DATA_LEN    14          // total bytes to read at a time into buffer (GEST_ID + TD_STATUS  + (6 * 2))
-
-#define TOUCH_USE_CTRL_MODE     TOUCH_CTRL_MODE_ACT
-#if TOUCH_READ_MODE == 1
-  #define TOUCH_USE_INT_MODE    TOUCH_INT_MODE_POLL
-#else
-  #define TOUCH_USE_INT_MODE    TOUCH_INT_MODE_TRIG
-#endif
-
-#if TOUCH_USE_DMA
-  #define FT6236_BUFFER_LOC     __DMA
-#else
-  #define FT6236_BUFFER_LOC
-#endif
+#include <string.h>
 
 touchPointRef_t touchData;
 volatile bool dataMutex = false;
@@ -106,15 +30,23 @@ uint8_t touchBuffer[FT6236_READ_DATA_LEN] FT6236_BUFFER_LOC;
 void touchParsePoint(uint8_t * pBuffer, uint8_t idx)
 {
   touchData.evt[idx] = FT6236_EVENT_FLAG(pBuffer[0]);
-  touchData.y[idx] = (FT6236_COORD_MSB(pBuffer[0]) | pBuffer[1]);
-  //touchData.y[idx] = LCD_H - (touchData.y[idx] >> 1);
-
   touchData.tid[idx] = FT6236_TOUCH_ID(pBuffer[2]);
-  touchData.x[idx] = (FT6236_COORD_MSB(pBuffer[2]) | pBuffer[3]);
-  //touchData.x[idx] = LCD_W - (0xFF - (touchData.x[idx] >> 1));
+  touchData.press[idx] = (touchData.evt[idx] == FT6236_EVT_PRESS || touchData.evt[idx] == FT6236_EVT_CONTACT);
+  if (touchData.evt[idx] != FT6236_EVT_NONE) {
+    touchData.rawPoint[idx].x = (FT6236_COORD_MSB(pBuffer[0]) | pBuffer[1]);
+    touchData.rawPoint[idx].y = (FT6236_COORD_MSB(pBuffer[2]) | pBuffer[3]);
 
-  touchData.z[idx] = pBuffer[4];
-  touchData.area[idx] = FT6236_TOUCH_AREA(pBuffer[5]);
+    int16_t * xptr = &(TOUCH_SWAP_XY ? touchData.point[idx].y : touchData.point[idx].x);
+    int16_t * yptr = &(TOUCH_SWAP_XY ? touchData.point[idx].x : touchData.point[idx].y);
+
+    *xptr = touchData.rawPoint[idx].x;
+    *yptr = touchData.rawPoint[idx].y;
+
+    if (TOUCH_INVERT_X)
+      *xptr = TOUCH_RESOLUTION_X - *xptr;
+    if (TOUCH_INVERT_Y)
+      *yptr = TOUCH_RESOLUTION_Y - *yptr;
+  }
 }
 
 void touchParseData(void)
@@ -122,21 +54,27 @@ void touchParseData(void)
   if (dataMutex)
     return;
 
+  if (TOUCH_READ_MODE == 2)
+    NVIC_DisableIRQ(TOUCH_INT_EXTI_IRQ);
+
   dataMutex = true;
-  NVIC_DisableIRQ(TOUCH_INT_EXTI_IRQ);
-  touchData.dataReady = false;
 
-  touchData.gid = touchBuffer[0];
-  touchData.status = FT6236_STATUS(touchBuffer[1]);
+  memset(&touchData, 0, FT6236_READ_DATA_LEN);
 
-  for (int i = 0, end = min<uint8_t>(touchData.status, TOUCH_POINTS); i < end; ++i) {
-    touchParsePoint(&touchBuffer[2 + (6*i)], i);
-    //TRACE("p[%d]: x: %d; y: %d; z: %d; evt: %d; tid: %d; area: %d; gid: %d; ", i, touchData.x[i], touchData.y[i], touchData.z[i], touchData.evt[i], touchData.tid[i], touchData.area[i], touchData.gid);
-    TRACE("p[%d]: x: %d; y: %d; evt: %X; id: %X;", i, touchData.x[i], touchData.y[i], touchData.evt[i], touchData.tid[i]);
+  touchData.status = FT6236_STATUS(touchBuffer[0]);  // status may be zero if a point was released
+
+  //TRACE("stat: %d;", touchData.status);
+  for (int i = 0; i < TOUCH_POINTS; ++i) {
+    touchParsePoint(&touchBuffer[1 + (6*i)], i);
+    //TRACE("  p[%d]: x: %3d; y: %3d; rawX: %3d; rawY: %3d; evt: %d; tid: %d; prs: %d", i, touchData.point[i].x, touchData.point[i].y, touchData.rawPoint[i].x, touchData.rawPoint[i].y, touchData.evt[i], touchData.tid[i], touchData.press[i]);
   }
-  NVIC_EnableIRQ(TOUCH_INT_EXTI_IRQ);
+  //DUMP(touchBuffer, FT6236_READ_DATA_LEN);
+
   touchData.dataReady = true;
   dataMutex = false;
+
+  if (TOUCH_READ_MODE == 2)
+    NVIC_EnableIRQ(TOUCH_INT_EXTI_IRQ);
 }
 
 uint8_t touchReadReg(uint8_t regAddr)
@@ -146,7 +84,12 @@ uint8_t touchReadReg(uint8_t regAddr)
 
 uint8_t touchWriteReg(uint8_t regAddr, uint8_t value)
 {
-  return i2cWriteByte(TOUCH_I2C_ADDRESS, regAddr, 8, value);
+  uint8_t ret;
+  do {
+    i2cWriteByte(TOUCH_I2C_ADDRESS, regAddr, 8, value);
+  }
+  while ((ret = touchReadReg(regAddr)) != value);
+  return ret;
 }
 
 // external interrupt for data ready signal
@@ -202,12 +145,10 @@ bool touchInit()
       return false;
 
   // reset touch controller
-  GPIO_SetBits(TOUCH_RST_GPIO, TOUCH_RST_GPIO_PIN);
-  delay_ms(100);
   GPIO_ResetBits(TOUCH_RST_GPIO, TOUCH_RST_GPIO_PIN);
-  delay_ms(500);
+  delay_ms(50);
   GPIO_SetBits(TOUCH_RST_GPIO, TOUCH_RST_GPIO_PIN);
-  delay_ms(300);
+  delay_ms(310);
 
   uint8_t pId = touchReadReg(FT6236_FOCALTECH_ID);
   if (pId != FT6236_VENDOR_ID) {
@@ -237,7 +178,7 @@ bool touchInit()
         touchReadReg(FT6236_PERIODMONITOR),
         touchReadReg(FT6236_G_MODE),
         touchReadReg(FT6236_PWR_MODE)
-        );
+  );
 
   return true;
 }
@@ -259,10 +200,10 @@ void touchReadData()
 
   dataMutex = true;
   if (TOUCH_USE_DMA) {
-    i2cDmaRead(TOUCH_I2C_ADDRESS, FT6236_GEST_ID, 8, touchBuffer, FT6236_READ_DATA_LEN, true, &touchDmaRxComplete);
+    i2cDmaRead(TOUCH_I2C_ADDRESS, FT6236_TD_STATUS, 8, touchBuffer, FT6236_READ_DATA_LEN, true, &touchDmaRxComplete);
   }
   else {
-    i2cRead(TOUCH_I2C_ADDRESS, FT6236_GEST_ID, 8, touchBuffer, FT6236_READ_DATA_LEN);
+    i2cRead(TOUCH_I2C_ADDRESS, FT6236_TD_STATUS, 8, touchBuffer, FT6236_READ_DATA_LEN);
     busDataReady = false;
     dataMutex = false;
     touchParseData();

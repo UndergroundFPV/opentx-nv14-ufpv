@@ -197,8 +197,8 @@ void gimbalsRead(uint16_t * values);
 enum EnumKeys
 {
   KEY_MENU,
+  KEY_ENTER=KEY_MENU,
   KEY_EXIT,
-  KEY_ENTER,
   KEY_DOWN,
   KEY_UP,
   KEY_RIGHT,
@@ -372,25 +372,6 @@ void backlightEnable(void);
 #if defined(__cplusplus) && !defined(SIMU)
 }
 #endif
-
-// Touch driver FT6236
-typedef struct
-{
-  // TODO: remove/consolidate these as needed
-  bool dataReady;
-  uint8_t  gid;       // gesture ID
-  uint8_t  status;    // number of points touched
-  uint16_t x[TOUCH_POINTS];
-  uint16_t y[TOUCH_POINTS];
-  uint8_t  z[TOUCH_POINTS];     // Touch Weight
-  uint8_t  evt[TOUCH_POINTS];   // Event Flag (2b)
-  uint8_t  tid[TOUCH_POINTS];   // Touch ID   (4b)
-  uint8_t  area[TOUCH_POINTS];  // Touch Area (4b)
-} touchPointRef_t;
-extern touchPointRef_t touchData;
-
-bool touchInit(void);
-void touchReadData(void);
 
 // Debug driver
 void debugPutc(const char c);

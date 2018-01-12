@@ -20,6 +20,10 @@
 
 #include "opentx.h"
 
+#if defined(TOUCH_SCREEN) && !defined(SIMU)
+  #include "touch_driver.h"
+#endif
+
 uint8_t currentSpeakerVolume = 255;
 uint8_t requiredSpeakerVolume = 255;
 uint8_t mainRequestFlags = 0;

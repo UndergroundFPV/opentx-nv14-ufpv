@@ -365,7 +365,12 @@
 #define TOUCH_RST_GPIO_PIN              GPIO_Pin_15
 #define TOUCH_RST_GPIO_PinSource        GPIO_PinSource15
 #define TOUCH_I2C_ADDRESS               0x70
+#define TOUCH_RESOLUTION_X              (LCD_W*2)
+#define TOUCH_RESOLUTION_Y              (LCD_H*2)
 #define TOUCH_POINTS                    2
+#define TOUCH_SWAP_XY                   1
+#define TOUCH_INVERT_X                  1  // original X, not swapped
+#define TOUCH_INVERT_Y                  0  // original Y, not swapped
 #if defined(I2C_DMA)
   #define TOUCH_USE_DMA           1
 #else
