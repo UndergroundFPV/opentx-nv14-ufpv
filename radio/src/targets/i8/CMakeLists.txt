@@ -9,7 +9,7 @@ set(LINKER_SCRIPT targets/i8/stm32f4_flash.ld)
 set(HAPTIC YES)
 set(LUA_EXPORT lua_export_i8)
 set(FLAVOUR i8)
-add_definitions(-DSTM32F40_41xxx -DPCBI8 -DSOFTWARE_VOLUME)
+add_definitions(-DSTM32F40_41xxx -DPCBFLYSKY -DPCBI8 -DSOFTWARE_VOLUME)
 add_definitions(-DEEPROM_VARIANT=0x4000)
 add_definitions(-DPWR_BUTTON_${PWR_BUTTON})
 set(GUI_DIR 128x64)
@@ -72,6 +72,11 @@ set(FIRMWARE_TARGET_SRC
   touch_driver.cpp
   ../common/arm/loadboot.cpp
   )
+
+set(PULSES_SRC
+  ${PULSES_SRC}
+  flysky_arm.cpp
+)
 
 set(STM32LIB_SRC
   STM32F4xx_StdPeriph_Driver/src/stm32f4xx_sdio.c

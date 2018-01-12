@@ -71,6 +71,12 @@ PACK(struct PxxUartPulsesData {
   uint16_t pcmCrc;
   uint16_t _alignment;
 });
+PACK(struct FlySkySerialPulsesData {
+  uint8_t  pulses[64];
+  uint8_t  * ptr;
+  uint8_t  index;
+  uint8_t  crc;
+});
 #endif
 
 #define MULTIMODULE_BAUDRATE 100000
@@ -115,6 +121,7 @@ union ModulePulsesData {
 #endif
 #if defined(INTMODULE_USART)
   PxxUartPulsesData pxx_uart;
+  FlySkySerialPulsesData flysky;
 #endif
   PpmPulsesData<pulse_duration_t> ppm;
   CrossfirePulsesData crossfire;
@@ -141,6 +148,7 @@ void setupPulsesDSM2(uint8_t port);
 void setupPulsesMultimodule(uint8_t port);
 void setupPulsesSbus(uint8_t port);
 void setupPulsesPXX(uint8_t port);
+void setupPulsesFlySky(uint8_t port);
 void setupPulsesPPMModule(uint8_t port);
 void setupPulsesPPMTrainer();
 void sendByteDsm2(uint8_t b);

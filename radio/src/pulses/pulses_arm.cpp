@@ -46,7 +46,8 @@ uint8_t getRequiredProtocol(uint8_t port)
           break;
 #endif
         case MODULE_TYPE_XJT:
-          required_protocol = PROTO_PXX;
+#warning "TODO protool set to FLYSKY for the first tests"
+          required_protocol = PROTO_FLYSKY;
           break;
         default:
           required_protocol = PROTO_NONE;
@@ -128,6 +129,9 @@ void setupPulses(uint8_t port)
   if (s_current_protocol[port] != required_protocol) {
     init_needed = true;
     switch (s_current_protocol[port]) { // stop existing protocol hardware
+#if defined(PCBFLYSKY)
+      case PROTO_FLYSKY:
+#endif
       case PROTO_PXX:
         disable_pxx(port);
         break;
@@ -166,10 +170,18 @@ void setupPulses(uint8_t port)
 
   // Set up output data here
   switch (required_protocol) {
+#if defined(PCBFLYSKY)
+    case PROTO_FLYSKY:
+      setupPulsesFlySky(port);
+      scheduleNextMixerCalculation(port, 9);
+      break;
+#endif
+
     case PROTO_PXX:
       setupPulsesPXX(port);
       scheduleNextMixerCalculation(port, 9);
       break;
+
     case PROTO_SBUS:
       setupPulsesSbus(port);
       scheduleNextMixerCalculation(port, (45+g_model.moduleData[port].sbus.refreshRate)/2);
@@ -228,6 +240,9 @@ void setupPulses(uint8_t port)
 
   if (init_needed) {
     switch (required_protocol) { // Start new protocol hardware here
+#if defined(PCBFLYSKY)
+      case PROTO_FLYSKY:
+#endif
       case PROTO_PXX:
         init_pxx(port);
         break;
@@ -252,7 +267,6 @@ void setupPulses(uint8_t port)
       case PROTO_SBUS:
         init_sbusOut(port);
         break;
-
 
       case PROTO_PPM:
         init_ppm(port);

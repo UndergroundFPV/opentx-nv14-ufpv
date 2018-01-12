@@ -125,7 +125,8 @@ extern "C" void INTMODULE_TX_DMA_Stream_IRQHandler(void)
 
 void intmoduleSendNextFrame()
 {
-  if (s_current_protocol[INTERNAL_MODULE] == PROTO_PXX) {
+  if (s_current_protocol[INTERNAL_MODULE] == PROTO_PXX || s_current_protocol[INTERNAL_MODULE] == PROTO_FLYSKY) {
+    // TODO check DMA_BufferSize != 0
     DMA_InitTypeDef DMA_InitStructure;
     DMA_DeInit(INTMODULE_TX_DMA_STREAM);
     DMA_InitStructure.DMA_Channel = INTMODULE_DMA_CHANNEL;

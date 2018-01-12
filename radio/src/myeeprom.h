@@ -471,6 +471,9 @@ enum Protocols {
 #if defined(PXX) || defined(DSM2) || defined(IRPROTOS)
   PROTO_PXX,
 #endif
+#if defined(PCBFLYSKY)
+  PROTO_FLYSKY,
+#endif
 #if defined(DSM2) || defined(IRPROTOS)
   PROTO_DSM2_LP45,
   PROTO_DSM2_DSM2,
