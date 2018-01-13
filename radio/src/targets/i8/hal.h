@@ -146,15 +146,18 @@
 #define INTMODULE
 #define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA1)
 #define INTMODULE_RCC_APB1Periph        (RCC_APB1Periph_USART3 | RCC_APB1Periph_TIM2)
-#define INTMODULE_TX_GPIO               GPIOB
+#define INTMODULE_GPIO                  GPIOB
+// #define INTMODULE_TX_GPIO               GPIOB
 #define INTMODULE_TX_GPIO_PIN           GPIO_Pin_10 // PB.10
-#define INTMODULE_RX_GPIO               GPIOB
+// #define INTMODULE_RX_GPIO               GPIOB
 #define INTMODULE_RX_GPIO_PIN           GPIO_Pin_11 // PB.11
 #define INTMODULE_TX_GPIO_PinSource     GPIO_PinSource10
 #define INTMODULE_RX_GPIO_PinSource     GPIO_PinSource11
 #define INTMODULE_GPIOB_PINS            (GPIO_Pin_10 | GPIO_Pin_11)
-#define INTMODULE_TX_GPIO_AF            GPIO_AF_USART3
+#define INTMODULE_GPIO_AF               GPIO_AF_USART3
 #define INTMODULE_USART                 USART3
+#define INTMODULE_USART_IRQn            USART3_IRQn
+#define INTMODULE_USART_IRQHandler      USART3_IRQHandler
 #define INTMODULE_DMA                   DMA1
 #define INTMODULE_DMA_CHANNEL           DMA_Channel_4
 #define INTMODULE_TX_DMA_STREAM         DMA1_Stream3
@@ -211,10 +214,10 @@
 #define SERIAL_RCC_AHB1Periph           (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA1)
 #define SERIAL_RCC_APB1Periph           RCC_APB1Periph_USART2
 #define SERIAL_GPIO                     GPIOD
-#define SERIAL_GPIO_PIN_TX              GPIO_Pin_5 // PD.05
-#define SERIAL_GPIO_PIN_RX              GPIO_Pin_6 // PD.06
-#define SERIAL_GPIO_PinSource_TX        GPIO_PinSource5
-#define SERIAL_GPIO_PinSource_RX        GPIO_PinSource6
+#define SERIAL_TX_GPIO_PIN              GPIO_Pin_5 // PD.05
+#define SERIAL_RX_GPIO_PIN              GPIO_Pin_6 // PD.06
+#define SERIAL_TX_GPIO_PinSource        GPIO_PinSource5
+#define SERIAL_RX_GPIO_PinSource        GPIO_PinSource6
 #define SERIAL_GPIO_AF                  GPIO_AF_USART2
 #define SERIAL_USART                    USART2
 #define SERIAL_USART_IRQHandler         USART2_IRQHandler

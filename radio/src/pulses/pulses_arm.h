@@ -74,11 +74,17 @@ PACK(struct PxxUartPulsesData {
 PACK(struct FlySkySerialPulsesData {
   uint8_t  pulses[64];
   uint8_t  * ptr;
-  uint8_t  index;
+  uint8_t  frame_index;
   uint8_t  crc;
+  uint8_t  state;
+  uint8_t  state_index;
+  uint8_t  esc_state;
+  uint8_t  telemetry[64];
+  uint8_t  telemetry_index;
 });
 #endif
 
+#define PXX_PERIOD_DURATION  9 /* ms */
 #define MULTIMODULE_BAUDRATE 100000
 #if defined(INTMODULE_PULSES) || defined(EXTMODULE_PULSES)
 /* PXX uses 20 bytes (as of Rev 1.1 document) with 8 changes per byte + stop bit ~= 162 max pulses */
@@ -148,6 +154,7 @@ void setupPulsesDSM2(uint8_t port);
 void setupPulsesMultimodule(uint8_t port);
 void setupPulsesSbus(uint8_t port);
 void setupPulsesPXX(uint8_t port);
+void resetPulsesFlySky(uint8_t port);
 void setupPulsesFlySky(uint8_t port);
 void setupPulsesPPMModule(uint8_t port);
 void setupPulsesPPMTrainer();

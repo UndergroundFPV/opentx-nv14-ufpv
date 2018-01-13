@@ -31,19 +31,18 @@ Fifo<uint8_t, 32> serial2RxFifo;
 
 void uart3Setup(unsigned int baudrate, bool dma)
 {
-  USART_InitTypeDef USART_InitStructure;
+  GPIO_PinAFConfig(SERIAL_GPIO, SERIAL_RX_GPIO_PinSource, SERIAL_GPIO_AF);
+  GPIO_PinAFConfig(SERIAL_GPIO, SERIAL_TX_GPIO_PinSource, SERIAL_GPIO_AF);
+
   GPIO_InitTypeDef GPIO_InitStructure;
-
-  GPIO_PinAFConfig(SERIAL_GPIO, SERIAL_GPIO_PinSource_RX, SERIAL_GPIO_AF);
-  GPIO_PinAFConfig(SERIAL_GPIO, SERIAL_GPIO_PinSource_TX, SERIAL_GPIO_AF);
-
-  GPIO_InitStructure.GPIO_Pin = SERIAL_GPIO_PIN_TX | SERIAL_GPIO_PIN_RX;
+  GPIO_InitStructure.GPIO_Pin = SERIAL_TX_GPIO_PIN | SERIAL_RX_GPIO_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_Init(SERIAL_GPIO, &GPIO_InitStructure);
 
+  USART_InitTypeDef USART_InitStructure;
   USART_InitStructure.USART_BaudRate = baudrate;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
