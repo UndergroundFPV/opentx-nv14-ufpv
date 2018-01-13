@@ -1407,6 +1407,10 @@ enum AUDIO_SOUNDS {
 #include "rtc.h"
 #endif
 
+#if defined(TOUCH_SCREEN)
+  #include "touch_manager.h"
+#endif
+
 #if defined(REVX)
 void setMFP();
 void clearMFP();
@@ -1483,7 +1487,14 @@ union ReusableBuffer
     } xpotsCalib[NUM_XPOTS];
 #endif
   } calib;
-
+#if defined(TOUCH_SCREEN)
+  struct
+  {
+    int8_t state;
+    tsPoint_t lcdPoint[3];
+    tsPoint_t touchPoint[3];
+  } touchCal;
+#endif
 #if defined(SDCARD)
   // 274 bytes
   struct

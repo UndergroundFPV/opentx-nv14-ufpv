@@ -123,7 +123,7 @@ void menuFirstCalib(event_t event)
 {
   if (event == EVT_KEY_BREAK(KEY_EXIT) || reusableBuffer.calib.state == CALIB_FINISHED) {
     menuCalibrationState = CALIB_START;
-    chainMenu(menuMainView);
+    popMenu();
   }
   else {
     lcdDrawTextAlignedCenter(0*FH, MENUCALIBRATION);

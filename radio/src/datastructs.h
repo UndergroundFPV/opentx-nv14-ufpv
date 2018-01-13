@@ -881,6 +881,13 @@ PACK(struct TrainerData {
   NOBACKUP(TrainerMix mix[4]);
 });
 
+#if defined(TOUCH_SCREEN)
+  #include "touch_manager.h"
+  #define TOUCHMANAGER_DATA  NOBACKUP(TouchCalibMatrix touchCalib);
+#else
+  #define TOUCHMANAGER_DATA
+#endif
+
 #if defined(PCBHORUS)
   #define SPLASH_MODE uint8_t splashSpares:3
 #elif defined(FSPLASH)
@@ -945,7 +952,8 @@ PACK(struct TrainerData {
     swconfig_t switchConfig; \
     char switchNames[NUM_SWITCHES][LEN_SWITCH_NAME]; \
     char anaNames[NUM_STICKS+NUM_POTS+NUM_SLIDERS][LEN_ANA_NAME]; \
-    BLUETOOTH_FIELDS
+    BLUETOOTH_FIELDS \
+    TOUCHMANAGER_DATA
 #elif defined(PCBSKY9X)
   #define EXTRA_GENERAL_FIELDS \
     EXTRA_GENERAL_FIELDS_ARM \
@@ -1183,6 +1191,10 @@ static inline void check_struct()
   CHKSIZE(FrSkyRSSIAlarm, 1);
 #endif
   CHKSIZE(TrainerData, 16);
+
+#if defined(TOUCH_SCREEN)
+  CHKSIZE(TouchCalibMatrix, (7*4+2));
+#endif
 
 #if defined(PCBXLITE)
   CHKSIZE(RadioData, 838);

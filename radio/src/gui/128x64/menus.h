@@ -21,9 +21,10 @@
 #ifndef _MENUS_H_
 #define _MENUS_H_
 
+#include "board.h"
 #include "keys.h"
 
-#if defined(PCBTARANIS)
+#if defined(STM32)
 typedef int8_t horzpos_t;
 #define NAVIGATION_LINE_BY_LINE        0x40
 #define IS_LINE_SELECTED(sub, k)       ((sub)==(k) && menuHorizontalPosition < 0)
@@ -67,6 +68,7 @@ inline MenuHandlerFunc lastPopMenu()
 void onMainViewMenu(const char * result);
 
 void menuFirstCalib(event_t event);
+void menuFirstCalibTouch(event_t event);
 void menuMainView(event_t event);
 void menuViewTelemetryFrsky(event_t event);
 void menuViewTelemetryMavlink(event_t event);
@@ -83,6 +85,9 @@ enum MenuRadioIndexes
   MENU_RADIO_ANALOGS_TEST,
   CASE_CPUARM(MENU_RADIO_HARDWARE)
   MENU_RADIO_CALIBRATION,
+#if defined(TOUCH_SCREEN)
+  MENU_RADIO_CALIB_TOUCH,
+#endif
   MENU_RADIO_PAGES_COUNT
 };
 
@@ -95,6 +100,7 @@ void menuRadioDiagKeys(event_t event);
 void menuRadioDiagAnalogs(event_t event);
 void menuRadioHardware(event_t event);
 void menuRadioCalibration(event_t event);
+void menuRadioCalibTouch(event_t event);
 
 static const MenuHandlerFunc menuTabGeneral[] PROGMEM = {
   menuRadioSetup,
@@ -106,6 +112,9 @@ static const MenuHandlerFunc menuTabGeneral[] PROGMEM = {
   menuRadioDiagAnalogs,
   CASE_CPUARM(menuRadioHardware)
   menuRadioCalibration
+  #if defined(TOUCH_SCREEN)
+    , menuRadioCalibTouch
+  #endif
 };
 
 enum MenuModelIndexes {

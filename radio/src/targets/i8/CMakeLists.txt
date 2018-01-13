@@ -10,7 +10,7 @@ set(HAPTIC YES)
 set(LUA_EXPORT lua_export_i8)
 set(FLAVOUR i8)
 add_definitions(-DSTM32F40_41xxx -DPCBFLYSKY -DPCBI8 -DSOFTWARE_VOLUME)
-add_definitions(-DEEPROM_VARIANT=0x4000)
+add_definitions(-DEEPROM_VARIANT=0)
 add_definitions(-DPWR_BUTTON_${PWR_BUTTON})
 set(GUI_DIR 128x64)
 set(BITMAPS_TARGET 9x_bitmaps)
@@ -39,6 +39,7 @@ set(GUI_SRC ${GUI_SRC}
   radio_diagkeys.cpp
   radio_diaganas.cpp
   radio_hardware.cpp
+  radio_calib_touch.cpp
   view_channels.cpp
   view_telemetry.cpp
   view_about.cpp
@@ -56,6 +57,7 @@ set(TARGET_SRC
   extmodule_driver.cpp
   trainer_driver.cpp
   gimbals_driver.cpp
+  ../../touch_manager.cpp
   ../common/arm/stm32/intmodule_serial_driver.cpp
   ../common/arm/stm32/audio_dac_driver.cpp
   ../common/arm/stm32/adc_driver.cpp

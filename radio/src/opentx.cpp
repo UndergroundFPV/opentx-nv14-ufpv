@@ -342,6 +342,11 @@ void generalDefault()
 #endif
 
   g_eeGeneral.chkSum = 0xFFFF;
+
+#if defined(TOUCH_SCREEN)
+  TouchManager::initCalibrationMatrix(&g_eeGeneral.touchCalib);
+#endif
+
 }
 
 uint16_t evalChkSum()
@@ -1910,6 +1915,9 @@ void opentxStart(OPENTX_START_ARGS)
 #endif
 
   uint8_t calibration_needed = (g_eeGeneral.chkSum != evalChkSum());
+#ifdef TOUCH_SCREEN
+  calibration_needed |= (TouchManager::isCurrentCalibrationValid() ? 0 : 0x02);
+#endif
 
 #if defined(GUI)
   if (!calibration_needed && OPENTX_START_SPLASH_NEEDED()) {
@@ -1933,7 +1941,10 @@ void opentxStart(OPENTX_START_ARGS)
 
 #if defined(GUI)
   if (calibration_needed) {
-    chainMenu(menuFirstCalib);
+    if (calibration_needed & 0x1)
+      pushMenu(menuFirstCalib);
+    if (calibration_needed & 0x2)
+      pushMenu(menuFirstCalibTouch);
   }
   else {
     checkAlarm();

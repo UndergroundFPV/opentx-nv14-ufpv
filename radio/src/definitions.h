@@ -21,6 +21,8 @@
 #ifndef _DEFINITIONS_H_
 #define _DEFINITIONS_H_
 
+#include <inttypes.h>
+
 #if defined(SIMU) &&  __GNUC__
   #define __ALIGNED           __attribute__((aligned(32)))
   #define __SECTION_USED(s)   __attribute__((used))
