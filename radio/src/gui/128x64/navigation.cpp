@@ -37,7 +37,7 @@ int8_t p2valdiff;
 
 int8_t  checkIncDec_Ret;
 
-#if defined(PCBX7)
+#if defined(STM32)
 #define DBLKEYS_PRESSED_RGT_LFT(in)    (false)
 #define DBLKEYS_PRESSED_UP_DWN(in)     (false)
 #define DBLKEYS_PRESSED_RGT_UP(in)     (false)

@@ -223,7 +223,7 @@ void menuStatisticsDebug(event_t event)
   }
 #endif
 
-#if defined(PCBTARANIS)
+#if defined(STM32)
 #if !defined(SIMU) && defined(DEBUG)
   lcdDrawTextAlignedLeft(MENU_DEBUG_Y_USB, "Usb");
   lcdDrawNumber(MENU_DEBUG_COL1_OFS, MENU_DEBUG_Y_USB, charsWritten, LEFT);
@@ -244,7 +244,7 @@ void menuStatisticsDebug(event_t event)
   lcdDrawText(lcdLastRightPos+2, MENU_DEBUG_Y_LUA+1, "[I]", SMLSIZE);
   lcdDrawNumber(lcdLastRightPos, MENU_DEBUG_Y_LUA, 10*maxLuaInterval, LEFT);
 #endif // LUA
-#endif // PCBTARANIS
+#endif // STM32
 
 #if defined(CPUARM)
   lcdDrawTextAlignedLeft(MENU_DEBUG_Y_MIXMAX, STR_TMIXMAXMS);

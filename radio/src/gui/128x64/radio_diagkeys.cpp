@@ -26,7 +26,7 @@ void displayKeyState(uint8_t x, uint8_t y, uint8_t key)
   lcdDrawChar(x, y, t+'0', t ? INVERS : 0);
 }
 
-#if !defined(PCBTARANIS)
+#if !defined(STM32)
 void displaySwitchState(uint8_t x, uint8_t y, uint8_t sw)
 {
   swsrc_t t = switchState(sw);
@@ -68,7 +68,7 @@ void menuRadioDiagKeys(event_t event)
 #endif
     }
 
-#if defined(PCBTARANIS) || defined(PCBI8)
+#if defined(STM32)
     if (i < NUM_SWITCHES) {
       if (SWITCH_EXISTS(i)) {
         getvalue_t val = getValue(MIXSRC_FIRST_SWITCH+i);

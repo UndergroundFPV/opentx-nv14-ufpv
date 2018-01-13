@@ -90,7 +90,7 @@ void menuModelFlightModeOne(event_t event)
   drawFlightMode(13*FW, 0, s_currIdx+1, (getFlightMode()==s_currIdx ? BOLD : 0));
 
 #if defined(GVARS) && !defined(GVARS_IN_CURVES_SCREEN)
-#if defined(PCBTARANIS)
+#if defined(STM32)
   #define VERTICAL_SHIFT  (ITEM_MODEL_FLIGHT_MODE_FADE_IN-ITEM_MODEL_FLIGHT_MODE_TRIMS)
   static const pm_uint8_t mstate_tab_fm1[] PROGMEM = {0, 3, 0, 0, (uint8_t)-1, 1, 1, 1, 1, 1, 1};
 #else
@@ -247,7 +247,7 @@ void menuModelFlightModeOne(event_t event)
     #define TRIMS_OFS                  (-FW/2-4)
     #define ROTARY_ENC_OFS             (2)
   #endif
-#elif defined(PCBTARANIS)
+#elif defined(STM32)
   #define NAME_POS                     20
   #define SWITCH_POS                   59
   #define TRIMS_POS                    79
@@ -292,14 +292,14 @@ void menuModelFlightModesAll(event_t event)
     att = (i==sub ? INVERS : 0);
     FlightModeData * p = flightModeAddress(i);
     drawFlightMode(0, y, i+1, att|(getFlightMode()==i ? BOLD : 0));
-#if defined(PCBTARANIS)
+#if defined(STM32)
     lcdDrawSizedText(NAME_POS, y, p->name, sizeof(p->name), ZCHAR);
 #else
     lcdDrawSizedText(4*FW+NAME_OFS, y, p->name, sizeof(p->name), ZCHAR);
 #endif
     if (i == 0) {
       for (uint8_t t=0; t<NUM_STICKS; t++) {
-#if defined(PCBTARANIS)
+#if defined(STM32)
         drawTrimMode(TRIMS_POS+t*FW*2, y, i, t, 0);
 #else
         drawShortTrimMode((9+LEN_FLIGHT_MODE_NAME+t)*FW+TRIMS_OFS, y, i, t, 0);
@@ -307,7 +307,7 @@ void menuModelFlightModesAll(event_t event)
       }
     }
     else {
-#if defined(PCBTARANIS)
+#if defined(STM32)
       drawSwitch(SWITCH_POS, y, p->swtch, 0);
       for (uint8_t t=0; t<NUM_STICKS; t++) {
         drawTrimMode(TRIMS_POS+t*FW*2, y, i, t, 0);
