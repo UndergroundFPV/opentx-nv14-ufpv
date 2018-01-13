@@ -29,6 +29,7 @@
 #define EESIZE_M128                    4096
 #define EESIZE_GRUVIN9X                4096
 #define EESIZE_TARANIS                 (32*1024)
+#define EESIZE_FLYSKY_I8               (64*1024)
 #define EESIZE_SKY9X                   (128*4096)
 #define EESIZE_9XRPRO                  (128*4096)
 #define EESIZE_MAX                     EESIZE_9XRPRO
@@ -56,6 +57,8 @@ void Boards::setBoardType(const Type & board)
 uint32_t Boards::getFourCC(Type board)
 {
   switch (board) {
+    case BOARD_FLYSKY_I8:
+      return 0x3278746F;
     case BOARD_X12S:
       return 0x3478746F;
     case BOARD_X10:
@@ -102,6 +105,8 @@ const int Boards::getEEpromSize(Board::Type board)
     case BOARD_TARANIS_X9DP:
     case BOARD_TARANIS_X9E:
       return EESIZE_TARANIS;
+    case BOARD_FLYSKY_I8:
+      return EESIZE_FLYSKY_I8;
     case BOARD_UNKNOWN:
       return EESIZE_MAX;
     default:
@@ -129,6 +134,7 @@ const int Boards::getFlashSize(Type board)
     case BOARD_TARANIS_X9D:
     case BOARD_TARANIS_X9DP:
     case BOARD_TARANIS_X9E:
+    case BOARD_FLYSKY_I8:
       return FSIZE_TARANIS;
     case BOARD_X12S:
     case BOARD_X10:
@@ -158,6 +164,18 @@ const SwitchInfo Boards::getSwitchInfo(Board::Type board, unsigned index)
       {SWITCH_3POS,   "SD"},
       {SWITCH_2POS,   "SF"},
       {SWITCH_TOGGLE, "SH"}
+    };
+    if (index < DIM(switches))
+      return switches[index];
+  }
+  if (IS_FLYSKY_I8(board)) {
+    const Board::SwitchInfo switches[] = {
+      {SWITCH_3POS,   "SA"},
+      {SWITCH_3POS,   "SB"},
+      {SWITCH_3POS,   "SC"},
+      {SWITCH_3POS,   "SD"},
+      {SWITCH_2POS,   "SE"},
+      {SWITCH_TOGGLE, "SF"}
     };
     if (index < DIM(switches))
       return switches[index];
@@ -210,7 +228,7 @@ const int Boards::getCapability(Board::Type board, Board::Capability capability)
       return 4;
 
     case Pots:
-      if (IS_TARANIS_SMALL(board))
+      if (IS_TARANIS_SMALL(board) || IS_FLYSKY_I8(board))
         return 2;
       else if (IS_TARANIS_X9E(board))
         return 4;
@@ -249,7 +267,7 @@ const int Boards::getCapability(Board::Type board, Board::Capability capability)
     case Switches:
       if (IS_TARANIS_X9E(board))
         return 18;
-      else if (IS_TARANIS_X7(board))
+      else if (IS_TARANIS_X7(board) || IS_FLYSKY_I8(board))
         return 6;
       else if (IS_TARANIS_XLITE(board))
         return 2;
@@ -265,7 +283,7 @@ const int Boards::getCapability(Board::Type board, Board::Capability capability)
         return getCapability(board, Switches);
 
     case SwitchPositions:
-      if (IS_HORUS_OR_TARANIS(board))
+      if (IS_HORUS_OR_TARANIS(board) || IS_FLYSKY(board))
         return getCapability(board, Switches) * 3;
       else
         return 9;
@@ -273,13 +291,19 @@ const int Boards::getCapability(Board::Type board, Board::Capability capability)
     case NumTrims:
       if (IS_HORUS(board))
         return 6;
-      else if (IS_TARANIS_XLITE(board))
+      else if (IS_TARANIS_XLITE(board) || IS_FLYSKY_I8(board))
         return 2;
       else
         return 4;
 
     case NumTrimSwitches:
       return getCapability(board, NumTrims) * 2;
+
+    case NumTouchPoints:
+      if (IS_FLYSKY(board))
+        return 2;
+      else
+        return 0;
   }
 
   return 0;

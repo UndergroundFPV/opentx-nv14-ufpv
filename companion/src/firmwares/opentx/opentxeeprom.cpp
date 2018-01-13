@@ -45,7 +45,7 @@ using namespace Board;
 #define MAX_MIXERS(board, version)            (IS_ARM(board) ? 64 : 32)
 #define MAX_CHANNELS(board, version)          (IS_ARM(board) ? 32 : 16)
 #define MAX_TRIMS(board)                      (Boards::getCapability(board, Board::NumTrims))
-#define MAX_EXPOS(board, version)             (IS_ARM(board) ? ((IS_HORUS_OR_TARANIS(board) && version >= 216) ? 64 : 32) : (IS_DBLRAM(board, version) ? 16 : 14))
+#define MAX_EXPOS(board, version)             (IS_ARM(board) ? (((IS_HORUS_OR_TARANIS(board) || IS_FLYSKY(board)) && version >= 216) ? 64 : 32) : (IS_DBLRAM(board, version) ? 16 : 14))
 #define MAX_LOGICAL_SWITCHES(board, version)  (IS_ARM(board) ? (version >= 218 ? 64 : 32) : ((IS_DBLEEPROM(board, version) && version<217) ? 15 : 12))
 #define MAX_CUSTOM_FUNCTIONS(board, version)  (IS_ARM(board) ? (version >= 216 ? 64 : 32) : (IS_DBLEEPROM(board, version) ? 24 : 16))
 #define MAX_CURVES(board, version)            (IS_ARM(board) ? ((HAS_LARGE_LCD(board) && version >= 216) ? 32 : 16) : 8)
@@ -2580,7 +2580,7 @@ class FrskyScreenField: public DataField {
     {
       for (int i=0; i<4; i++) {
         if (IS_ARM(board) && version >= 217) {
-          if (IS_TARANIS(board))
+          if (IS_STM32(board))
             bars.Append(new SourceField<16>(this, screen.body.bars[i].source, board, version, variant));
           else
             bars.Append(new SourceField<8>(this, screen.body.bars[i].source, board, version, variant));
@@ -2597,7 +2597,7 @@ class FrskyScreenField: public DataField {
       int columns = (HAS_LARGE_LCD(board) ? 3 : 2);
       for (int i=0; i<4; i++) {
         for (int j=0; j<columns; j++) {
-          if (IS_TARANIS(board) && version >= 217)
+          if (IS_STM32(board) && version >= 217)
             numbers.Append(new SourceField<16>(this, screen.body.lines[i].source[j], board, version, variant));
           else if (IS_ARM(board) && version >= 217)
             numbers.Append(new SourceField<8>(this, screen.body.lines[i].source[j], board, version, variant));
@@ -2609,13 +2609,13 @@ class FrskyScreenField: public DataField {
         numbers.Append(new SpareBitsField<1>(this));
       }
 
-      if (IS_TARANIS(board) && version >= 217) {
+      if (IS_STM32(board) && version >= 217) {
         script.Append(new CharField<8>(this, screen.body.script.filename, true, "Script name"));
         script.Append(new SpareBitsField<16*8>(this));
       }
 
       if (IS_ARM(board) && version >= 217) {
-        if (IS_TARANIS(board))
+        if (IS_STM32(board))
           none.Append(new SpareBitsField<24*8>(this));
         else
           none.Append(new SpareBitsField<20*8>(this));
@@ -2942,6 +2942,22 @@ class CustomScreenField: public StructField {
 };
 #endif
 
+class TouchCalibField: public StructField {
+  public:
+    TouchCalibField(DataField * parent, TouchCalibMatrix & matrix, Board::Type /*board*/, unsigned int /*version*/):
+      StructField(parent, "Touch Calibration")
+    {
+      Append(new SignedField<32>(this, matrix.An, "Matrix An"));
+      Append(new SignedField<32>(this, matrix.Bn, "Matrix Bn"));
+      Append(new SignedField<32>(this, matrix.Cn, "Matrix Cn"));
+      Append(new SignedField<32>(this, matrix.Dn, "Matrix Dn"));
+      Append(new SignedField<32>(this, matrix.En, "Matrix En"));
+      Append(new SignedField<32>(this, matrix.Fn, "Matrix Fn"));
+      Append(new SignedField<32>(this, matrix.Div, "Matrix Div"));
+      Append(new UnsignedField<16>(this, matrix.crc, "Matrix CRC"));
+    }
+};
+
 class SensorField: public TransformedField {
   public:
     SensorField(DataField * parent, SensorData & sensor, Board::Type board, unsigned int version):
@@ -3213,7 +3229,7 @@ OpenTxModelData::OpenTxModelData(ModelData & modelData, Board::Type board, unsig
     internalField.Append(new SwitchesWarningField<32>(this, modelData.switchWarningStates, board, version));
   else if (IS_TARANIS_X9E(board))
     internalField.Append(new SwitchesWarningField<64>(this, modelData.switchWarningStates, board, version));
-  else if (IS_TARANIS(board))
+  else if (IS_STM32(board))
     internalField.Append(new SwitchesWarningField<16>(this, modelData.switchWarningStates, board, version));
   else
     internalField.Append(new SwitchesWarningField<8>(this, modelData.switchWarningStates, board, version));
@@ -3637,7 +3653,7 @@ OpenTxGeneralData::OpenTxGeneralData(GeneralSettings & generalData, Board::Type 
   }
   if (version >= 216 && IS_HORUS(board))
     internalField.Append(new SpareBitsField<3>(this));
-  else if (version >= 216 && IS_TARANIS(board))
+  else if (version >= 216 && IS_STM32(board))
     internalField.Append(new SignedField<3>(this, generalData.splashDuration));
   else if (version >= 213 || (!IS_ARM(board) && version >= 212))
     internalField.Append(new UnsignedField<3>(this, generalData.splashMode)); // TODO
@@ -3655,11 +3671,11 @@ OpenTxGeneralData::OpenTxGeneralData(GeneralSettings & generalData, Board::Type 
   internalField.Append(new SignedField<8>(this, generalData.PPM_Multiplier));
   internalField.Append(new SignedField<8>(this, generalData.hapticLength));
 
-  if (version < 216 || (version < 218 && !IS_9X(board)) || (!IS_9X(board) && !IS_TARANIS(board) && !IS_HORUS(board))) {
+  if (version < 216 || (version < 218 && !IS_9X(board)) || (!IS_9X(board) && !IS_STM32(board))) {
     internalField.Append(new UnsignedField<8>(this, generalData.reNavigation));
   }
 
-  if (version >= 216 && !IS_TARANIS(board) && !IS_HORUS(board)) {
+  if (version >= 216 && !IS_STM32(board)) {
     internalField.Append(new UnsignedField<8>(this, generalData.stickReverse));
   }
 
@@ -3785,7 +3801,7 @@ OpenTxGeneralData::OpenTxGeneralData(GeneralSettings & generalData, Board::Type 
 
     if (IS_TARANIS_X9E(board))
       internalField.Append(new SpareBitsField<64>(this)); // switchUnlockStates
-    else if (IS_TARANIS(board))
+    else if (IS_TARANIS(board) || IS_FLYSKY(board))
       internalField.Append(new SpareBitsField<16>(this)); // switchUnlockStates
 
     if (version == 217) {
@@ -3809,7 +3825,7 @@ OpenTxGeneralData::OpenTxGeneralData(GeneralSettings & generalData, Board::Type 
       }
       internalField.Append(new CharField<17>(this, generalData.currModelFilename, true, "Current model filename"));
     }
-    else if (IS_TARANIS(board) && version >= 217) {
+    else if ((IS_TARANIS(board) || IS_FLYSKY(board)) && version >= 217) {
       for (int i=0; i<MAX_SWITCH_SLOTS(board, version); i++) {
         if (i < MAX_SWITCHES(board, version))
           internalField.Append(new UnsignedField<2>(this, generalData.switchConfig[i]));
@@ -3838,6 +3854,10 @@ OpenTxGeneralData::OpenTxGeneralData(GeneralSettings & generalData, Board::Type 
     else if (IS_TARANIS_X9E(board) && version >= 217) {
       internalField.Append(new BoolField<8>(this, generalData.bluetoothEnable));
       internalField.Append(new ZCharField<10>(this, generalData.bluetoothName, "Bluetooth name"));
+    }
+
+    if (Boards::getCapability(board, Board::NumTouchPoints)) {
+      internalField.Append(new TouchCalibField(this, generalData.touchCalib, board, version));
     }
 
     if (IS_HORUS(board)) {

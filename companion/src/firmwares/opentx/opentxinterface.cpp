@@ -95,6 +95,8 @@ const char * OpenTxEepromInterface::getName()
       return "OpenTX for FrSky Horus";
     case BOARD_X10:
       return "OpenTX for FrSky X10";
+    case BOARD_FLYSKY_I8:
+      return "OpenTX for FlySky I8";
     default:
       return "OpenTX for an unknown board";
   }
@@ -460,12 +462,12 @@ int OpenTxFirmware::getCapability(::Capability capability)
     case FlightModesHaveFades:
       return 1;
     case Heli:
-      if (IS_HORUS_OR_TARANIS(board))
+      if (IS_STM32(board))
         return id.contains("noheli") ? 0 : 1;
       else
         return id.contains("heli") ? 1 : 0;
     case Gvars:
-      if (IS_HORUS_OR_TARANIS(board))
+      if (IS_STM32(board))
         return id.contains("nogvars") ? 0 : 9;
       else if (id.contains("gvars"))
         return IS_ARM(board) ? 9 : 5;
@@ -474,7 +476,7 @@ int OpenTxFirmware::getCapability(::Capability capability)
     case ModelName:
       return (IS_HORUS(board) ? 15 : (HAS_LARGE_LCD(board) ? 12 : 10));
     case FlightModesName:
-      return (IS_HORUS_OR_TARANIS(board) ? 10 : 6);
+      return (IS_STM32(board) ? 10 : 6);
     case GvarsName:
       return (IS_9X(board) ? 0 : 3);
     case GvarsInCS:
@@ -539,9 +541,9 @@ int OpenTxFirmware::getCapability(::Capability capability)
     case SoundPitch:
       return 1;
     case Haptic:
-      return (IS_2560(board) || IS_SKY9X(board) || IS_TARANIS_PLUS(board) || IS_TARANIS_SMALL(board) || IS_TARANIS_X9E(board) || IS_HORUS(board) || id.contains("haptic"));
+      return (IS_2560(board) || IS_SKY9X(board) || (IS_STM32(board) && board != Board::BOARD_TARANIS_X9D) || id.contains("haptic"));
     case ModelTrainerEnable:
-      if (IS_HORUS_OR_TARANIS(board))
+      if (IS_STM32(board))
         return 1;
       else
         return 0;
@@ -574,7 +576,7 @@ int OpenTxFirmware::getCapability(::Capability capability)
     case HasExpoNames:
       return (IS_ARM(board) ? (IS_TARANIS_X9(board) ? 8 : 6) : false);
     case HasNoExpo:
-      return (IS_HORUS_OR_TARANIS(board) ? false : true);
+      return (IS_STM32(board) ? false : true);
     case ChannelsName:
       return (IS_ARM(board) ? (HAS_LARGE_LCD(board) ? 6 : 4) : 0);
     case HasCvNames:
@@ -594,13 +596,13 @@ int OpenTxFirmware::getCapability(::Capability capability)
     case TelemetryCustomScreensFieldsPerLine:
       return HAS_LARGE_LCD(board) ? 3 : 2;
     case NoTelemetryProtocol:
-      return IS_HORUS_OR_TARANIS(board) ? 1 : 0;
+      return IS_STM32(board) ? 1 : 0;
     case TelemetryUnits:
       return 0;
     case TelemetryMaxMultiplier:
       return (IS_ARM(board) ? 32 : 8);
     case PPMCenter:
-      return (IS_HORUS_OR_TARANIS(board) ? 500 : (id.contains("ppmca") ? 125 : 0));
+      return (IS_STM32(board) ? 500 : (id.contains("ppmca") ? 125 : 0));
     case PPMUnitMicroseconds:
       return id.contains("ppmus") ? 1 : 0;
     case SYMLimits:
@@ -636,7 +638,7 @@ int OpenTxFirmware::getCapability(::Capability capability)
     case LcdWidth:
       if (IS_HORUS(board))
         return 480;
-      else if (IS_TARANIS_SMALL(board))
+      else if (IS_TARANIS_SMALL(board) || IS_FLYSKY_I8(board))
         return 128;
       else if (IS_TARANIS(board))
         return 212;
@@ -650,14 +652,12 @@ int OpenTxFirmware::getCapability(::Capability capability)
     case LcdDepth:
       if (IS_HORUS(board))
         return 16;
-      else if (IS_TARANIS_SMALL(board))
-        return 1;
-      else if (IS_TARANIS(board))
+      else if (IS_TARANIS(board) && HAS_LARGE_LCD(board))
         return 4;
       else
         return 1;
     case GetThrSwitch:
-      return (IS_HORUS_OR_TARANIS(board) ? SWITCH_SF1 : SWITCH_THR);
+      return (IS_STM32(board) ? SWITCH_SF1 : SWITCH_THR);
     case HasDisplayText:
       return IS_ARM(board) ? 1 : 0;
     case HasTopLcd:
@@ -673,11 +673,11 @@ int OpenTxFirmware::getCapability(::Capability capability)
     case RtcTime:
       return IS_ARM(board) || IS_2560(board) ? 1 : 0;
     case LuaScripts:
-      return IS_HORUS_OR_TARANIS(board) && id.contains("lua") ? 7 : 0;
+      return IS_STM32(board) && id.contains("lua") ? 7 : 0;
     case LuaInputsPerScript:
-      return IS_HORUS_OR_TARANIS(board) ? 10 : 0;
+      return IS_STM32(board) ? 10 : 0;
     case LuaOutputsPerScript:
-      return IS_HORUS_OR_TARANIS(board) ? 6 : 0;
+      return IS_STM32(board) ? 6 : 0;
     case LimitsPer1000:
     case EnhancedCurves:
       return IS_ARM(board);
@@ -704,9 +704,9 @@ int OpenTxFirmware::getCapability(::Capability capability)
       return IS_ARM(board) ? 1 : 0;
     case HasInputDiff:
     case HasMixerExpo:
-      return (IS_HORUS_OR_TARANIS(board) ? true : false);
+      return IS_STM32(board);
     case HasBatMeterRange:
-      return (IS_HORUS_OR_TARANIS(board) ? true : id.contains("battgraph"));
+      return (IS_STM32(board) ? true : id.contains("battgraph"));
     case DangerousFunctions:
       return id.contains("danger") ? 1 : 0;
     case HasModelCategories:
@@ -723,7 +723,7 @@ QString OpenTxFirmware::getAnalogInputName(unsigned int index)
 
 QTime OpenTxFirmware::getMaxTimerStart()
 {
-  if (IS_HORUS_OR_TARANIS(board))
+  if (IS_STM32(board))
     return QTime(23, 59, 59);
   else if (IS_ARM(board))
     return QTime(8, 59, 59);
@@ -733,7 +733,7 @@ QTime OpenTxFirmware::getMaxTimerStart()
 
 int OpenTxFirmware::isAvailable(PulsesProtocol proto, int port)
 {
-  if (IS_HORUS_OR_TARANIS(board)) {
+  if (IS_STM32(board)) {
     switch (port) {
       case 0:
         switch (proto) {
@@ -1190,6 +1190,11 @@ void registerOpenTxFirmwares()
   firmware = new OpenTxFirmware("opentx-x12s", QCoreApplication::translate("Firmware", "FrSky Horus X12S"), BOARD_X12S);
   addOpenTxFrskyOptions(firmware);
   firmware->addOption("pcbdev", QCoreApplication::translate("Firmware", "Use ONLY with first DEV pcb version"));
+  registerOpenTxFirmware(firmware);
+
+  /* FlySky I8 board */
+  firmware = new OpenTxFirmware("opentx-i8", QCoreApplication::translate("Firmware", "FlySky I8"), BOARD_FLYSKY_I8);
+  addOpenTxTaranisOptions(firmware);
   registerOpenTxFirmware(firmware);
 
   /* 9XR-Pro */

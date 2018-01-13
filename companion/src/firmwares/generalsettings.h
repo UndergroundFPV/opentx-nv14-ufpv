@@ -59,6 +59,17 @@ class TrainerData {
     void clear() { memset(this, 0, sizeof(TrainerData)); }
 };
 
+struct TouchCalibMatrix {
+  int An,
+      Bn,
+      Cn,
+      Dn,
+      En,
+      Fn,
+      Div;
+  unsigned crc;
+};
+
 class GeneralSettings {
   Q_DECLARE_TR_FUNCTIONS(GeneralSettings)
 
@@ -163,6 +174,7 @@ class GeneralSettings {
     unsigned int potConfig[CPN_MAX_KNOBS];
     char sliderName[CPN_MAX_SLIDERS][3+1];
     unsigned int sliderConfig[CPN_MAX_SLIDERS];
+    TouchCalibMatrix touchCalib;
 
     char themeName[8+1];
     typedef uint8_t ThemeOptionData[8+1];

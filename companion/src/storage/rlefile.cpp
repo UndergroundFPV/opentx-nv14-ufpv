@@ -64,7 +64,7 @@ void RleFile::EeFsCreate(uint8_t *eeprom, int size, Board::Type board, unsigned 
       }
     }
   }
-  else if (IS_TARANIS(board)) {
+  else if (IS_STM32(board)) {
     eeFsArm = (EeFsArm *)eeprom;
     eeFsVersion = 5;
     eeFsSize = 8+4*62;
@@ -146,7 +146,7 @@ bool RleFile::EeFsOpen(uint8_t *eeprom, int size, Board::Type board)
     searchFat();
     return 1;
   }
-  else if (IS_TARANIS(board)) {
+  else if (IS_STM32(board)) {
     eeFsArm = (EeFsArm *)eeprom;
     eeFsVersion = eeFsArm->version;
     eeFsSize = 8+4*62;
