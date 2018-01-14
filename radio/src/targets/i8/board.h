@@ -200,7 +200,9 @@ enum EnumKeys
   KEY_ENTER=KEY_MENU,
   KEY_EXIT,
   KEY_DOWN,
+  KEY_MINUS = KEY_DOWN,
   KEY_UP,
+  KEY_PLUS = KEY_UP,
   KEY_RIGHT,
   KEY_LEFT,
 
@@ -217,10 +219,6 @@ enum EnumKeys
 
   NUM_KEYS
 };
-
-#define KEY_PLUS                      KEY_RIGHT
-#define KEY_MINUS                     KEY_LEFT
-#define KEY_ENTER                     KEY_MENU
 
 enum EnumSwitches
 {
