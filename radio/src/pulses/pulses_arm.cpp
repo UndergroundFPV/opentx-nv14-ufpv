@@ -45,9 +45,13 @@ uint8_t getRequiredProtocol(uint8_t port)
           required_protocol = PROTO_PPM;
           break;
 #endif
-        case MODULE_TYPE_XJT:
-#warning "TODO protool set to FLYSKY for the first tests"
+#if defined(PCBFLYSKY)
+        case MODULE_TYPE_FLYSKY:
           required_protocol = PROTO_FLYSKY;
+          break;
+#endif
+        case MODULE_TYPE_XJT:
+          required_protocol = PROTO_PXX;
           break;
         default:
           required_protocol = PROTO_NONE;
@@ -66,6 +70,11 @@ uint8_t getRequiredProtocol(uint8_t port)
         case MODULE_TYPE_R9M:
           required_protocol = PROTO_PXX;
           break;
+#if defined(PCBFLYSKY)
+        case MODULE_TYPE_FLYSKY:
+          required_protocol = PROTO_FLYSKY;
+          break;
+#endif
         case MODULE_TYPE_SBUS:
           required_protocol = PROTO_SBUS;
           break;

@@ -474,7 +474,9 @@ void modelDefault(uint8_t id)
   }
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
+#if defined(PCBFLYSKY)
+  g_model.moduleData[INTERNAL_MODULE].type = MODULE_TYPE_FLYSKY;
+#elif defined(PCBFRSKY)
   g_model.moduleData[INTERNAL_MODULE].type = MODULE_TYPE_XJT;
   g_model.moduleData[INTERNAL_MODULE].channelsCount = DEFAULT_CHANNELS(INTERNAL_MODULE);
 #elif defined(PCBSKY9X)

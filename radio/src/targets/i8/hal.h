@@ -170,6 +170,7 @@
 #define INTMODULE_TIMER_FREQ            (PERI1_FREQUENCY * TIMER_MULT_APB1)
 
 // External Module
+#define EXTMODULE
 #define EXTMODULE_PULSES
 #define EXTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_DMA1)
 #define EXTMODULE_RCC_APB1Periph        RCC_APB1Periph_TIM4
@@ -190,6 +191,7 @@
 #define EXTMODULE_TIMER_FREQ            (PERI1_FREQUENCY * TIMER_MULT_APB1)
 
 // Trainer Port
+#define TRAINERMODULE
 #define TRAINER_RCC_AHB1Periph          (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOC)
 #define TRAINER_RCC_APB1Periph          RCC_APB1Periph_TIM4
 #define TRAINER_GPIO                    GPIOD

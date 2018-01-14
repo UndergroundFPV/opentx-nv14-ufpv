@@ -168,6 +168,16 @@ void parseFlySkyFeedbackFrame(uint8_t port)
         incrFlySkyFrame(port);
       }
       break;
+
+    case COMMAND_ID_BIND:
+      if (!checkFlySkyFrameCrc(modulePulsesData[port].flysky.telemetry+1, 7)) {
+        return;
+      }
+      else if (modulePulsesData[port].flysky.state == FLYSKY_MODULE_STATE_BIND) {
+        moduleFlag[port] &= ~MODULE_BIND;
+        incrFlySkyFrame(port);
+      }
+      break;
   }
 }
 
@@ -215,6 +225,13 @@ void resetPulsesFlySky(uint8_t port)
 void setupPulsesFlySky(uint8_t port)
 {
   checkFlySkyFeedback(port);
+
+  if (moduleFlag[port] == MODULE_BIND) {
+    modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_BIND;
+  }
+  /*else if (moduleFlag[port] == MODULE_RANGECHECK) {
+
+  }*/
 
   initFlySkyArray(port);
   putFlySkyHead(port);

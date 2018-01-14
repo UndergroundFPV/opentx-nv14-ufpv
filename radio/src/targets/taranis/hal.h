@@ -624,6 +624,7 @@
 #endif
 
 // External Module
+#define EXTMODULE
 #define EXTMODULE_PULSES
 #if defined(PCBXLITE)
   #define EXTMODULE_RCC_AHB1Periph      (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)
@@ -668,6 +669,7 @@
   #define TRAINER_RCC_AHB1Periph        0
   #define TRAINER_RCC_APB1Periph        0
 #else
+  #define TRAINERMODULE
   #define TRAINER_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC)
   #define TRAINER_RCC_APB1Periph        RCC_APB1Periph_TIM3
   #define TRAINER_GPIO                  GPIOC

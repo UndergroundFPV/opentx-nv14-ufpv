@@ -581,6 +581,9 @@ enum DSM2Protocols {
 enum ModuleTypes {
   MODULE_TYPE_NONE = 0,
   MODULE_TYPE_PPM,
+#if defined(PCBFLYSKY)
+  MODULE_TYPE_FLYSKY,
+#endif
   MODULE_TYPE_XJT,
   MODULE_TYPE_DSM2,
   MODULE_TYPE_CROSSFIRE,

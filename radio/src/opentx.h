@@ -446,6 +446,7 @@ void memswap(void * a, void * b, uint8_t size);
 #define IS_MODULE_R9M_FCC(idx)            (IS_MODULE_R9M(idx) && g_model.moduleData[idx].subType == MODULE_SUBTYPE_R9M_FCC)
 #define IS_MODULE_R9M_LBT(idx)            (IS_MODULE_R9M(idx) && g_model.moduleData[idx].subType == MODULE_SUBTYPE_R9M_LBT)
 #define IS_MODULE_PXX(idx)                (IS_MODULE_XJT(idx) || IS_MODULE_R9M(idx))
+#define IS_MODULE_FLYSKY(idx)             (g_model.moduleData[idx].type == MODULE_TYPE_FLYSKY)
 
 #if defined(DSM2)
   #define IS_MODULE_DSM2(idx)             (idx==EXTERNAL_MODULE && g_model.moduleData[EXTERNAL_MODULE].type==MODULE_TYPE_DSM2)

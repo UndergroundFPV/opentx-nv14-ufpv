@@ -555,7 +555,7 @@ bool isTelemetryProtocolAvailable(int protocol)
 }
 #endif
 
-#if defined(PCBHORUS)
+#if defined(PCBHORUS) || defined(PCBI8)
 bool isTrainerModeAvailable(int mode)
 {
   return true;

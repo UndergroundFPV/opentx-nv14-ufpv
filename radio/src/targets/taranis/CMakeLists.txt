@@ -130,7 +130,7 @@ if(SPLASH STREQUAL OFF)
   message(FATAL_ERROR "Option SPLASH=OFF not supported on Taranis")
 endif()
 
-add_definitions(-DPCBTARANIS)
+add_definitions(-DPCBFRSKY -DPCBTARANIS)
 add_definitions(-DAUDIO -DVOICE -DRTCLOCK)
 
 set(GUI_SRC ${GUI_SRC}

@@ -552,6 +552,7 @@
 #endif
 
 // External Module
+#define EXTMODULE
 #define EXTMODULE_PULSES
 #define EXTMODULE_PWR_GPIO              GPIOB
 #define EXTMODULE_PWR_GPIO_PIN          GPIO_Pin_3  // PB.03
@@ -597,6 +598,7 @@
 #define HEARTBEAT_GPIO_PIN              GPIO_Pin_12 // PD.12
 
 // Trainer Port
+#define TRAINERMODULE
 #define TRAINER_RCC_AHB1Periph          (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA1)
 #define TRAINER_RCC_APB1Periph          RCC_APB1Periph_TIM3
 #define TRAINER_GPIO                    GPIOC
