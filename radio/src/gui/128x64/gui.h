@@ -456,7 +456,7 @@ void drawSleepBitmap();
 void drawVerticalScrollbar(coord_t x, coord_t y, coord_t h, uint16_t offset, uint16_t count, uint8_t visible);
 #endif
 
-#if defined(PCBTARANIS)
+#if defined(STM32)
 void drawAlertBox(const pm_char * title, const pm_char * text, const char * action);
 #endif
 

@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -30,13 +30,13 @@ void menuRadioVersion(event_t event)
     NVIC_SystemReset();
   }
 #endif
-  
+
 #if defined(STM32)
   if (event == EVT_ENTRY) {
     getCPUUniqueID(reusableBuffer.version.id);
   }
 #endif
-  
+
   SIMPLE_MENU(STR_MENUVERSION, menuTabGeneral, MENU_RADIO_VERSION, 1);
 
   lcdDrawTextAlignedLeft(MENU_HEADER_HEIGHT+FH, vers_stamp);
@@ -53,11 +53,11 @@ void menuRadioVersion(event_t event)
   lcdDrawTextAlignedLeft(MENU_HEADER_HEIGHT+5*FH+1, STR_EEBACKUP);
   lcdDrawTextAlignedLeft(MENU_HEADER_HEIGHT+6*FH+1, STR_FACTORYRESET);
   lcdDrawFilledRect(0, MENU_HEADER_HEIGHT+5*FH, LCD_W, 2*FH+1, SOLID);
-  
+
   if (event == EVT_KEY_LONG(KEY_ENTER)) {
     eepromBackup();
   }
-  else if (event == EVT_KEY_LONG(KEY_MENU)) {
+  else if ((KEY_MENU != KEY_ENTER && event == EVT_KEY_LONG(KEY_MENU)) || (KEY_MENU == KEY_ENTER && event == EVT_KEY_LONG(KEY_DOWN))) {
     POPUP_CONFIRMATION(STR_CONFIRMRESET);
   }
 #endif

@@ -269,6 +269,16 @@
   #include "disk_cache.h"
 #endif
 
+#if !defined(IS_TOUCH_ENABLED)
+  #define IS_TOUCH_ENABLED()           (0)  // numeric value so can be used in macros, may already be defined in board/hal header.
+#endif
+
+#if IS_TOUCH_ENABLED()
+  #define CASE_TOUCH(x) x,
+#else
+  #define CASE_TOUCH(x)
+#endif
+
 #if defined(SIMU)
   #include "targets/simu/simpgmspace.h"
 #elif defined(CPUARM)
@@ -911,9 +921,43 @@ inline void resumeMixerCalculations()
 {
   CoLeaveMutexSection(mixerMutex);
 }
+
+inline OS_MutexID createMutex(void) {
+  OS_MutexID m = CoCreateMutex();
+#if !defined(SIMU)
+  if (m == E_CREATE_FAIL)
+    TRACE_DEBUG("Failed to create mutex, returned: %d", m);
+#endif
+  return m;
+}
+
+inline bool enterMutexSection(OS_MutexID mutexId)
+{
+  StatusType s;
+  if ((s = CoEnterMutexSection(mutexId)) == E_OK)
+    return true;
+  TRACE_DEBUG("CoEnterMutex returned %d", s);
+  return false;
+}
+
+inline bool leaveMutexSection(OS_MutexID mutexId)
+{
+  if (CoLeaveMutexSection(mutexId) == E_OK)
+    return true;
+  return false;
+}
 #else
+typedef uint8_t OS_MutexID;
+
 #define pauseMixerCalculations()
 #define resumeMixerCalculations()
+
+inline OS_MutexID createMutex(void) {
+  static OS_MutexID mtxId = 0;
+  return (++mtxId);
+}
+inline bool enterMutexSection(OS_MutexID mutexId) { return true; }
+inline bool leaveMutexSection(OS_MutexID mutexId) { return true; }
 #endif
 
 void generalDefault();
@@ -1407,7 +1451,7 @@ enum AUDIO_SOUNDS {
 #include "rtc.h"
 #endif
 
-#if defined(TOUCH_SCREEN)
+#if IS_TOUCH_ENABLED()
   #include "touch_manager.h"
 #endif
 
@@ -1487,7 +1531,7 @@ union ReusableBuffer
     } xpotsCalib[NUM_XPOTS];
 #endif
   } calib;
-#if defined(TOUCH_SCREEN)
+#if IS_TOUCH_ENABLED()
   struct
   {
     int8_t state;

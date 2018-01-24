@@ -343,7 +343,7 @@ void generalDefault()
 
   g_eeGeneral.chkSum = 0xFFFF;
 
-#if defined(TOUCH_SCREEN)
+#if IS_TOUCH_ENABLED()
   TouchManager::initCalibrationMatrix(&g_eeGeneral.touchCalib);
 #endif
 
@@ -1061,7 +1061,7 @@ void checkSDVersion()
 }
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBFLYSKY)
 void checkFailsafe()
 {
   for (int i=0; i<NUM_MODULES; i++) {
@@ -1915,7 +1915,7 @@ void opentxStart(OPENTX_START_ARGS)
 #endif
 
   uint8_t calibration_needed = (g_eeGeneral.chkSum != evalChkSum());
-#ifdef TOUCH_SCREEN
+#if IS_TOUCH_ENABLED()
   calibration_needed |= (TouchManager::isCurrentCalibrationValid() ? 0 : 0x02);
 #endif
 
@@ -1943,8 +1943,10 @@ void opentxStart(OPENTX_START_ARGS)
   if (calibration_needed) {
     if (calibration_needed & 0x1)
       pushMenu(menuFirstCalib);
+#if IS_TOUCH_ENABLED()
     if (calibration_needed & 0x2)
       pushMenu(menuFirstCalibTouch);
+#endif
   }
   else {
     checkAlarm();
