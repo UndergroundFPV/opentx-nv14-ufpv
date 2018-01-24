@@ -437,6 +437,9 @@
 #elif defined(PCBTARANIS)
   #define LEN_VKEYS                    "\005"
   #define TR_VKEYS                      "Menu\0""Exit\0""Enter""Page\0""Plus\0""Minus"
+#elif defined(PCBI8)
+  #define LEN_VKEYS                    "\005"
+  #define TR_VKEYS                     "K1\0  ""K2\0  ""Down\0""Up\0  ""Right""Left\0"
 #else
   #define LEN_VKEYS                    "\005"
   #define TR_VKEYS                     "Menu\0""Exit\0""Down\0""Up\0  ""Right""Left\0"
@@ -611,12 +614,16 @@
 
 #if defined(PCBTARANIS) || defined(PCBHORUS)
   #define TR_ENTER                     "[ENTER]"
+#elif defined(PCBI8)
+  #define TR_ENTER                     "[K1:OK]"
 #else
   #define TR_ENTER                     "[MENU]"
 #endif
 
 #if defined(PCBHORUS)
   #define TR_EXIT                      "[RTN]"
+#elif defined(PCBI8)
+  #define TR_EXIT                      "[K2:EXIT]"
 #else
   #define TR_EXIT                      "[EXIT]"
 #endif
@@ -1106,6 +1113,9 @@
 #if defined(COLORLCD)
 #define TR_EEBACKUP                    "EEPROM backup"
 #define TR_FACTORYRESET                "Factory reset"
+#elif defined(PCBI8)
+#define TR_EEBACKUP                    TR("\001[K1 Long]: Backup", "\012[K1 Long]: EEPROM backup")
+#define TR_FACTORYRESET                TR("\001[DOWN Long]: Fact. reset", "\012[DOWN Long]: Factory reset")
 #else
 #define TR_EEBACKUP                    TR("\001[ENTER Long]: Backup", "\012[ENTER Long]: EEPROM backup")
 #define TR_FACTORYRESET                TR("\001[MENU Long]: Fact. reset", "\012[MENU Long]: Factory reset")
@@ -1185,7 +1195,7 @@
 #define TR_ABOUTUS                     TR(" ABOUT ", "ABOUT")
 
 #define TR_ABOUT_OPENTX_1              TR("OpenTX\001is\001open\001source,\001non", "OpenTX is open source, non-")
-#define TR_ABOUT_OPENTX_2              TR("commercial,\001wo\001warranties.", "commercial and comes with no")
+#define TR_ABOUT_OPENTX_2              TR("commercial,\001no\001warranties.", "commercial and comes with no")
 #define TR_ABOUT_OPENTX_3              TR("It\001was\001developed\001for\001free.", "warranties. It was developed")
 #define TR_ABOUT_OPENTX_4              TR("Support through donations", "for free. Support through")
 #define TR_ABOUT_OPENTX_5              TR("is welcome!", "donations is welcome!")
@@ -1222,6 +1232,10 @@
   #define TR_ABOUT_HARDWARE_1          "FrSky"
   #define TR_ABOUT_HARDWARE_2          TR("Hardware design/producer", "Hardware designer/producer")
   #define TR_ABOUT_HARDWARE_3          "Firmware contributor"
+#elif defined(PCBFLYSKY)
+  #define TR_ABOUT_HARDWARE_1          "FlySky"
+  #define TR_ABOUT_HARDWARE_2          TR("Hardware design/producer", "Hardware designer/producer")
+  #define TR_ABOUT_HARDWARE_3          ""
 #else
   #define TR_ABOUT_HARDWARE_1          "Brent Nelson"
   #define TR_ABOUT_HARDWARE_2          "Sky9x designer/producer"

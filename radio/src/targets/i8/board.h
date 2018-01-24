@@ -193,11 +193,18 @@ int sbusGetByte(uint8_t * byte);
 void gimbalsInit(void);
 void gimbalsRead(uint16_t * values);
 
+// Enable touch
+#if defined(TOUCH_SCREEN)
+  #define IS_TOUCH_ENABLED()           (1)  // numeric value so can be used in macros
+#else
+  #define IS_TOUCH_ENABLED()           (0)  // numeric value so can be used in macros
+#endif
+
 // Keys driver
 enum EnumKeys
 {
-  KEY_MENU,
-  KEY_ENTER=KEY_MENU,
+  KEY_ENTER,
+  KEY_MENU = KEY_ENTER,
   KEY_EXIT,
   KEY_DOWN,
   KEY_MINUS = KEY_DOWN,
