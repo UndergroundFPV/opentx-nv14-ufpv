@@ -502,7 +502,7 @@ PACK(struct FrSkyLineData {
   source_t sources[NUM_LINE_ITEMS];
 });
 
-#if defined(PCBTARANIS)
+#if defined(PCBTARANIS) || defined(PCBI8)
 PACK(struct TelemetryScriptData {
   char    file[LEN_SCRIPT_FILENAME];
   int16_t inputs[MAX_TELEM_SCRIPT_INPUTS];
@@ -512,7 +512,7 @@ PACK(struct TelemetryScriptData {
 union FrSkyScreenData {
   FrSkyBarData  bars[4];
   FrSkyLineData lines[4];
-#if defined(PCBTARANIS)
+#if defined(PCBTARANIS) || defined(PCBI8)
   TelemetryScriptData script;
 #endif
 };
@@ -782,7 +782,7 @@ PACK(struct CustomScreenData {
   NOBACKUP(CustomScreenData screenData[MAX_CUSTOM_SCREENS]); \
   NOBACKUP(Topbar::PersistentData topbarData); \
   NOBACKUP(uint8_t view);
-#elif defined(PCBTARANIS)
+#elif defined(PCBTARANIS) || defined(PCBI8)
 #define CUSTOM_SCREENS_DATA \
   NOBACKUP(uint8_t view);
 #else

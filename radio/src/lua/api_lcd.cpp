@@ -18,10 +18,10 @@
  * GNU General Public License for more details.
  */
 
-#include <ctype.h>
-#include <stdio.h>
 #include "opentx.h"
 #include "lua_api.h"
+#include <ctype.h>
+#include <stdio.h>
 
 /*luadoc
 @function lcd.refresh()

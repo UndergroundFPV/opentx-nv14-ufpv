@@ -484,7 +484,7 @@ enum TelemetryUnit {
   #define NUM_LINE_ITEMS 2
 #endif
 
-#if defined(PCBTARANIS)
+#if defined(PCBTARANIS) || defined(PCBI8)
 #define MAX_TELEM_SCRIPT_INPUTS  8
 #endif
 
@@ -844,34 +844,38 @@ enum MixSources {
   MIXSRC_SA = MIXSRC_FIRST_SWITCH,  LUA_EXPORT("sa", "Switch A")
   MIXSRC_SB,                        LUA_EXPORT("sb", "Switch B")
   MIXSRC_LAST_SWITCH = MIXSRC_SB,
-#elif defined(PCBTARANIS) || defined(PCBHORUS)
+#elif defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
   MIXSRC_SA = MIXSRC_FIRST_SWITCH,  LUA_EXPORT("sa", "Switch A")
   MIXSRC_SB,                        LUA_EXPORT("sb", "Switch B")
   MIXSRC_SC,                        LUA_EXPORT("sc", "Switch C")
   MIXSRC_SD,                        LUA_EXPORT("sd", "Switch D")
-#if !defined(PCBX7)
-  MIXSRC_SE,                        LUA_EXPORT("se", "Switch E")
-#endif
+  #if !defined(PCBX7)
+    MIXSRC_SE,                      LUA_EXPORT("se", "Switch E")
+  #endif
   MIXSRC_SF,                        LUA_EXPORT("sf", "Switch F")
-#if !defined(PCBX7)
-  MIXSRC_SG,                        LUA_EXPORT("sg", "Switch G")
-#endif
-  MIXSRC_SH,                        LUA_EXPORT("sh", "Switch H")
-#if defined(PCBX9E)
-  MIXSRC_SI,                        LUA_EXPORT("si", "Switch I")
-  MIXSRC_SJ,                        LUA_EXPORT("sj", "Switch J")
-  MIXSRC_SK,                        LUA_EXPORT("sk", "Switch K")
-  MIXSRC_SL,                        LUA_EXPORT("sl", "Switch L")
-  MIXSRC_SM,                        LUA_EXPORT("sm", "Switch M")
-  MIXSRC_SN,                        LUA_EXPORT("sn", "Switch N")
-  MIXSRC_SO,                        LUA_EXPORT("so", "Switch O")
-  MIXSRC_SP,                        LUA_EXPORT("sp", "Switch P")
-  MIXSRC_SQ,                        LUA_EXPORT("sq", "Switch Q")
-  MIXSRC_SR,                        LUA_EXPORT("sr", "Switch R")
-  MIXSRC_LAST_SWITCH = MIXSRC_SR,
-#else
-  MIXSRC_LAST_SWITCH = MIXSRC_SH,
-#endif
+  #if defined(PCBI8)
+    MIXSRC_LAST_SWITCH = MIXSRC_SF,
+  #else
+    #if !defined(PCBX7)
+      MIXSRC_SG,                    LUA_EXPORT("sg", "Switch G")
+    #endif
+    MIXSRC_SH,                      LUA_EXPORT("sh", "Switch H")
+    #if defined(PCBX9E)
+      MIXSRC_SI,                    LUA_EXPORT("si", "Switch I")
+      MIXSRC_SJ,                    LUA_EXPORT("sj", "Switch J")
+      MIXSRC_SK,                    LUA_EXPORT("sk", "Switch K")
+      MIXSRC_SL,                    LUA_EXPORT("sl", "Switch L")
+      MIXSRC_SM,                    LUA_EXPORT("sm", "Switch M")
+      MIXSRC_SN,                    LUA_EXPORT("sn", "Switch N")
+      MIXSRC_SO,                    LUA_EXPORT("so", "Switch O")
+      MIXSRC_SP,                    LUA_EXPORT("sp", "Switch P")
+      MIXSRC_SQ,                    LUA_EXPORT("sq", "Switch Q")
+      MIXSRC_SR,                    LUA_EXPORT("sr", "Switch R")
+      MIXSRC_LAST_SWITCH = MIXSRC_SR,
+    #else
+      MIXSRC_LAST_SWITCH = MIXSRC_SH,
+    #endif  // defined(PCBX9E)
+  #endif  // defined(PCBI8)
 #else
   MIXSRC_3POS = MIXSRC_FIRST_SWITCH,
   MIXSRC_THR,

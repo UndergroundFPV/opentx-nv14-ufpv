@@ -172,7 +172,7 @@ enum MenuModelTelemetryFrskyItems {
 #endif
 
 
-#if defined (PCBTARANIS)
+#if defined (PCBTARANIS) || defined(PCBI8)
   #define TELEMETRY_TYPE_SHOW_TELEMETRY  (! IS_INTERNAL_MODULE_ENABLED() && g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_PPM) ? (uint8_t)0 : HIDDEN_ROW
 #elif defined (CPUARM)
   #define TELEMETRY_TYPE_SHOW_TELEMETRY  (g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_PPM) ? (uint8_t)0 : HIDDEN_ROW

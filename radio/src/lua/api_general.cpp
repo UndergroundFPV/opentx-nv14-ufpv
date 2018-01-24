@@ -18,12 +18,12 @@
  * GNU General Public License for more details.
  */
 
-#include <ctype.h>
-#include <stdio.h>
 #include "opentx.h"
 #include "stamp.h"
 #include "lua_api.h"
 #include "telemetry/frsky.h"
+#include <ctype.h>
+#include <stdio.h>
 
 #if defined(PCBX12S)
   #include "lua/lua_exports_x12s.inc"   // this line must be after lua headers
@@ -35,6 +35,8 @@
   #include "lua/lua_exports_x7.inc"
 #elif defined(PCBTARANIS)
   #include "lua/lua_exports_x9d.inc"
+#elif defined(PCBI8)
+  #include "lua/lua_exports_i8.inc"
 #endif
 
 #if defined(SIMU)
@@ -1319,10 +1321,14 @@ const luaR_value_entry opentxConstants[] = {
   { "MIXSRC_SD", MIXSRC_SD },
 #if !defined(PCBX7)
   { "MIXSRC_SE", MIXSRC_SE },
+#if !defined(PCBI8)
   { "MIXSRC_SG", MIXSRC_SG },
 #endif
+#endif
   { "MIXSRC_SF", MIXSRC_SF },
+#if !defined(PCBI8)
   { "MIXSRC_SH", MIXSRC_SH },
+#endif
   { "MIXSRC_CH1", MIXSRC_CH1 },
   { "SWSRC_LAST", SWSRC_LAST_LOGICAL_SWITCH },
 #if defined(COLORLCD)

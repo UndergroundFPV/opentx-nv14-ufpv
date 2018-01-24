@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -18,11 +18,11 @@
  * GNU General Public License for more details.
  */
 
-#include <ctype.h>
-#include <stdio.h>
 #include "opentx.h"
 #include "lua_api.h"
 #include "timers.h"
+#include <ctype.h>
+#include <stdio.h>
 
 /*luadoc
 @function model.getInfo()

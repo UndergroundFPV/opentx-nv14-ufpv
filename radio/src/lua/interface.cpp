@@ -20,12 +20,12 @@
 
 /** @file Main interface layer handler for Lua API. */
 
-#include <ctype.h>
-#include <stdio.h>
 #include "opentx.h"
 #include "bin_allocator.h"
 #include "lua_api.h"
 #include "sdcard.h"
+#include <ctype.h>
+#include <stdio.h>
 
 extern "C" {
   #include <lundump.h>
