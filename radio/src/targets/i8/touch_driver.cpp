@@ -185,6 +185,7 @@ bool touchInit()
 
 void touchDmaRxComplete()
 {
+  i2cLeaveMutexSection();
   dataMutex = false;
   touchParseData();
 }
@@ -199,6 +200,7 @@ void touchReadData()
     return;
 
   dataMutex = true;
+  i2cEnterMutexSection();
   if (TOUCH_USE_DMA) {
     i2cDmaRead(TOUCH_I2C_ADDRESS, FT6236_TD_STATUS, 8, touchBuffer, FT6236_READ_DATA_LEN, true, &touchDmaRxComplete);
   }
@@ -206,6 +208,7 @@ void touchReadData()
     i2cRead(TOUCH_I2C_ADDRESS, FT6236_TD_STATUS, 8, touchBuffer, FT6236_READ_DATA_LEN);
     busDataReady = false;
     dataMutex = false;
+    i2cLeaveMutexSection();
     touchParseData();
   }
 }

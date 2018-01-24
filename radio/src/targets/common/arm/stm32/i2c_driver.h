@@ -22,7 +22,6 @@
 #define I2C_DRIVER_H
 
 #include <stdint.h>
-#include <atomic>
 
 #ifndef   I2C_I2Cx
   #define I2C_I2Cx             I2C  // I2C peripheral
@@ -43,7 +42,7 @@
 extern "C" {
 #endif
 
-typedef void i2cDmaCallback_t (void);
+typedef void (*i2cDmaCallback_t) (void);
 typedef struct {
   bool dataInit;
   bool hwInit;
@@ -52,14 +51,16 @@ typedef struct {
 } i2cData_t;
 
 bool i2cInit();
+void i2cEnterMutexSection();
+void i2cLeaveMutexSection();
 bool i2cWaitBusReady();
 bool i2cWaitStandbyState(uint8_t addr);
 bool i2cWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len);
 bool i2cWriteByte(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t data);
 bool i2cRead(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len);
 uint8_t i2cReadByte(uint8_t addr, uint16_t loc, uint8_t regSz);
-bool i2cDmaWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t * callback);
-bool i2cDmaRead(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t * callback);
+bool i2cDmaWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t callback);
+bool i2cDmaRead(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t callback);
 
 #ifdef __cplusplus
 }

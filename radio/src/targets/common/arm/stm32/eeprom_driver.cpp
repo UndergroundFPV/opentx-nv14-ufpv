@@ -33,8 +33,10 @@
   */
 void eepromReadBlock(uint8_t * buffer, size_t address, size_t size)
 {
+  i2cEnterMutexSection();
   if (!i2cRead(EEPROM_I2C_ADDRESS, (uint16_t)address, 16, buffer, (uint16_t)size))
     TRACE_ERROR("eeprom: I2C read failed in eepromReadBlock()!\r\n");
+  i2cLeaveMutexSection();
 }
 
 uint8_t eepromIsTransferComplete()
@@ -73,10 +75,12 @@ void eepromWriteBlock(uint8_t * buffer, size_t address, size_t size)
     count = size;
   }
   while (count > 0) {
+    i2cEnterMutexSection();
     eepromPageWrite(buffer, address, count);
     if (!i2cWaitStandbyState(EEPROM_I2C_ADDRESS)) {
       TRACE_WARNING("eeprom: eepromWriteBlock() I2C standby state failed, write may be incomplete.\r\n");
     }
+    i2cLeaveMutexSection();
     address += count;
     buffer += count;
     size -= count;

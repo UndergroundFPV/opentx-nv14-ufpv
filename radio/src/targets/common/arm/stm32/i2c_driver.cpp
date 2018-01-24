@@ -21,16 +21,28 @@
 #include "i2c_driver.h"
 #include "board.h"
 #include "debug.h"
+#include "opentx.h"
 
 #if !defined(UNUSED)
 #define UNUSED(x)	((void)(x))
 #endif
 
 i2cData_t i2cData;
+OS_MutexID i2cMutex;
 
 bool i2cErrorHandler()
 {
   return i2cInit();
+}
+
+void i2cEnterMutexSection()
+{
+  enterMutexSection(i2cMutex);
+}
+
+void i2cLeaveMutexSection()
+{
+  leaveMutexSection(i2cMutex);
 }
 
 bool i2cWaitEvent(uint32_t event)
@@ -66,6 +78,8 @@ bool i2cWaitFlagCleared(uint32_t flag)
 
 bool i2cWaitBusReady()
 {
+  if (!i2cData.dataInit && !i2cInit())
+    return false;
   if (!i2cWaitFlagCleared(I2C_FLAG_BUSY)) {
     TRACE_I2C_ERR("i2cWaitBusReady(): Bus timeout, I2C_FLAG_BUSY still set.");
     return I2C_ERROR_HANDLER();
@@ -82,6 +96,7 @@ void i2cDataInit() {
   i2cData.hwInit = false;
   i2cData.dmaRxCallback = NULL;
   i2cData.dmaTxCallback = NULL;
+  i2cMutex = createMutex();
 }
 
 void i2cDmaInit(uint32_t direction)
@@ -183,7 +198,7 @@ bool i2cInit()
     I2C_SoftwareResetCmd(I2C_I2Cx, DISABLE);
   }
 
-  TRACE("[I2C] i2cInit() (@ %dHz)", I2C_SPEED);
+  TRACE("[I2C] i2cInit() (@ %dHz) MtxId %d", I2C_SPEED, i2cMutex);
   return true;
 }
 
@@ -321,7 +336,7 @@ uint8_t i2cReadByte(uint8_t addr, uint16_t loc, uint8_t regSz)
 }
 
 // TODO: DMA write untested
-bool i2cDmaWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t * callback)
+bool i2cDmaWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t callback)
 {
 #if defined(I2C_DMA) && defined(I2C_DMA_TX_Stream)
   if (!i2cPrepareWrite(addr, loc, regSz))
@@ -355,7 +370,7 @@ bool i2cDmaWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, u
 #endif
 }
 
-bool i2cDmaRead(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t * callback)
+bool i2cDmaRead(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len, bool oneShot, i2cDmaCallback_t callback)
 {
 #if defined(I2C_DMA) && defined(I2C_DMA_RX_Stream)
   if (!i2cPrepareRead(addr, loc, regSz))

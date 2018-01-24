@@ -252,9 +252,10 @@ int main()
   BACKLIGHT_ENABLE();
 #endif
 
-#if defined(PCBTARANIS)
-  i2cInit();
-#endif
+#warning "TODO: test to make sure i2c inits automatically in bootloader when eeprom uses it"
+//#if defined(PCBTARANIS)
+//  i2cInit();
+//#endif
   init10msTimer();
 
   // SD card detect pin
