@@ -28,21 +28,28 @@
 #endif
 
 i2cData_t i2cData;
-OS_MutexID i2cMutex;
+OS_EventID i2cSem;
 
 bool i2cErrorHandler()
 {
   return i2cInit();
 }
 
-void i2cEnterMutexSection()
+bool i2cEnterMutexSection()
 {
-  enterMutexSection(i2cMutex);
+  if (pendSemaphore(i2cSem, 1000) != E_OK)
+    return false;
+  return true;
 }
 
 void i2cLeaveMutexSection()
 {
-  leaveMutexSection(i2cMutex);
+  (void)postSemaphore(i2cSem);
+}
+
+void i2cLeaveMutexSection_isr()
+{
+  (void)postSemaphore_isr(i2cSem);
 }
 
 bool i2cWaitEvent(uint32_t event)
@@ -96,7 +103,7 @@ void i2cDataInit() {
   i2cData.hwInit = false;
   i2cData.dmaRxCallback = NULL;
   i2cData.dmaTxCallback = NULL;
-  i2cMutex = createMutex();
+  i2cSem = createSemaphore(1, 1, EVENT_SORT_TYPE_FIFO);
 }
 
 void i2cDmaInit(uint32_t direction)
@@ -198,7 +205,7 @@ bool i2cInit()
     I2C_SoftwareResetCmd(I2C_I2Cx, DISABLE);
   }
 
-  TRACE("[I2C] i2cInit() (@ %dHz) MtxId %d", I2C_SPEED, i2cMutex);
+  TRACE("[I2C] i2cInit() (@ %dHz)", I2C_SPEED);
   return true;
 }
 
@@ -410,6 +417,7 @@ bool i2cDmaRead(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, ui
 extern "C" void I2C_DMA_RX_IRQHandler(void)
 {
   DEBUG_INTERRUPT(INT_I2C_DMA_RX);
+  CoEnterISR();
   if (DMA_GetFlagStatus(I2C_DMA_RX_Stream, I2C_DMA_RX_FLAG_TCIF) != RESET) {
     I2C_GenerateSTOP(I2C_I2Cx, ENABLE);
     DMA_Cmd(I2C_DMA_RX_Stream, DISABLE);
@@ -419,6 +427,7 @@ extern "C" void I2C_DMA_RX_IRQHandler(void)
     if (i2cData.dmaRxCallback)
       i2cData.dmaRxCallback();
   }
+  CoExitISR();
 }
 #endif  // defined(I2C_DMA) && defined(I2C_DMA_RX_IRQHandler)
 
@@ -426,6 +435,7 @@ extern "C" void I2C_DMA_RX_IRQHandler(void)
 extern "C" void I2C_DMA_TX_IRQHandler(void)
 {
   DEBUG_INTERRUPT(INT_I2C_DMA_TX);
+  CoEnterISR();
   if (DMA_GetFlagStatus(I2C_DMA_TX_Stream, I2C_DMA_TX_FLAG_TCIF) != RESET) {
     DMA_Cmd(I2C_DMA_TX_Stream, DISABLE);
     //I2C_DMACmd(I2C_I2Cx, DISABLE);
@@ -442,5 +452,6 @@ extern "C" void I2C_DMA_TX_IRQHandler(void)
     if (i2cData.i2cDmaTxCallback)
       i2cData.i2cDmaTxCallback();
   }
+  CoExitISR();
 }
 #endif  // defined(I2C_DMA) && defined(I2C_DMA_TX_IRQHandler)

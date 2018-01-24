@@ -121,6 +121,7 @@ set(FIRMWARE_SRC
   ${COOS_DIR}/kernel/timer.c
   ${COOS_DIR}/kernel/flag.c
   ${COOS_DIR}/kernel/mutex.c
+  ${COOS_DIR}/kernel/sem.c
   ${COOS_DIR}/kernel/serviceReq.c
   ${COOS_DIR}/portable/GCC/port.c
   ${COOS_DIR}/portable/arch.c

@@ -50,10 +50,11 @@ typedef struct {
   i2cDmaCallback_t * dmaTxCallback;
 } i2cData_t;
 
-bool i2cInit();
-void i2cEnterMutexSection();
-void i2cLeaveMutexSection();
-bool i2cWaitBusReady();
+bool i2cInit(void);
+bool i2cEnterMutexSection(void);
+void i2cLeaveMutexSection(void);
+void i2cLeaveMutexSection_isr(void);
+bool i2cWaitBusReady(void);
 bool i2cWaitStandbyState(uint8_t addr);
 bool i2cWrite(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t * pBuffer, uint16_t len);
 bool i2cWriteByte(uint8_t addr, uint16_t loc, uint8_t regSz, uint8_t data);

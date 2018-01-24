@@ -241,7 +241,7 @@ Event = semaphore + mailbox + queue;
 /*!< 
 Enable(1) or disable(0) semaphore management.	      
 */
-#define CFG_SEM_EN              (0)	
+#define CFG_SEM_EN              (1)	
 
 /*!< 
 Enable(1) or disable(0) mailbox management.	      

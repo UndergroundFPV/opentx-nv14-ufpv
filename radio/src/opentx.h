@@ -909,56 +909,45 @@ template<class t> void SWAP(t & a, t & b) { t tmp = b; b = a; a = tmp; }
 
 uint16_t isqrt32(uint32_t n);
 
+// OS abstraction layer (tasks, semaphores, mutexes, etc)
 #if defined(CPUARM) && !defined(BOOT)
-#include "tasks_arm.h"
-extern OS_MutexID mixerMutex;
-inline void pauseMixerCalculations()
-{
-  CoEnterMutexSection(mixerMutex);
-}
+  #include "tasks_arm.h"
 
-inline void resumeMixerCalculations()
-{
-  CoLeaveMutexSection(mixerMutex);
-}
+  extern OS_MutexID mixerMutex;
+  inline void pauseMixerCalculations() { CoEnterMutexSection(mixerMutex); }
+  inline void resumeMixerCalculations() { CoLeaveMutexSection(mixerMutex); }
 
-inline OS_MutexID createMutex(void) {
-  OS_MutexID m = CoCreateMutex();
-#if !defined(SIMU)
-  if (m == E_CREATE_FAIL)
-    TRACE_DEBUG("Failed to create mutex, returned: %d", m);
-#endif
-  return m;
-}
+  inline OS_MutexID createMutex(void) { return CoCreateMutex(); }
+  inline StatusType enterMutexSection(OS_MutexID mutexId) { return CoEnterMutexSection(mutexId); }
+  inline StatusType leaveMutexSection(OS_MutexID mutexId) { return CoLeaveMutexSection(mutexId); }
 
-inline bool enterMutexSection(OS_MutexID mutexId)
-{
-  StatusType s;
-  if ((s = CoEnterMutexSection(mutexId)) == E_OK)
-    return true;
-  TRACE_DEBUG("CoEnterMutex returned %d", s);
-  return false;
-}
+  inline StatusType postSemaphore(OS_EventID id)                   { return CoPostSem(id); }
+  inline StatusType postSemaphore_isr(OS_EventID id)               { return isr_PostSem(id); }
+  inline StatusType pendSemaphore(OS_EventID id, uint32_t timeout) { return CoPendSem(id, timeout); }
+  inline StatusType acceptSemaphore(OS_EventID id)                 { return CoAcceptSem(id);}
+  inline StatusType deleteSemaphore(OS_EventID id, uint8_t opt)    { return CoDelSem(id, opt); }
+  inline OS_EventID createSemaphore(uint16_t initCnt, uint16_t maxCnt, uint8_t sortType) { return CoCreateSem(initCnt, maxCnt, sortType); }
+#else  // defined(CPUARM) && !defined(BOOT)
+  typedef uint8_t OS_MutexID;
+  typedef uint8_t OS_EventID;
+  typedef uint8_t StatusType;
 
-inline bool leaveMutexSection(OS_MutexID mutexId)
-{
-  if (CoLeaveMutexSection(mutexId) == E_OK)
-    return true;
-  return false;
-}
-#else
-typedef uint8_t OS_MutexID;
+  #define pauseMixerCalculations()
+  #define resumeMixerCalculations()
 
-#define pauseMixerCalculations()
-#define resumeMixerCalculations()
-
-inline OS_MutexID createMutex(void) {
-  static OS_MutexID mtxId = 0;
-  return (++mtxId);
-}
-inline bool enterMutexSection(OS_MutexID mutexId) { return true; }
-inline bool leaveMutexSection(OS_MutexID mutexId) { return true; }
-#endif
+  inline OS_MutexID createMutex(void) {
+    static OS_MutexID mtxId = 0;
+    return (++mtxId);
+  }
+  #define enterMutexSection(...)   (0)
+  #define leaveMutexSection(...)   (0)
+  #define postSemaphore(...)       (0)
+  #define postSemaphore_isr(...)   (0)
+  #define pendSemaphore(...)       (0)
+  #define acceptSemaphore(...)     (0)
+  #define deleteSemaphore(...)     (0)
+  #define createSemaphore(...)     createMutex()
+#endif  // defined(CPUARM) && !defined(BOOT)
 
 void generalDefault();
 void modelDefault(uint8_t id);
