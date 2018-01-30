@@ -22,7 +22,9 @@
 
 void extmoduleSendNextFrame();
 
+#ifndef _MSC_VER
 #warning "TODO check TRAINER_EXTMODULE_TIMER_IRQn, the timer is also used by trainer"
+#endif
 
 void extmoduleStop()
 {

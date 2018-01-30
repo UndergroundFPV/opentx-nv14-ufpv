@@ -24,7 +24,9 @@ DMAFifo<32> heartbeatFifo __DMA (HEARTBEAT_DMA_Stream);
 
 void trainerSendNextFrame();
 
+#ifndef _MSC_VER
 #warning "TODO all TRAINER_TIMER_IRQn, the timer is also used by trainer"
+#endif
 
 void init_trainer_ppm()
 {
@@ -119,7 +121,9 @@ void trainerSendNextFrame()
 #endif
 }
 
+#ifndef _MSC_VER
 #warning "TODO merge this with Extmodule DMA_IRQHandler as they share the same timer channel and DMA stream"
+#endif
 /*
 extern "C" void TRAINER_OUT_DMA_IRQHandler()
 {
@@ -135,7 +139,9 @@ extern "C" void TRAINER_OUT_DMA_IRQHandler()
 
 extern "C" void TRAINER_EXTMODULE_TIMER_IRQHandler()
 {
+#ifndef _MSC_VER
   #warning "TODO remove this"
+#endif
   TRAINER_TIMER->DIER = 0;
 
   DEBUG_INTERRUPT(INT_TRAINER);
@@ -173,7 +179,9 @@ extern "C" void TRAINER_EXTMODULE_TIMER_IRQHandler()
     trainerSendNextFrame();
   }
 
+#ifndef _MSC_VER
 #warning "TODO we have to do something with ext module which uses the same timer"
+#endif
 #if 0
   EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE; // Stop this interrupt
   EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;

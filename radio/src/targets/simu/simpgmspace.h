@@ -409,7 +409,7 @@ extern OS_MutexID audioMutex;
 #define OS_TID pthread_t
 #define OS_TCID uint32_t
 #define OS_STK uint32_t
-#define OS_EventID sem_t
+#define OS_EventID sem_t *
 
 typedef unsigned char      U8;
 typedef unsigned int       U32;
@@ -431,12 +431,22 @@ U64 CoGetOSTime(void);
 #define CoEnterMutexSection(m)         pthread_mutex_lock(&(m))
 #define CoLeaveMutexSection(m)         pthread_mutex_unlock(&(m))
 
-#define CoCreateSem(_cnt, _max, _srt)  ({ sem_t * semaphore = (sem_t *)malloc(sizeof(sem_t)); sem_init(semaphore, (_max), (_cnt)); semaphore; })
-#define CoPostSem(__sem)               sem_post(&(__sem))
-#define isr_PostSem(__sem)             sem_post(&(__sem))
-#define CoPendSem(__sem, __to)         sem_wait(&(__sem))
-#define CoAcceptSem(__sem)             sem_trywait(&(__sem))
-#define CoDelSem(__sem, __opt)         ({ int ret = sem_destroy(&(__sem)); free(&(__sem)); ret; })
+inline OS_EventID CoCreateSem(uint16_t initCnt, uint16_t maxCnt, uint8_t /*sortType*/)
+{
+  OS_EventID semaphore = (OS_EventID)malloc(sizeof(sem_t));
+  sem_init(semaphore, maxCnt, initCnt);
+  return semaphore;
+}
+inline int CoDelSem(OS_EventID id, uint8_t /*opt*/)
+{
+  int ret = sem_destroy(id);
+  free(id);
+  return ret;
+}
+#define CoPostSem(__sem)               sem_post((__sem))
+#define isr_PostSem(__sem)             sem_post((__sem))
+#define CoPendSem(__sem, __to)         sem_wait((__sem))
+#define CoAcceptSem(__sem)             sem_trywait((__sem))
 
 // TODO: real flags (use semaphores?)
 #define CoCreateFlag(...)              E_OK
