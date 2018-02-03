@@ -101,6 +101,15 @@ set(SRC
   crc16.cpp
   vario.cpp
   )
+if(NOT MSVC)
+  set(SRC
+    ${SRC}
+    ${THIRDPARTY_DIR}/DSP_Lib/Source/CommonTables/arm_common_tables.c
+    ${THIRDPARTY_DIR}/DSP_Lib/Source/FastMathFunctions/arm_cos_f32.c
+    ${THIRDPARTY_DIR}/DSP_Lib/Source/FastMathFunctions/arm_sin_f32.c
+    ${THIRDPARTY_DIR}/DSP_Lib/Source/FastMathFunctions/arm_sin_cos_f32.c
+    )
+endif()
 set(FIRMWARE_TARGET_SRC
   ${FIRMWARE_TARGET_SRC}
   diskio.cpp
