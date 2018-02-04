@@ -256,13 +256,6 @@
   #endif
 #endif
 
-// RESX range is used for internal calculation; The menu says -100.0 to 100.0; internally it is -1024 to 1024 to allow some optimizations
-#define RESX_SHIFT 10
-#define RESX       1024
-#define RESXu      1024u
-#define RESXul     1024ul
-#define RESXl      1024l
-
 #include "board.h"
 
 #if defined(DISK_CACHE)
@@ -907,8 +900,6 @@ template<class t> FORCEINLINE t sgn(t a) { return a>0 ? 1 : (a < 0 ? -1 : 0); }
 template<class t> FORCEINLINE t limit(t mi, t x, t ma) { return min(max(mi,x),ma); }
 template<class t> void SWAP(t & a, t & b) { t tmp = b; b = a; a = tmp; }
 
-uint16_t isqrt32(uint32_t n);
-
 // OS abstraction layer (tasks, semaphores, mutexes, etc)
 #if defined(CPUARM) && !defined(BOOT)
   #include "tasks_arm.h"
@@ -953,65 +944,28 @@ void generalDefault();
 void modelDefault(uint8_t id);
 
 #if defined(CPUARM)
-void checkModelIdUnique(uint8_t index, uint8_t module);
-#endif
+  #include "otx_math.h"
 
-#if defined(CPUARM)
-uint32_t hash(const void * ptr, uint32_t size);
-inline int divRoundClosest(const int n, const int d)
-{
-  if (d == 0)
-    return 0;
-  else
-    return ((n < 0) ^ (d < 0)) ? ((n - d/2)/d) : ((n + d/2)/d);
-}
-
-#define calc100to256_16Bits(x) calc100to256(x)
-#define calc100toRESX_16Bits(x) calc100toRESX(x)
-
-inline int calc100to256(int x)
-{
-  return divRoundClosest(x*256, 100);
-}
-
-inline int calc100toRESX(int x)
-{
-  return divRoundClosest(x*RESX, 100);
-}
-
-inline int calc1000toRESX(int x)
-{
-  return divRoundClosest(x*RESX, 1000);
-}
-
-inline int calcRESXto1000(int x)
-{
-  return divRoundClosest(x*1000, RESX);
-}
-
-inline int calcRESXto100(int x)
-{
-  return divRoundClosest(x*100, RESX);
-}
-
+  void checkModelIdUnique(uint8_t index, uint8_t module);
 #else
-extern int16_t calc100to256_16Bits(int16_t x); // @@@2 open.20.fsguruh: return x*2.56
-extern int16_t calc100to256(int8_t x); // @@@2 open.20.fsguruh: return x*2.56
-extern int16_t calc100toRESX_16Bits(int16_t x); // @@@ open.20.fsguruh
-extern int16_t calc100toRESX(int8_t x);
-extern int16_t calc1000toRESX(int16_t x);
-extern int16_t calcRESXto1000(int16_t x);
-extern int8_t  calcRESXto100(int16_t x);
+  // in avr_maths.cpp
+  extern int16_t calc100to256_16Bits(int16_t x); // @@@2 open.20.fsguruh: return x*2.56
+  extern int16_t calc100to256(int8_t x); // @@@2 open.20.fsguruh: return x*2.56
+  extern int16_t calc100toRESX_16Bits(int16_t x); // @@@ open.20.fsguruh
+  extern int16_t calc100toRESX(int8_t x);
+  extern int16_t calc1000toRESX(int16_t x);
+  extern int16_t calcRESXto1000(int16_t x);
+  extern int8_t  calcRESXto100(int16_t x);
+  extern uint16_t isqrt32(uint32_t n);
 #endif
 
+extern const char vers_stamp[];
 #if defined(COLORLCD)
-extern const char vers_stamp[];
-extern const char date_stamp[];
-extern const char time_stamp[];
-extern const char eeprom_stamp[];
-#else
-extern const char vers_stamp[];
+  extern const char date_stamp[];
+  extern const char time_stamp[];
+  extern const char eeprom_stamp[];
 #endif
+
 /**
  * Tries to find opentx version in the first 1024 byte of either firmware/bootloader (the one not running) or the buffer
  * @param buffer If non-null find the firmware version in the buffer instead

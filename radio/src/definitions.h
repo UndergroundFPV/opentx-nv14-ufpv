@@ -80,4 +80,11 @@ typedef __int24 int24_t;
   #define CONVERT_UINT_PTR(x) ((uint32_t *)(x))
 #endif
 
+// RESX range is used for internal calculation; The menu says -100.0 to 100.0; internally it is -1024 to 1024 to allow some optimizations
+#define RESX_SHIFT 10
+#define RESX       1024
+#define RESXu      1024u
+#define RESXul     1024ul
+#define RESXl      1024l
+
 #endif // _DEFINITIONS_H_

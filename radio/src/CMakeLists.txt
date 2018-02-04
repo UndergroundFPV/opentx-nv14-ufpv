@@ -371,7 +371,6 @@ if(GUI)
   set(SRC
     ${SRC}
     keys.cpp
-    maths.cpp
     translations.cpp
     gui/gui_common.cpp
     )
@@ -379,10 +378,9 @@ if(GUI)
     set(SRC ${SRC} gui/${GUI_DIR}/${FILE})
   endforeach()
   if(ARCH STREQUAL ARM)
-    set(SRC
-      ${SRC}
-      gui/gui_common_arm.cpp
-      )
+    set(SRC ${SRC} gui/gui_common_arm.cpp)
+  else()
+    set(SRC ${SRC} math_avr.cpp)
   endif()
 endif()
 
