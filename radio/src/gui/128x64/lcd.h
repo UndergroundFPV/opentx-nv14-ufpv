@@ -32,14 +32,26 @@
 #if defined(CPUARM)
   typedef int32_t lcdint_t;
   typedef uint32_t lcduint_t;
+  typedef uint32_t LcdFlags;
 #else
   typedef int16_t lcdint_t;
   typedef uint16_t lcduint_t;
+  typedef uint8_t LcdFlags;
 #endif
 
 #define FW                             6
 #define FWNUM                          5
 #define FH                             8
+#define FW_TIN                         4
+#define FH_TIN                         6
+#define FW_SML                         6
+#define FH_SML                         7
+#define FW_MID                         9
+#define FH_MID                         13
+#define FW_DBL                         11
+#define FH_DBL                         17
+#define FW_XXL                         23
+#define FH_XXL                         39
 
 #define LCD_LINES                      (LCD_H/FH)
 #define LCD_COLS                       (LCD_W/FW)
@@ -122,12 +134,6 @@
   #define STREXPANDED                  0x00
 #endif
 
-#if defined(CPUARM)
-  typedef uint32_t LcdFlags;
-#else
-  typedef uint8_t LcdFlags;
-#endif
-
 #define display_t                      uint8_t
 #define DISPLAY_BUFFER_SIZE            (LCD_W*((LCD_H+7)/8))
 
@@ -154,6 +160,23 @@ extern coord_t lcdNextPos;
 typedef const unsigned char pm_uchar;
 typedef const char pm_char;
 #endif
+
+/*!
+  \brief Like FW/FH/FWNUM macros but for any font size flag.
+  \param which  Size to return: 'w' for width, 'n' for number width, 'h' for height
+  \param f      LcdFlags (font size)
+  \param actual Set to \e 1 to return unpadded size (-1 pixel)
+  \return Maximum size of a font character in pixels.
+*/
+inline uint8_t lcdFontScaledSize(char which, LcdFlags f, uint8_t actual = 0)
+{
+  if (f & TINSIZE) return (which == 'h' ? FH_TIN : FW_TIN) - actual;
+  if (f & SMLSIZE) return (which == 'h' ? FH_SML : FW_SML) - actual;
+  if (f & MIDSIZE) return (which == 'h' ? FH_MID : which == 'n' ? FW_MID-1 : FW_MID) - actual;
+  if (f & DBLSIZE) return (which == 'h' ? FH_DBL : which == 'n' ? FW_DBL-1 : FW_DBL) - actual;
+  if (f & XXLSIZE) return (which == 'h' ? FH_XXL : FW_XXL) - actual;
+  return (which == 'h' ? FH : which == 'n' ? FWNUM : FW) - actual;
+}
 
 void lcdDrawChar(coord_t x, coord_t y, const unsigned char c);
 void lcdDrawChar(coord_t x, coord_t y, const unsigned char c, LcdFlags flags);
