@@ -59,6 +59,13 @@ class Fifo
       }
     }
 
+    T pop()
+    {
+      T e;
+      pop(e);
+      return e;
+    }
+
     bool isEmpty() const
     {
       return (ridx == widx);
