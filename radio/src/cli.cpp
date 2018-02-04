@@ -23,6 +23,8 @@
 #include <ctype.h>
 #include <malloc.h>
 #include <new>
+#include <unordered_map>
+#include <vector>
 
 #define CLI_COMMAND_MAX_ARGS           8
 #define CLI_COMMAND_MAX_LEN            256
@@ -1070,6 +1072,159 @@ int cliDebugVars(const char ** argv)
   return 0;
 }
 
+//
+// Benchmarking
+//
+
+//! Benchmarking callback function, left here as an example . \a ver is version of test to execute.  \sa cliBenchIterate()
+//!  Note that everything inside this function is timed, so keep it to a bare minimum of just the bits you want to test.
+void cliBenchSinCos(int ver)
+{
+  // Important: need some place to store return values and they need to be volatile,
+  //   otherwise compiler just optimizes it all out (runs very fast that way though! ;-)
+  volatile float s, c;
+  // In this particular case we also need some vars to pass as references, can't be volatile but these will not get optimized out anyway.
+  float ts, tc;
+  // Now run the actual test loop. Here we're testing trig so we iterate over values of -PI2 to PI2 in .5 degree increments
+  for (float i = -M_PI2f; i <= M_PI2f; i += (0.5f * DEG_TO_RADf)) {
+    switch (ver) {
+      case 0:
+        // default system
+        s = sinf(i);
+        c = cosf(i);
+        break;
+
+      case 1:
+        // arm32 math lib separate functions
+        s = MathUtil::sinf(i);
+        c = MathUtil::cosf(i);
+        break;
+
+      case 2:
+        // arm32 math lib combined function (more accurate than the separate ones)
+        MathUtil::sincosf(i, &ts, &tc);
+        break;
+
+      default:
+        break;
+    }
+  }
+  // now stop compiler bitching (it's hard to please!)
+  UNUSED(c);
+  UNUSED(s);
+}
+
+//! Another, simpler benchmarking example
+void cliBenchAtan2(int ver)
+{
+  volatile float s;
+  for (float p = -M_PI2f; p <= M_PI2f; p += (0.5f * DEG_TO_RADf)) {
+    switch (ver) {
+      case 0:
+        // default system version
+        s = atan2f(p, -p);
+        break;
+
+      case 1:
+        // special "secret sauce" version ;-)
+        s = MathUtil::atan2f(p, -p);
+        break;
+
+      default:
+        break;
+    }
+  }
+  UNUSED(s);
+}
+
+/*!
+   \brief Loop over a callback function \a cb for \a iter number of times while timing each iteration.
+   \param iter  Number of iterations to perform.
+   \param cb    Callback to execute for the actual test, which returns void and takes one argument of type \a int \e (void (*)(int)).
+   \param args  Vector of argument(s) to pass to callback. One set of iterations is executed for each argument in the list, using each one in turn as the callback argument.
+   \param names Vector of names for tests, corresponding to the arguments list. These are just printed along with status output, they're not passed to the callback.
+ */
+void cliBenchIterate(int iter, void (*cb)(int), const std::vector<int> & args, const std::vector<const char *> & names)
+{
+  DebugTimer tmr;
+  std::unordered_map<int, debug_timer_t> iterTimes(args.size());
+  tmr.setConvertTo1us(false);
+  int n = 0;
+  CoSetPriority(cliTaskId, 1);  // prevent thread hijack
+  for (const int arg: args) {
+    tmr.reset();
+    for (int i=0; i < iter; ++i) {
+      tmr.start();
+      cb(arg);      // timed part
+      tmr.stop();
+      serialPrintf("++ [%s] iter: %d; elapsed: %ld;\n", names.at(n), i, tmr.getLast());
+    }
+    iterTimes.insert({arg, tmr.getTotal()});
+    serialPrintf(  "== [%s]: iterations: %d; avg: %ld; min: %ld; max: %ld; ttl: %ld;\n\n", names.at(n), tmr.iterationsCount(), tmr.getAvg(), tmr.getMin(), tmr.getMax(), tmr.getTotal());
+    ++n;
+  }
+  CoSetPriority(cliTaskId, 10);
+  // show a comparison report if > 1 arguments
+  if (args.size() > 1) {
+    n = 0;
+    for (const int arg1: args) {
+      int n2 = 0;
+      for (const int arg2: args) {
+        if (arg2 > arg1) {
+          const debug_timer_t a1 = iterTimes.find(arg1)->second;
+          const debug_timer_t a2 = iterTimes.find(arg2)->second;
+          const int32_t dtmT = (a2 - a1);
+          const int32_t dtmA = dtmT / iter;
+          const int32_t pctT = roundf(float(abs(dtmT)) / float(a2) * 100.0);
+          const int32_t pctA = roundf(float(abs(dtmA)) / float(a2 / iter) * 100.0f);
+          serialPrintf(  "<> [%s] VS [%s] deltas: avg %ld (%ld%%);\t ttl %ld (%ld%%);\n", names.at(n2), names.at(n), dtmA, pctA, dtmT, pctT);
+        }
+        ++n2;
+      }
+      ++n;
+    }
+    serialPrintf("\n");
+  }
+}
+
+//! Convenience version of above to just run a function callback with one default argument of 0 (zero) and test name of "benchmark".  \sa cliBenchIterate()
+void cliBenchIterate(int iter, void (*cb)(int))
+{
+  cliBenchIterate(iter, cb, std::vector<int>(1, 0), std::vector<const char *>(1, "benchmark"));
+}
+
+//! Main branch point for "bench" commands. Just add yours here in another "if" branch.  Clean up after you're done... ;-)
+int cliBench(const char ** argv)
+{
+  int iter;
+  bool ok = false;
+  if (toInt(argv, 2, &iter) <= 0)
+    iter = 5;
+
+  serialPrintf("\n");
+  if (!strcmp(argv[1], "sincos") || !strcmp(argv[1], "all")) {
+    serialPrintf("Sin/Cos std VS (arm_sinf_f32 & arm_cosf_f32) VS arm_sincosf_f32\n");
+    const std::vector<int> args = {0, 1, 2};
+    const std::vector<const char *> names = {"std default", "arm_sin&cos", "arm_sincosf"};
+    cliBenchIterate(iter, &cliBenchSinCos, args, names);
+    ok = true;
+  }
+  if (!strcmp(argv[1], "atan2") || !strcmp(argv[1], "all")) {
+    serialPrintf("Atan2 std VS alt1\n");
+    const std::vector<int> args = {0, 1};
+    const std::vector<const char *> names = {"std", "alt"};
+    cliBenchIterate(iter, &cliBenchAtan2, args, names);
+    ok = true;
+  }
+  if (!ok) {
+    serialPrintf("Invalid argument: %s\n", argv[1]);
+  }
+  return 0;
+}
+
+// Benchmarking end
+
+
 int cliRepeat(const char ** argv)
 {
   int interval = 0;
@@ -1180,6 +1335,7 @@ const CliCommand cliCommands[] = {
   { "trace", cliTrace, "on | off" },
   { "help", cliHelp, "[<command>]" },
   { "debugvars", cliDebugVars, "" },
+  { "bench", cliBench, "sincos | atan2 | all [<iterations>]  !!! blocks other tasks !!!" },
   { "repeat", cliRepeat, "<interval> <command>" },
 #if defined(JITTER_MEASURE)
   { "jitter", cliShowJitter, "" },

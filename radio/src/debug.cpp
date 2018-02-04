@@ -175,8 +175,6 @@ void CoTaskSwitchHook(uint8_t taskID)
 
 #endif // #if defined(DEBUG_TASKS)
 
-#if defined(DEBUG_TIMERS)
-
 void DebugTimer::start()
 {
   _start_hiprec = getTmr2MHz();
@@ -194,13 +192,17 @@ void DebugTimer::stop()
   last = get_tmr10ms() - _start_loprec;  //use low precision timer
   if (last < 3) {
     //use high precision
-    last = (uint16_t)(getTmr2MHz() - _start_hiprec) / 2;
+    last = (uint16_t)(getTmr2MHz() - _start_hiprec);
+    if (convertTo1us)
+      last /= 2;
   }
-  else {
+  else if (convertTo1us) {
     last *= 10000ul; //adjust unit to 1us
   }
   evalStats();
 }
+
+#if defined(DEBUG_TIMERS)
 
 DebugTimer debugTimers[DEBUG_TIMERS_COUNT];
 

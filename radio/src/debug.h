@@ -301,8 +301,6 @@ extern void CoTaskSwitchHook(uint8_t taskID);
 #endif // #if defined(DEBUG_TASKS)
 
 
-#if defined(DEBUG_TIMERS)
-
 #if defined(__cplusplus)
 typedef uint32_t debug_timer_t;
 
@@ -311,31 +309,40 @@ class DebugTimer
 private:
   debug_timer_t min;
   debug_timer_t max;
-  // debug_timer_t avg;
-  debug_timer_t last;   //unit 1us
+  debug_timer_t ttl;
+  debug_timer_t last;  // unit 1us or ticks depending on convertTo1us setting (default is 1us)
+  uint32_t iter;       // iteration (stops) count
+  bool convertTo1us;   // convert samples to 1us time (default) or use actual ticks (500ns/10ms increments)
 
   uint16_t _start_hiprec;
   uint32_t _start_loprec;
 
-  void evalStats() {
+  inline void evalStats() {
+    ++iter;
+    ttl += last;
     if (min > last) min = last;
     if (max < last) max = last;
-    //todo avg
   }
 
 public:
-  DebugTimer(): min(-1), max(0), /*avg(0),*/ last(0), _start_hiprec(0), _start_loprec(0) {};
+  DebugTimer(): min(-1), max(0), ttl(0), last(0), iter(0), convertTo1us(true), _start_hiprec(0), _start_loprec(0) {}
 
   void start();
   void stop();
-  void sample() { stop(); start(); }
+  inline void sample() { stop(); start(); }
 
-  void reset() { min = -1;  max = last = 0; }
+  inline void reset() { min = -1;  max = ttl = last = iter = 0; }
+  inline void setConvertTo1us(bool convert) { convertTo1us = convert; }
 
-  debug_timer_t getMin() const { return min; }
-  debug_timer_t getMax() const { return max; }
-  debug_timer_t getLast() const { return last; }
+  inline debug_timer_t getMin() const { return min; }
+  inline debug_timer_t getMax() const { return max; }
+  inline debug_timer_t getLast() const { return last; }
+  inline debug_timer_t getTotal() const { return ttl; }
+  inline debug_timer_t getAvg() const { return (ttl / iter); }
+  inline uint32_t iterationsCount() const { return iter; }
 };
+
+#if defined(DEBUG_TIMERS)
 
 enum DebugTimers {
   debugTimerIntPulses,
@@ -380,8 +387,6 @@ enum DebugTimers {
 extern DebugTimer debugTimers[DEBUG_TIMERS_COUNT];
 extern const char * const debugTimerNames[DEBUG_TIMERS_COUNT];
 
-#endif // #if defined(__cplusplus)
-
 #define DEBUG_TIMER_START(timer)  debugTimers[timer].start()
 #define DEBUG_TIMER_STOP(timer)   debugTimers[timer].stop()
 #define DEBUG_TIMER_SAMPLE(timer) debugTimers[timer].sample()
@@ -394,6 +399,8 @@ extern const char * const debugTimerNames[DEBUG_TIMERS_COUNT];
 #define DEBUG_TIMER_SAMPLE(timer)
 
 #endif //#if defined(DEBUG_TIMERS)
+
+#endif // #if defined(__cplusplus)
 
 #endif // _DEBUG_H_
 
