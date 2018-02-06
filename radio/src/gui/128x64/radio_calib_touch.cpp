@@ -648,14 +648,14 @@ void menuCommonCalibTouch(event_t event, uint8_t menuType = 0)
         nextState(CALIB_POINT_1);
       break;
 
-    case EVT_KEY_PREVIOUS_PAGE:
+    case EVT_KEY_BREAK(KEY_LEFT):
       if (menuType == 1 && (reusableBuffer.touchCal.state < CALIB_POINT_1 || reusableBuffer.touchCal.state > CALIB_STORE)) {
         nextState(CALIB_PG_PREV);
         killEvents(event);
       }
       break;
 
-    case EVT_KEY_NEXT_PAGE:
+    case EVT_KEY_BREAK(KEY_RIGHT):
       if (menuType == 1 && (reusableBuffer.touchCal.state < CALIB_POINT_1 || reusableBuffer.touchCal.state > CALIB_STORE)) {
         nextState(CALIB_PG_NEXT);
         killEvents(event);
