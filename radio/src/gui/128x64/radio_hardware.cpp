@@ -120,6 +120,7 @@ enum MenuRadioHardwareItems {
   ITEM_RADIO_HARDWARE_BLUETOOTH_NAME,
 #endif
   ITEM_RADIO_HARDWARE_JITTER_FILTER,
+  ITEM_RADIO_HARDWARE_BAT_CAL,
   ITEM_RADIO_HARDWARE_MAX
 };
 
@@ -272,6 +273,13 @@ void menuRadioHardware(event_t event)
         g_eeGeneral.jitterFilter = 1 - editCheckBox(b, HW_SETTINGS_COLUMN2, y, STR_JITTER_FILTER, attr, event);
         break;
       }
+
+      case ITEM_RADIO_HARDWARE_BAT_CAL:
+        lcdDrawTextAlignedLeft(y, STR_BATT_CALIB);
+        lcdDrawNumber(HW_SETTINGS_COLUMN2, y, getBatteryVoltage(), attr|LEFT|PREC2, 0);
+        if (attr)
+          CHECK_INCDEC_GENVAR(event, g_eeGeneral.txVoltageCalibration, -127, 127);
+        break;
     }
   }
 }
