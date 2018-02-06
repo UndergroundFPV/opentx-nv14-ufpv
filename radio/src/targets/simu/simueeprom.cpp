@@ -19,7 +19,9 @@
  */
 
 #include "opentx.h"
+#if defined(CPUARM)
 #include "eeprom_driver.h"
+#endif
 
 const char * eepromFile = NULL;
 FILE * fp = NULL;

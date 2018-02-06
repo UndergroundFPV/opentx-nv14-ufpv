@@ -918,7 +918,7 @@ template<class t> void SWAP(t & a, t & b) { t tmp = b; b = a; a = tmp; }
   inline StatusType acceptSemaphore(OS_EventID id)                 { return CoAcceptSem(id);}
   inline StatusType deleteSemaphore(OS_EventID id, uint8_t opt)    { return CoDelSem(id, opt); }
   inline OS_EventID createSemaphore(uint16_t initCnt, uint16_t maxCnt, uint8_t sortType) { return CoCreateSem(initCnt, maxCnt, sortType); }
-#else  // defined(CPUARM) && !defined(BOOT)
+#elif defined(CPUARM)  // defined(CPUARM) && !defined(BOOT)
   typedef uint8_t OS_MutexID;
   typedef uint8_t OS_EventID;
   typedef uint8_t StatusType;
@@ -938,6 +938,9 @@ template<class t> void SWAP(t & a, t & b) { t tmp = b; b = a; a = tmp; }
   #define acceptSemaphore(...)     (0)
   #define deleteSemaphore(...)     (0)
   #define createSemaphore(...)     createMutex()
+#else  // AVR
+  #define pauseMixerCalculations()
+  #define resumeMixerCalculations()
 #endif  // defined(CPUARM) && !defined(BOOT)
 
 void generalDefault();
