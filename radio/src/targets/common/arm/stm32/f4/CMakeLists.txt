@@ -5,7 +5,7 @@ set(STM32LIB_DIR ${THIRDPARTY_DIR}/STM32F4xx_DSP_StdPeriph_Lib_V1.4.0/Libraries)
 include_directories(${STM32LIB_DIR}/STM32F4xx_StdPeriph_Driver/inc)
 include_directories(${STM32LIB_DIR}/CMSIS/Device/ST/STM32F4xx/Include)
 include_directories(${STM32LIB_DIR}/CMSIS/include)
-add_definitions(-DSTM32F4 -DARM_MATH_CM4)
+add_definitions(-DSTM32F4 -DARM_MATH_CM4 -D__FPU_PRESENT=1)
 set(STM32LIB_SRC
   ${STM32LIB_SRC}
   STM32F4xx_StdPeriph_Driver/src/misc.c
