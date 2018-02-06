@@ -96,6 +96,7 @@ class RadioUiAction : public QObject
       }
     }
 
+    void setIndex(int index)                            { m_hwIndex = index; }
     void setDescription(const QString & description)    { m_description = description; }
     void setText(QPair<QString, QString> name_descript) { setText(name_descript.first, name_descript.second); }
 

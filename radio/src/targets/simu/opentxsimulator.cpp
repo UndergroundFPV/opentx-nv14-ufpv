@@ -17,6 +17,7 @@
 #include "opentxsimulator.h"
 #include "opentx.h"
 #include "simulcd.h"
+#include "simutouch.h"
 
 #include <QDebug>
 #include <QElapsedTimer>
@@ -301,6 +302,11 @@ void OpenTxSimulator::rotaryEncoderEvent(int steps)
   timer->start(10);
 #endif
 #endif  // defined(ROTARY_ENCODER_NAVIGATION)
+}
+
+void OpenTxSimulator::touchEvent()
+{
+  //simuSetTouchEvent(event);
 }
 
 void OpenTxSimulator::setTrainerTimeout(uint16_t ms)

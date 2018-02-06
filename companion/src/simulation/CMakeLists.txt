@@ -4,6 +4,7 @@ set(simulation_SRCS
   radiooutputswidget.cpp
   simulateduiwidget.cpp
   simulateduiwidget9X.cpp
+  simulateduiwidgetI8.cpp
   simulateduiwidgetX7.cpp
   simulateduiwidgetX9.cpp
   simulateduiwidgetX9E.cpp
@@ -15,6 +16,7 @@ set(simulation_SRCS
   simulatorwidget.cpp
   telemetrysimu.cpp
   trainersimu.cpp
+  widgets/lcdwidget.cpp
   widgets/radiowidget.cpp
   widgets/virtualjoystickwidget.cpp
 )

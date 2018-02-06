@@ -19,6 +19,7 @@
  */
 
 #include "simulateduiwidget.h"
+#include "appdata.h"
 #include "eeprominterface.h"
 #include "lcdwidget.h"
 #include "radiouiaction.h"
@@ -197,6 +198,11 @@ void SimulatedUIWidget::setLcd(LcdWidget * lcd)
     m_backLight = 0;
 
   m_lcd->setBackgroundColor(m_backlightColors.at(m_backLight));
+
+//  if (Boards::getCapability(firmware->getBoard(), Board::NumTouchPoints)) {
+//    m_lcd->setAcceptTouchEvents(true);
+//    connect(m_lcd, &LcdWidget::simulatorTouchEvent, m_simulator, &SimulatorInterface::touchEvent);
+//  }
 }
 
 void SimulatedUIWidget::connectScrollActions()

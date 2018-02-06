@@ -127,6 +127,22 @@ class SimulatedUIWidget9X: public SimulatedUIWidget
 
 };
 
+class SimulatedUIWidgetI8: public SimulatedUIWidget9X
+{
+  Q_OBJECT
+
+  public:
+    explicit SimulatedUIWidgetI8(SimulatorInterface * simulator, QWidget * parent = NULL);
+    virtual ~SimulatedUIWidgetI8();
+
+  protected:
+    void setLightOn(bool enable);
+
+  private:
+    //Ui::SimulatedUIWidget9X * ui;
+
+};
+
 class SimulatedUIWidgetX7: public SimulatedUIWidget
 {
   Q_OBJECT
