@@ -883,7 +883,7 @@ PACK(struct TrainerData {
 
 #if defined(TOUCH_SCREEN)
   #include "touch_manager.h"
-  #define TOUCHMANAGER_DATA  NOBACKUP(TouchCalibMatrix touchCalib);
+  #define TOUCHMANAGER_DATA  NOBACKUP(Touch::CalibMatrix touchCalib);
 #else
   #define TOUCHMANAGER_DATA
 #endif
@@ -1193,7 +1193,7 @@ static inline void check_struct()
   CHKSIZE(TrainerData, 16);
 
 #if defined(TOUCH_SCREEN)
-  CHKSIZE(TouchCalibMatrix, (7*4+2));
+  CHKSIZE(Touch::CalibMatrix, (7*4+2));
 #endif
 
 #if defined(PCBXLITE)

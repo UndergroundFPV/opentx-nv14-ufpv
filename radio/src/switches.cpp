@@ -67,7 +67,7 @@ volatile GETSWITCH_RECURSIVE_TYPE s_last_switch_value = 0;
 
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBFLYSKY)
 #if defined(PCBX9E)
 tmr10ms_t switchesMidposStart[16];
 #else
@@ -476,7 +476,7 @@ bool getSwitch(swsrc_t swtch)
     result = true;
   }
   else if (cs_idx <= SWSRC_LAST_SWITCH) {
-#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBFLYSKY)
     if (flags & GETSWITCH_MIDPOS_DELAY)
       result = SWITCH_POSITION(cs_idx-SWSRC_FIRST_SWITCH);
     else
@@ -592,7 +592,7 @@ swsrc_t getMovedSwitch()
   static tmr10ms_t s_move_last_time = 0;
   swsrc_t result = 0;
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBFLYSKY)
   for (int i=0; i<NUM_SWITCHES; i++) {
     if (SWITCH_EXISTS(i)) {
       swarnstate_t mask = ((swarnstate_t)0x03 << (i*2));
@@ -642,7 +642,7 @@ void checkSwitches()
 #endif
   swarnstate_t states = g_model.switchWarningState;
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBFLYSKY)
   uint8_t bad_pots = 0, last_bad_pots = 0xff;
 #endif
 
@@ -651,7 +651,7 @@ void checkSwitches()
 
 #if defined(TELEMETRY_MOD_14051) || defined(TELEMETRY_MOD_14051_SWAPPED)
   #define GETADC_COUNT (MUX_MAX+1)
-#elif defined(PCBTARANIS) || defined(PCBHORUS)
+#elif defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBFLYSKY)
   #define GETADC_COUNT 1
 #endif
 #ifdef GETADC_COUNT
@@ -687,7 +687,7 @@ void checkSwitches()
         }
       }
     }
-#elif defined(PCBTARANIS)
+#elif defined(PCBTARANIS) || defined(PCBFLYSKY)
     for (int i=0; i<NUM_SWITCHES; i++) {
       if (SWITCH_WARNING_ALLOWED(i) && !(g_model.switchWarningEnable & (1<<i))) {
         swarnstate_t mask = ((swarnstate_t)0x03 << (i*2));
@@ -735,7 +735,7 @@ void checkSwitches()
     LED_ERROR_BEGIN();
 
     // first - display warning
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBFLYSKY)
     if ((last_bad_switches != switches_states) || (last_bad_pots != bad_pots)) {
       drawAlertBox(STR_SWITCHWARN, NULL, STR_PRESSANYKEYTOSKIP);
       if (last_bad_switches == 0xff || last_bad_pots == 0xff) {
@@ -847,7 +847,7 @@ void checkSwitches()
       last_bad_switches = 0xff;
     }
 #else
-    if (pwrCheck()==e_power_off || keyDown()) break;
+    if (pwrCheck()==e_power_off || getEvent()) break;
 
     doLoopCommonActions();
 

@@ -18,23 +18,11 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _CLI_H_
-#define _CLI_H_
+#ifndef SIMUTOUCH_H
+#define SIMUTOUCH_H
 
-#include "serial.h"
+//class QTouchEvent;
 
-extern uint8_t cliTracesEnabled;
+void simuSetTouchEvent();
 
-#ifdef __cplusplus
-#include "fifo.h"
-extern Fifo<uint8_t, 256> cliRxFifo;
-#include "tasks_arm.h"
-#define CLI_STACK_SIZE                 1000
-extern OS_TID cliTaskId;
-extern TaskStack<CLI_STACK_SIZE> cliStack;
-#endif
-
-void cliStart();
-uint32_t cliStackFree();
-
-#endif // _CLI_H_
+#endif // SIMUTOUCH_H

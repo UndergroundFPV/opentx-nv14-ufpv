@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -27,15 +27,25 @@ extern "C" {
 }
 #endif
 
+// stack sizes should be in multiples of 8 for better alignment
 #define MENUS_STACK_SIZE       2000
-#define MIXER_STACK_SIZE       500
-#define AUDIO_STACK_SIZE       500
-#define BLUETOOTH_STACK_SIZE   500
+#define MIXER_STACK_SIZE       504
+#define AUDIO_STACK_SIZE       504
+#define TOUCH_STACK_SIZE       400  // TODO: this can be reduced a lot after debug (tracing) is done (on last check only 42 Words are actually used)
+#define BLUETOOTH_STACK_SIZE   504  // WTF: there is no BT task.... ???
+
+#define MIXER_TASK_PRIO        5
+#define AUDIO_TASK_PRIO        7
+#define MENUS_TASK_PRIO        10
+#define CLI_TASK_PRIO          10
+#define TOUCH_TASK_PRIO        12   // lower prio than GUI! otherwise may block (runs at 1 tick)
 
 #if defined(_MSC_VER)
-#define _ALIGNED(x) __declspec(align(x))
+  #define _ALIGNED(x) __declspec(align(x))
 #elif defined(__GNUC__)
-#define _ALIGNED(x) __attribute__ ((aligned(x)))
+  #define _ALIGNED(x) __attribute__ ((aligned(x)))
+#elif !defined(_ALIGNED)
+  #define _ALIGNED(x)
 #endif
 
 uint16_t getStackAvailable(void * address, uint16_t size);
@@ -70,6 +80,8 @@ extern TaskStack<MIXER_STACK_SIZE> mixerStack;
 
 extern OS_TID audioTaskId;
 extern TaskStack<AUDIO_STACK_SIZE> audioStack;
+
+extern OS_FlagID openTxInitCompleteFlag;
 
 void tasksStart();
 

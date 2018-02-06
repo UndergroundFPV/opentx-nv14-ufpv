@@ -43,8 +43,8 @@
 #define FT6236_P2_WEIGHT        (0X0D)      // 2nd Touch Weight (R)
 #define FT6236_P2_AREA          (0X0E)      // 2nd Touch Area (R)
 
-#define FT6236_TH_GROUP         (0x80)      // Threshold for touch detection (R/W)
-#define FT6236_TH_DIFF          (0x85)      // Filter function coefficient (R/W)
+#define FT6236_TH_GROUP         (0x80)      // Threshold for touch detection (R/W)  Not clear this has any effect at all (no docs) default 31
+#define FT6236_TH_DIFF          (0x85)      // Filter function coefficient (R/W)  Apparently this means the tolerance within which the next coordinate is different from the previous?
 #define FT6236_CTRL             (0x86)      // 0: will keep active mode. 1: switch to monitor mode when idle (R/W)
 #define FT6236_TIMEENTERMONITOR (0x87)      // Idle timeout before switching to monitor mode (R/W)
 #define FT6236_PERIODACTIVE     (0x88)      // Report rate in active mode (R/W)
@@ -81,6 +81,7 @@
 #define FT6236_EVT_RELEASE      (0x01)
 #define FT6236_EVT_CONTACT      (0x02)
 #define FT6236_EVT_NONE         (0x03)
+#define FT6236_EVT_MAX          FT6236_EVT_NONE
 
 // read value masks
 #define FT6236_STATUS(v)        (v & 0x0F)
@@ -92,12 +93,31 @@
 // setup
 #define TOUCH_READ_MODE         1           // 1 = polled mode (read data on demand); 2 = immediate (read data as soon as ready, in ISR)
 #define FT6236_READ_DATA_LEN    11          // total bytes to read at a time into buffer (TD_STATUS  + (P1_XH + P1_XL + P1_YH + P1_YL + P1_W + P1_A + P2_XH + P2_XL + P2_YH + P2_YL))
+#define TOUCH_MUTEX_TIMEOUT     0xFFF       // maximum cycles to block before failing to aquire data buffer read/write mutex
+#define TOUCH_MAX_WAIT_TIME     20          // [ms] maximum wait until assuming we're not hearing from the touch sensor again and a point has been released (if set too high this may miss UP events, if too low then might assume UP when it's not)
 
-#define TOUCH_USE_CTRL_MODE     FT6236_CTRL_MODE_ACT
+#ifndef   TOUCH_USE_CTRL_MODE
+  #define TOUCH_USE_CTRL_MODE   FT6236_CTRL_MODE_MON  // for FT6236_CTRL, factory default: FT6236_CTRL_MODE_MON; also valid: FT6236_CTRL_MODE_ACT
+#endif
 #if TOUCH_READ_MODE == 1
   #define TOUCH_USE_INT_MODE    FT6236_INT_MODE_POLL
 #else
   #define TOUCH_USE_INT_MODE    FT6236_INT_MODE_TRIG
+#endif
+#ifndef   TOUCH_USE_GROUP_VAL
+  #define TOUCH_USE_GROUP_VAL   15          // for FT6236_TH_GROUP, factory default: 31
+#endif
+#ifndef   TOUCH_USE_DIFF_VAL
+  #define TOUCH_USE_DIFF_VAL    160         // for FT6236_TH_DIFF, factory default: 160
+#endif
+#ifndef   TOUCH_USE_PER_ACT
+  #define TOUCH_USE_PER_ACT     2           // for FT6236_PERIODACTIVE, factory default: 10  NOTE: Looks like it needs to be faster than our sample rate otherwise events are missed
+#endif
+#ifndef   TOUCH_USE_PER_MON
+  #define TOUCH_USE_PER_MON     30          // for FT6236_PERIODMONITOR, factory default: 30
+#endif
+#ifndef   TOUCH_USE_ENTER_MON
+  #define TOUCH_USE_ENTER_MON   30          // for FT6236_TIMEENTERMONITOR, factory default 30
 #endif
 
 #if TOUCH_USE_DMA
@@ -106,27 +126,32 @@
   #define FT6236_BUFFER_LOC
 #endif
 
-#ifdef __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
 typedef struct
 {
-  // TODO: remove/consolidate these as needed
-  bool      dataReady;
   uint8_t   status;               // number of valid touchpoints
-  tsPoint_t point[TOUCH_POINTS];
-  tsPoint_t rawPoint[TOUCH_POINTS];
-  bool      press[TOUCH_POINTS];  // is touchpoint pressed
-  uint8_t   evt[TOUCH_POINTS];    // Event Flag (2b)
-  uint8_t   tid[TOUCH_POINTS];    // Touch ID   (4b)
-} touchPointRef_t;
-extern touchPointRef_t touchData;
+  Touch::tTime_t lastEvent;
+  Touch::RawTrackingPoint touchPt[TOUCH_POINTS];
+  TouchManager * touchManager;
+  bool initialized;
+  bool reportHoldEvents;
+  bool reportMoveEvents;
+  bool needLastRead;
+  uint8_t ptsIdxList[TOUCH_POINTS];
+  uint8_t dataReadyFlag;
+  uint8_t busDataReadyFlag;
+} touchData_t;
+extern touchData_t touchData;
 
 bool touchInit(void);
-void touchReadData(void);
+int8_t touchReadData();
+bool touchGetDataMutex(void);
+void touchRelDataMutex(void);
 
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
 

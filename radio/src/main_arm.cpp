@@ -20,10 +20,6 @@
 
 #include "opentx.h"
 
-#if defined(TOUCH_SCREEN) && !defined(SIMU)
-  #include "touch_driver.h"
-#endif
-
 uint8_t currentSpeakerVolume = 255;
 uint8_t requiredSpeakerVolume = 255;
 uint8_t mainRequestFlags = 0;
@@ -410,10 +406,6 @@ void perMain()
   handleUsbConnection();
   checkTrainerSettings();
   periodicTick();
-#if defined(TOUCH_SCREEN) && !defined(SIMU)
-  // TODO: might be a better place for this, and also need to deal with SIMU
-  touchReadData();
-#endif
   DEBUG_TIMER_STOP(debugTimerPerMain1);
 
   if (mainRequestFlags & (1 << REQUEST_FLIGHT_RESET)) {

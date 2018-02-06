@@ -33,11 +33,14 @@ TaskStack<AUDIO_STACK_SIZE> audioStack;
 OS_MutexID audioMutex;
 OS_MutexID mixerMutex;
 
+OS_FlagID openTxInitCompleteFlag;
+
 enum TaskIndex {
   MENU_TASK_INDEX,
   MIXER_TASK_INDEX,
   AUDIO_TASK_INDEX,
   CLI_TASK_INDEX,
+  TOUCH_TASK_INDEX,
   BLUETOOTH_TASK_INDEX,
   TASK_INDEX_COUNT,
   MAIN_TASK_INDEX = 255
@@ -59,9 +62,6 @@ uint16_t getStackAvailable(void * address, uint16_t size)
     i++;
   }
   return i*4;
-#if defined(CLI)
-  cliStackPaint();
-#endif
 }
 
 void stackPaint()
@@ -71,6 +71,9 @@ void stackPaint()
   audioStack.paint();
 #if defined(CLI)
   cliStack.paint();
+#endif
+#if IS_TOUCH_ENABLED()
+  TouchManager::taskStack().paint();
 #endif
 }
 
@@ -270,16 +273,22 @@ void tasksStart()
   cliStart();
 #endif
 
-  mixerTaskId = CoCreateTask(mixerTask, NULL, 5, &mixerStack.stack[MIXER_STACK_SIZE-1], MIXER_STACK_SIZE);
-  menusTaskId = CoCreateTask(menusTask, NULL, 10, &menusStack.stack[MENUS_STACK_SIZE-1], MENUS_STACK_SIZE);
+  mixerTaskId = CoCreateTask(mixerTask, NULL, MIXER_TASK_PRIO, &mixerStack.stack[MIXER_STACK_SIZE-1], MIXER_STACK_SIZE);
+  menusTaskId = CoCreateTask(menusTask, NULL, MENUS_TASK_PRIO, &menusStack.stack[MENUS_STACK_SIZE-1], MENUS_STACK_SIZE);
 
 #if !defined(SIMU)
   // TODO move the SIMU audio in this task
-  audioTaskId = CoCreateTask(audioTask, NULL, 7, &audioStack.stack[AUDIO_STACK_SIZE-1], AUDIO_STACK_SIZE);
+  audioTaskId = CoCreateTask(audioTask, NULL, AUDIO_TASK_PRIO, &audioStack.stack[AUDIO_STACK_SIZE-1], AUDIO_STACK_SIZE);
+#endif
+
+#if IS_TOUCH_ENABLED()
+  TouchManager::instance()->init();  // init touch task
 #endif
 
   audioMutex = CoCreateMutex();
   mixerMutex = CoCreateMutex();
+
+  openTxInitCompleteFlag = CoCreateFlag(false, false);
 
   CoStartOS();
 }

@@ -680,6 +680,9 @@ int cliStackInfo(const char ** argv)
   serialPrint("[MENUS] %d available / %d", menusStack.available(), menusStack.size());
   serialPrint("[MIXER] %d available / %d", mixerStack.available(), mixerStack.size());
   serialPrint("[AUDIO] %d available / %d", audioStack.available(), audioStack.size());
+#if IS_TOUCH_ENABLED()
+  serialPrint("[TOUCH] %d available / %d", TouchManager::taskStack().available(), TouchManager::taskStack().size());
+#endif
   serialPrint("[CLI] %d available / %d", cliStack.available(), cliStack.size());
   return 0;
 }
@@ -833,6 +836,11 @@ void printTaskSwitchLog()
     else if (audioTaskId == n) {
       serialPrint("%d: audio", n);
     }
+#if IS_TOUCH_ENABLED()
+    else if (TouchManager::taskId() == n) {
+      serialPrint("%d: touch", n);
+    }
+#endif
   }
   serialCrlf();
 
@@ -864,7 +872,6 @@ void printTaskSwitchLog()
 #endif // #if defined(DEBUG_TASKS)
 
 #if defined(DEBUG_TIMERS)
-
 void printDebugTime(uint32_t time)
 {
   if (time >= 30000) {
@@ -884,6 +891,7 @@ void printDebugTimer(const char * name, DebugTimer & timer)
   serialCrlf();
   timer.reset();
 }
+
 void printDebugTimers()
 {
   for(int n = 0; n < DEBUG_TIMERS_COUNT; n++) {
@@ -1163,7 +1171,7 @@ void cliBenchIterate(int iter, void (*cb)(int), const std::vector<int> & args, c
     serialPrintf(  "== [%s]: iterations: %d; avg: %ld; min: %ld; max: %ld; ttl: %ld;\n\n", names.at(n), tmr.iterationsCount(), tmr.getAvg(), tmr.getMin(), tmr.getMax(), tmr.getTotal());
     ++n;
   }
-  CoSetPriority(cliTaskId, 10);
+  CoSetPriority(cliTaskId, CLI_TASK_PRIO);
   // show a comparison report if > 1 arguments
   if (args.size() > 1) {
     n = 0;
@@ -1448,5 +1456,5 @@ void cliTask(void * pdata)
 
 void cliStart()
 {
-  cliTaskId = CoCreateTaskEx(cliTask, NULL, 10, &cliStack.stack[CLI_STACK_SIZE-1], CLI_STACK_SIZE, 1, false);
+  cliTaskId = CoCreateTaskEx(cliTask, NULL, CLI_TASK_PRIO, &cliStack.stack[CLI_STACK_SIZE-1], CLI_STACK_SIZE, 1, false);
 }

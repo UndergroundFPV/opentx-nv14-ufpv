@@ -8,6 +8,7 @@ set(SIMU_SRC
   simueeprom.cpp
   simufatfs.cpp
   simudisk.cpp
+  simutouch.cpp
   )
 
 remove_definitions(-DCLI)

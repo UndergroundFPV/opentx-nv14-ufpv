@@ -45,6 +45,11 @@ Key keys[NUM_KEYS];
 #if defined(CPUARM)
 event_t getEvent(bool trim)
 {
+#if !defined(BOOT) && IS_TOUCH_ENABLED()
+  if (!trim && !KeyEventEmulator::keyEventsSuspended())
+    TouchManager::instance()->processQueue(&KeyEventEmulator::mapToKeyEvent);
+#endif
+
   event_t evt = s_evt;
   int8_t k = EVT_KEY_MASK(s_evt) - TRM_BASE;
   bool trim_evt = (k>=0 && k<TRM_LAST-TRM_BASE+1);
@@ -176,6 +181,10 @@ void killEvents(event_t event)
     killEvents(BTN_REa + g_eeGeneral.reNavigation - 1);
     return;
   }
+#endif
+
+#if !defined(BOOT) && IS_TOUCH_ENABLED()
+  KeyEventEmulator::killEvents(event);
 #endif
 
   event = EVT_KEY_MASK(event);

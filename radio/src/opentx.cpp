@@ -983,7 +983,7 @@ void doSplash()
       if (!(g_eeGeneral.splashMode & 0x04)) {
 #endif
 
-      if (keyDown() || inputsMoved()) return;
+      if (getEvent() || inputsMoved()) return;
 
 #if defined(FSPLASH)
       }
@@ -1230,7 +1230,7 @@ void checkTHR()
     }
 #endif
 
-    if (keyDown() || v <= THRCHK_DEADBAND-1024) {
+    if (getEvent() || v <= THRCHK_DEADBAND-1024) {
       break;
     }
 
@@ -1278,7 +1278,7 @@ void alert(const pm_char * title, const pm_char * msg ALERT_SOUND_ARG)
     CoTickDelay(10);
 #endif
 
-    if (keyDown()) break; // wait for key release
+    if (getEvent()) break; // wait for key release
 
     doLoopCommonActions();
 
@@ -2598,6 +2598,8 @@ void opentxInit(OPENTX_INIT_ARGS)
   referenceSystemAudioFiles();
   audioQueue.start();
   BACKLIGHT_ENABLE();
+
+  (void)CoSetFlag(openTxInitCompleteFlag);  // notify other threads, all critical startup should be done, and before openTxStart().
 #endif
 
 #if defined(PCBSKY9X)

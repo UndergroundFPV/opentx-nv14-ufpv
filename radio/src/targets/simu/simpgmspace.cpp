@@ -433,7 +433,10 @@ void StopSimu()
 #if defined(CPUARM)
   pthread_join(mixerTaskId, NULL);
   pthread_join(menusTaskId, NULL);
+#if IS_TOUCH_ENABLED()
+  pthread_join(TouchManager::taskId(), NULL);
 #endif
+#endif  // CPUARM
   pthread_join(main_thread_pid, NULL);
 }
 
@@ -646,11 +649,6 @@ int lcdRestoreBackupBuffer()
   memcpy(displayBuf, simuLcdBackupBuf, sizeof(displayBuf));
   return 1;
 }
-
-#if defined(TOUCH_SCREEN)
-#include "touch_driver.h"
-touchPointRef_t touchData;
-#endif
 
 #if defined(CPUARM)
 void pwrOff()

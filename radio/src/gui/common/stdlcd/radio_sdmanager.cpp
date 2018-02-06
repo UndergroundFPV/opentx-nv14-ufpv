@@ -237,7 +237,7 @@ void menuRadioSdManager(event_t _event)
       break;
 
     case EVT_KEY_LONG(KEY_ENTER):
-#if !defined(PCBTARANIS)
+#if !defined(STM32)
       if (menuVerticalPosition < HEADER_LINE) {
         killEvents(_event);
         POPUP_MENU_ADD_ITEM(STR_SD_INFO);

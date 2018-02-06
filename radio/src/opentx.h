@@ -1478,8 +1478,9 @@ union ReusableBuffer
   struct
   {
     int8_t state;
-    tsPoint_t lcdPoint[3];
-    tsPoint_t touchPoint[3];
+    bool newState;
+    Touch::tsPoint_t lcdPoint[3];
+    Touch::tsPoint_t touchPoint[3];
   } touchCal;
 #endif
 #if defined(SDCARD)

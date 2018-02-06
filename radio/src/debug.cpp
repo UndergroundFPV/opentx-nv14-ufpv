@@ -175,6 +175,7 @@ void CoTaskSwitchHook(uint8_t taskID)
 
 #endif // #if defined(DEBUG_TASKS)
 
+#if defined(CPUARM)
 void DebugTimer::start()
 {
   _start_hiprec = getTmr2MHz();
@@ -201,6 +202,7 @@ void DebugTimer::stop()
   }
   evalStats();
 }
+#endif
 
 #if defined(DEBUG_TIMERS)
 

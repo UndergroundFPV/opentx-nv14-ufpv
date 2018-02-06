@@ -32,10 +32,14 @@ uint32_t readKeys()
     result |= 1 << KEY_RIGHT;
   if (~TRIMS_GPIO_REG_LHL & TRIMS_GPIO_PIN_LHL)
     result |= 1 << KEY_LEFT;
+//  if (~TRIMS_GPIO_REG_LVD & TRIMS_GPIO_PIN_LVD)
+//    result |= 1 << KEY_MINUS;
+//  if (~TRIMS_GPIO_REG_LVU & TRIMS_GPIO_PIN_LVU)
+//    result |= 1 << KEY_PLUS;
   if (~KEYS_GPIO_REG_K2 & KEYS_GPIO_PIN_K2)
     result |= 1 << KEY_EXIT;
   if (~KEYS_GPIO_REG_K1 & KEYS_GPIO_PIN_K1)
-    result |= 1 << KEY_MENU;  
+    result |= 1 << KEY_MENU;
 
   // if (result != 0) TRACE("readKeys(): result=0x%02x", result);
 
@@ -51,10 +55,10 @@ uint32_t readTrims()
 //    result |= 0x01;
   if (~TRIMS_GPIO_REG_LHR & TRIMS_GPIO_PIN_LHR)
     result |= 0x02;
-//  if (~TRIMS_GPIO_REG_LVD & TRIMS_GPIO_PIN_LVD)
-//    result |= 0x04;
-//  if (~TRIMS_GPIO_REG_LVU & TRIMS_GPIO_PIN_LVU)
-//    result |= 0x08;
+  if (~TRIMS_GPIO_REG_LVD & TRIMS_GPIO_PIN_LVD)
+    result |= 0x04;
+  if (~TRIMS_GPIO_REG_LVU & TRIMS_GPIO_PIN_LVU)
+    result |= 0x08;
 //  if (~TRIMS_GPIO_REG_RVD & TRIMS_GPIO_PIN_RVD)
 //    result |= 0x10;
 //  if (~TRIMS_GPIO_REG_RVU & TRIMS_GPIO_PIN_RVU)
