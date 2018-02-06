@@ -49,13 +49,13 @@ void menuRadioDiagKeys(event_t event)
       displayKeyState(i&1? 20*FW : 18*FW, y, TRM_BASE+i);
     }
 
+    y = MENU_HEADER_HEIGHT + FH + FH * i;
 #if defined(PCBX7)
     if (i < TRM_BASE && i >= 2) {
         // hide PLUS and MINUS virtual buttons
 #else
     if (i < TRM_BASE) {
 #endif
-      y = MENU_HEADER_HEIGHT + FH + FH * i;
 #if defined(PCBXLITE)
       y -= FH;  // ???
 #endif
