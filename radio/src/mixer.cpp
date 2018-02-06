@@ -691,7 +691,7 @@ void evalFlightModeMixes(uint8_t mode, uint8_t tick10ms)
     uint32_t q = calc100toRESX(g_model.swashR.value);
     q *= q;
     if (v>q) {
-      uint16_t d = isqrt32(v);
+      uint16_t d = MathUtil::isqrt32(v);
       int16_t tmp = calc100toRESX(g_model.swashR.value);
       heliEleValue = (int32_t) heliEleValue*tmp/d;
       heliAilValue = (int32_t) heliAilValue*tmp/d;

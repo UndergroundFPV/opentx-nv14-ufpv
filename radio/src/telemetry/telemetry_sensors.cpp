@@ -316,12 +316,12 @@ void TelemetryItem::eval(const TelemetrySensor & sensor)
         result += dist*dist;
 
         // Length on ground (ignoring curvature of the earth)
-        result = isqrt32(result);
+        result = MathUtil::isqrt32(result);
 
         if (altItem) {
           dist = abs(altItem->value) / g_model.telemetrySensors[sensor.dist.alt-1].getPrecDivisor();
           result = dist*dist + result*result;
-          result = isqrt32(result);
+          result = MathUtil::isqrt32(result);
         }
 
         setValue(sensor, result, UNIT_METERS);

@@ -80,8 +80,9 @@
 #define DEG_TO_RADf    (float)(DEG_TO_RAD)
 
 
-#define OTXM_TEMPL_CSTE_INL  template <typename T> constexpr inline
-#define OTXM_TEMPL_INL_CST   template <typename T> inline const
+#define OTXM_CST_ST_INL         constexpr static inline
+#define OTXM_TEMPL_ST_INL       template <typename T> static inline
+#define OTXM_TEMPL_CST_ST_INL   template <typename T> OTXM_CST_ST_INL
 
 
 #define calc100to256_16Bits(x) calc100to256(x)
@@ -120,33 +121,6 @@ inline int calcRESXto100(int x)
   return divRoundClosest(x*100, RESX);
 }
 
-//! djb2 hash algorithm
-inline const uint32_t hash(const void * ptr, uint32_t size)
-{
-  const uint8_t * data = (const uint8_t *)ptr;
-  uint32_t hash = 5381;
-  for (uint32_t i=0; i<size; i++) {
-    hash = ((hash << 5) + hash) + data[i]; /* hash * 33 + c */
-  }
-  return hash;
-}
-
-//! unsigned integer square root
-inline const uint16_t isqrt32(uint32_t n)
-{
-  uint16_t c = 0x8000;
-  uint16_t g = 0x8000;
-
-  for (;;) {
-    if ((uint32_t)g*g > n)
-      g ^= c;
-    c >>= 1;
-    if(c == 0)
-      return g;
-    g |= c;
-  }
-}
-
 //! abstract version, use \e MathUtil::sinf() instead
 inline const float otx_sinf(float x)
 {
@@ -173,26 +147,29 @@ inline const void otx_sincosf(float x, float * s, float * c)
 #if defined(CPUARM) && defined(__GNUC__)
   arm_sin_cos_f32(x * RAD_TO_DEGf, s, c);  // for some reason the arm lib version takes degrees not radians... so we adapt.
 #else
+  // sincos() isn't really a standard function, eg. MSCVC does not implement it (of course)
   *s = otx_sinf(x);
   *c = otx_cosf(x);
 #endif
 }
 
 //! A collection of optimized math routines, in some cases providing faster alternatives to standard versions. Geared towards float precision and integer types.
-namespace MathUtil {
+class MathUtil
+{
+  public:
 
   //! Faster version of standard sinf function at expense of some accuracy (see @ bottom for full stats)
   //! Error margin: [avg]  7.95405e-006 (0.0000080); [max]  1.86563e-005 (0.0000187);
-  inline const float sinf(float x) { return otx_sinf(x); }
+  static inline const float sinf(float x) { return otx_sinf(x); }
 
   //! Faster version of standard sinf function at expense of some accuracy (see @ bottom for full stats)
   //! Error margin: [avg]  7.99415e-006 (0.0000080); [max]  1.86477e-005 (0.0000186);
-  inline const float cosf(float x) { return otx_cosf(x); }
+  static inline const float cosf(float x) { return otx_cosf(x); }
 
   //! Faster version of common sincosf function, more accurate but slightly slower than the individual versions above (see @ bottom for full stats)
   //! Error margin:  Sin [avg]  6.08607e-008 (0.0000001); [max]  4.02331e-007 (0.0000004);
   //! Error margin:  Cos [avg]  5.97036e-008 (0.0000001); [max]  3.61353e-007 (0.0000004);
-  inline void sincosf(float x, float * s, float * c) { otx_sincosf(x, s, c); }
+  static inline void sincosf(float x, float * s, float * c) { otx_sincosf(x, s, c); }
 
   //! Returns atan2 in radians, faster than default atan2f and plenty accurate for float precision. (see @ bottom for full stats)
   //! Avg. err: 1.50728e-008 (0.00000002); Max err: 1.69079e-006 (0.00000169)
@@ -215,33 +192,60 @@ namespace MathUtil {
       return( angle );
   }
 
+  //! unsigned integer square root
+  static const uint16_t isqrt32(uint32_t n)
+  {
+    uint16_t c = 0x8000;
+    uint16_t g = 0x8000;
+
+    for (;;) {
+      if ((uint32_t)g*g > n)
+        g ^= c;
+      c >>= 1;
+      if(c == 0)
+        return g;
+      g |= c;
+    }
+  }
+
+  //! djb2 hash algorithm
+  static const uint32_t hash(const void * ptr, uint32_t size)
+  {
+    const uint8_t * data = (const uint8_t *)ptr;
+    uint32_t hash = 5381;
+    for (uint32_t i=0; i<size; i++) {
+      hash = ((hash << 5) + hash) + data[i]; /* hash * 33 + c */
+    }
+    return hash;
+  }
+
   // constexpr versions
-  OTXM_TEMPL_CSTE_INL T abs(const T & t) { return t >= T(0) ? t : -t; }
-  OTXM_TEMPL_CSTE_INL const T & min(const T & a, const T & b) { return (a < b) ? a : b; }
-  OTXM_TEMPL_CSTE_INL const T & max(const T & a, const T & b) { return (a < b) ? b : a; }
-  OTXM_TEMPL_CSTE_INL const T & bound(const T & min, const T & val, const T & max) { return MathUtil::max(min, MathUtil::min(max, val)); }
+  OTXM_TEMPL_CST_ST_INL T abs(const T & t) { return t >= T(0) ? t : -t; }
+  OTXM_TEMPL_CST_ST_INL const T & min(const T & a, const T & b) { return (a < b) ? a : b; }
+  OTXM_TEMPL_CST_ST_INL const T & max(const T & a, const T & b) { return (a < b) ? b : a; }
+  OTXM_TEMPL_CST_ST_INL const T & bound(const T & min, const T & val, const T & max) { return MathUtil::max(min, MathUtil::min(max, val)); }
 
   //! float fuzzy zero check
-  constexpr inline bool fuzzyIsZero(float x, float epsilon = 1e-5f)   { return (MathUtil::abs(x) <= epsilon); }
+  OTXM_CST_ST_INL bool fuzzyIsZero(float x, float epsilon = 1e-5f)   { return (MathUtil::abs(x) <= epsilon); }
   //! double fuzzy zero check
-  constexpr inline bool fuzzyIsZero(double x, double epsilon = 1e-12) { return (MathUtil::abs(x) <= epsilon); }
+  OTXM_CST_ST_INL bool fuzzyIsZero(double x, double epsilon = 1e-12) { return (MathUtil::abs(x) <= epsilon); }
   //! float fuzzy compare
-  constexpr inline bool fuzzyCompare(float x, float y, float epsilon = 1e5f)    { return (MathUtil::abs(x - y) * epsilon <= min(MathUtil::abs(x), MathUtil::abs(y))); }
+  OTXM_CST_ST_INL bool fuzzyCompare(float x, float y, float epsilon = 1e5f)    { return (MathUtil::abs(x - y) * epsilon <= min(MathUtil::abs(x), MathUtil::abs(y))); }
   //! double fuzzy compare
-  constexpr inline bool fuzzyCompare(double x, double y, double epsilon = 1e12) { return (MathUtil::abs(x - y) * epsilon <= min(MathUtil::abs(x), MathUtil::abs(y))); }
+  OTXM_CST_ST_INL bool fuzzyCompare(double x, double y, double epsilon = 1e12) { return (MathUtil::abs(x - y) * epsilon <= min(MathUtil::abs(x), MathUtil::abs(y))); }
 
   //! wrap x -> [0, max) float
-  inline const float wrapMax(float x, float max) { return fmodf(max + fmodf(x, max), max); }
+  static inline const float wrapMax(float x, float max) { return fmodf(max + fmodf(x, max), max); }
   //! wrap x -> [0, max) double
-  inline const double wrapMax(double x, double max) { return fmod(max + fmod(x, max), max); }
+  static inline const double wrapMax(double x, double max) { return fmod(max + fmod(x, max), max); }
   //! wrap x -> [0, max) integers
-  OTXM_TEMPL_CSTE_INL typename std::enable_if<std::is_integral<T>::value, T>::type wrapMax(T x, T max) { return ((max + (x % max)) % max); }
+  OTXM_TEMPL_CST_ST_INL typename std::enable_if<std::is_integral<T>::value, T>::type wrapMax(T x, T max) { return ((max + (x % max)) % max); }
 
   //! wrap x -> [min, max)
-  OTXM_TEMPL_CSTE_INL T wrapMinMax(T x, T min, T max) { return min + wrapMax(x - min, max - min); }
+  OTXM_TEMPL_CST_ST_INL T wrapMinMax(T x, T min, T max) { return min + wrapMax(x - min, max - min); }
 
   //! Normalize/reduce/wrap an angle into a range, works with degrees or radians of any variable type. Convenience wrapper for \sa wrapMinMax() template.
-  OTXM_TEMPL_INL_CST T normalizeAngleRange(T angle, T min = T(-180), T max = T(180))
+  OTXM_TEMPL_ST_INL const T normalizeAngleRange(T angle, T min = T(-180), T max = T(180))
   {
     if (angle < min || angle > max)
       angle = wrapMinMax(angle, min, max);
@@ -249,18 +253,18 @@ namespace MathUtil {
   }
 
   //! Normalize degrees \a x into compass range [0, 360] and return result.
-  OTXM_TEMPL_CSTE_INL T normalizeCompassAngle(T x) { return normalizeAngleRange(x, T(0), T(360)); }
+  OTXM_TEMPL_CST_ST_INL T normalizeCompassAngle(T x) { return normalizeAngleRange(x, T(0), T(360)); }
 
   //! Normalize/reduce/wrap angle radians \a x into range [-PI, PI] and return result.
-  OTXM_TEMPL_CSTE_INL T normalizeAnglePi(T x)      { return normalizeAngleRange(x, -T(M_PI), T(M_PI)); }
+  OTXM_TEMPL_CST_ST_INL T normalizeAnglePi(T x)      { return normalizeAngleRange(x, -T(M_PI), T(M_PI)); }
 
   //! Normalize/reduce/wrap angle radians \a x into range [-PI/2, PI/2] and return result.
-  OTXM_TEMPL_CSTE_INL T normalizeAngleHalfPi(T x)  { return normalizeAngleRange(x, -T(M_PI_2), T(M_PI_2)); }
+  OTXM_TEMPL_CST_ST_INL T normalizeAngleHalfPi(T x)  { return normalizeAngleRange(x, -T(M_PI_2), T(M_PI_2)); }
 
   //! Normalize/reduce/wrap angle radians \a x into range [0, PI*2] and return result.
-  OTXM_TEMPL_CSTE_INL T normalizeAngleTwoPi(T x)   { return normalizeAngleRange(x, T(0), T(M_PI2)); }
+  OTXM_TEMPL_CST_ST_INL T normalizeAngleTwoPi(T x)   { return normalizeAngleRange(x, T(0), T(M_PI2)); }
 
-}  // namespace MathUtil
+};
 
 /*  Accuracy/benchmark tests & other notes
 
