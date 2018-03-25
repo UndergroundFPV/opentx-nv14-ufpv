@@ -387,7 +387,7 @@ SDCardState SD_GetState(void)
 {
   uint32_t resp1 = 0;
 
-  if (SD_Detect()== SD_PRESENT) {
+  if (SD_Detect() == SD_PRESENT) {
     if (SD_SendStatus(&resp1) != SD_OK) {
       return SD_CARD_ERROR;
     }
@@ -409,9 +409,9 @@ uint8_t SD_Detect(void)
 {
   __IO uint8_t status = SD_PRESENT;
 
-#if 0 // TODO
-  /*!< Check GPIO to detect SD */
-  if (GPIO_ReadInputDataBit(SD_DETECT_GPIO_PORT, SD_DETECT_PIN) != Bit_RESET) {
+#if 0 // defined(SD_PRESENT_GPIO)
+  // TODO test this on X12S / X10, also init seems missing!
+  if (GPIO_ReadInputDataBit(SD_PRESENT_GPIO, SD_PRESENT_GPIO_PIN) != Bit_RESET) {
     status = SD_NOT_PRESENT;
   }
 #endif

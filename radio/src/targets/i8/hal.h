@@ -192,7 +192,7 @@
 
 // Trainer Port
 #define TRAINERMODULE
-#define TRAINER_RCC_AHB1Periph          (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOC)
+#define TRAINER_RCC_AHB1Periph          (RCC_AHB1Periph_GPIOD)
 #define TRAINER_RCC_APB1Periph          RCC_APB1Periph_TIM4
 #define TRAINER_GPIO                    GPIOD
 #define TRAINER_IN_GPIO_PIN             GPIO_Pin_13 // PD.13
