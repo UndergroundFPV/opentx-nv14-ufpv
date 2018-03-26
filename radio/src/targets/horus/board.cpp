@@ -137,6 +137,7 @@ void boardInit()
                          LCD_RCC_AHB1Periph |
                          BACKLIGHT_RCC_AHB1Periph |
                          SD_RCC_AHB1Periph |
+                         SDRAM_RCC_AHB1Periph |
                          AUDIO_RCC_AHB1Periph |
                          KEYS_RCC_AHB1Periph |
                          ADC_RCC_AHB1Periph |
