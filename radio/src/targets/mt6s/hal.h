@@ -217,7 +217,7 @@
 #define BACKLIGHT_GPIO_AF               GPIO_AF_TIM8
 #define BACKLIGHT_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
 
-// SD
+// SD card
 #define SD_RCC_AHB1Periph               (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)
 #define SD_RCC_APB1Periph               0
 #define SD_PRESENT_GPIO                 GPIOC
@@ -235,6 +235,10 @@
 #define SD_SDIO_CLK_DIV(fq)             ((48000000 / (fq)) - 2)
 #define SD_SDIO_INIT_CLK_DIV            SD_SDIO_CLK_DIV(400000)
 #define SD_SDIO_TRANSFER_CLK_DIV        SD_SDIO_CLK_DIV(24000000)
+
+// SDRAM
+#define SDRAM_RCC_AHB1Periph            (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOF | RCC_AHB1Periph_GPIOG | RCC_AHB1Periph_GPIOH | RCC_AHB1Periph_GPIOI)
+#define SDRAM_RCC_AHB3Periph            RCC_AHB3Periph_FMC
 
 // SPI FLASH
 #define EEPROM_RCC_AHB1Periph           RCC_AHB1Periph_GPIOG

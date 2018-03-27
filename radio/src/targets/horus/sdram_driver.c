@@ -20,11 +20,6 @@
 
 #include "board.h"
 
-#define SDRAM_MEMORY_WIDTH    FMC_SDMemory_Width_16b
-#define SDRAM_CAS_LATENCY    FMC_CAS_Latency_3
-#define SDCLOCK_PERIOD    FMC_SDClock_Period_2
-#define SDRAM_TIMEOUT     ((uint32_t)0xFFFF)
-
 #define SDRAM_MODEREG_BURST_LENGTH_1             ((uint16_t)0x0000)
 #define SDRAM_MODEREG_BURST_LENGTH_2             ((uint16_t)0x0001)
 #define SDRAM_MODEREG_BURST_LENGTH_4             ((uint16_t)0x0002)
@@ -135,8 +130,7 @@ void SDRAM_InitSequence(void)
   FMC_SDRAMCommandStructure.FMC_AutoRefreshNumber = 1;
   FMC_SDRAMCommandStructure.FMC_ModeRegisterDefinition = 0;
   /* Wait until the SDRAM controller is ready */
-  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET)
-  {
+  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET) {
   }
   /* Send the command */
   FMC_SDRAMCmdConfig(&FMC_SDRAMCommandStructure);
@@ -152,8 +146,7 @@ void SDRAM_InitSequence(void)
   FMC_SDRAMCommandStructure.FMC_AutoRefreshNumber = 1;
   FMC_SDRAMCommandStructure.FMC_ModeRegisterDefinition = 0;
   /* Wait until the SDRAM controller is ready */
-  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET)
-  {
+  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET) {
   }
   /* Send the command */
   FMC_SDRAMCmdConfig(&FMC_SDRAMCommandStructure);
@@ -165,15 +158,13 @@ void SDRAM_InitSequence(void)
   FMC_SDRAMCommandStructure.FMC_AutoRefreshNumber = 4;
   FMC_SDRAMCommandStructure.FMC_ModeRegisterDefinition = 0;
   /* Wait until the SDRAM controller is ready */
-  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET)
-  {
+  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET) {
   }
   /* Send the  first command */
   FMC_SDRAMCmdConfig(&FMC_SDRAMCommandStructure);
 
   /* Wait until the SDRAM controller is ready */
-  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET)
-  {
+  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET) {
   }
   /* Send the second command */
   FMC_SDRAMCmdConfig(&FMC_SDRAMCommandStructure);
@@ -192,8 +183,7 @@ void SDRAM_InitSequence(void)
   FMC_SDRAMCommandStructure.FMC_AutoRefreshNumber = 1;
   FMC_SDRAMCommandStructure.FMC_ModeRegisterDefinition = tmpr;
   /* Wait until the SDRAM controller is ready */
-  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET)
-  {
+  while(FMC_GetFlagStatus(FMC_Bank2_SDRAM, FMC_FLAG_Busy) != RESET) {
   }
   /* Send the command */
   FMC_SDRAMCmdConfig(&FMC_SDRAMCommandStructure);
@@ -210,16 +200,13 @@ void SDRAM_InitSequence(void)
 
 void SDRAM_Init(void)
 {
-  FMC_SDRAMInitTypeDef  FMC_SDRAMInitStructure;
-  FMC_SDRAMTimingInitTypeDef  FMC_SDRAMTimingInitStructure; 
-  
   /* GPIO configuration for FMC SDRAM bank */
   SDRAM_GPIOConfig();
-  
-  /* Enable FMC clock */
-  RCC_AHB3PeriphClockCmd(RCC_AHB3Periph_FMC, ENABLE);
  
   /* FMC Configuration ---------------------------------------------------------*/
+  FMC_SDRAMInitTypeDef FMC_SDRAMInitStructure;
+  FMC_SDRAMTimingInitTypeDef FMC_SDRAMTimingInitStructure;
+
   /* FMC SDRAM Bank configuration */
   /* Timing configuration for 90 Mhz of SD clock frequency (168Mhz/2) */
   /* TMRD: 2 Clock cycles */
@@ -243,11 +230,11 @@ void SDRAM_Init(void)
   FMC_SDRAMInitStructure.FMC_ColumnBitsNumber = FMC_ColumnBits_Number_8b;
   /* Column addressing: [11:0] */
   FMC_SDRAMInitStructure.FMC_RowBitsNumber = FMC_RowBits_Number_12b;
-  FMC_SDRAMInitStructure.FMC_SDMemoryDataWidth = SDRAM_MEMORY_WIDTH;
+  FMC_SDRAMInitStructure.FMC_SDMemoryDataWidth = FMC_SDMemory_Width_16b;
   FMC_SDRAMInitStructure.FMC_InternalBankNumber = FMC_InternalBank_Number_4;
-  FMC_SDRAMInitStructure.FMC_CASLatency = SDRAM_CAS_LATENCY; 
+  FMC_SDRAMInitStructure.FMC_CASLatency = FMC_CAS_Latency_3;
   FMC_SDRAMInitStructure.FMC_WriteProtection = FMC_Write_Protection_Disable;
-  FMC_SDRAMInitStructure.FMC_SDClockPeriod = SDCLOCK_PERIOD;  
+  FMC_SDRAMInitStructure.FMC_SDClockPeriod = FMC_SDClock_Period_2;
   FMC_SDRAMInitStructure.FMC_ReadBurst = FMC_Read_Burst_Disable;
   FMC_SDRAMInitStructure.FMC_ReadPipeDelay = FMC_ReadPipe_Delay_0;
   FMC_SDRAMInitStructure.FMC_SDRAMTimingStruct = &FMC_SDRAMTimingInitStructure;

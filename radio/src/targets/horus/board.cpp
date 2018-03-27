@@ -153,6 +153,9 @@ void boardInit()
                          SPORT_UPDATE_RCC_AHB1Periph,
                          ENABLE);
 
+  RCC_AHB3PeriphClockCmd(SDRAM_RCC_AHB3Periph,
+                         ENABLE);
+
   RCC_APB1PeriphClockCmd(INTERRUPT_xMS_RCC_APB1Periph |
                          ADC_RCC_APB1Periph |
                          TIMER_2MHz_RCC_APB1Periph |
