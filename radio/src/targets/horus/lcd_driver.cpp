@@ -38,47 +38,35 @@ uint8_t LCD_BACKUP_FRAME_BUFFER[DISPLAY_BUFFER_SIZE] __SDRAM;
 
 uint32_t CurrentLayer = LCD_FIRST_LAYER;
 
-#define NRST_LOW()   do { LCD_GPIO_NRST->BSRRH = LCD_GPIO_PIN_NRST; } while(0)
-#define NRST_HIGH()  do { LCD_GPIO_NRST->BSRRL = LCD_GPIO_PIN_NRST; } while(0)
+#define NRST_LOW()   LCD_GPIO_NRST->BSRRH = LCD_GPIO_PIN_NRST
+#define NRST_HIGH()  LCD_GPIO_NRST->BSRRL = LCD_GPIO_PIN_NRST
 
 static void LCD_AF_GPIOConfig(void)
 {
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-      /* GPIOs Configuration */
-      /*
-       +------------------------+-----------------------+----------------------------+
-       +                       LCD pins assignment                                   +
-       +------------------------+-----------------------+----------------------------
-       |                                       |  LCD_TFT G2 <-> PJ.09 |                                            |
-       |  LCD_TFT R3 <-> PJ.02  |  LCD_TFT G3 <-> PJ.10 |  LCD_TFT B3 <-> PJ.15      |
-       |  LCD_TFT R4 <-> PJ.03  |  LCD_TFT G4 <-> PJ.11 |  LCD_TFT B4 <-> PK.03      |
-       |  LCD_TFT R5 <-> PJ.04  |  LCD_TFT G5 <-> PK.00 |  LCD_TFT B5 <-> PK.04      |
-       |  LCD_TFT R6 <-> PJ.05  |  LCD_TFT G6 <-> PK.01 |  LCD_TFT B6 <-> PK.05      |
-       |  LCD_TFT R7 <-> PJ.06  |  LCD_TFT G7 <-> PK.02 |  LCD_TFT B7 <-> PK.06      |
-       -------------------------------------------------------------------------------
-                |  LCD_TFT HSYNC <-> PI.12  | LCDTFT VSYNC <->  PI.13 |
-                |  LCD_TFT CLK   <-> PI.14  | LCD_TFT DE   <->  PK.07 ///
-                 -----------------------------------------------------
-                | LCD_CS <-> PI.10    |LCD_SCK<->PI.11
-                 -----------------------------------------------------
+  /*
+  ------------------------------------------------------------
+  LCD_HSYNC <-> PI.12 | LCD_R3 <-> PJ.02 | LCD_G5 <-> PK.00
+  LCD VSYNC <-> PI.13 | LCD_R4 <-> PJ.03 | LCD_G6 <-> PK.01
+  LCD_CLK   <-> PI.14 | LCD_R5 <-> PJ.04 | LCD_G7 <-> PK.02
+                      | LCD_R6 <-> PJ.05 | LCD_B4 <-> PK.03
+                      | LCD_R7 <-> PJ.06 | LCD_B5 <-> PK.04
+                      | LCD_G2 <-> PJ.09 | LCD_B6 <-> PK.05
+                      | LCD_G3 <-> PJ.10 | LCD_B7 <-> PK.06
+                      | LCD_G4 <-> PJ.11 | LCD_DE <-> PK.07
+                      | LCD_B3 <-> PJ.15 |
   */
+
   // GPIOI configuration
   GPIO_PinAFConfig(GPIOI, GPIO_PinSource12, GPIO_AF_LTDC);
   GPIO_PinAFConfig(GPIOI, GPIO_PinSource13, GPIO_AF_LTDC);
   GPIO_PinAFConfig(GPIOI, GPIO_PinSource14, GPIO_AF_LTDC);
-
+  GPIO_InitTypeDef GPIO_InitStructure;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14;
-  GPIO_InitStructure.GPIO_Speed =GPIO_Speed_2MHz;
-  GPIO_InitStructure.GPIO_Mode =GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType =GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd =GPIO_PuPd_NOPULL;
   GPIO_Init(GPIOI, &GPIO_InitStructure);
-
-  GPIO_PinAFConfig(GPIOK, GPIO_PinSource7, GPIO_AF_LTDC);
-
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-  GPIO_Init(GPIOK, &GPIO_InitStructure);
 
   // GPIOJ configuration
   GPIO_PinAFConfig(GPIOJ, GPIO_PinSource2, GPIO_AF_LTDC);
@@ -90,10 +78,7 @@ static void LCD_AF_GPIOConfig(void)
   GPIO_PinAFConfig(GPIOJ, GPIO_PinSource10, GPIO_AF_LTDC);
   GPIO_PinAFConfig(GPIOJ, GPIO_PinSource11, GPIO_AF_LTDC);
   GPIO_PinAFConfig(GPIOJ, GPIO_PinSource15, GPIO_AF_LTDC);
-
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | \
-                               GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_15;
-
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_15;
   GPIO_Init(GPIOJ, &GPIO_InitStructure);
 
   // GPIOK configuration
@@ -104,13 +89,8 @@ static void LCD_AF_GPIOConfig(void)
   GPIO_PinAFConfig(GPIOK, GPIO_PinSource4, GPIO_AF_LTDC);
   GPIO_PinAFConfig(GPIOK, GPIO_PinSource5, GPIO_AF_LTDC);
   GPIO_PinAFConfig(GPIOK, GPIO_PinSource6, GPIO_AF_LTDC);
-
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 ;
-
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_PinAFConfig(GPIOK, GPIO_PinSource7, GPIO_AF_LTDC);
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
   GPIO_Init(GPIOK, &GPIO_InitStructure);
 }
 
@@ -125,26 +105,16 @@ static void LCD_NRSTConfig(void)
   GPIO_Init(LCD_GPIO_NRST, &GPIO_InitStructure);
 }
 
-// TODO delay function
-static void delay3(uint32_t nCount)
-{
-  uint32_t index = 0;
-  for(index = (1000 * 100 * nCount); index != 0; --index)
-  {
-    __asm("nop\n");
-  }
-}
-
-static void lcd_reset(void)
+static void lcdReset(void)
 {
   NRST_HIGH();
-  delay3(1);
+  delay_ms(1);
 
   NRST_LOW(); //  RESET();
-  delay3(20);
+  delay_ms(100);
 
   NRST_HIGH();
-  delay3(30);
+  delay_ms(100);
 }
 
 void LCD_Init_LTDC(void)
@@ -300,24 +270,6 @@ void LCD_LayerInit()
   LTDC_DitherCmd(ENABLE);
 }
 
-/*********************************output****************************************/
-/**
-  * @brief  Initializes the LCD.
-  * @param  None
-  * @retval None
-  */
-void LCD_Init(void)
-{
-  /* Reset the LCD --------------------------------------------------------*/
-  LCD_NRSTConfig();
-  lcd_reset();
-
-  /* Configure the LCD Control pins */
-  LCD_AF_GPIOConfig();
-
-  LCD_Init_LTDC();
-}
-
 BitmapBuffer lcdBuffer1(BMP_RGB565, LCD_W, LCD_H, (uint16_t *)LCD_FIRST_FRAME_BUFFER);
 BitmapBuffer lcdBuffer2(BMP_RGB565, LCD_W, LCD_H, (uint16_t *)LCD_SECOND_FRAME_BUFFER);
 BitmapBuffer * lcd = &lcdBuffer1;
@@ -358,8 +310,15 @@ void LCD_SetTransparency(uint8_t transparency)
 
 void lcdInit(void)
 {
-  /* Initialize the LCD */
-  LCD_Init();
+  /* Reset the LCD --------------------------------------------------------*/
+  LCD_NRSTConfig();
+  lcdReset();
+
+  /* Configure the LCD Control pins */
+  LCD_AF_GPIOConfig();
+
+  LCD_Init_LTDC();
+
   LCD_LayerInit();
 
   /* Enable LCD display */
@@ -367,7 +326,6 @@ void lcdInit(void)
 
   /* Set Background layer */
   LCD_SetLayer(LCD_FIRST_LAYER);
-  // lcdClear();
   LCD_SetTransparency(0);
 
   /* Set Foreground layer */
