@@ -332,7 +332,7 @@
 #define USB_GPIO_AF                     GPIO_AF_OTG1_FS
 
 // LCD
-#define LCD_RCC_AHB1Periph              (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOF | RCC_AHB1Periph_GPIOI | RCC_AHB1Periph_GPIOJ | RCC_AHB1Periph_GPIOK | RCC_AHB1Periph_DMA2D)
+#define LCD_RCC_AHB1Periph              (RCC_AHB1Periph_GPIOF | RCC_AHB1Periph_GPIOI | RCC_AHB1Periph_GPIOJ | RCC_AHB1Periph_GPIOK | RCC_AHB1Periph_DMA2D)
 #define LCD_RCC_APB1Periph              0
 #define LCD_RCC_APB2Periph              RCC_APB2Periph_LTDC
 #if defined(PCBX12S)

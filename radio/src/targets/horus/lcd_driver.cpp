@@ -20,7 +20,7 @@
 
 #include "opentx.h"
 
-#define HBP  42
+#define HBP  42 // TODO use names from FlySky
 #define VBP  12
 
 #define HSW  2
@@ -126,16 +126,13 @@ void LCD_Init_LTDC(void)
   /* PLLSAI_VCO Output = PLLSAI_VCO Input * PLLSAI_N = 192 Mhz */
   /* PLLLCDCLK = PLLSAI_VCO Output/PLL_LTDC = 192/3 = 64 Mhz */
   /* LTDC clock frequency = PLLLCDCLK / RCC_PLLSAIDivR = 64/4 = 16 Mhz */
-  //second pam is for audio
-  //third pam is for LCD
   RCC_PLLSAIConfig(192, 6, 3);
-  RCC_LTDCCLKDivConfig(RCC_PLLSAIDivR_Div4);  //Modify by Fy
+  RCC_LTDCCLKDivConfig(RCC_PLLSAIDivR_Div4);
   /* Enable PLLSAI Clock */
   RCC_PLLSAICmd(ENABLE);
 
   /* Wait for PLLSAI activation */
-  while(RCC_GetFlagStatus(RCC_FLAG_PLLSAIRDY) == RESET)
-  {
+  while (RCC_GetFlagStatus(RCC_FLAG_PLLSAIRDY) == RESET) {
   }
 
   /* LTDC Configuration *********************************************************/
@@ -194,11 +191,6 @@ void LCD_Init_LTDC(void)
 #endif
 }
 
-/**
-  * @brief  Initializes the LCD Layers.
-  * @param  None
-  * @retval None
-  */
 void LCD_LayerInit()
 {
   LTDC_Layer_InitTypeDef LTDC_Layer_InitStruct;
@@ -274,11 +266,6 @@ BitmapBuffer lcdBuffer1(BMP_RGB565, LCD_W, LCD_H, (uint16_t *)LCD_FIRST_FRAME_BU
 BitmapBuffer lcdBuffer2(BMP_RGB565, LCD_W, LCD_H, (uint16_t *)LCD_SECOND_FRAME_BUFFER);
 BitmapBuffer * lcd = &lcdBuffer1;
 
-/**
-  * @brief  Sets the LCD Layer.
-  * @param  Layerx: specifies the Layer foreground or background.
-  * @retval None
-  */
 void LCD_SetLayer(uint32_t Layerx)
 {
   if (Layerx == LCD_FIRST_LAYER) {
@@ -291,12 +278,6 @@ void LCD_SetLayer(uint32_t Layerx)
   }
 }
 
-/**
-  * @brief  Configure the transparency.
-  * @param  transparency: specifies the transparency,
-  *         This parameter must range from 0x00 to 0xFF.
-  * @retval None
-  */
 void LCD_SetTransparency(uint8_t transparency)
 {
   if (CurrentLayer == LCD_FIRST_LAYER) {
