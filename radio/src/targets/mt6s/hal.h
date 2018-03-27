@@ -206,7 +206,7 @@
 #define DMA_SCREEN_IRQ_PRIO             6
 
 // Backlight
-// TODO TIM3, TIM8, TIM14
+// TODO TIM3, TIM8, TIM14, review the channel in backlight_driver.cpp according to the chosen timer
 #define BACKLIGHT_RCC_AHB1Periph        RCC_AHB1Periph_GPIOA
 #define BACKLIGHT_GPIO                  GPIOA
 #define BACKLIGHT_TIMER                 TIM8
