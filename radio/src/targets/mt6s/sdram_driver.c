@@ -208,7 +208,7 @@ void SDRAM_InitSequence(void)
   }
 }
 
-void SDRAM_Init(void)
+void sdramInit(void)
 {
   /* GPIO configuration for FMC SDRAM bank */
   SDRAM_GPIOConfig();

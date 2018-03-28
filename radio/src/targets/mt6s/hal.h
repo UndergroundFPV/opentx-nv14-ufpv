@@ -25,6 +25,10 @@
  * TIM1 = Haptic
  * TIM4 = Trainer
  * TIM6 = Audio
+ * TIM7 = 2MHz counter
+ *
+ *
+ * TIM14 = 5ms counter
  */
 
 /* DMA Allocation:
