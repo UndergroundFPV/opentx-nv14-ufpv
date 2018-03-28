@@ -34,13 +34,13 @@
 
 typedef void (*voidFunction)(void);
 
-#define jumpTo(addr) {                                          \
-        SCB->VTOR = addr;                                       \
-        __set_MSP(*(__IO uint32_t*)addr);                       \
-        uint32_t     jumpAddress = *(uint32_t*)(addr + 4);      \
-        voidFunction jumpFn = (voidFunction)jumpAddress;        \
-        jumpFn();                                               \
-    }
+#define jumpTo(addr) {                                    \
+  SCB->VTOR = addr;                                       \
+  __set_MSP(*(__IO uint32_t*)addr);                       \
+  uint32_t     jumpAddress = *(uint32_t*)(addr + 4);      \
+  voidFunction jumpFn = (voidFunction)jumpAddress;        \
+  jumpFn();                                               \
+}
 
 // Bootloader marker:
 // -> used to detect valid bootloader files
@@ -55,7 +55,7 @@ volatile rotenc_t rotencValue[1] = {0};
  *        Local variables
  *----------------------------------------------------------------------------*/
 
-uint32_t FirmwareSize;
+uint32_t firmwareSize;
 uint32_t firmwareAddress = FIRMWARE_ADDRESS;
 uint32_t firmwareWritten = 0;
 
@@ -64,9 +64,6 @@ uint32_t eepromAddress = 0;
 uint32_t eepromWritten = 0;
 #endif
 
-//TCHAR backupFilename[_MAX_LFN+1];
-
-//uint32_t Master_frequency;
 volatile uint8_t Tenms = 1;
 
 FlashCheckRes Valid;
@@ -135,19 +132,19 @@ uint32_t isValidBufferStart(const uint8_t * buffer)
 
 FlashCheckRes checkFlashFile(unsigned int index, FlashCheckRes res)
 {
-    if (res != FC_UNCHECKED)
-        return res;
+  if (res != FC_UNCHECKED)
+      return res;
 
-    if (openBinFile(memoryType, index) != FR_OK)
-        return FC_ERROR;
+  if (openBinFile(memoryType, index) != FR_OK)
+      return FC_ERROR;
 
-    if (closeBinFile() != FR_OK)
-        return FC_ERROR;
+  if (closeBinFile() != FR_OK)
+      return FC_ERROR;
 
-    if (!isValidBufferStart(Block_buffer))
-        return FC_ERROR;
+  if (!isValidBufferStart(Block_buffer))
+      return FC_ERROR;
 
-    return FC_OK;
+  return FC_OK;
 }
 
 int menuFlashFile(uint32_t index, event_t event)
@@ -303,61 +300,56 @@ int main()
       event_t event = getEvent();
 
       if (state == ST_START) {
-
-          bootloaderDrawScreen(state, vpos);
-
-          if (event == EVT_KEY_FIRST(KEY_DOWN)) {
-              vpos = (vpos + 1) % MAIN_MENU_LEN;
-              continue;
-          }
-          else if (event == EVT_KEY_FIRST(KEY_UP)) {
-              vpos = (vpos + MAIN_MENU_LEN - 1) % MAIN_MENU_LEN;
-              continue;
-          }
-          else if (event == EVT_KEY_BREAK(KEY_ENTER)) {
-              switch (vpos) {
-              case 0:
-                  memoryType = MEM_FLASH;
-                  state = ST_DIR_CHECK;
-                  break;
+        bootloaderDrawScreen(state, vpos);
+        if (event == EVT_KEY_FIRST(KEY_DOWN)) {
+          vpos = (vpos + 1) % MAIN_MENU_LEN;
+          continue;
+        }
+        else if (event == EVT_KEY_FIRST(KEY_UP)) {
+          vpos = (vpos + MAIN_MENU_LEN - 1) % MAIN_MENU_LEN;
+          continue;
+        }
+        else if (event == EVT_KEY_BREAK(KEY_ENTER)) {
+          switch (vpos) {
+            case 0:
+              memoryType = MEM_FLASH;
+              state = ST_DIR_CHECK;
+              break;
 #if defined(EEPROM)
-              case 1:
-                  memoryType = MEM_EEPROM;
-                  state = ST_DIR_CHECK;
-                  break;
+            case 1:
+              memoryType = MEM_EEPROM;
+              state = ST_DIR_CHECK;
+              break;
 #endif
-              default:
-                  state = ST_REBOOT;
-                  break;
-              }
+            default:
+              state = ST_REBOOT;
+              break;
+            }
 
-              // next loop
-              continue;
-          }
+          // next loop
+          continue;
+        }
       }
       else if (state == ST_DIR_CHECK) {
+        fr = openBinDir(memoryType);
 
-          fr = openBinDir(memoryType);
-
-          if (fr == FR_OK) {
-              index = vpos = 0;
-              state = ST_FILE_LIST;
-              nameCount = fetchBinFiles(index);
-              continue;
+        if (fr == FR_OK) {
+          index = vpos = 0;
+          state = ST_FILE_LIST;
+          nameCount = fetchBinFiles(index);
+          continue;
+        }
+        else {
+          bootloaderDrawScreen(state, fr);
+          if (event == EVT_KEY_BREAK(KEY_EXIT) || event == EVT_KEY_BREAK(KEY_ENTER)) {
+            vpos = 0;
+            state = ST_START;
+            continue;
           }
-          else {
-              bootloaderDrawScreen(state, fr);
-
-              if (event == EVT_KEY_BREAK(KEY_EXIT) || event == EVT_KEY_BREAK(KEY_ENTER)) {
-                  vpos = 0;
-                  state = ST_START;
-                  continue;
-              }
-          }
+        }
       }
 
       if (state == ST_FILE_LIST) {
-
         uint32_t limit = MAX_NAMES_ON_SCREEN;
         if (nameCount < limit) {
           limit = nameCount;
@@ -389,38 +381,37 @@ int main()
         bootloaderDrawScreen(state, 0);
 
         for (uint32_t i=0; i<limit; i++) {
-            bootloaderDrawFilename(binFiles[i].name, i, (vpos == i));
+          bootloaderDrawFilename(binFiles[i].name, i, (vpos == i));
         }
 
         if (event == EVT_KEY_BREAK(KEY_ENTER)) {
-            // Select file to flash
-            state = ST_FLASH_CHECK;
-            Valid = FC_UNCHECKED;
-            continue;
+          // Select file to flash
+          state = ST_FLASH_CHECK;
+          Valid = FC_UNCHECKED;
+          continue;
         }
         else if (event == EVT_KEY_BREAK(KEY_EXIT)) {
-            state = ST_START;
-            vpos = 0;
-            continue;
+          state = ST_START;
+          vpos = 0;
+          continue;
         }
       }
       else if (state == ST_FLASH_CHECK) {
-
           bootloaderDrawScreen(state, Valid, binFiles[vpos].name);
 
           int result = menuFlashFile(vpos, event);
           if (result == 0) {
-              // canceled
-              state = ST_FILE_LIST;
+            // canceled
+            state = ST_FILE_LIST;
           }
           else if (result == 1) {
-              // confirmed
+            // confirmed
 
-              if (memoryType == MEM_FLASH) {
-                  FirmwareSize    = binFiles[vpos].size - BOOTLOADER_SIZE;
-                  firmwareAddress = FIRMWARE_ADDRESS    + BOOTLOADER_SIZE;
-                  firmwareWritten = 0;
-              }
+            if (memoryType == MEM_FLASH) {
+              firmwareSize    = binFiles[vpos].size - BOOTLOADER_SIZE;
+              firmwareAddress = FIRMWARE_ADDRESS    + BOOTLOADER_SIZE;
+              firmwareWritten = 0;
+            }
 #if defined(EEPROM)
               else {
                   eepromAddress = 0;
@@ -442,7 +433,7 @@ int main()
         if (memoryType == MEM_FLASH) {
           flashWriteBlock();
           firmwareWritten += sizeof(Block_buffer);
-          progress = (100*firmwareWritten) / FirmwareSize;
+          progress = (100*firmwareWritten) / firmwareSize;
         }
 #if defined(EEPROM)
         else {
@@ -486,7 +477,6 @@ int main()
 
       if (event == EVT_KEY_LONG(KEY_EXIT)) {
           // Start the main application
-
           state = ST_REBOOT;
       }
 
