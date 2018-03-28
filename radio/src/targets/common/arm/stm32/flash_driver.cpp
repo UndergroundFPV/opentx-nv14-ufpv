@@ -29,13 +29,13 @@
 //next reset.
 //The FLASH_CR register can be locked again by software by setting the LOCK bit in the
 //FLASH_CR register.
-void unlockFlash()
+void flashUnlock()
 {
   FLASH->KEYR = 0x45670123;
   FLASH->KEYR = 0xCDEF89AB;
 }
 
-void lockFlash()
+void flashLock()
 {
   while (FLASH->SR & FLASH_SR_BSY);
   FLASH->CR |= FLASH_CR_LOCK;

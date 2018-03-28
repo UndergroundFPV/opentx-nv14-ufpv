@@ -44,7 +44,7 @@ void bootloaderFlash(const char * filename)
   static uint8_t unlocked = 0;
   if (!unlocked) {
     unlocked = 1;
-    unlockFlash();
+    flashUnlock();
   }
 
   for (int i=0; i<BOOTLOADER_SIZE; i+=1024) {
@@ -65,7 +65,7 @@ void bootloaderFlash(const char * filename)
   }
 
   if (unlocked) {
-    lockFlash();
+    flashLock();
     unlocked = 0;
   }
 

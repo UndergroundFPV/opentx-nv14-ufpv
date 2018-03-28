@@ -279,7 +279,7 @@ int main()
           state = ST_USB;
           if (!unlocked) {
             unlocked = 1;
-            unlockFlash();
+            flashUnlock();
           }
           usbStart();
           usbPluggedIn();
@@ -291,7 +291,7 @@ int main()
               vpos = 0;
               usbStop();
               if (unlocked) {
-                  lockFlash();
+                  flashLock();
                   unlocked = 0;
               }
               state = ST_START;
@@ -435,7 +435,7 @@ int main()
         // commit to flashing
         if (!unlocked && (memoryType == MEM_FLASH)) {
           unlocked = 1;
-          unlockFlash();
+          flashUnlock();
         }
 
         int progress = 0;
@@ -472,7 +472,7 @@ int main()
 
       if (state == ST_FLASH_DONE) {
         if (unlocked) {
-          lockFlash();
+          flashLock();
           unlocked = 0;
         }
 

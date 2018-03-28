@@ -237,10 +237,10 @@ void SystemInit(void)
   RCC->CIR = 0x00000000;
   
 #if defined(SDRAM)
-  void SDRAM_Init();
+  void sdramInit();
   void FMC_SDRAMWriteProtectionConfig(uint32_t SDRAM_Bank, FunctionalState NewState);
 
-  SDRAM_Init(); // calls SDRAM_GPIOConfig()
+  sdramInit(); // calls SDRAM_GPIOConfig()
   FMC_SDRAMWriteProtectionConfig(((uint32_t)0x00000001), DISABLE);
 #endif
   
