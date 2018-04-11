@@ -102,7 +102,7 @@ set(SRC
   vario.cpp
   )
 if(NOT MSVC)
-  set(SRC
+  set(FIRMWARE_SRC
     ${SRC}
     ${THIRDPARTY_DIR}/DSP_Lib/Source/CommonTables/arm_common_tables.c
     ${THIRDPARTY_DIR}/DSP_Lib/Source/FastMathFunctions/arm_cos_f32.c

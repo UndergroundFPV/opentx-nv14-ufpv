@@ -37,10 +37,10 @@ uint32_t readKeys()
 //    result |= 1 << KEY_MINUS;
 //  if (~TRIMS_GPIO_REG_LVU & TRIMS_GPIO_PIN_LVU)
 //    result |= 1 << KEY_PLUS;
-  if (~KEYS_GPIO_REG_K2 & KEYS_GPIO_PIN_K2)
-    result |= 1 << KEY_EXIT;
-  if (~KEYS_GPIO_REG_K1 & KEYS_GPIO_PIN_K1)
-    result |= 1 << KEY_MENU;
+//  if (~KEYS_GPIO_REG_K2 & KEYS_GPIO_PIN_K2)
+//    result |= 1 << KEY_EXIT;
+//  if (~KEYS_GPIO_REG_K1 & KEYS_GPIO_PIN_K1)
+//    result |= 1 << KEY_MENU;
 
   // if (result != 0) TRACE("readKeys(): result=0x%02x", result);
 
@@ -87,14 +87,16 @@ uint8_t keyDown()
 /* TODO common to ARM */
 void readKeysAndTrims()
 {
+  uint32_t i;
+
   uint8_t index = 0;
   uint32_t in = readKeys();
-  for (uint8_t i = 1; i != uint8_t(1 << TRM_BASE); i <<= 1) {
-    keys[index++].input(in & i);
+  for (i = 0; i < TRM_BASE; i++) {
+    keys[index++].input(in & (1 << i));
   }
 
   in = readTrims();
-  for (uint8_t i = 1; i != uint8_t(1 << 8); i <<= 1) {
+  for (i = 1; i <= 1 << (TRM_LAST-TRM_BASE); i <<= 1) {
     keys[index++].input(in & i);
   }
 }
@@ -107,17 +109,15 @@ uint8_t keyState(uint8_t index)
 #if !defined(BOOT)
 uint32_t switchState(uint8_t index)
 {
-  uint16_t value = adcValues[SWITCH_FIRST + (index / 3)];
-  uint8_t position;
+  uint32_t xxx = 0;
 
-  if (value < 1024)
-    position = 0;
-  else if (value > 3*1024)
-    position = 2;
-  else
-    position = 1;
+  switch (index) {
+    default:
+      break;
+  }
 
-  return position == index % 3;
+  // TRACE("switch %d => %d", index, xxx);
+  return xxx;
 }
 #endif
 
@@ -126,11 +126,30 @@ void keysInit()
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
 
-  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOE_PINS;
-  GPIO_Init(GPIOE, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOB_PINS;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOC_PINS;
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
 
   GPIO_InitStructure.GPIO_Pin = KEYS_GPIOD_PINS;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
+
+//  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOE_PINS;
+//  GPIO_Init(GPIOE, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOG_PINS;
+  GPIO_Init(GPIOG, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOH_PINS;
+  GPIO_Init(GPIOH, &GPIO_InitStructure);
+
+//  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOI_PINS;
+//  GPIO_Init(GPIOI, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOJ_PINS;
+  GPIO_Init(GPIOJ, &GPIO_InitStructure);
 }

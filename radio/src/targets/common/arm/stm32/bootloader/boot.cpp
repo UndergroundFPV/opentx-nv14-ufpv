@@ -58,6 +58,7 @@ volatile rotenc_t rotencValue[1] = {0};
 uint32_t firmwareSize;
 uint32_t firmwareAddress = FIRMWARE_ADDRESS;
 uint32_t firmwareWritten = 0;
+FlashCheckRes firmwareValid;
 
 #if defined(EEPROM)
 uint32_t eepromAddress = 0;
@@ -65,8 +66,6 @@ uint32_t eepromWritten = 0;
 #endif
 
 volatile uint8_t Tenms = 1;
-
-FlashCheckRes Valid;
 
 MemoryType memoryType;
 uint32_t   unlocked = 0;
@@ -149,29 +148,29 @@ FlashCheckRes checkFlashFile(unsigned int index, FlashCheckRes res)
 
 int menuFlashFile(uint32_t index, event_t event)
 {
-  Valid = checkFlashFile(index, Valid);
+  firmwareValid = checkFlashFile(index, firmwareValid);
 
-  if (Valid == FC_ERROR) {
-
-    if (event == EVT_KEY_BREAK(KEY_EXIT) || event == EVT_KEY_BREAK(KEY_ENTER))
+  if (firmwareValid == FC_ERROR) {
+    if (event == EVT_KEY_BREAK(KEY_EXIT) || event == EVT_KEY_BREAK(KEY_ENTER)) {
       return 0;
+    }
 
     return -1;
   }
 
   if (event == EVT_KEY_LONG(KEY_ENTER)) {
-
     return (openBinFile(memoryType, index) == FR_OK) && isValidBufferStart(Block_buffer);
   }
-  else if (event == EVT_KEY_BREAK(KEY_EXIT))
+  else if (event == EVT_KEY_BREAK(KEY_EXIT)) {
     return 0;
+  }
 
   return -1;
 }
 
 extern Key keys[];
 
-static uint32_t PowerUpDelay;
+static uint32_t powerupDelay;
 
 void flashWriteBlock()
 {
@@ -284,16 +283,16 @@ int main()
       }
 
       if (state == ST_USB) {
-          if (usbPlugged() == 0) {
-              vpos = 0;
-              usbStop();
-              if (unlocked) {
-                  flashLock();
-                  unlocked = 0;
-              }
-              state = ST_START;
+        if (usbPlugged() == 0) {
+          vpos = 0;
+          usbStop();
+          if (unlocked) {
+            flashLock();
+            unlocked = 0;
           }
-          bootloaderDrawScreen(state, 0);
+          state = ST_START;
+        }
+        bootloaderDrawScreen(state, 0);
       }
 
       lcdRefreshWait();
@@ -387,7 +386,7 @@ int main()
         if (event == EVT_KEY_BREAK(KEY_ENTER)) {
           // Select file to flash
           state = ST_FLASH_CHECK;
-          Valid = FC_UNCHECKED;
+          firmwareValid = FC_UNCHECKED;
           continue;
         }
         else if (event == EVT_KEY_BREAK(KEY_EXIT)) {
@@ -397,29 +396,29 @@ int main()
         }
       }
       else if (state == ST_FLASH_CHECK) {
-          bootloaderDrawScreen(state, Valid, binFiles[vpos].name);
+        bootloaderDrawScreen(state, firmwareValid, binFiles[vpos].name);
 
-          int result = menuFlashFile(vpos, event);
-          if (result == 0) {
-            // canceled
-            state = ST_FILE_LIST;
+        int result = menuFlashFile(vpos, event);
+        if (result == 0) {
+          // canceled
+          state = ST_FILE_LIST;
+        }
+        else if (result == 1) {
+          // confirmed
+
+          if (memoryType == MEM_FLASH) {
+            firmwareSize    = binFiles[vpos].size - BOOTLOADER_SIZE;
+            firmwareAddress = FIRMWARE_ADDRESS    + BOOTLOADER_SIZE;
+            firmwareWritten = 0;
           }
-          else if (result == 1) {
-            // confirmed
-
-            if (memoryType == MEM_FLASH) {
-              firmwareSize    = binFiles[vpos].size - BOOTLOADER_SIZE;
-              firmwareAddress = FIRMWARE_ADDRESS    + BOOTLOADER_SIZE;
-              firmwareWritten = 0;
-            }
 #if defined(EEPROM)
-              else {
-                  eepromAddress = 0;
-                  eepromWritten = 0;
-              }
-#endif
-              state = ST_FLASHING;
+          else {
+            eepromAddress = 0;
+            eepromWritten = 0;
           }
+#endif
+          state = ST_FLASHING;
+        }
       }
 
       else if (state == ST_FLASHING) {
@@ -449,13 +448,11 @@ int main()
         if (BlockCount == 0) {
           state = ST_FLASH_DONE; // EOF
         }
-        else if ((memoryType == MEM_FLASH) &&
-                 (firmwareWritten >= FLASHSIZE - BOOTLOADER_SIZE)) {
+        else if (memoryType == MEM_FLASH && firmwareWritten >= (FLASHSIZE - BOOTLOADER_SIZE)) {
           state = ST_FLASH_DONE; // Backstop
         }
 #if defined(EEPROM)
-        else if ((memoryType == MEM_EEPROM) &&
-                 (eepromWritten >= EEPROM_SIZE)) {
+        else if (memoryType == MEM_EEPROM && eepromWritten >= EEPROM_SIZE) {
           state = ST_FLASH_DONE; // Backstop
         }
 #endif
@@ -476,14 +473,14 @@ int main()
       }
 
       if (event == EVT_KEY_LONG(KEY_EXIT)) {
-          // Start the main application
-          state = ST_REBOOT;
+        // Start the main application
+        state = ST_REBOOT;
       }
 
       lcdRefresh();
 
-      if (PowerUpDelay < 20) {  // 200 mS
-        PowerUpDelay += 1;
+      if (powerupDelay < 20) {  // 200 mS
+        powerupDelay += 1;
       }
       else {
         sdPoll10ms();

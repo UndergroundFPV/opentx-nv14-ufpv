@@ -44,8 +44,8 @@ void intmoduleNoneStart()
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_Init(INTMODULE_GPIO, &GPIO_InitStructure);
-  GPIO_SetBits(INTMODULE_GPIO, INTMODULE_TX_GPIO_PIN); // Set high
+  GPIO_Init(INTMODULE_TX_GPIO, &GPIO_InitStructure);
+  GPIO_SetBits(INTMODULE_TX_GPIO, INTMODULE_TX_GPIO_PIN); // Set high
 
   INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
   INTMODULE_TIMER->PSC = INTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
@@ -70,8 +70,8 @@ void intmodulePxxStart()
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 
-  GPIO_PinAFConfig(INTMODULE_GPIO, INTMODULE_TX_GPIO_PinSource, INTMODULE_GPIO_AF);
-  GPIO_PinAFConfig(INTMODULE_GPIO, INTMODULE_RX_GPIO_PinSource, INTMODULE_GPIO_AF);
+  GPIO_PinAFConfig(INTMODULE_TX_GPIO, INTMODULE_TX_GPIO_PinSource, INTMODULE_TX_GPIO_AF);
+  GPIO_PinAFConfig(INTMODULE_TX_GPIO, INTMODULE_RX_GPIO_PinSource, INTMODULE_TX_GPIO_AF);
 
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = INTMODULE_TX_GPIO_PIN | INTMODULE_RX_GPIO_PIN;
@@ -79,7 +79,7 @@ void intmodulePxxStart()
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-  GPIO_Init(INTMODULE_GPIO, &GPIO_InitStructure);
+  GPIO_Init(INTMODULE_TX_GPIO, &GPIO_InitStructure);
 
   USART_DeInit(INTMODULE_USART);
   USART_InitTypeDef USART_InitStructure;
@@ -145,7 +145,7 @@ uint8_t intmoduleGetByte(uint8_t * byte)
 
 void intmoduleSendNextFrame()
 {
-  if (s_current_protocol[INTERNAL_MODULE] == PROTO_PXX || s_current_protocol[INTERNAL_MODULE] == PROTO_FLYSKY) {
+  if (IS_PXX_PROTOCOL(s_current_protocol[INTERNAL_MODULE]) || IS_FLYSKY_PROTOCOL(s_current_protocol[INTERNAL_MODULE])) {
     uint8_t * data = modulePulsesData[INTERNAL_MODULE].pxx_uart.pulses;
     uint8_t size = modulePulsesData[INTERNAL_MODULE].pxx_uart.ptr - data;
     if (size) {

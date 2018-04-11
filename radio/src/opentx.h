@@ -948,7 +948,6 @@ void modelDefault(uint8_t id);
 
 #if defined(CPUARM)
   #include "otx_math.h"
-
   void checkModelIdUnique(uint8_t index, uint8_t module);
 #else
   // in avr_maths.cpp

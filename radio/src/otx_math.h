@@ -22,18 +22,21 @@
 #define OTX_MATH_H
 
 #include "definitions.h"
-#if defined(CPUARM) && defined(__GNUC__)
+
+#if defined(CPUARM) && defined(__GNUC__) && !defined(SIMU)
   #include "board.h"
   #include "arm_math.h"
 #endif
-#ifndef QT_CORE_LIB
+
+#if !defined(QT_CORE_LIB)
   #define _USE_MATH_DEFINES
 #endif
+
 #include <cmath>
 #include <inttypes.h>
 #include <type_traits>
 
-#ifndef   M_PI
+#if !defined(M_PI)
   #define M_PI         3.14159265358979323846   // pi
   #define M_PI_2       1.57079632679489661923   // pi/2
   #define M_PI_4       0.785398163397448309616  // pi/4
@@ -48,6 +51,7 @@
   #define M_LN2        0.693147180559945309417  // ln(2)
   #define M_LN10       2.30258509299404568402   // ln(10)
 #endif
+
 // these are typically not standard even in the non-standard math defines :)
 #ifndef   M_LNPI
   #define M_LNPI       1.144729885849400174143  // ln(pi)
@@ -124,17 +128,17 @@ inline int calcRESXto100(int x)
 //! abstract version, use \e MathUtil::sinf() instead
 inline const float otx_sinf(float x)
 {
-#if defined(CPUARM) && defined(__GNUC__)
-    return arm_sin_f32(x);
+#if defined(CPUARM) && defined(__GNUC__) && !defined(SIMU)
+  return arm_sin_f32(x);
 #else
-    return sinf(x);
+  return sinf(x);
 #endif
 }
 
 //! abstract version, use \e MathUtil::cosf() instead
 inline const float otx_cosf(float x)
 {
-#if defined(CPUARM) && defined(__GNUC__)
+#if defined(CPUARM) && defined(__GNUC__) && !defined(SIMU)
   return arm_cos_f32(x);
 #else
   return cosf(x);
@@ -144,7 +148,7 @@ inline const float otx_cosf(float x)
 //! abstract version, use \e MathUtil::sincosf() instead
 inline const void otx_sincosf(float x, float * s, float * c)
 {
-#if defined(CPUARM) && defined(__GNUC__)
+#if defined(CPUARM) && defined(__GNUC__) && !defined(SIMU)
   arm_sin_cos_f32(x * RAD_TO_DEGf, s, c);  // for some reason the arm lib version takes degrees not radians... so we adapt.
 #else
   // sincos() isn't really a standard function, eg. MSCVC does not implement it (of course)

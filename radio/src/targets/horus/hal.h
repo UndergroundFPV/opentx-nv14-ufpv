@@ -527,6 +527,7 @@
 #define INTMODULE_USART                 USART1
 #define INTMODULE_TX_GPIO_AF            GPIO_AF_USART1
 #define INTMODULE_USART_IRQn            USART1_IRQn
+#define INTMODULE_USART_IRQHandler      USART1_IRQHandler
 #define INTMODULE_TX_DMA_STREAM         DMA2_Stream7
 #define INTMODULE_TX_DMA_Stream_IRQn    DMA2_Stream7_IRQn
 #define INTMODULE_TX_DMA_Stream_IRQHandler DMA2_Stream7_IRQHandler

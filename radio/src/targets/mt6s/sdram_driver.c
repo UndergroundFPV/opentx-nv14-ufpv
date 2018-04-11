@@ -20,6 +20,18 @@
 
 #include "board.h"
 
+#define SDRAM_MODEREG_BURST_LENGTH_1             ((uint16_t)0x0000)
+#define SDRAM_MODEREG_BURST_LENGTH_2             ((uint16_t)0x0001)
+#define SDRAM_MODEREG_BURST_LENGTH_4             ((uint16_t)0x0002)
+#define SDRAM_MODEREG_BURST_LENGTH_8             ((uint16_t)0x0004)
+#define SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL      ((uint16_t)0x0000)
+#define SDRAM_MODEREG_BURST_TYPE_INTERLEAVED     ((uint16_t)0x0008)
+#define SDRAM_MODEREG_CAS_LATENCY_2              ((uint16_t)0x0020)
+#define SDRAM_MODEREG_CAS_LATENCY_3              ((uint16_t)0x0030)
+#define SDRAM_MODEREG_OPERATING_MODE_STANDARD    ((uint16_t)0x0000)
+#define SDRAM_MODEREG_WRITEBURST_MODE_PROGRAMMED ((uint16_t)0x0000)
+#define SDRAM_MODEREG_WRITEBURST_MODE_SINGLE     ((uint16_t)0x0200)
+
 void SDRAM_GPIOConfig(void)
 {
   /*
@@ -240,7 +252,7 @@ void sdramInit(void)
   FMC_SDRAMInitStructure.FMC_ColumnBitsNumber = FMC_ColumnBits_Number_8b;
   /* Column addressing: [11:0] */
   FMC_SDRAMInitStructure.FMC_RowBitsNumber = FMC_RowBits_Number_12b;
-  FMC_SDRAMInitStructure.FMC_SDMemoryDataWidth = SDRAM_MEMORY_WIDTH;
+  FMC_SDRAMInitStructure.FMC_SDMemoryDataWidth = FMC_SDMemory_Width_16b; // TODO not 32 bits???
   FMC_SDRAMInitStructure.FMC_InternalBankNumber = FMC_InternalBank_Number_4;
   FMC_SDRAMInitStructure.FMC_CASLatency = FMC_CAS_Latency_3;
   FMC_SDRAMInitStructure.FMC_WriteProtection = FMC_Write_Protection_Disable;

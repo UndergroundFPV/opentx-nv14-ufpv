@@ -99,15 +99,13 @@ if(PCB STREQUAL I8)
     )
 endif()
 
-if(NOT (PCB STREQUAL X10 OR PCB STREQUAL X12S))
+if(NOT (PCB STREQUAL X10 OR PCB STREQUAL X12S OR PCB STREQUAL MT6S))
   set(BOOTLOADER_SRC
     ${BOOTLOADER_SRC}
     ../i2c_driver.cpp
     ../eeprom_driver.cpp
     )
-
   remove_definitions(-DDEBUG)
-
 else()
   set(BOOTLOADER_SRC
     ${BOOTLOADER_SRC}

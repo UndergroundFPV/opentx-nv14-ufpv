@@ -54,8 +54,8 @@ void pwrInit()
 
   // TODO move this elsewhere! (plus SD DETECT on other boards)
   // Init TRAINER DETECT PIN
-  GPIO_InitStructure.GPIO_Pin = TRAINER_DETECT_GPIO_PIN;
-  GPIO_Init(TRAINER_DETECT_GPIO, &GPIO_InitStructure);
+  // GPIO_InitStructure.GPIO_Pin = TRAINER_DETECT_GPIO_PIN;
+  // GPIO_Init(TRAINER_DETECT_GPIO, &GPIO_InitStructure);
 
   pwrOn();
 }

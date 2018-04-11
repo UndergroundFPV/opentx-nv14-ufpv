@@ -18,7 +18,6 @@
  * GNU General Public License for more details.
  */
 
-#include <math.h>
 #include "opentx.h"
 
 void BitmapBuffer::drawAlphaPixel(display_t * p, uint8_t opacity, uint16_t color)
@@ -164,8 +163,6 @@ void BitmapBuffer::drawCircle(int x0, int y0, int radius)
 }
 #endif
 
-#define PI 3.14159265f
-
 bool evalSlopes(int * slopes, int startAngle, int endAngle)
 {
   if (startAngle >= 360 || endAngle <= 0)
@@ -176,7 +173,7 @@ bool evalSlopes(int * slopes, int startAngle, int endAngle)
     slopes[2] = -100000;
   }
   else {
-    float angle1 = float(startAngle) * (PI / 180.0f);
+    float angle1 = float(startAngle) * (M_PI / 180.0f);
     if (startAngle >= 180) {
       slopes[1] = -100000;
       slopes[2] = cosf(angle1) * 100 / sinf(angle1);
@@ -192,7 +189,7 @@ bool evalSlopes(int * slopes, int startAngle, int endAngle)
     slopes[3] = 100000;
   }
   else {
-    float angle2 = float(endAngle)  * (PI / 180.0f);
+    float angle2 = float(endAngle)  * (M_PI / 180.0f);
     if (endAngle >= 180) {
       slopes[0] = -100000;
       slopes[3] = -cosf(angle2) * 100 / sinf(angle2);

@@ -272,14 +272,10 @@ uint32_t readKeys(void);
 uint32_t readTrims(void);
 #define TRIMS_PRESSED()                 (readTrims())
 #define KEYS_PRESSED()                  (readKeys())
-#define DBLKEYS_PRESSED_RGT_LFT(in)     ((in & ((1<<KEY_RIGHT) + (1<<KEY_LEFT))) == ((1<<KEY_RIGHT) + (1<<KEY_LEFT)))
-#define DBLKEYS_PRESSED_UP_DWN(in)      ((in & ((1<<KEY_UP) + (1<<KEY_DOWN))) == ((1<<KEY_UP) + (1<<KEY_DOWN)))
-#define DBLKEYS_PRESSED_RGT_UP(in)      ((in & ((1<<KEY_RIGHT) + (1<<KEY_UP))) == ((1<<KEY_RIGHT) + (1<<KEY_UP)))
-#define DBLKEYS_PRESSED_LFT_DWN(in)     ((in & ((1<<KEY_LEFT) + (1<<KEY_DOWN))) == ((1<<KEY_LEFT) + (1<<KEY_DOWN)))
-
-// Rotary encoder driver
-#define ROTARY_ENCODER_NAVIGATION
-void checkRotaryEncoder(void);
+#define DBLKEYS_PRESSED_RGT_LFT(in)     (false)
+#define DBLKEYS_PRESSED_UP_DWN(in)      (false)
+#define DBLKEYS_PRESSED_RGT_UP(in)      (false)
+#define DBLKEYS_PRESSED_LFT_DWN(in)     (false)
 
 // WDT driver
 #define WDTO_500MS                      500
