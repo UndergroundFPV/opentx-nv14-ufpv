@@ -221,7 +221,6 @@ extern uint8_t maxTemperature ;           // Raw temp reading
 uint8_t getTemperature();
 
 #define strcpy_P strcpy
-#define strcat_P strcat
 
 #if !defined(REVA)
 extern uint16_t Current_analogue;

@@ -107,7 +107,6 @@ extern "C" {
 #define TIMER_MULT_APB2                 2
 
 #define strcpy_P strcpy
-#define strcat_P strcat
 
 extern uint16_t sessionTimer;
 

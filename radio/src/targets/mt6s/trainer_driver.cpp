@@ -22,6 +22,7 @@
 
 void trainerSendNextFrame();
 
+#if 0
 void init_trainer_ppm()
 {
   GPIO_PinAFConfig(TRAINER_GPIO, TRAINER_OUT_GPIO_PinSource, TRAINER_GPIO_AF);
@@ -152,3 +153,4 @@ extern "C" void TRAINER_TIMER_IRQHandler()
     trainerSendNextFrame();
   }
 }
+#endif

@@ -22,6 +22,7 @@
 
 void extmoduleSendNextFrame();
 
+#if 0
 void extmoduleStop()
 {
   EXTERNAL_MODULE_OFF();
@@ -311,3 +312,4 @@ extern "C" void EXTMODULE_TIMER_IRQHandler()
   setupPulses(EXTERNAL_MODULE);
   extmoduleSendNextFrame();
 }
+#endif

@@ -40,6 +40,8 @@
   const int8_t ana_direction[NUM_ANALOGS] = {-1,1,-1,1,  1,1,  1};
 #elif defined(PCBI8)
   const int8_t ana_direction[NUM_ANALOGS] = {/*sticks*/1,1,1,1, /*pots*/1,1, /*switches*/1,1,1,1,1,1, /*batt*/1,1};
+#elif defined(PCBMT6S)
+  // TODO
 #elif defined(REV4a)
   const int8_t ana_direction[NUM_ANALOGS] = {1,-1,1,-1,  1,-1,0,  1,1,  1};
 #else
@@ -116,6 +118,8 @@ void adcInit()
 #elif defined(PCBI8)
   ADC_MAIN->SQR2 = (ADC_CHANNEL_SWE<<0) + (ADC_CHANNEL_SWF<<5) + (ADC_CHANNEL_LIBATT<<10) + (ADC_CHANNEL_DRYBATT<<15); // conversions 7 and more
   ADC_MAIN->SQR3 = (ADC_CHANNEL_POT1<<0) + (ADC_CHANNEL_POT2<<5) + (ADC_CHANNEL_SWA<<10) + (ADC_CHANNEL_SWB<<15) + (ADC_CHANNEL_SWC<<20) + (ADC_CHANNEL_SWD<<25); // conversions 1 to 6
+#elif defined(PCBMT6S)
+  // TODO
 #else
   ADC_MAIN->SQR2 = (ADC_CHANNEL_POT3<<0) + (ADC_CHANNEL_SLIDER1<<5) + (ADC_CHANNEL_SLIDER2<<10) + (ADC_CHANNEL_BATT<<15); // conversions 7 and more
   ADC_MAIN->SQR3 = (ADC_CHANNEL_STICK_LH<<0) + (ADC_CHANNEL_STICK_LV<<5) + (ADC_CHANNEL_STICK_RV<<10) + (ADC_CHANNEL_STICK_RH<<15) + (ADC_CHANNEL_POT1<<20) + (ADC_CHANNEL_POT2<<25); // conversions 1 to 6
@@ -228,7 +232,6 @@ void adcStop()
 uint16_t getAnalogValue(uint8_t index)
 {
   return adcValues[index];
-
 
   if (IS_POT(index) && !IS_POT_SLIDER_AVAILABLE(index)) {
     // Use fixed analog value for non-existing and/or non-connected pots.

@@ -33,7 +33,7 @@
   #define LUA_EXPORT_EXTRA(...)
 #endif
 
-#if defined(PCBHORUS)
+#if defined(PCBHORUS) || defined(PCBMT6S)
   #define MAX_MODELS                   60
   #define MAX_OUTPUT_CHANNELS          32 // number of real output channels CH1-CH32
   #define MAX_FLIGHT_MODES             9
@@ -249,7 +249,7 @@ enum BeeperMode {
   e_mode_all
 };
 
-#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8) || defined(PCBMT6S)
   enum ModuleIndex {
     INTERNAL_MODULE,
     EXTERNAL_MODULE,
@@ -292,7 +292,7 @@ enum ModuleIndex {
   #define TRAINER_MODE_MAX()            HAS_WIRELESS_TRAINER_HARDWARE() ? TRAINER_MODE_MASTER_BATTERY_COMPARTMENT : TRAINER_MODE_MASTER_CPPM_EXTERNAL_MODULE
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8) || defined(PCBMT6S)
   #define IS_INTERNAL_MODULE_ENABLED()  (g_model.moduleData[INTERNAL_MODULE].type != MODULE_TYPE_NONE)
 #elif defined(PCBSKY9X)
   #define IS_INTERNAL_MODULE_ENABLED()  (false)
@@ -314,7 +314,7 @@ enum UartModes {
   UART_MODE_MAX = UART_MODE_COUNT-1
 };
 
-#if defined(PCBHORUS)
+#if defined(PCBHORUS) || defined(PCBMT6S)
   #define LEN_SWITCH_NAME              3
   #define LEN_ANA_NAME                 3
   #define LEN_MODEL_FILENAME           16

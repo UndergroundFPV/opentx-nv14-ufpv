@@ -771,7 +771,7 @@ typedef uint8_t swarnenable_t;
   #define TELEMETRY_DATA
 #endif
 
-#if defined(PCBHORUS)
+#if defined(COLORLCD)
 #include "gui/480x272/layout.h"
 #include "gui/480x272/topbar.h"
 PACK(struct CustomScreenData {
@@ -921,7 +921,7 @@ PACK(struct TrainerData {
     CustomFunctionData customFn[MAX_SPECIAL_FUNCTIONS];
 #endif
 
-#if defined(PCBHORUS)
+#if defined(PCBHORUS) || defined(PCBMT6S)
   #define EXTRA_GENERAL_FIELDS \
     EXTRA_GENERAL_FIELDS_ARM \
     NOBACKUP(uint8_t  serial2Mode:4); \
@@ -934,7 +934,7 @@ PACK(struct TrainerData {
     NOBACKUP(uint8_t spare:1); \
     NOBACKUP(uint8_t blOffBright:7); \
     NOBACKUP(char bluetoothName[LEN_BLUETOOTH_NAME]);
-#elif defined(PCBTARANIS) || defined(PCBI8)
+#elif defined(PCBTARANIS) || defined(PCBI8) || defined(PCBMT6S)
   #if defined(BLUETOOTH)
     #define BLUETOOTH_FIELDS \
       uint8_t spare; \
@@ -1119,7 +1119,7 @@ static inline void check_struct()
   CHKSIZE(CurveData, 4);
   CHKSIZE(CustomScreenData, 610);
   CHKSIZE(Topbar::PersistentData, 216);
-#elif defined(PCBI8)
+#elif defined(PCBI8) || defined(PCBMT6S)
   // TODO
 #elif defined(PCBSKY9X)
   CHKSIZE(MixData, 20);

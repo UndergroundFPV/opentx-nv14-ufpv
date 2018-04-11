@@ -86,7 +86,6 @@ void interrupt1ms()
   }
 
   DEBUG_TIMER_START(debugTimerRotEnc);
-  checkRotaryEncoder();
   DEBUG_TIMER_STOP(debugTimerRotEnc);
 }
 
@@ -109,7 +108,6 @@ void boardInit()
 
 #if !defined(SIMU)
   RCC_AHB1PeriphClockCmd(PWR_RCC_AHB1Periph |
-                         PCBREV_RCC_AHB1Periph |
                          LCD_RCC_AHB1Periph |
                          BACKLIGHT_RCC_AHB1Periph |
                          SD_RCC_AHB1Periph |

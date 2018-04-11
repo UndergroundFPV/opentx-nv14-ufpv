@@ -92,7 +92,6 @@ extern "C" {
 #define TIMER_MULT_APB2                 2
 
 #define strcpy_P strcpy
-#define strcat_P strcat
 
 extern uint16_t sessionTimer;
 
@@ -223,6 +222,8 @@ enum EnumKeys
 
   NUM_KEYS
 };
+
+#define KEY_MENU = KEY_ENTER
 
 enum EnumSwitches
 {
