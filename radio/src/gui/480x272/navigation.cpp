@@ -131,6 +131,7 @@ int checkIncDec(event_t event, int val, int i_min, int i_max, unsigned int i_fla
     }
   }
 
+#if defined(PCBFRSKY)
   if (s_editMode>0 && event==EVT_ROTARY_RIGHT) {
     newval += min<int>(rotencSpeed, i_max-val);
     while (isValueAvailable && !isValueAvailable(newval) && newval<=i_max) {
@@ -151,6 +152,7 @@ int checkIncDec(event_t event, int val, int i_min, int i_max, unsigned int i_fla
       AUDIO_KEY_ERROR();
     }
   }
+#endif
 
   if (!READ_ONLY() && i_min==0 && i_max==1 && event==EVT_KEY_BREAK(KEY_ENTER)) {
     s_editMode = 0;

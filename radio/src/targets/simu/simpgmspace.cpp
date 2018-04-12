@@ -285,7 +285,8 @@ void simuSetSwitch(uint8_t swtch, int8_t state)
   // TRACE_SIMPGMSPACE("simuSetSwitch(%d, %d)", swtch, state);
 
   switch (swtch) {
-#if defined(PCBTARANIS)
+#if defined(PCBMT6S)
+#elif defined(PCBTARANIS)
   #if defined(SWITCHES_GPIO_REG_A_L)
     SWITCH_3_CASE(0,  SWITCHES_GPIO_REG_A_L, SWITCHES_GPIO_REG_A_H, SWITCHES_GPIO_PIN_A_L, SWITCHES_GPIO_PIN_A_H)
     SWITCH_3_CASE(1,  SWITCHES_GPIO_REG_B_L, SWITCHES_GPIO_REG_B_H, SWITCHES_GPIO_PIN_B_L, SWITCHES_GPIO_PIN_B_H)

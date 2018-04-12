@@ -136,7 +136,7 @@ enum CurveType {
 
 #define MAX_POINTS_PER_CURVE           17
 
-#if defined(PCBHORUS)
+#if defined(PCBHORUS) || defined(PCBMT6S)
   #define LEN_MODEL_NAME               15
   #define LEN_TIMER_NAME               8
   #define LEN_FLIGHT_MODE_NAME         10
@@ -844,7 +844,7 @@ enum MixSources {
   MIXSRC_SA = MIXSRC_FIRST_SWITCH,  LUA_EXPORT("sa", "Switch A")
   MIXSRC_SB,                        LUA_EXPORT("sb", "Switch B")
   MIXSRC_LAST_SWITCH = MIXSRC_SB,
-#elif defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
+#elif defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8) || defined(PCBMT6S)
   MIXSRC_SA = MIXSRC_FIRST_SWITCH,  LUA_EXPORT("sa", "Switch A")
   MIXSRC_SB,                        LUA_EXPORT("sb", "Switch B")
   MIXSRC_SC,                        LUA_EXPORT("sc", "Switch C")

@@ -126,7 +126,7 @@ extern const pm_char STR_OPEN9X[];
 #define OFS_TRNMODE            (OFS_VBEEPMODE + sizeof(TR_VBEEPMODE))
 #endif
 #define OFS_TRNCHN             (OFS_TRNMODE + sizeof(TR_TRNMODE))
-#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBI8)
+#if defined(PCBFRSKY) || defined(PCBFLYSKY)
   #define OFS_UART3MODES       (OFS_TRNCHN + sizeof(TR_TRNCHN))
   #define OFS_SWTYPES          (OFS_UART3MODES + sizeof(TR_UART3MODES))
   #define OFS_POTTYPES         (OFS_SWTYPES + sizeof(TR_SWTYPES))
@@ -509,7 +509,7 @@ extern const pm_char STR_BEEPCOUNTDOWN[];
 extern const pm_char STR_PERSISTENT[];
 extern const pm_char STR_BACKLIGHT_LABEL[];
 extern const pm_char STR_BLDELAY[];
-#if defined(PWM_BACKLIGHT) || defined(PCBHORUS)
+#if defined(PWM_BACKLIGHT) || defined(COLORLCD)
 extern const pm_char STR_BLONBRIGHTNESS[];
 extern const pm_char STR_BLOFFBRIGHTNESS[];
 #endif
@@ -791,7 +791,7 @@ extern const pm_char STR_SCRIPT_KILLED[];
 extern const pm_char STR_SCRIPT_ERROR[];
 extern const pm_char STR_PLAY_FILE[];
 extern const pm_char STR_ASSIGN_BITMAP[];
-#if defined(PCBHORUS)
+#if defined(COLORLCD)
 extern const pm_char STR_ASSIGN_SPLASH[];
 #endif
 extern const pm_char STR_EXECUTE_FILE[];

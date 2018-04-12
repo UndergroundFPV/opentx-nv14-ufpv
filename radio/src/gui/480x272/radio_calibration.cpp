@@ -89,6 +89,7 @@ bool menuCommonCalib(event_t event)
         reusableBuffer.calib.midVals[i] = (reusableBuffer.calib.hiVals[i] + reusableBuffer.calib.loVals[i]) / 2;
       }
       uint8_t idx = i - POT1;
+#if NUM_XPOTS > 0
       int count = reusableBuffer.calib.xpotsCalib[idx].stepsCount;
       if (IS_POT_MULTIPOS(i) && count <= XPOTS_MULTIPOS_COUNT) {
         // use raw analog value for multipos calibraton, anaIn() already has multipos decoded value
@@ -120,6 +121,7 @@ bool menuCommonCalib(event_t event)
           }
         }
       }
+#endif
     }
   }
 
@@ -152,10 +154,12 @@ bool menuCommonCalib(event_t event)
         reusableBuffer.calib.loVals[i] = 15000;
         reusableBuffer.calib.hiVals[i] = -15000;
         reusableBuffer.calib.midVals[i] = i < TX_VOLTAGE ? anaIn(i) : anaIn(i+1);
+#if NUM_XPOTS > 0
         if (i < NUM_XPOTS) {
           reusableBuffer.calib.xpotsCalib[i].stepsCount = 0;
           reusableBuffer.calib.xpotsCalib[i].lastCount = 0;
         }
+#endif
       }
       break;
 
@@ -172,6 +176,7 @@ bool menuCommonCalib(event_t event)
           g_eeGeneral.calib[i].spanPos = v - v/STICK_TOLERANCE;
         }
       }
+#if NUM_XPOTS > 0
       for (int i=POT1; i<=POT_LAST; i++) {
         int idx = i - POT1;
         int count = reusableBuffer.calib.xpotsCalib[idx].stepsCount;
@@ -195,6 +200,7 @@ bool menuCommonCalib(event_t event)
           }
         }
       }
+#endif
       break;
 
     case CALIB_STORE:

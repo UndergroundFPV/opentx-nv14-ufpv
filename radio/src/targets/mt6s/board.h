@@ -165,8 +165,8 @@ void sdramInit(void);
 // Pulses driver
 #define INTERNAL_MODULE_ON()            GPIO_SetBits(INTMODULE_PWR_GPIO, INTMODULE_PWR_GPIO_PIN)
 #define INTERNAL_MODULE_OFF()           GPIO_ResetBits(INTMODULE_PWR_GPIO, INTMODULE_PWR_GPIO_PIN)
-#define EXTERNAL_MODULE_ON()            GPIO_SetBits(EXTMODULE_PWR_GPIO, EXTMODULE_PWR_GPIO_PIN)
-#define EXTERNAL_MODULE_OFF()           GPIO_ResetBits(EXTMODULE_PWR_GPIO, EXTMODULE_PWR_GPIO_PIN)
+#define EXTERNAL_MODULE_ON()            // GPIO_SetBits(EXTMODULE_PWR_GPIO, EXTMODULE_PWR_GPIO_PIN)
+#define EXTERNAL_MODULE_OFF()           // GPIO_ResetBits(EXTMODULE_PWR_GPIO, EXTMODULE_PWR_GPIO_PIN)
 #define IS_INTERNAL_MODULE_ON()         (GPIO_ReadInputDataBit(INTMODULE_PWR_GPIO, INTMODULE_PWR_GPIO_PIN) == Bit_SET)
 #define IS_EXTERNAL_MODULE_ON()         (GPIO_ReadInputDataBit(EXTMODULE_PWR_GPIO, EXTMODULE_PWR_GPIO_PIN) == Bit_SET)
 #define IS_UART_MODULE(port)            (port == INTERNAL_MODULE)
@@ -223,7 +223,10 @@ enum EnumKeys
   NUM_KEYS
 };
 
-#define KEY_MENU = KEY_ENTER
+#define KEY_MENU  KEY_ENTER
+#define EVT_ROTARY_BREAK  0xfd
+#define EVT_ROTARY_RIGHT  0xfe
+#define EVT_ROTARY_LEFT   0xff
 
 enum EnumSwitches
 {
@@ -310,7 +313,7 @@ void watchdogInit(unsigned int duration);
 
 // ADC driver
 #define NUM_POTS                        2
-#define NUM_XPOTS                       NUM_POTS
+#define NUM_XPOTS                       0 // NUM_POTS
 #define NUM_SLIDERS                     0
 #define NUM_PWMANALOGS                  0
 enum Analogs {
@@ -367,6 +370,7 @@ uint32_t pwrPressedDuration(void);
 #define LCD_W                           320
 #define LCD_H                           480
 #define LCD_DEPTH                       16
+#define LCD_CONTRAST_DEFAULT            20
 void lcdInit(void);
 void lcdRefresh(void);
 void DMAFillRect(uint16_t * dest, uint16_t destw, uint16_t desth, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color);

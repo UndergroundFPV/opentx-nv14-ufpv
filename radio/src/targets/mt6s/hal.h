@@ -128,28 +128,15 @@
 
 // S.Port update connector
 #define SPORT_MAX_BAUDRATE              250000 // < 400000
-#if defined(PCBX10)
-  #define SPORT_UPDATE_RCC_AHB1Periph   RCC_AHB1Periph_GPIOH
-  #define SPORT_UPDATE_PWR_GPIO         GPIOH
-  #define SPORT_UPDATE_PWR_GPIO_PIN     GPIO_Pin_13  // PH.13
-#else
-  #define SPORT_UPDATE_RCC_AHB1Periph   0
-#endif
+#define SPORT_UPDATE_RCC_AHB1Periph   RCC_AHB1Periph_GPIOH
+#define SPORT_UPDATE_PWR_GPIO         GPIOH
+#define SPORT_UPDATE_PWR_GPIO_PIN     GPIO_Pin_13  // PH.13
 
 // Led
-#define STATUS_LEDS
-#if defined(PCBX12S)
-  #define LED_RCC_AHB1Periph            RCC_AHB1Periph_GPIOI
-  #define LED_GPIO                      GPIOI
-  #define LED_GPIO_PIN                  GPIO_Pin_5  // PI.05
-#elif defined(PCBX10)
-  #define LED_RCC_AHB1Periph            RCC_AHB1Periph_GPIOE
-  #define LED_GPIO                      GPIOE
-  #define LED_RED_GPIO_PIN              GPIO_Pin_2
-  #define LED_GREEN_GPIO_PIN            GPIO_Pin_4
-  #define LED_BLUE_GPIO_PIN             GPIO_Pin_5
-  #define LED_GPIO_PIN                  (LED_RED_GPIO_PIN | LED_GREEN_GPIO_PIN | LED_BLUE_GPIO_PIN)
-#endif
+// #define STATUS_LEDS
+#define LED_RCC_AHB1Periph            RCC_AHB1Periph_GPIOI
+#define LED_GPIO                      GPIOI
+#define LED_GPIO_PIN                  GPIO_Pin_5  // PI.05
 
 // Serial Port (DEBUG)
 #define SERIAL_RCC_AHB1Periph           (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA1)

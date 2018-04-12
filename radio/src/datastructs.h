@@ -975,7 +975,7 @@ PACK(struct TrainerData {
   #define EXTRA_GENERAL_FIELDS
 #endif
 
-#if defined(PCBHORUS)
+#if defined(COLORLCD)
   #include "gui/480x272/theme.h"
   #define THEME_DATA \
     NOBACKUP(char themeName[8]); \

@@ -22,7 +22,7 @@
 
 #define CS_LAST_VALUE_INIT -32768
 
-#if defined(PCBHORUS)
+#if defined(COLORLCD)
   #define SWITCH_WARNING_LIST_X        WARNING_LINE_X
   #define SWITCH_WARNING_LIST_Y        WARNING_LINE_Y+3*FH
   #define SWITCH_WARNING_LIST_INTERVAL 35
@@ -592,7 +592,7 @@ swsrc_t getMovedSwitch()
   static tmr10ms_t s_move_last_time = 0;
   swsrc_t result = 0;
 
-#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBFLYSKY)
+#if defined(PCBFRSKY) || defined(PCBFLYSKY)
   for (int i=0; i<NUM_SWITCHES; i++) {
     if (SWITCH_EXISTS(i)) {
       swarnstate_t mask = ((swarnstate_t)0x03 << (i*2));
