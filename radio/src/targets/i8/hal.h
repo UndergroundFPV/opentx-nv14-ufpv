@@ -146,15 +146,14 @@
 #define INTMODULE
 #define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA1)
 #define INTMODULE_RCC_APB1Periph        (RCC_APB1Periph_USART3 | RCC_APB1Periph_TIM2)
-#define INTMODULE_GPIO                  GPIOB
-// #define INTMODULE_TX_GPIO               GPIOB
+#define INTMODULE_TX_GPIO               GPIOB
 #define INTMODULE_TX_GPIO_PIN           GPIO_Pin_10 // PB.10
-// #define INTMODULE_RX_GPIO               GPIOB
+#define INTMODULE_RX_GPIO               GPIOB
 #define INTMODULE_RX_GPIO_PIN           GPIO_Pin_11 // PB.11
 #define INTMODULE_TX_GPIO_PinSource     GPIO_PinSource10
 #define INTMODULE_RX_GPIO_PinSource     GPIO_PinSource11
 #define INTMODULE_GPIOB_PINS            (GPIO_Pin_10 | GPIO_Pin_11)
-#define INTMODULE_GPIO_AF               GPIO_AF_USART3
+#define INTMODULE_TX_GPIO_AF            GPIO_AF_USART3
 #define INTMODULE_USART                 USART3
 #define INTMODULE_USART_IRQn            USART3_IRQn
 #define INTMODULE_USART_IRQHandler      USART3_IRQHandler

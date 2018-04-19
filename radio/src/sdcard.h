@@ -138,8 +138,8 @@ const char * getFileExtension(const char * filename, uint8_t size=0, uint8_t ext
   #define OTX_FOURCC 0x3278746F // otx for i8
   #define O9X_FOURCC 0x3278396F // o9x for i8
 #elif defined(PCBMT6S)
-  #define OTX_FOURCC 0x3A78746F // otx for i8
-  #define O9X_FOURCC 0x3A78396F // o9x for i8
+  #define OTX_FOURCC 0x3A78746F // otx for MT6S
+  #define O9X_FOURCC 0x3A78396F // o9x for MT6S
 #elif defined(PCBSKY9X)
   #define OTX_FOURCC 0x3278746F // otx for sky9x
   #define O9X_FOURCC 0x3278396F // o9x for sky9x
