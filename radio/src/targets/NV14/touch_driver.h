@@ -1,0 +1,90 @@
+#ifndef __TOUCH_DRIVER_H__
+#define __TOUCH_DRIVER_H__
+
+#include "board.h"
+
+#define PORT_TOUCH_SCL              ( GPIOB )
+#define PIN_TOUCH_SCL               ( GPIO_Pin_8 )
+#define PORT_TOUCH_SDA              ( GPIOB )
+#define PIN_TOUCH_SDA               ( GPIO_Pin_7 )
+#define PORT_TOUCH_RESET            ( GPIOB )
+#define PIN_TOUCH_RESET             ( GPIO_Pin_12 )
+
+#define PORT_TOUCH_INT              ( GPIOB )
+#define PIN_TOUCH_INT               ( GPIO_Pin_9 )
+
+#define SET_TOUCH_INT_IN()          GPIO_SetDirection( PORT_TOUCH_INT, 9, 1 )
+
+#define SET_TOUCH_RESET_OUT()       GPIO_SetDirection( PORT_TOUCH_RESET, 12, 0 )
+#define SET_TOUCH_RESET()           GPIO_WriteBit( PORT_TOUCH_RESET,PIN_TOUCH_RESET, Bit_SET )
+#define CLR_TOUCH_RESET()           GPIO_WriteBit( PORT_TOUCH_RESET,PIN_TOUCH_RESET, Bit_RESET )
+
+#define SET_TOUCH_SCL_OUT()         GPIO_SetDirection( PORT_TOUCH_SCL, 8, 0 )
+#define SET_TOUCH_SCL()             GPIO_WriteBit( PORT_TOUCH_SCL,PIN_TOUCH_SCL, Bit_SET )
+#define CLR_TOUCH_SCL()             GPIO_WriteBit( PORT_TOUCH_SCL,PIN_TOUCH_SCL, Bit_RESET )
+
+#define SET_TOUCH_SDA_IN()          GPIO_SetDirection( PORT_TOUCH_SDA, 7, 1 )
+#define SET_TOUCH_SDA_OUT()         GPIO_SetDirection( PORT_TOUCH_SDA, 7, 0 )
+
+#define SET_TOUCH_SDA()             GPIO_WriteBit(PORT_TOUCH_SDA, PIN_TOUCH_SDA, Bit_SET)
+#define CLR_TOUCH_SDA()             GPIO_WriteBit(PORT_TOUCH_SDA, PIN_TOUCH_SDA, Bit_RESET)
+
+#define READ_TOUCH_SDA()            GPIO_ReadInputDataBit( PORT_TOUCH_SDA, PIN_TOUCH_SDA )
+
+#define TOUCH_PANEL_ADDRESS         ( 0x38 )
+
+#define LCD_VERTICAL                ( 0x00 )
+#define LCD_HORIZONTAL              ( 0x01 )
+#define LCD_DIRECTION               ( LCD_VERTICAL )
+
+#define LCD_WIDTH                         ( 320 )
+#define LCD_HEIGHT                        ( 480 )
+
+#define TOUCH_INVALID               ( 250 )
+
+enum ENUM_TOUCH_EVENT
+{
+    TE_NONE,
+    TE_DOWN,
+    TE_UP,
+    TE_SLIDE,
+    TE_END
+};
+
+enum ENUM_IO_SPEED
+{
+    IO_SPEED_LOW,
+    IO_SPEED_MID,
+    IO_SPEED_QUICK,
+    IO_SPEED_HIGH
+};
+
+enum ENUM_IO_MODE
+{
+    IO_MODE_INPUT,
+    IO_MODE_OUTPUT,
+    IO_MODE_ALTERNATE,
+    IO_MODE_ANALOG
+};
+
+typedef struct
+{
+   unsigned char  Event;
+   short X;
+   short Y;
+   short startX;
+   short startY;
+   uint32_t Time;
+} STRUCT_TOUCH;
+
+extern STRUCT_TOUCH   touchState;
+
+
+extern STRUCT_TOUCH Touch;
+
+#define GET_ARRAY_SIZE( ARRAY )              ( ( sizeof( ARRAY ) ) / ( sizeof( ARRAY[0] ) ) )
+
+extern void TouchInit( void );
+extern void TouchDriver( void );
+
+#endif /*__TOUCH_DRIVER_H__*/
