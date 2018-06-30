@@ -74,6 +74,7 @@ extern "C" {
 #include "hal.h"
 
 #include "touch_driver.h"
+#include "hallStick_driver.h"
 
 #if defined(__cplusplus) && !defined(SIMU)
 }

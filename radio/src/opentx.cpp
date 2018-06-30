@@ -2508,9 +2508,9 @@ void opentxInit(OPENTX_INIT_ARGS)
   TRACE("opentxInit");
 
 #if defined(GUI)
-  menuHandlers[0] = menuMainView;
+  menuHandlers[0] = menuMainView;//menuMainView;
   #if MENUS_LOCK != 2/*no menus*/
-    menuHandlers[1] = menuModelSelect;
+    menuHandlers[1] = menuModelSetup;//menuModelSelect;
   #endif
 #endif
 
@@ -2716,8 +2716,10 @@ int main()
   // lcdSetRefVolt(25);
 #endif
 
+#if 1
 #if defined(SPLASH) && (defined(PCBTARANIS) || defined(COLORLCD))
   drawSplash();
+#endif
 #endif
 
   sei(); // interrupts needed now

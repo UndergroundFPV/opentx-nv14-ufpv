@@ -127,7 +127,7 @@ else()
   message(WARNING "Unknown PCB '${PCB}'")
 endif()
 
-message(WARNING "I'm here!")
+#message(WARNING "I'm here!")
 
 if(NOT PCB STREQUAL 9XR AND NOT PCB STREQUAL 9XRPRO AND NOT PCB STREQUAL I8 AND NOT PCB STREQUAL NV14)
   option(DBLKEYS "Double Keys" ON)

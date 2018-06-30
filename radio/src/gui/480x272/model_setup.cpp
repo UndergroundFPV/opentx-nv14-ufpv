@@ -615,6 +615,7 @@ void editTimerCountdown(int timerIdx, coord_t y, LcdFlags attr, event_t event)
 
 bool menuModelSetup(event_t event)
 {
+#if 1
   // Switch to external antenna confirmation
   //  bool newAntennaSel;
   //  if (warningResult) {
@@ -1431,7 +1432,7 @@ bool menuModelSetup(event_t event)
 #endif
 
   menuBodyWindow.setInnerHeight(rect.y);
-
+#endif
   return true;
 }
 

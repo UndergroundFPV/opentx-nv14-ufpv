@@ -319,6 +319,8 @@ void initModelsList()
 
 bool menuModelSelect(event_t event)
 {
+  return true;
+
   if (warningResult) {
     warningResult = 0;
     if (deleteMode == MODE_DELETE_CATEGORY) {

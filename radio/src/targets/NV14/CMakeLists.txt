@@ -30,6 +30,7 @@ set(TARGET_SRC
   #../common/arm/stm32/audio_dac_driver.cpp
   audio_spi_driver.cpp
   ../common/arm/stm32/adc_driver.cpp
+  hallStick_driver.cpp
   )
 
 set(BITMAPS_TARGET nv14_bitmaps)

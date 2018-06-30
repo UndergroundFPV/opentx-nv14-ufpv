@@ -151,6 +151,7 @@ bool menuMainView(event_t event)
     g_model.view = 0;
   }
 
+#if 0
   for (uint8_t i=0; i<MAX_CUSTOM_SCREENS; i++) {
     if (customScreens[i]) {
       if (i == g_model.view)
@@ -159,6 +160,7 @@ bool menuMainView(event_t event)
         customScreens[i]->background();
     }
   }
+#endif
 
   if (handleIconButton(20, 68, ICON_MODEL, BUTTON_ON)) {
     pushMenu(menuTabModel[0]);
