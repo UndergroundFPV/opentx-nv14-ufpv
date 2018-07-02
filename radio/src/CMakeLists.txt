@@ -200,7 +200,7 @@ if(TEMPLATES)
 endif()
 
 message(STATUS ${LUA})
-if(NOT LUA STREQUAL NO)
+if(NOT LUA STREQUAL OFF)
   add_definitions(-DLUA)
   if(LUA_COMPILER)
     add_definitions(-DLUA_COMPILER)
