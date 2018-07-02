@@ -23,7 +23,8 @@
 #include "hallStick_driver.h"
 #undef   __HALLSTICK_DRIVER_C__
 
-Fifo<uint8_t, 512> hallSerialTxFifo;
+//Fifo<uint8_t, 512> hallSerialTxFifo;
+DMAFifo<32> hallSerialTxFifo __DMA (HALL_DMA_Stream_TX);
 DMAFifo<32> hallSerialRxFifo __DMA (HALL_DMA_Stream_RX);
 
 STRUCT_HALL HallProtocol =
@@ -64,6 +65,13 @@ void HallStick_Init(void)
   UART_BufferSize[HALLSTICK_UART] = HALLSTICK_BUFF_SIZE;
   UART_DMA_LastValue[HALLSTICK_UART] = HALLSTICK_BUFF_SIZE;
 #endif
+  NVIC_InitTypeDef NVIC_InitStructure;
+  NVIC_InitStructure.NVIC_IRQChannel = HALL_SERIAL_RX_DMA_Stream_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
   GPIO_PinAFConfig(HALL_SERIAL_GPIO, HALL_SERIAL_RX_GPIO_PinSource, HALL_SERIAL_GPIO_AF);
   GPIO_PinAFConfig(HALL_SERIAL_GPIO, HALL_SERIAL_TX_GPIO_PinSource, HALL_SERIAL_GPIO_AF);
 
@@ -74,7 +82,7 @@ void HallStick_Init(void)
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_Init(HALL_SERIAL_GPIO, &GPIO_InitStructure);
-
+#if 1
   USART_InitTypeDef USART_InitStructure;
   USART_InitStructure.USART_BaudRate = FLYSKY_HALL_BAUDRATE;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
@@ -86,6 +94,9 @@ void HallStick_Init(void)
 
   DMA_InitTypeDef DMA_InitStructure;
   hallSerialRxFifo.clear();
+
+
+  DMA_DeInit(HALL_DMA_Stream_RX);
   USART_ITConfig(HALL_SERIAL_USART, USART_IT_RXNE, DISABLE);
   USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, DISABLE);
   DMA_InitStructure.DMA_Channel = HALL_DMA_Channel_RX;
@@ -104,18 +115,34 @@ void HallStick_Init(void)
   DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
   DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
   DMA_Init(HALL_DMA_Stream_RX, &DMA_InitStructure);
-  USART_DMACmd(HALL_SERIAL_USART, USART_DMAReq_Rx, ENABLE);
-  USART_Cmd(HALL_SERIAL_USART, ENABLE);
   DMA_Cmd(HALL_DMA_Stream_RX, ENABLE);
 
-  // no DMA ...
-  USART_Cmd(HALL_SERIAL_USART, ENABLE);
-  //USART_ITConfig(AUX_SERIAL_USART, USART_IT_RXNE, ENABLE);
-  USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, DISABLE);
-  NVIC_SetPriority(HALL_SERIAL_USART_IRQn, 6);
-  NVIC_EnableIRQ(HALL_SERIAL_USART_IRQn);
+#if 0
 
-  ResetHall();
+  /* DMA1 Channel4 (triggered by USART1 Tx event) Config */
+  DMA_DeInit(HALL_DMA_Stream_TX);
+  DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&HALL_SERIAL_USART->DR);
+  DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(hallSerialTxFifo.buffer());
+  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+  DMA_InitStructure.DMA_BufferSize = 0;
+  DMA_Init(HALL_DMA_Stream_TX, &DMA_InitStructure);//初始化
+  USART_Cmd(HALL_SERIAL_USART, ENABLE);
+
+#endif
+
+  // no DMA ...
+  USART_ClearFlag(HALL_SERIAL_USART, USART_FLAG_TC);
+  //USART_ITConfig(AUX_SERIAL_USART, USART_IT_RXNE, ENABLE);
+  //USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, DISABLE);DMA_GetCurrDataCounter
+
+  USART_ITConfig(HALL_SERIAL_USART, USART_IT_IDLE, ENABLE);
+  USART_ITConfig(HALL_SERIAL_USART, USART_IT_TC, ENABLE);
+  USART_DMACmd(HALL_SERIAL_USART, USART_DMAReq_Rx | USART_DMAReq_Tx, ENABLE);
+
+  //NVIC_SetPriority(HALL_SERIAL_RX_DMA_Stream_IRQn, 6);
+  //NVIC_EnableIRQ(HALL_SERIAL_RX_DMA_Stream_IRQn);
+#endif
+  //ResetHall();
 }
 
 
@@ -137,14 +164,15 @@ extern "C" void HALL_SERIAL_USART_IRQHandler(void)
 
 extern "C" void HALL_RX_DMA_Stream_IRQHandler(void)
 {
-  if (DMA_GetITStatus(HALL_DMA_Stream_RX, INTMODULE_TX_DMA_FLAG_TC)) {
+  if (DMA_GetITStatus(HALL_DMA_Stream_RX, USART_IT_IDLE)) {
     // TODO we could send the 8 next channels here (when needed)
-    DMA_ClearITPendingBit(HALL_DMA_Stream_RX, INTMODULE_TX_DMA_FLAG_TC);
+    DMA_ClearITPendingBit(HALL_DMA_Stream_RX, USART_IT_IDLE);
   }
 }
 
 void hallSerialPutc(char c)
 {
+#if 0
 #if !defined(SIMU)
   int n = 0;
   while (hallSerialTxFifo.isFull()) {
@@ -155,12 +183,14 @@ void hallSerialPutc(char c)
   hallSerialTxFifo.push(c);
   USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, ENABLE);
 #endif
+#endif
 }
 
 
 void HALL_UART_TransmitData( unsigned char *pData, U32 length )
 {
   //MCU_UART_TransmitData( HALLSTICK_UART, ( U32 )pData, Length );
+#if 0
   int n = 0;
   int i = 0;
 
@@ -178,6 +208,7 @@ void HALL_UART_TransmitData( unsigned char *pData, U32 length )
   }
 
   USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, ENABLE);
+#endif
 }
 
 

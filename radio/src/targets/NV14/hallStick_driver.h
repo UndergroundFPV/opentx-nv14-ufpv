@@ -26,7 +26,7 @@ auther:
 #define HALLSTICK_UART                  ( UART_ID4 )
 #define HALLSTICK_BUFF_SIZE             ( 254 )
 
-#define FLYSKY_HALL_BAUDRATE            (961200)
+#define FLYSKY_HALL_BAUDRATE            (921600)
 
 typedef  struct
 {
@@ -146,7 +146,9 @@ enum
 
 #define HALL_SERIAL_USART_IRQHandler      UART4_IRQHandler
 #define HALL_SERIAL_USART_IRQn            UART4_IRQn
+#define HALL_SERIAL_RX_DMA_Stream_IRQn    DMA1_Stream2_IRQn
 #define HALL_DMA_Stream_RX                DMA1_Stream2
+#define HALL_DMA_Stream_TX                DMA1_Stream4
 
 #define HALL_RX_DMA_Stream_IRQHandler     DMA1_Stream2_IRQHandler
 

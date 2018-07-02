@@ -136,6 +136,8 @@ void boardInit()
                          AUDIO_RCC_AHB1Periph |
                          HAPTIC_RCC_AHB1Periph |
                          //INTMODULE_RCC_AHB1Periph |
+                         RCC_APB1Periph_UART4 |
+                         RCC_AHB1Periph_DMA1 |
                          EXTMODULE_RCC_AHB1Periph,
                          ENABLE);
 
@@ -180,6 +182,7 @@ void boardInit()
  // *TestSDRAM = 85;
  // *TestSDRAM = 86;
 
+  //HallStick_Init();
   monitorInit();
   keysInit();
   adcInit();
