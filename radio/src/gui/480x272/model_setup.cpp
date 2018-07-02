@@ -18,6 +18,7 @@
  * GNU General Public License for more details.
  */
 
+#include <functional>
 #include <touch_driver.h>
 #include "opentx.h"
 
@@ -108,39 +109,31 @@ void onBindMenu(const char * result)
     g_model.moduleData[moduleIdx].pxx.power = R9M_LBT_POWER_25;
     g_model.moduleData[moduleIdx].pxx.receiver_telem_off = true;
     g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 = false;
-  }
-  else if (result == STR_BINDING_25MW_CH1_8_TELEM_ON) {
+  } else if (result == STR_BINDING_25MW_CH1_8_TELEM_ON) {
     g_model.moduleData[moduleIdx].pxx.power = R9M_LBT_POWER_25;
     g_model.moduleData[moduleIdx].pxx.receiver_telem_off = false;
     g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 = false;
-  }
-  else if (result == STR_BINDING_500MW_CH1_8_TELEM_OFF) {
+  } else if (result == STR_BINDING_500MW_CH1_8_TELEM_OFF) {
     g_model.moduleData[moduleIdx].pxx.power = R9M_LBT_POWER_500;
     g_model.moduleData[moduleIdx].pxx.receiver_telem_off = true;
     g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 = false;
-  }
-  else if (result == STR_BINDING_500MW_CH9_16_TELEM_OFF) {
+  } else if (result == STR_BINDING_500MW_CH9_16_TELEM_OFF) {
     g_model.moduleData[moduleIdx].pxx.power = R9M_LBT_POWER_500;
     g_model.moduleData[moduleIdx].pxx.receiver_telem_off = true;
     g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 = true;
-  }
-  else if (result == STR_BINDING_1_8_TELEM_ON) {
+  } else if (result == STR_BINDING_1_8_TELEM_ON) {
     g_model.moduleData[moduleIdx].pxx.receiver_telem_off = false;
     g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 = false;
-  }
-  else if (result == STR_BINDING_1_8_TELEM_OFF) {
+  } else if (result == STR_BINDING_1_8_TELEM_OFF) {
     g_model.moduleData[moduleIdx].pxx.receiver_telem_off = true;
     g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 = false;
-  }
-  else if (result == STR_BINDING_9_16_TELEM_ON) {
+  } else if (result == STR_BINDING_9_16_TELEM_ON) {
     g_model.moduleData[moduleIdx].pxx.receiver_telem_off = false;
     g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 = true;
-  }
-  else if (result == STR_BINDING_9_16_TELEM_OFF) {
+  } else if (result == STR_BINDING_9_16_TELEM_OFF) {
     g_model.moduleData[moduleIdx].pxx.receiver_telem_off = true;
     g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 = true;
-  }
-  else {
+  } else {
     return;
   }
 
@@ -150,11 +143,10 @@ void onBindMenu(const char * result)
 void onModelSetupBitmapMenu(const char * result)
 {
   if (result == STR_UPDATE_LIST) {
-    if (!sdListFiles(BITMAPS_PATH, BITMAPS_EXT, sizeof(g_model.header.bitmap)-LEN_BITMAPS_EXT, NULL)) {
+    if (!sdListFiles(BITMAPS_PATH, BITMAPS_EXT, sizeof(g_model.header.bitmap) - LEN_BITMAPS_EXT, NULL)) {
       POPUP_WARNING(STR_NO_BITMAPS_ON_SD);
     }
-  }
-  else {
+  } else {
     // The user choosed a bmp file in the list
     copySelection(g_model.header.bitmap, result, sizeof(g_model.header.bitmap));
     storageDirty(EE_MODEL);
@@ -163,38 +155,39 @@ void onModelSetupBitmapMenu(const char * result)
 
 void editTimerMode(int timerIdx, coord_t y, LcdFlags attr, event_t event)
 {
-  TimerData & timer = g_model.timers[timerIdx];
+  TimerData &timer = g_model.timers[timerIdx];
   if (attr && menuHorizontalPosition < 0) {
-    lcdDrawSolidFilledRect(MODEL_SETUP_2ND_COLUMN-INVERT_HORZ_MARGIN, y-INVERT_VERT_MARGIN+1, 115+2*INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
+    lcdDrawSolidFilledRect(MODEL_SETUP_2ND_COLUMN - INVERT_HORZ_MARGIN, y - INVERT_VERT_MARGIN + 1,
+                           115 + 2 * INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
   }
-  drawStringWithIndex(&menuBodyWindow, MENUS_MARGIN_LEFT, y, STR_TIMER, timerIdx+1, BOLD);
+  drawStringWithIndex(MENUS_MARGIN_LEFT, y, STR_TIMER, timerIdx + 1, BOLD);
   // drawTimerMode(&menuBodyWindow, MODEL_SETUP_2ND_COLUMN, y, timer.mode, (menuHorizontalPosition<=0 ? attr : 0));
   // drawTimer(&menuBodyWindow, MODEL_SETUP_2ND_COLUMN+50, y, timer.start, (menuHorizontalPosition!=0 ? attr|TIMEHOUR : TIMEHOUR));
-  if (attr && s_editMode>0) {
+  if (attr && s_editMode > 0) {
     switch (menuHorizontalPosition) {
-      case 0:
-      {
+      case 0: {
         int32_t timerMode = timer.mode;
-        if (timerMode < 0) timerMode -= TMRMODE_COUNT-1;
-        CHECK_INCDEC_MODELVAR_CHECK(event, timerMode, -TMRMODE_COUNT-SWSRC_LAST+1, TMRMODE_COUNT+SWSRC_LAST-1, isSwitchAvailableInTimers);
-        if (timerMode < 0) timerMode += TMRMODE_COUNT-1;
+        if (timerMode < 0) timerMode -= TMRMODE_COUNT - 1;
+        CHECK_INCDEC_MODELVAR_CHECK(event, timerMode, -TMRMODE_COUNT - SWSRC_LAST + 1, TMRMODE_COUNT + SWSRC_LAST - 1,
+                                    isSwitchAvailableInTimers);
+        if (timerMode < 0) timerMode += TMRMODE_COUNT - 1;
         timer.mode = timerMode;
 #if defined(AUTOSWITCH)
-        if (s_editMode>0) {
-          int8_t val = timer.mode - (TMRMODE_COUNT-1);
+        if (s_editMode > 0) {
+          int8_t val = timer.mode - (TMRMODE_COUNT - 1);
           int8_t switchVal = checkIncDecMovedSwitch(val);
           if (val != switchVal) {
-            timer.mode = switchVal + (TMRMODE_COUNT-1);
+            timer.mode = switchVal + (TMRMODE_COUNT - 1);
             storageDirty(EE_MODEL);
           }
         }
 #endif
         break;
       }
-      case 1:
-      {
-        const int stopsMinutes[] = { 8, 60, 120, 180, 240, 300, 600, 900, 1200 };
-        timer.start = checkIncDec(event, timer.start, 0, TIMER_MAX, EE_MODEL, NULL, (const CheckIncDecStops&)stopsMinutes);
+      case 1: {
+        const int stopsMinutes[] = {8, 60, 120, 180, 240, 300, 600, 900, 1200};
+        timer.start = checkIncDec(event, timer.start, 0, TIMER_MAX, EE_MODEL, NULL,
+                                  (const CheckIncDecStops &) stopsMinutes);
         break;
       }
     }
@@ -204,7 +197,7 @@ void editTimerMode(int timerIdx, coord_t y, LcdFlags attr, event_t event)
 int getSwitchWarningsCount()
 {
   int count = 0;
-  for (int i=0; i<NUM_SWITCHES; ++i) {
+  for (int i = 0; i < NUM_SWITCHES; ++i) {
     if (SWITCH_WARNING_ALLOWED(i)) {
       ++count;
     }
@@ -224,11 +217,11 @@ int getSwitchWarningsCount()
 #define EXTERNAL_MODULE_MODE_ROWS         (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE)) ? (uint8_t)1 : IS_MODULE_MULTIMODULE(EXTERNAL_MODULE) ? MULTIMODULE_MODE_ROWS(EXTERNAL_MODULE) : (uint8_t)0
 
 #if TIMERS == 1
-  #define TIMERS_ROWS                     TIMER_ROWS(0)
+#define TIMERS_ROWS                     TIMER_ROWS(0)
 #elif TIMERS == 2
-  #define TIMERS_ROWS                     TIMER_ROWS(0), TIMER_ROWS(1)
+#define TIMERS_ROWS                     TIMER_ROWS(0), TIMER_ROWS(1)
 #elif TIMERS == 3
-  #define TIMERS_ROWS                     TIMER_ROWS(0), TIMER_ROWS(1), TIMER_ROWS(2)
+#define TIMERS_ROWS                     TIMER_ROWS(0), TIMER_ROWS(1), TIMER_ROWS(2)
 #endif
 
 #define SW_WARN_ITEMS()                   uint8_t(NAVIGATION_LINE_BY_LINE|(getSwitchWarningsCount()-1))
@@ -245,20 +238,10 @@ int getSwitchWarningsCount()
 
 #define TRAINER_LINE2_ROWS                (g_model.trainerMode == TRAINER_MODE_SLAVE ? (uint8_t)2 : HIDDEN_ROW)
 
-class KeyboardWindow: public Window {
-  protected:
-    char * field;
-    uint8_t length;
-    coord_t cursorPos;
-    uint8_t cursorIndex;
-
+class KeyboardWindow : public Window {
   public:
-    KeyboardWindow() :
-      Window(0, LCD_H - 270, LCD_W, 270),
-      field(NULL),
-      length(0),
-      cursorPos(0),
-      cursorIndex(0)
+    KeyboardWindow(Window * parent, const rect_t & rect) :
+      Window(parent, rect)
     {
     }
 
@@ -266,11 +249,15 @@ class KeyboardWindow: public Window {
     {
       this->field = field;
       this->length = length;
+      this->setHeight(270);
+      menuBodyWindow.setHeight(LCD_H - 270 - menuBodyWindow.rect.y);
     }
 
     void disable()
     {
       this->field = NULL;
+      this->setHeight(0);
+      menuBodyWindow.setHeight(LCD_H - 0 - menuBodyWindow.rect.y);
     }
 
     char * getField()
@@ -299,185 +286,413 @@ class KeyboardWindow: public Window {
       cursorPos = x - rest;
     }
 
-    void draw()
+    void paint(BitmapBuffer * dc)
     {
-#if 0
-      drawBitmap(0, 0, keyboardBitmap);
-      if (touchPressed(0, 0, width, height)) {
-        coord_t x = touchState.X;
-        coord_t y = touchState.Y - this->y;
-        uint8_t row = y / 54;
-        char c = 0;
-        if (row == 0) {
-          uint8_t column = (max(6, x) - 6) / 31;
-          c = *("1234567890" + column);
-        }
-        else if (row == 1) {
-          uint8_t column = (max(6, x) - 6) / 31;
-          c = *("qwertyuiop" + column);
-        }
-        else if (row == 2) {
-          uint8_t column = (max(20, x) - 20) / 31;
-          c = *("asdfghjkl" + column);
-        }
-        else if (row == 3) {
-          if (x > 270) {
-            if (cursorIndex > 0) {
-              // backspace
-              char c = idx2char(field[cursorIndex - 1]);
-              memmove(field + cursorIndex - 1, field + cursorIndex, length - cursorIndex);
-              field[length - 1] = '\0';
-              cursorPos -= getCharWidth(c, fontspecsTable[0]);
-              cursorIndex -= 1;
-            }
-          }
-          else {
-            uint8_t column = (max(52, x) - 52) / 31;
-            c = *("zxcvbnm" + column);
+      if (!keyboardBitmap)
+        keyboardBitmap = BitmapBuffer::load(getThemePath("keyboard.png"));
+      dc->drawBitmap(0, 0, keyboardBitmap);
+    }
+
+    bool onTouch(coord_t x, coord_t y)
+    {
+      uint8_t row = y / 54;
+      char c = 0;
+      if (row == 0) {
+        uint8_t column = (max<uint8_t>(6, x) - 6) / 31;
+        c = *("1234567890" + column);
+      }
+      else if (row == 1) {
+        uint8_t column = (max<uint8_t>(6, x) - 6) / 31;
+        c = *("qwertyuiop" + column);
+      }
+      else if (row == 2) {
+        uint8_t column = (max<uint8_t>(20, x) - 20) / 31;
+        c = *("asdfghjkl" + column);
+      }
+      else if (row == 3) {
+        if (x > 270) {
+          if (cursorIndex > 0) {
+            // backspace
+            char c = idx2char(field[cursorIndex - 1]);
+            memmove(field + cursorIndex - 1, field + cursorIndex, length - cursorIndex);
+            field[length - 1] = '\0';
+            cursorPos -= getCharWidth(c, fontspecsTable[0]);
+            cursorIndex -= 1;
           }
         }
-        else if (row == 4) {
-          if (x > 240) {
-            // enter
-            disable();
-          }
-          else if (x > 207) {
-            c = ',';
-          }
-          else if (x > 38) {
-            c = ' ';
-          }
-          else {
-            c = '.';
-          }
-        }
-        if (c && zlen(field, length) < length) {
-          memmove(field+cursorIndex+1, field+cursorIndex, length - cursorIndex - 1);
-          field[cursorIndex++] = char2idx(c);
-          cursorPos += getCharWidth(c, fontspecsTable[0]);
+        else {
+          uint8_t column = (max<uint8_t>(52, x) - 52) / 31;
+          c = *("zxcvbnm" + column);
         }
       }
-#endif
+      else if (row == 4) {
+        if (x > 240) {
+          // enter
+          disable();
+        }
+        else if (x > 207) {
+          c = ',';
+        }
+        else if (x > 38) {
+          c = ' ';
+        }
+        else {
+          c = '.';
+        }
+      }
+      if (c && zlen(field, length) < length) {
+        memmove(field + cursorIndex + 1, field + cursorIndex, length - cursorIndex - 1);
+        field[cursorIndex++] = char2idx(c);
+        cursorPos += getCharWidth(c, fontspecsTable[0]);
+      }
+      return true;
     }
+
+  protected:
+    char * field = nullptr;
+    uint8_t length = 0;
+    coord_t cursorPos = 0;
+    uint8_t cursorIndex = 0;
+    BitmapBuffer * keyboardBitmap = NULL;
 };
 
-KeyboardWindow keyboardWindow;
-
-struct rect_t {
-  coord_t x, y, w, h;
-};
-
-#define HAS_FOCUS (1<<1)
+KeyboardWindow keyboardWindow(&mainWindow, {0, LCD_H - 270, LCD_W, 0});
 
 #if 1
 #define CONTENT_WIDTH     140
-template <class W>
-bool Subtitle(W * window, rect_t & rect, const char * label)
-{
-  rect.h = 30;
-  drawText(window, rect.x, rect.y, label, BOLD);
-}
 
-template <class W>
-bool CheckBox(W * window, rect_t & rect, const char * label, uint8_t & value, LcdFlags flags=0)
-{
-  rect.h = 30;
-  bool hasFocus = (flags & HAS_FOCUS) || window->hasFocus(rect.x, rect.y);
-  drawText(window, rect.x, rect.y+4, label);
-  coord_t x = rect.x + rect.w - CONTENT_WIDTH - 2;
-  if (hasFocus) {
-    window->drawSolidFilledRect(x-1, rect.y+8, 14, 14, TEXT_INVERTED_BGCOLOR);
-    window->drawSolidFilledRect(x+1, rect.y+10, 10, 10, TEXT_BGCOLOR);
-    if (value) {
-      window->drawSolidFilledRect(x+2, rect.y+11, 8, 8, TEXT_INVERTED_BGCOLOR);
+class Subtitle : public Window {
+  public:
+    Subtitle(Window * parent, const rect_t & rect, const char * label) :
+      Window(parent, rect),
+      label(strdup(label))
+    {
     }
-  }
-  else {
-    if (value) {
-      window->drawSolidFilledRect(x+2, rect.y+11, 8, 8, SCROLLBOX_COLOR);
-      drawSolidRect(window, x, rect.y+9, 12, 12, 1, LINE_COLOR);
-    }
-    else {
-      drawSolidRect(window, x, rect.y+9, 12, 12, 1, LINE_COLOR);
-    }
-  }
-  if (window->touchPressed(rect.x, rect.y, rect.w, rect.h)) {
-    value ^= 1;
-    window->setFocus(rect.x, rect.y);
-    return true;
-  }
-  else {
-    return false;
-  }
-}
 
-template <class W>
-bool Choice(W * window, rect_t & rect, const char * label, const char * values, uint8_t & value, uint8_t vmin, uint8_t vmax, LcdFlags flags=0)
-{
-  rect.h = 30;
-  bool hasFocus = (flags & HAS_FOCUS) || window->hasFocus(rect.x, rect.y);
-  LcdFlags textColor = 0;
-  LcdFlags lineColor = CURVE_AXIS_COLOR;
-  if (hasFocus) {
-    textColor = TEXT_INVERTED_BGCOLOR;
-    lineColor = TEXT_INVERTED_BGCOLOR;
-  }
-  drawText(&menuBodyWindow, rect.x, rect.y, label);
-  drawTextAtIndex(&menuBodyWindow, rect.x + rect.w - CONTENT_WIDTH, rect.y, values, value, textColor);
-  drawSolidRect(window, rect.x + rect.w - CONTENT_WIDTH - 3, rect.y - 3, CONTENT_WIDTH + 4, rect.h, 1, lineColor);
-  if (window->touchPressed(rect.x, rect.y, rect.w, rect.h)) {
-    // value ^= 1;
-    window->setFocus(rect.x, rect.y);
-    return true;
-  }
-  else {
-    return false;
-  }
-}
+    ~Subtitle()
+    {
+      free(label);
+    }
 
-template <class W>
-bool TextEdit(W * window, rect_t & rect, const char * label, char * value, uint8_t length, LcdFlags flags=0)
-{
-  rect.h = 30;
-  coord_t textLeft = rect.x + rect.w - CONTENT_WIDTH;
-  bool result = false;
-  bool hasFocus = (flags & HAS_FOCUS) || window->hasFocus(rect.x, rect.y);
-  LcdFlags textColor = 0;
-  LcdFlags lineColor = CURVE_AXIS_COLOR;
-  if (window->touchPressed(rect.x, rect.y, rect.w, rect.h)) {
-    if (!hasFocus) {
-      window->setFocus(rect.x, rect.y);
-      hasFocus = true;
+    void paint(BitmapBuffer * dc)
+    {
+      dc->drawText(0, 3, label, BOLD);
     }
-    if (!keyboardWindow.getField()) {
-      window->setHeight(LCD_H - keyboardWindow.height - window->y);
-      keyboardWindow.setField(value, length);
+
+  protected:
+    char * label;
+};
+
+class StaticText : public Window {
+  public:
+    StaticText(Window * parent, const rect_t & rect, const char * text, LcdFlags flags = 0) :
+      Window(parent, rect),
+      flags(flags),
+      text(strdup(text))
+    {
     }
-    keyboardWindow.setCursorPos(touchState.X - textLeft);
-    result = true;
-  }
-  if (hasFocus) {
-    textColor = TEXT_INVERTED_BGCOLOR;
-    lineColor = TEXT_INVERTED_BGCOLOR;
-  }
-  else {
-    if (!keyboardWindow.getField()) {
-      window->setHeight(MENU_BODY_HEIGHT);
+
+    ~StaticText()
+    {
+      free(text);
     }
-  }
-  drawText(&menuBodyWindow, rect.x, rect.y, label);
-  if (!hasFocus && zlen(value, length) == 0)
-    menuBodyWindow.drawSizedText(textLeft, rect.y, "---", length, textColor);
-  else
-    menuBodyWindow.drawSizedText(textLeft, rect.y, value, length, ZCHAR | textColor);
-  drawSolidRect(window, textLeft - 3, rect.y - 3, CONTENT_WIDTH + 3, rect.h, 1, lineColor);
-  if (hasFocus) {
-    coord_t cursorPos = keyboardWindow.getCursorPos();
-    window->drawSolidFilledRect(textLeft + cursorPos - 1, rect.y+1, 2, 22, TEXT_INVERTED_BGCOLOR);
-//    window->drawSolidFilledRect(textLeft + cursorPos -1, rect.y+1, 1, 22, TEXT_INVERTED_BGCOLOR);
-  }
-  return result;
-}
+
+    void paint(BitmapBuffer * dc)
+    {
+      dc->drawText(0, 3, text, flags);
+    }
+
+    LcdFlags flags;
+
+  protected:
+    char * text;
+};
+
+class StaticBitmap: public Window {
+  public:
+    StaticBitmap(Window * parent, const rect_t & rect, const char * filename):
+      Window(parent, rect),
+      bitmap(BitmapBuffer::load(filename))
+    {
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      dc->drawBitmap(0, 0, bitmap);
+    }
+
+    BitmapBuffer * bitmap;
+};
+
+class Button : public Window {
+  public:
+    Button(Window * parent, const rect_t & rect, const char * label, std::function<uint8_t(void)> onPress):
+      Window(parent, rect),
+      label(label),
+      onPress(onPress)
+    {
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      dc->drawText(rect.w / 2, 0, label, CENTERED);
+      if (state)
+        drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, SCROLLBOX_COLOR);
+      else
+        drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, CURVE_AXIS_COLOR);
+    }
+
+    bool onTouch(coord_t x, coord_t y)
+    {
+      state = onPress();
+      return true;
+    }
+
+  protected:
+    const char * label;
+    std::function<uint8_t(void)> onPress;
+    uint8_t state = 0;
+};
+
+class CheckBox : public Window {
+  public:
+    CheckBox(Window * parent, const rect_t & rect, std::function<uint8_t()> getValue, std::function<void(uint8_t)> setValue,
+             LcdFlags flags = 0) :
+      Window(parent, rect),
+      getValue(getValue),
+      setValue(setValue)
+    {
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      // TRACE("PAINT label=%s w=%d offset=%d,%d", label, rect.w, lcd->getOffsetX(), lcd->getOffsetY());
+      bool hasFocus = this->hasFocus();
+      uint8_t value = getValue();
+      if (hasFocus) {
+        dc->drawSolidFilledRect(0, 4, 14, 14, TEXT_INVERTED_BGCOLOR);
+        dc->drawSolidFilledRect(2, 6, 10, 10, TEXT_BGCOLOR);
+        if (value) {
+          dc->drawSolidFilledRect(3, 7, 8, 8, TEXT_INVERTED_BGCOLOR);
+        }
+      }
+      else {
+        if (value) {
+          dc->drawSolidFilledRect(3, 7, 8, 8, SCROLLBOX_COLOR);
+          drawSolidRect(dc, 1, 5, 12, 12, 1, LINE_COLOR);
+        }
+        else {
+          drawSolidRect(dc, 1, 5, 12, 12, 1, LINE_COLOR);
+        }
+      }
+    }
+
+    bool onTouch(coord_t x, coord_t y)
+    {
+      setValue(!getValue());
+      setFocus();
+      return true;
+    }
+
+    const char * label;
+    std::function<uint8_t()> getValue;
+    std::function<void(uint8_t)> setValue;
+};
+
+class Choice : public Window {
+  public:
+    Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
+           std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0
+    ) :
+      Window(parent, rect),
+      values(values),
+      vmin(vmin),
+      vmax(vmax),
+      getValue(getValue),
+      setValue(setValue)
+    {
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      bool hasFocus = this->hasFocus();
+      LcdFlags textColor = 0;
+      LcdFlags lineColor = CURVE_AXIS_COLOR;
+      if (hasFocus) {
+        textColor = TEXT_INVERTED_BGCOLOR;
+        lineColor = TEXT_INVERTED_BGCOLOR;
+      }
+      drawTextAtIndex(dc, 3, 3, values, getValue(), textColor);
+      drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
+    }
+
+    bool onTouch(coord_t x, coord_t y)
+    {
+      int16_t value = getValue() + 1;
+      if (value > vmax)
+        value = vmin;
+      setValue(value);
+      setFocus();
+      return true;
+    }
+
+    const char * label;
+    const char * values;
+    int16_t vmin;
+    int16_t vmax;
+    std::function<int16_t()> getValue;
+    std::function<void(int16_t)> setValue;
+};
+
+class NumberEdit : public Window {
+  public:
+    NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, int32_t step,
+               std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags = 0,
+               const char * prefix = nullptr, const char * suffix = nullptr) :
+      Window(parent, rect),
+      vmin(vmin),
+      vmax(vmax),
+      step(step),
+      getValue(getValue),
+      setValue(setValue),
+      flags(flags),
+      prefix(prefix),
+      suffix(suffix)
+    {
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      bool hasFocus = this->hasFocus();
+      LcdFlags textColor = 0;
+      LcdFlags lineColor = CURVE_AXIS_COLOR;
+      if (hasFocus) {
+        textColor = TEXT_INVERTED_BGCOLOR;
+        lineColor = TEXT_INVERTED_BGCOLOR;
+      }
+      drawNumber(dc, 3, 3, getValue(), textColor | flags, 0, prefix, suffix);
+      drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
+    }
+
+    bool onTouch(coord_t x, coord_t y)
+    {
+      int32_t value = getValue() + step;
+      if (value > vmax)
+        value = vmin;
+      setValue(value);
+      setFocus();
+      return true;
+    }
+
+    int32_t vmin;
+    int32_t vmax;
+    int32_t step;
+    std::function<int32_t()> getValue;
+    std::function<void(int32_t)> setValue;
+    LcdFlags flags;
+    const char * prefix;
+    const char * suffix;
+};
+
+
+class TextEdit : public Window {
+  public:
+    TextEdit(Window * parent, const rect_t &rect, char * value, uint8_t length, LcdFlags flags = 0) :
+      Window(parent, rect),
+      value(value),
+      length(length)
+    {
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      bool hasFocus = this->hasFocus();
+      LcdFlags textColor = 0;
+      LcdFlags lineColor = CURVE_AXIS_COLOR;
+      if (hasFocus) {
+        textColor = TEXT_INVERTED_BGCOLOR;
+        lineColor = TEXT_INVERTED_BGCOLOR;
+      }
+      if (!hasFocus && zlen(value, length) == 0)
+        dc->drawSizedText(3, 3, "---", length, textColor);
+      else
+        dc->drawSizedText(3, 3, value, length, ZCHAR | textColor);
+      drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
+      if (hasFocus) {
+        coord_t cursorPos = keyboardWindow.getCursorPos();
+        dc->drawSolidFilledRect(cursorPos + 2, 3, 2, 22, 0); // TEXT_INVERTED_BGCOLOR);
+      }
+    }
+
+    void onFocusLost()
+    {
+      keyboardWindow.disable();
+    }
+
+    bool onTouch(coord_t x, coord_t y)
+    {
+      setFocus();
+      if (keyboardWindow.getField() != value) {
+        keyboardWindow.setField(value, length);
+      }
+      keyboardWindow.setCursorPos(x);
+      return true;
+    }
+
+  protected:
+    char * value;
+    uint8_t length;
+};
+
+class GridLayout {
+  public:
+    GridLayout(Window &window) :
+      window(window)
+    {
+    }
+
+    rect_t getLabelSlot(bool indent = false)
+    {
+      coord_t left = indent ? MENUS_MARGIN_LEFT + INDENT_WIDTH : MENUS_MARGIN_LEFT;
+      return { left, currentY, LCD_W - MENUS_MARGIN_RIGHT - CONTENT_WIDTH, 30 };
+    }
+
+    rect_t getFieldSlot(uint8_t count = 1, uint8_t index = 0)
+    {
+      coord_t width = (CONTENT_WIDTH - (count - 1) * 10) / count;
+      coord_t left = LCD_W - MENUS_MARGIN_RIGHT - CONTENT_WIDTH + (width + 10) * index;
+      return {left, currentY, width, 30};
+    }
+
+    void nextLine()
+    {
+      currentY += 30 + 10;
+    }
+
+    void spacer(coord_t height=10)
+    {
+      currentY += height;
+    }
+
+  protected:
+    Window &window;
+    coord_t currentY = 0;
+};
+
+Window internalModuleWindow(&menuBodyWindow, {0, 0, LCD_W, 0});
+Window externalModuleWindow(&menuBodyWindow, {0, 0, LCD_W, 0});
+
+#define GET_DEFAULT(value)  [=]() -> int32_t { return value; }
+#define SET_DEFAULT(value)  [=](int32_t newValue) -> void { value = newValue; }
+#define SUBTITLE(label) { rect.h = 30; rect.x = MENUS_MARGIN_LEFT; new Subtitle(&menuBodyWindow, rect, label); rect.y += rect.h + 10; }
+#define NUMBER_EDIT_WITH_PREFIX(X, label, value, vmin, vmax, prefix) { rect.h = 30; rect.x = X; rect.w = LCD_W - (X) - MENUS_MARGIN_RIGHT; new NumberEdit(&menuBodyWindow, rect, label, vmin, vmax, 1, GET_DEFAULT(value), SET_DEFAULT(value), 0, prefix); rect.y += rect.h + 10; }
+#define LINE_CHOICE_WITH_CUSTOM_SET(X, label, values, value, vmin, vmax, set) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new Choice(&menuBodyWindow, rect, values, vmin, vmax, GET_DEFAULT(value), set); rect.y += rect.h + 10; }
+#define LINE_LABEL(X, label) { rect.h = 30; rect.x = (X); rect.w = LCD_W - (X) - MENUS_MARGIN_RIGHT - CONTENT_WIDTH; new StaticText(&menuBodyWindow, rect, label); }
+#define LINE_CHECKBOX(X, label, value) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new CheckBox(&menuBodyWindow, rect, GET_DEFAULT(value), SET_DEFAULT(value)); rect.y += rect.h + 10; }
+#define LINE_CHECKBOX_INVERTED(X, label, value) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new CheckBox(&menuBodyWindow, rect, [=]() -> uint8_t { return !value; }, [=](uint8_t newValue) -> void { value = !newValue; }); rect.y += rect.h + 10; }
+#define LINE_CHOICE(X, label, values, value, vmin, vmax) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new Choice(&menuBodyWindow, rect, values, vmin, vmax, GET_DEFAULT(value), SET_DEFAULT(value)); rect.y += rect.h + 10; }
+#define LINE_TEXT_EDIT(X, label, text, length) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new TextEdit(&menuBodyWindow, rect, text, length); rect.y += rect.h + 10; }
+
 #else
 template <class W>
 bool Subtitle(W * window, rect_t & rect, const char * label)
@@ -581,24 +796,21 @@ bool TextEdit(W * window, rect_t & rect, const char * label, char * value, uint8
     return false;
   }
 }
-#endif
-
-#define SUBTITLE(label) { rect.x = MENUS_MARGIN_LEFT; Subtitle(&menuBodyWindow, rect, label); rect.y += rect.h + 10; }
 #define CHECKBOX(X, label, value) { rect.x = X; rect.w = LCD_W - (X) - 20; uint8_t _value = value; CheckBox(&menuBodyWindow, rect, label, _value); value = _value; rect.y += rect.h + 10; }
 #define CHECKBOX_INVERTED(X, label, value) { rect.x = X; rect.w = LCD_W - (X) - 20; uint8_t _value = !value; CheckBox(&menuBodyWindow, rect, label, _value); value = !_value; rect.y += rect.h + 10; }
-#define CHOICE(X, label, values, value, vmin, vmax) { rect.x = X; rect.w = LCD_W - (X) - 20; uint8_t _value = value; Choice(&menuBodyWindow, rect, label, values, _value, vmin, vmax); value = _value; rect.y += rect.h + 10; }
-#define TEXT_EDIT(X, label, text, length) { rect.x = (X); rect.w = LCD_W - (X) - 20; TextEdit(&menuBodyWindow, rect, label, text, length); rect.y += rect.h + 10; }
+#endif
 
 void editTimerCountdown(int timerIdx, coord_t y, LcdFlags attr, event_t event)
 {
-  TimerData & timer = g_model.timers[timerIdx];
+  TimerData &timer = g_model.timers[timerIdx];
 
-  rect_t rect = { MENUS_MARGIN_LEFT + INDENT_WIDTH, y, LCD_W - (MENUS_MARGIN_LEFT + INDENT_WIDTH) - 20, 30 };
+//  rect_t rect = {MENUS_MARGIN_LEFT + INDENT_WIDTH, y, LCD_W - (MENUS_MARGIN_LEFT + INDENT_WIDTH) - 20, 30};
 //  drawWidgetLabel(&menuBodyWindow, rect, NO_INDENT(STR_BEEPCOUNTDOWN));
-  drawTextAtIndex(&menuBodyWindow, MENUS_MARGIN_LEFT + INDENT_WIDTH, y + 10, STR_VBEEPCOUNTDOWN, timer.countdownBeep, (menuHorizontalPosition == 0 ? attr : 0));
+  // drawTextAtIndex(MENUS_MARGIN_LEFT + INDENT_WIDTH, y + 10, STR_VBEEPCOUNTDOWN, timer.countdownBeep, (menuHorizontalPosition == 0 ? attr : 0));
 //  drawWidgetLine(&menuBodyWindow, rect, CURVE_AXIS_COLOR);
   if (timer.countdownBeep != COUNTDOWN_SILENT) {
-    drawNumber(&menuBodyWindow, MENUS_MARGIN_LEFT + INDENT_WIDTH, y + 10, TIMER_COUNTDOWN_START(timerIdx), (menuHorizontalPosition == 1 ? attr : 0) | LEFT, 0, NULL, "s");
+    drawNumber(lcd, MENUS_MARGIN_LEFT + INDENT_WIDTH, y + 10, TIMER_COUNTDOWN_START(timerIdx),
+               (menuHorizontalPosition == 1 ? attr : 0) | LEFT, 0, NULL, "s");
   }
 
   if (attr && s_editMode > 0) {
@@ -613,61 +825,282 @@ void editTimerCountdown(int timerIdx, coord_t y, LcdFlags attr, event_t event)
   }
 }
 
-bool menuModelSetup(event_t event)
+void updateInternalModuleWindow(int8_t value)
 {
-#if 1
-  // Switch to external antenna confirmation
-  //  bool newAntennaSel;
-  //  if (warningResult) {
-  //    warningResult = 0;
-  //    g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna = XJT_EXTERNAL_ANTENNA;
-  //  }
+  GridLayout grid(internalModuleWindow);
 
-/*  MENU(STR_MENUSETUP, MODEL_ICONS, menuTabModel, MENU_MODEL_SETUP, ITEM_MODEL_SETUP_MAX,
-       { 0, 0, TIMERS_ROWS, 0, 1, 0, 0,
-         LABEL(Throttle), 0, 0, 0,
-         LABEL(PreflightCheck), 0, 0, SW_WARN_ITEMS(), POT_WARN_ROWS, (g_model.potsWarnMode ? POT_WARN_ITEMS() : HIDDEN_ROW), (g_model.potsWarnMode ? SLIDER_WARN_ITEMS() : HIDDEN_ROW), NAVIGATION_LINE_BY_LINE|(NUM_STICKS+NUM_POTS+NUM_SLIDERS+NUM_ROTARY_ENCODERS-1), 0,
-         LABEL(InternalModule),
-         INTERNAL_MODULE_MODE_ROWS,
-         INTERNAL_MODULE_CHANNELS_ROWS,
-         IF_INTERNAL_MODULE_ON(IS_MODULE_XJT(INTERNAL_MODULE) ? (HAS_RF_PROTOCOL_MODELINDEX(g_model.moduleData[INTERNAL_MODULE].rfProtocol) ? (uint8_t)2 : (uint8_t)1) : (IS_MODULE_PPM(INTERNAL_MODULE) ? (uint8_t)1 : HIDDEN_ROW)),
-         IF_INTERNAL_MODULE_ON((IS_MODULE_XJT(INTERNAL_MODULE)) ? FAILSAFE_ROWS(INTERNAL_MODULE) : HIDDEN_ROW),
-         IF_INTERNAL_MODULE_ON(0),
-         LABEL(ExternalModule),
-         EXTERNAL_MODULE_MODE_ROWS,
-         MULTIMODULE_STATUS_ROWS
-         EXTERNAL_MODULE_CHANNELS_ROWS,
-         ((IS_MODULE_XJT(EXTERNAL_MODULE) && !HAS_RF_PROTOCOL_MODELINDEX(g_model.moduleData[EXTERNAL_MODULE].rfProtocol)) || IS_MODULE_SBUS(EXTERNAL_MODULE)) ? (uint8_t)1 : (IS_MODULE_PPM(EXTERNAL_MODULE) || IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE) || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) ? (uint8_t)2 : HIDDEN_ROW,
-         FAILSAFE_ROWS(EXTERNAL_MODULE),
-         EXTERNAL_MODULE_OPTION_ROW,
-         (IS_MODULE_R9M_LBT(EXTERNAL_MODULE) ? (uint8_t)0 : HIDDEN_ROW),
-         MULTIMODULE_MODULE_ROWS
-         EXTERNAL_MODULE_POWER_ROW,
-         LABEL(Trainer),
-         0,
-         TRAINER_LINE1_ROWS,
-         TRAINER_LINE2_ROWS });
-*/
+  internalModuleWindow.deleteWindows();
 
-/*  if (menuEvent) {
-    moduleFlag[0] = 0;
-    moduleFlag[1] = 0;
+  new StaticText(&internalModuleWindow, grid.getLabelSlot(), STR_MODE);
+  new Choice(&internalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
+             GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].rfProtocol),
+             [&](int32_t newValue) -> void {
+               g_model.moduleData[INTERNAL_MODULE].rfProtocol = newValue - 1;
+               updateInternalModuleWindow(g_model.moduleData[INTERNAL_MODULE].rfProtocol);
+             });
+  grid.nextLine();
+
+  if (value != RF_PROTO_OFF) {
+    new StaticText(&internalModuleWindow, grid.getLabelSlot(), STR_CHANNELRANGE);
+    new NumberEdit(&internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS(0), 1,
+                   GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
+                   [=](int8_t newValue) -> void { g_model.moduleData[INTERNAL_MODULE].channelsStart = newValue - 1; }, 0, STR_CH);
+    new NumberEdit(&internalModuleWindow, grid.getFieldSlot(2, 1), 1 + g_model.moduleData[INTERNAL_MODULE].channelsStart,
+                   min<int8_t>(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart + MAX_CHANNELS(0) + 8, 1 + 32), 1,
+                   GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].channelsCount + 8 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
+                   [=](int8_t newValue) -> void {
+                     g_model.moduleData[INTERNAL_MODULE].channelsCount = newValue - 8 - g_model.moduleData[INTERNAL_MODULE].channelsStart;
+                   }, 0, STR_CH);
+    grid.nextLine();
+
+    new StaticText(&internalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
+    new Choice(&internalModuleWindow, grid.getFieldSlot(), STR_VFAILSAFE, 0, FAILSAFE_LAST,
+               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode),
+               SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode));
+    grid.nextLine();
+
+    new StaticText(&internalModuleWindow, grid.getLabelSlot(), STR_ANTENNASELECTION);
+    new Choice(&internalModuleWindow, grid.getFieldSlot(), STR_VANTENNATYPES, 0, 1,
+               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna),
+               SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna));
   }
-*/
 
-  MT6S_MENU(STR_MENUSETUP, MODEL_ICONS, menuTabModel);
+  coord_t delta = internalModuleWindow.adjustHeight();
+  menuBodyWindow.moveWindowsTop(internalModuleWindow.rect.y, delta);
+  menuBodyWindow.innerHeight += delta;
+}
 
-  if (keyboardWindow.getField()) {
-    keyboardWindow.draw();
+// @3djc don't use NOINDENT anymore (this could be another task later ... remove all these INDENT from translations ...)
+
+void resetModuleSettings(uint8_t module)
+{
+  g_model.moduleData[module].channelsStart = 0;
+  if(IS_MODULE_PPM(module)) {
+    g_model.moduleData[module].channelsCount = 0;
+    SET_DEFAULT_PPM_FRAME_LENGTH(EXTERNAL_MODULE);
+  }
+  else
+    g_model.moduleData[module].channelsCount = MAX_SENT_CHANNELS(g_model.moduleData[module].type) - 8;
+  g_model.moduleData[module].rfProtocol = 0;
+}
+
+
+void updateExternalModuleWindow()
+{
+  GridLayout grid(externalModuleWindow);
+
+  externalModuleWindow.deleteWindows();
+
+  new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_MODE);
+  new Choice(&externalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
+             GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].type),
+             [&](int32_t newValue) -> void {
+               g_model.moduleData[EXTERNAL_MODULE].type = newValue;
+               resetModuleSettings(EXTERNAL_MODULE);
+               updateExternalModuleWindow();
+             });
+  if (g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_NONE || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
+    coord_t delta = externalModuleWindow.adjustHeight();
+    menuBodyWindow.moveWindowsTop(externalModuleWindow.rect.y, delta);
+    menuBodyWindow.innerHeight += delta;
+    return;
+  }
+
+  if (IS_MODULE_XJT(EXTERNAL_MODULE)) {
+    new Choice(&externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, 1 + RF_PROTO_X16, 1 + RF_PROTO_LAST,
+               GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
+               [=](int32_t newValue) -> void { g_model.moduleData[EXTERNAL_MODULE].rfProtocol = newValue - 1; });
+  }
+  else if (IS_MODULE_DSM2(EXTERNAL_MODULE)) {
+    new Choice(&externalModuleWindow, grid.getFieldSlot(2, 1), STR_DSM_PROTOCOLS, DSM2_PROTO_LP45, DSM2_PROTO_DSMX,
+               GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
+               SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
+  }
+  else if (IS_MODULE_R9M(EXTERNAL_MODULE)) {
+    new Choice(&externalModuleWindow, grid.getFieldSlot(2, 1), STR_R9M_MODES, MODULE_SUBTYPE_R9M_FCC, MODULE_SUBTYPE_R9M_LBT,
+               GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].subType),
+               [&](int32_t newValue) -> void {
+                 g_model.moduleData[EXTERNAL_MODULE].subType = newValue;
+                 updateExternalModuleWindow();
+               });
+  }
+
+  grid.nextLine();
+
+  // Channel Range
+  new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_CHANNELRANGE);
+
+  if (IS_MODULE_CROSSFIRE(EXTERNAL_MODULE)) { // CRSF has a fixed 16ch span
+    // FROM
+    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 0), 1, 17, 1,
+                   GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
+                   [=](int32_t newValue) -> void {
+                     g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
+                     updateExternalModuleWindow();
+                   }, 0, STR_CH);
+    // TO
+    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 1),
+                   0, 32, 1,
+                   GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 16),
+                   [=](int8_t newValue) -> void {
+                     g_model.moduleData[EXTERNAL_MODULE].channelsCount = 8;
+                   }, 0, STR_CH);
   }
   else {
-    menuBodyWindow.scroll();
+    // FROM
+    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount, 1,
+                   GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
+                   [=](int32_t newValue) -> void {
+                     g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
+                     updateExternalModuleWindow();
+                   }, 0, STR_CH);
+    // TO
+    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 1),
+                   g_model.moduleData[EXTERNAL_MODULE].channelsStart+1, g_model.moduleData[EXTERNAL_MODULE].channelsStart + MAX_CHANNELS(EXTERNAL_MODULE), 1,
+                   GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 8 + g_model.moduleData[EXTERNAL_MODULE].channelsCount),
+                   [=](int8_t newValue) -> void {
+                     g_model.moduleData[EXTERNAL_MODULE].channelsCount = newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
+                     TRACE("Channel count : %d",g_model.moduleData[EXTERNAL_MODULE].channelsCount );
+                     updateExternalModuleWindow();
+                   }, 0, STR_CH);
   }
 
-  rect_t rect = { MENUS_MARGIN_LEFT, MENUS_MARGIN_LEFT, 0, 0 };
+  grid.nextLine();
+
+
+  // PPM MODULES
+  if (IS_MODULE_PPM(EXTERNAL_MODULE)) {
+    SET_DEFAULT_PPM_FRAME_LENGTH(EXTERNAL_MODULE);
+    // PPM FRAME
+    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_PPMFRAME);
+    // PPM FRAME LENGTH
+    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225, 5,
+                   GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength * 5 + 225),
+                   [=](int32_t newValue) -> void {
+                     g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength = (newValue - 225) / 5;
+                   }, PREC1, NULL, STR_MS);
+
+    // PPM FRAME DELAY
+    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 1), 100, 800, 50,
+                   GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.delay * 50 + 300),
+                   [=](int32_t newValue) -> void {
+                     g_model.moduleData[EXTERNAL_MODULE].ppm.delay = (newValue - 300) / 50;
+                   }, 0, NULL, "us");
+  }
+
+  if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE) || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
+    // Receiver
+    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_RECEIVER_NUM);
+    // Receiver number
+    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 0), 0, MAX_RX_NUM(EXTERNAL_MODULE), 1,
+                   GET_DEFAULT(g_model.header.modelId[EXTERNAL_MODULE]),
+                   [=](int8_t newValue) -> void { g_model.header.modelId[EXTERNAL_MODULE] = newValue;
+                   }, 0);
+    grid.nextLine();
+
+    // Bind and Range buttons
+    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_MODULE_BIND, BLINK);
+
+    new Button(&externalModuleWindow, grid.getFieldSlot(2, 0), STR_MODULE_BIND,
+               [&]() -> uint8_t {
+                 return 1;
+               });
+    new Button(&externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
+               [&]() -> uint8_t {
+                 return 1;
+               });
+  }
+  grid.nextLine();
+
+  // FAILSAFE
+  if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_R9M(EXTERNAL_MODULE)) {
+    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
+    new Choice(&externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
+               GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode),
+               SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode));
+    grid.nextLine();
+  }
+
+  // R9M POWER
+  if (IS_MODULE_R9M_FCC(EXTERNAL_MODULE)) {
+    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
+    new Choice(&externalModuleWindow, grid.getFieldSlot(), STR_R9M_FCC_POWER_VALUES, 0, R9M_FCC_POWER_MAX,
+               GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].pxx.power),
+               [&](int32_t newValue) -> void {
+                 g_model.moduleData[EXTERNAL_MODULE].pxx.power = newValue;
+               });
+  }
+  if (IS_MODULE_R9M_LBT(EXTERNAL_MODULE)) {
+    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
+    new Choice(&externalModuleWindow, grid.getFieldSlot(), STR_R9M_LBT_POWER_VALUES, 0, R9M_LBT_POWER_MAX,
+               GET_DEFAULT(min(g_model.moduleData[EXTERNAL_MODULE].pxx.power, (uint8_t) R9M_LBT_POWER_MAX)),
+               [&](int32_t newValue) -> void {
+                 g_model.moduleData[EXTERNAL_MODULE].pxx.power = newValue;
+               });
+  }
+
+  coord_t delta = externalModuleWindow.adjustHeight();
+  menuBodyWindow.moveWindowsTop(externalModuleWindow.rect.y, delta);
+  menuBodyWindow.innerHeight += delta;
+}
+
+class PagesCarousel: public Window {
+  public:
+    PagesCarousel(Window * parent):
+      Window(parent, { TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, MENU_HEADER_HEIGHT })
+    {
+      setInnerWidth(TOPBAR_BUTTON_WIDTH * (DIM(MODEL_ICONS) - 1));
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      for (unsigned i=0; i<DIM(MODEL_ICONS) - 1; i++) {
+        theme->drawMenuIcon(MODEL_ICONS[i+1], i, menuPageIndex == i);
+      }
+    }
+};
+
+class MenuHeaderWindow: public Window {
+  public:
+    MenuHeaderWindow():
+      Window(&mainWindow, { 0, 0, LCD_W, MENU_BODY_TOP })
+    {
+      new PagesCarousel(this);
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      dc->drawBitmap(0, 0, theme->getIconBitmap(ICON_BACK, true));
+      dc->drawSolidFilledRect(0, MENU_HEADER_HEIGHT, LCD_W, MENU_TITLE_TOP - MENU_HEADER_HEIGHT, TEXT_BGCOLOR); // the white separation line
+      dc->drawSolidFilledRect(0, MENU_TITLE_TOP, LCD_W, MENU_TITLE_HEIGHT, TITLE_BGCOLOR); // the title line background
+      if (1/*title*/) {
+        lcdDrawText(MENUS_MARGIN_LEFT, MENU_TITLE_TOP, STR_MENUSETUP, MENU_TITLE_COLOR);
+      }
+    }
+};
+
+void buildModelMenuHeader()
+{
+  new MenuHeaderWindow();
+}
+
+void buildModelSetupMenu()
+{
+  GridLayout grid(menuBodyWindow);
+  grid.spacer(10);
+
+  buildModelMenuHeader();
+
+  rect_t rect = {MENUS_MARGIN_LEFT, MENUS_MARGIN_LEFT + 40, 0, 0};
 
   // Model name
-  TEXT_EDIT(MENUS_MARGIN_LEFT, STR_MODELNAME, g_model.header.name, sizeof(g_model.header.name));
+#if 0
+  LINE_TEXT_EDIT(MENUS_MARGIN_LEFT, STR_MODELNAME, g_model.header.name, sizeof(g_model.header.name));
+#else
+  new StaticText(&menuBodyWindow, grid.getLabelSlot(), STR_MODELNAME);
+  new TextEdit(&menuBodyWindow, grid.getFieldSlot(), g_model.header.name, sizeof(g_model.header.name));
+  grid.nextLine();
+#endif
 
 /*
  * case ITEM_MODEL_BITMAP: {
@@ -691,32 +1124,32 @@ bool menuModelSetup(event_t event)
       }
 */
 
-  for (uint8_t i=0; i<TIMERS; i++) {
+  for (uint8_t i = 0; i < TIMERS; i++) {
     // Timer label
     char timerLabel[8];
-    strAppendStringWithIndex(timerLabel, STR_TIMER, i+1);
+    strAppendStringWithIndex(timerLabel, STR_TIMER, i + 1);
     SUBTITLE(timerLabel);
 
     // editTimerMode(0, y, attr, event);
-
     // Timer name
-    TEXT_EDIT(MENUS_MARGIN_LEFT + INDENT_WIDTH, NO_INDENT(STR_TIMER_NAME), g_model.timers[i].name, LEN_TIMER_NAME);
+    LINE_TEXT_EDIT(MENUS_MARGIN_LEFT + INDENT_WIDTH, NO_INDENT(STR_TIMER_NAME), g_model.timers[i].name, LEN_TIMER_NAME);
 
     // Timer minute beep
-    CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, NO_INDENT(STR_MINUTEBEEP), g_model.timers[i].minuteBeep);
+    LINE_CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, NO_INDENT(STR_MINUTEBEEP), g_model.timers[i].minuteBeep);
 
     // Timer countdown
     // editTimerCountdown(0, y, attr, event);
 
     // Timer persistent
-    CHOICE(MENUS_MARGIN_LEFT + INDENT_WIDTH, NO_INDENT(STR_PERSISTENT), STR_VPERSISTENT, g_model.timers[i].persistent, 0, 2);
+    LINE_CHOICE(MENUS_MARGIN_LEFT + INDENT_WIDTH, NO_INDENT(STR_PERSISTENT), STR_VPERSISTENT,
+                g_model.timers[i].persistent, 0, 2);
   }
 
   // Extended limits
-  CHECKBOX(MENUS_MARGIN_LEFT, STR_ELIMITS, g_model.extendedLimits);
+  LINE_CHECKBOX(MENUS_MARGIN_LEFT, STR_ELIMITS, g_model.extendedLimits);
 
   // Extended trims
-  CHECKBOX(MENUS_MARGIN_LEFT, STR_ETRIMS, g_model.extendedTrims);
+  LINE_CHECKBOX(MENUS_MARGIN_LEFT, STR_ETRIMS, g_model.extendedTrims);
 /*
   drawText(&menuBodyWindow, MODEL_SETUP_2ND_COLUMN+18, y, STR_RESET_BTN, menuHorizontalPosition>0  && !NO_HIGHLIGHT() ? attr : 0);
         if (attr && menuHorizontalPosition>0) {
@@ -733,17 +1166,17 @@ bool menuModelSetup(event_t event)
         */
 
   // Display trims
-  CHOICE(MENUS_MARGIN_LEFT, STR_DISPLAY_TRIMS, "\006No\0   ChangeYes", g_model.displayTrims, 0, 2);
+  LINE_CHOICE(MENUS_MARGIN_LEFT, STR_DISPLAY_TRIMS, "\006No\0   ChangeYes", g_model.displayTrims, 0, 2);
 
   // Trim step
-  CHOICE(MENUS_MARGIN_LEFT, STR_TRIMINC, STR_VTRIMINC, g_model.trimInc, -2, 2);
+  LINE_CHOICE(MENUS_MARGIN_LEFT, STR_TRIMINC, STR_VTRIMINC, g_model.trimInc, -2, 2);
 
   // Throttle parameters
   {
     SUBTITLE(STR_THROTTLE_LABEL);
 
     // Throttle reversed
-    CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_THROTTLEREVERSE, g_model.throttleReversed);
+    LINE_CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_THROTTLEREVERSE, g_model.throttleReversed);
 
 /*      case ITEM_MODEL_THROTTLE_TRACE:
       {
@@ -759,7 +1192,7 @@ bool menuModelSetup(event_t event)
       }*/
 
     // Throttle trim
-    CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_TTRIM, g_model.thrTrim);
+    LINE_CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_TTRIM, g_model.thrTrim);
   }
 
   // Preflight parameters
@@ -767,10 +1200,10 @@ bool menuModelSetup(event_t event)
     SUBTITLE(STR_PREFLIGHT);
 
     // Display checklist
-    CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_CHECKLIST, g_model.displayChecklist);
+    LINE_CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_CHECKLIST, g_model.displayChecklist);
 
     // Throttle warning
-    CHECKBOX_INVERTED(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_THROTTLEWARNING, g_model.disableThrottleWarning);
+    LINE_CHECKBOX_INVERTED(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_THROTTLEWARNING, g_model.disableThrottleWarning);
 
     // Switches warning
     /*
@@ -821,7 +1254,81 @@ bool menuModelSetup(event_t event)
       */
   }
 
+  // Internal module
+  {
+    SUBTITLE(TR_INTERNALRF);
+
+    internalModuleWindow.rect.y = rect.y;
+    updateInternalModuleWindow(g_model.moduleData[INTERNAL_MODULE].rfProtocol);
+    rect.y += internalModuleWindow.rect.h + 10;
+  }
+
+  // External module
+  {
+    SUBTITLE(TR_EXTERNALRF);
+
+    externalModuleWindow.rect.y = rect.y;
+    updateExternalModuleWindow();
+    rect.y += externalModuleWindow.rect.h + 10;
+  }
+
+  menuBodyWindow.setInnerHeight(rect.y);
+}
+
+bool menuModelSetup(event_t event)
+{
+  // Switch to external antenna confirmation
+  //  bool newAntennaSel;
+  //  if (warningResult) {
+  //    warningResult = 0;
+  //    g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna = XJT_EXTERNAL_ANTENNA;
+  //  }
+
+/*  MENU(STR_MENUSETUP, MODEL_ICONS, menuTabModel, MENU_MODEL_SETUP, ITEM_MODEL_SETUP_MAX,
+       { 0, 0, TIMERS_ROWS, 0, 1, 0, 0,
+         LABEL(Throttle), 0, 0, 0,
+         LABEL(PreflightCheck), 0, 0, SW_WARN_ITEMS(), POT_WARN_ROWS, (g_model.potsWarnMode ? POT_WARN_ITEMS() : HIDDEN_ROW), (g_model.potsWarnMode ? SLIDER_WARN_ITEMS() : HIDDEN_ROW), NAVIGATION_LINE_BY_LINE|(NUM_STICKS+NUM_POTS+NUM_SLIDERS+NUM_ROTARY_ENCODERS-1), 0,
+         LABEL(InternalModule),
+         INTERNAL_MODULE_MODE_ROWS,
+         INTERNAL_MODULE_CHANNELS_ROWS,
+         IF_INTERNAL_MODULE_ON(IS_MODULE_XJT(INTERNAL_MODULE) ? (HAS_RF_PROTOCOL_MODELINDEX(g_model.moduleData[INTERNAL_MODULE].rfProtocol) ? (uint8_t)2 : (uint8_t)1) : (IS_MODULE_PPM(INTERNAL_MODULE) ? (uint8_t)1 : HIDDEN_ROW)),
+         IF_INTERNAL_MODULE_ON((IS_MODULE_XJT(INTERNAL_MODULE)) ? FAILSAFE_ROWS(INTERNAL_MODULE) : HIDDEN_ROW),
+         IF_INTERNAL_MODULE_ON(0),
+         LABEL(ExternalModule),
+         EXTERNAL_MODULE_MODE_ROWS,
+         MULTIMODULE_STATUS_ROWS
+         EXTERNAL_MODULE_CHANNELS_ROWS,
+         ((IS_MODULE_XJT(EXTERNAL_MODULE) && !HAS_RF_PROTOCOL_MODELINDEX(g_model.moduleData[EXTERNAL_MODULE].rfProtocol)) || IS_MODULE_SBUS(EXTERNAL_MODULE)) ? (uint8_t)1 : (IS_MODULE_PPM(EXTERNAL_MODULE) || IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE) || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) ? (uint8_t)2 : HIDDEN_ROW,
+         FAILSAFE_ROWS(EXTERNAL_MODULE),
+         EXTERNAL_MODULE_OPTION_ROW,
+         (IS_MODULE_R9M_LBT(EXTERNAL_MODULE) ? (uint8_t)0 : HIDDEN_ROW),
+         MULTIMODULE_MODULE_ROWS
+         EXTERNAL_MODULE_POWER_ROW,
+         LABEL(Trainer),
+         0,
+         TRAINER_LINE1_ROWS,
+         TRAINER_LINE2_ROWS });
+*/
+
+/*  if (menuEvent) {
+    moduleFlag[0] = 0;
+    moduleFlag[1] = 0;
+  }
+*/
+
+  if (event == EVT_ENTRY) {
+    buildModelSetupMenu();
+  }
+  else {
+    mainWindow.checkEvents();
+    // lcd->clear(TEXT_BGCOLOR);
+    mainWindow.refresh();
+  }
+
+  return true;
+
 #if 0
+
       case ITEM_MODEL_SLIDPOT_WARNING_STATE:
         drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y,STR_POTWARNINGSTATE);
         lcdDrawTextAtIndex(MODEL_SETUP_2ND_COLUMN, y, PSTR("\004""OFF\0""Man\0""Auto"), g_model.potsWarnMode, attr);
@@ -1423,16 +1930,12 @@ bool menuModelSetup(event_t event)
     y += 40;
   }
 
-
-
   if (IS_RANGECHECK_ENABLE()) {
     theme->drawMessageBox("RSSI :", NULL, NULL, WARNING_TYPE_INFO);
     lcdDrawNumber(WARNING_LINE_X, WARNING_INFOLINE_Y, TELEMETRY_RSSI(), DBLSIZE|LEFT);
   }
 #endif
 
-  menuBodyWindow.setInnerHeight(rect.y);
-#endif
   return true;
 }
 
@@ -1448,14 +1951,14 @@ bool menuModelFailsafe(event_t event)
     killEvents(event);
     event = 0;
     if (s_editMode) {
-      g_model.moduleData[g_moduleIdx].failsafeChannels[menuVerticalPosition] = channelOutputs[menuVerticalPosition+channelStart];
+      g_model.moduleData[g_moduleIdx].failsafeChannels[menuVerticalPosition] = channelOutputs[menuVerticalPosition +
+                                                                                              channelStart];
       storageDirty(EE_MODEL);
       AUDIO_WARNING1();
       s_editMode = 0;
       SEND_FAILSAFE_NOW(g_moduleIdx);
-    }
-    else {
-      int16_t & failsafe = g_model.moduleData[g_moduleIdx].failsafeChannels[menuVerticalPosition];
+    } else {
+      int16_t &failsafe = g_model.moduleData[g_moduleIdx].failsafeChannels[menuVerticalPosition];
       if (failsafe < FAILSAFE_CHANNEL_HOLD)
         failsafe = FAILSAFE_CHANNEL_HOLD;
       else if (failsafe == FAILSAFE_CHANNEL_HOLD)
@@ -1469,22 +1972,22 @@ bool menuModelFailsafe(event_t event)
   }
 
   SIMPLE_SUBMENU_WITH_OPTIONS("FAILSAFE", ICON_STATS_ANALOGS, NUM_CHANNELS(g_moduleIdx), OPTION_MENU_NO_SCROLLBAR);
-  drawStringWithIndex(50, 3+FH, "Module", g_moduleIdx+1, MENU_TITLE_COLOR);
+  drawStringWithIndex(50, 3 + FH, "Module", g_moduleIdx + 1, MENU_TITLE_COLOR);
 
-  for (uint8_t col=0; col < cols; col++) {
-    for (uint8_t line=0; line < 8; line++) {
-      coord_t x = col*(LCD_W/2);
-      const coord_t y = MENU_CONTENT_TOP - FH + line*(FH+4);
-      const int32_t channelValue = channelOutputs[ch+channelStart];
-      int32_t failsafeValue = g_model.moduleData[g_moduleIdx].failsafeChannels[8*col+line];
+  for (uint8_t col = 0; col < cols; col++) {
+    for (uint8_t line = 0; line < 8; line++) {
+      coord_t x = col * (LCD_W / 2);
+      const coord_t y = MENU_CONTENT_TOP - FH + line * (FH + 4);
+      const int32_t channelValue = channelOutputs[ch + channelStart];
+      int32_t failsafeValue = g_model.moduleData[g_moduleIdx].failsafeChannels[8 * col + line];
 
       // Channel name if present, number if not
-      if (g_model.limitData[ch+channelStart].name[0] != '\0') {
-        putsChn(x+MENUS_MARGIN_LEFT, y-3, ch+1, TINSIZE);
-        lcdDrawSizedText(x+MENUS_MARGIN_LEFT, y+5, g_model.limitData[ch+channelStart].name, sizeof(g_model.limitData[ch+channelStart].name), ZCHAR|SMLSIZE);
-      }
-      else {
-        putsChn(x+MENUS_MARGIN_LEFT, y, ch+1, 0);
+      if (g_model.limitData[ch + channelStart].name[0] != '\0') {
+        putsChn(x + MENUS_MARGIN_LEFT, y - 3, ch + 1, TINSIZE);
+        lcdDrawSizedText(x + MENUS_MARGIN_LEFT, y + 5, g_model.limitData[ch + channelStart].name,
+                         sizeof(g_model.limitData[ch + channelStart].name), ZCHAR | SMLSIZE);
+      } else {
+        putsChn(x + MENUS_MARGIN_LEFT, y, ch + 1, 0);
       }
 
       // Value
@@ -1494,29 +1997,26 @@ bool menuModelFailsafe(event_t event)
         if (s_editMode) {
           if (failsafeValue == FAILSAFE_CHANNEL_HOLD || failsafeValue == FAILSAFE_CHANNEL_NOPULSE) {
             s_editMode = 0;
-          }
-          else {
+          } else {
             flags |= BLINK;
-            CHECK_INCDEC_MODELVAR(event, g_model.moduleData[g_moduleIdx].failsafeChannels[8*col+line], -lim, +lim);
+            CHECK_INCDEC_MODELVAR(event, g_model.moduleData[g_moduleIdx].failsafeChannels[8 * col + line], -lim, +lim);
           }
         }
       }
 
-      x += (LCD_W/2)-4-MENUS_MARGIN_LEFT-SLIDER_W;
+      x += (LCD_W / 2) - 4 - MENUS_MARGIN_LEFT - SLIDER_W;
 
       if (failsafeValue == FAILSAFE_CHANNEL_HOLD) {
-        drawText(&menuBodyWindow,x, y+2, "HOLD", flags|SMLSIZE);
+        lcd->drawText(x, y + 2, "HOLD", flags | SMLSIZE);
         failsafeValue = 0;
-      }
-      else if (failsafeValue == FAILSAFE_CHANNEL_NOPULSE) {
-        drawText(&menuBodyWindow,x, y+2, "NONE", flags|SMLSIZE);
+      } else if (failsafeValue == FAILSAFE_CHANNEL_NOPULSE) {
+        lcd->drawText(x, y + 2, "NONE", flags | SMLSIZE);
         failsafeValue = 0;
-      }
-      else {
+      } else {
 #if defined(PPM_UNIT_US)
         lcdDrawNumber(x, y, PPM_CH_CENTER(ch)+failsafeValue/2, flags);
 #elif defined(PPM_UNIT_PERCENT_PREC1)
-        lcdDrawNumber(x, y, calcRESXto1000(failsafeValue), PREC1|flags);
+        lcdDrawNumber(x, y, calcRESXto1000(failsafeValue), PREC1 | flags);
 #else
         lcdDrawNumber(x, y, calcRESXto1000(failsafeValue)/10, flags);
 #endif
@@ -1524,14 +2024,16 @@ bool menuModelFailsafe(event_t event)
 
       // Gauge
       x += 4;
-      lcdDrawRect(x, y+3, SLIDER_W+1, 12);
-      const coord_t lenChannel = limit((uint8_t)1, uint8_t((abs(channelValue) * SLIDER_W/2 + lim/2) / lim), uint8_t(SLIDER_W/2));
-      const coord_t lenFailsafe = limit((uint8_t)1, uint8_t((abs(failsafeValue) * SLIDER_W/2 + lim/2) / lim), uint8_t(SLIDER_W/2));
-      x += SLIDER_W/2;
-      const coord_t xChannel = (channelValue>0) ? x : x+1-lenChannel;
-      const coord_t xFailsafe = (failsafeValue>0) ? x : x+1-lenFailsafe;
-      lcdDrawSolidFilledRect(xChannel, y+4, lenChannel, 5, TEXT_COLOR);
-      lcdDrawSolidFilledRect(xFailsafe, y+9, lenFailsafe, 5, ALARM_COLOR);
+      lcdDrawRect(x, y + 3, SLIDER_W + 1, 12);
+      const coord_t lenChannel = limit((uint8_t) 1, uint8_t((abs(channelValue) * SLIDER_W / 2 + lim / 2) / lim),
+                                       uint8_t(SLIDER_W / 2));
+      const coord_t lenFailsafe = limit((uint8_t) 1, uint8_t((abs(failsafeValue) * SLIDER_W / 2 + lim / 2) / lim),
+                                        uint8_t(SLIDER_W / 2));
+      x += SLIDER_W / 2;
+      const coord_t xChannel = (channelValue > 0) ? x : x + 1 - lenChannel;
+      const coord_t xFailsafe = (failsafeValue > 0) ? x : x + 1 - lenFailsafe;
+      lcdDrawSolidFilledRect(xChannel, y + 4, lenChannel, 5, TEXT_COLOR);
+      lcdDrawSolidFilledRect(xFailsafe, y + 9, lenFailsafe, 5, ALARM_COLOR);
 
       if (++ch >= NUM_CHANNELS(g_moduleIdx))
         break;

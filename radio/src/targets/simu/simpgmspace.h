@@ -460,6 +460,7 @@ inline int CoDelSem(OS_EventID id, uint8_t /*opt*/)
 #define UART_Stop(...)
 #define UART3_Stop(...)
 #define USART_GetITStatus(...)         0
+#define USART_ClearFlag(...)
 
 #if defined(STM32)
 inline void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct) { }

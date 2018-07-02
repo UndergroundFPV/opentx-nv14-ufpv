@@ -69,7 +69,7 @@ class ModelCell
       buffer->clear(TEXT_BGCOLOR);
 
       if (error) {
-        drawText(buffer, 5, 2, "(Invalid Model)", TEXT_COLOR);
+        // TODO drawText(buffer, 5, 2, "(Invalid Model)", TEXT_COLOR);
         buffer->drawBitmapPattern(5, 23, LBM_LIBRARY_SLOT, TEXT_COLOR);
       }
       else {
@@ -84,7 +84,7 @@ class ModelCell
         char timer[LEN_TIMER_STRING];
         buffer->drawSizedText(5, 2, modelName, LEN_MODEL_NAME, SMLSIZE|TEXT_COLOR);
         getTimerString(timer, 0);
-        drawText(buffer, 101, 40, timer, TEXT_COLOR);
+        // drawText(buffer, 101, 40, timer, TEXT_COLOR);
         for (int i=0; i<4; i++) {
           buffer->drawBitmapPattern(104+i*11, 25, LBM_SCORE0, TITLE_BGCOLOR);
         }

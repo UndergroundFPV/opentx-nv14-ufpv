@@ -57,7 +57,7 @@
 #define USBD_VID                            0x0483
 
 #define USBD_LANGID_STRING                  0x409
-#define USBD_MANUFACTURER_STRING            "FrSky"
+// #define USBD_MANUFACTURER_STRING            "FrSky"
 #define USBD_SERIALNUMBER_FS_STRING         "00000000001B"
 
 

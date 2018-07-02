@@ -21,7 +21,6 @@
 #ifndef _THEME_H_
 #define _THEME_H_
 
-#include "zone.h"
 #include <list>
 
 class BitmapBuffer;
@@ -71,6 +70,8 @@ class Theme
     virtual void load() const;
 
     virtual void drawBackground() const;
+
+    virtual const BitmapBuffer * getIconBitmap(uint8_t index, bool selected) const { return nullptr; }
 
     virtual bool drawTopbarBackground(uint32_t options=0) const = 0;
 

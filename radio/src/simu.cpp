@@ -258,9 +258,26 @@ long Open9xSim::onMouseDown(FXObject*,FXSelector,void*v)
   
   // TRACE("onMouseDown %d %d", evt->win_x, evt->win_y);
 
-  touchState.Event = 2;
-  touchState.startX = touchState.X = evt->win_x;
-  touchState.startY = touchState.Y = evt->win_y;
+  touchState.Event = TE_DOWN;
+  touchState.startX = touchState.lastX = touchState.X = evt->win_x;
+  touchState.startY = touchState.lastY = touchState.Y = evt->win_y;
+  return 0;
+}
+
+long Open9xSim::onMouseUp(FXObject*,FXSelector,void*v)
+{
+  FXEvent * evt=(FXEvent*)v;
+
+  // TRACE("onMouseUp %d %d", evt->win_x, evt->win_y);
+
+  if (touchState.Event == TE_DOWN) {
+    touchState.Event = TE_UP;
+    touchState.X = evt->win_x;
+    touchState.Y = evt->win_y;
+  }
+  else {
+    touchState.Event = TE_NONE;
+  }
   return 0;
 }
 
@@ -269,18 +286,10 @@ long Open9xSim::onMouseMove(FXObject*,FXSelector,void*v)
   FXEvent *evt=(FXEvent*)v;
   if (evt->state & LEFTBUTTONMASK) {
     // TRACE("onMouseMove %d %d", evt->win_x, evt->win_y);
-    touchState.Event = 3;
+    touchState.Event = TE_SLIDE;
     touchState.X = evt->win_x;
     touchState.Y = evt->win_y;
   }
-
-  return 0;
-}
-
-long Open9xSim::onMouseUp(FXObject*,FXSelector,void*)
-{
-  // TRACE("onMouseUp");
-  touchState.Event = 0;
 
   return 0;
 }

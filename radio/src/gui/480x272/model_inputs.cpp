@@ -356,13 +356,13 @@ void displayExpoInfos(coord_t y, ExpoData * ed)
     drawSwitch(EXPO_LINE_SWITCH_POS, y, ed->swtch);
   }
   if (ed->mode != 3) {
-    drawText(&menuBodyWindow, EXPO_LINE_SIDE_POS, y, ed->mode == 2 ? "\176" : "\177");
+    lcd->drawText(EXPO_LINE_SIDE_POS, y, ed->mode == 2 ? "\176" : "\177");
   }
 }
 
 void displayExpoLine(coord_t y, ExpoData * ed)
 {
-  drawSource(&menuBodyWindow, EXPO_LINE_SRC_POS, y, ed->srcRaw);
+  drawSource(EXPO_LINE_SRC_POS, y, ed->srcRaw);
 
   displayExpoInfos(y, ed);
   // displayFlightModes(&menuBodyWindow, EXPO_LINE_FM_POS, y, ed->flightModes, 0);
@@ -506,7 +506,7 @@ bool menuModelExposAll(event_t event)
     coord_t y = 5 + (cur-menuVerticalOffset) * FH;
     if ((i<MAX_EXPOS && (ed=expoAddress(i))->chn+1 == ch && EXPO_VALID(ed))) {
       if (cur-menuVerticalOffset >= 0/* && cur-menuVerticalOffset < NUM_BODY_LINES*/) {
-         drawSource(&menuBodyWindow, MENUS_MARGIN_LEFT, y, ch);
+         drawSource(MENUS_MARGIN_LEFT, y, ch);
       }
       uint8_t mixCnt = 0;
       do {
@@ -527,7 +527,7 @@ bool menuModelExposAll(event_t event)
           LcdFlags attr = ((s_copyMode || sub != cur) ? 0 : INVERS);
 
           // GVAR_MENU_ITEM(EXPO_LINE_WEIGHT_POS, y, ed->weight, MIN_EXPO_WEIGHT, 100, RIGHT | attr | (isExpoActive(i) ? BOLD : 0), 0, 0);
-          drawGVarValue(&menuBodyWindow, EXPO_LINE_WEIGHT_POS, y, ed->weight, MIN_EXPO_WEIGHT, 100, RIGHT | attr | (isExpoActive(i) ? BOLD : 0));
+          // drawGVarValue(EXPO_LINE_WEIGHT_POS, y, ed->weight, MIN_EXPO_WEIGHT, 100, RIGHT | attr | (isExpoActive(i) ? BOLD : 0));
           displayExpoLine(y, ed);
 
           if (s_copyMode) {
@@ -558,7 +558,7 @@ bool menuModelExposAll(event_t event)
         }
       }
       if (cur-menuVerticalOffset >= 0/* && cur-menuVerticalOffset < NUM_BODY_LINES*/) {
-        drawSource(&menuBodyWindow, MENUS_MARGIN_LEFT, y, ch, attr);
+        drawSource(MENUS_MARGIN_LEFT, y, ch, attr);
         if (s_copyMode == MOVE_MODE && s_copySrcCh == ch) {
           lineExpoSurround(y);
         }

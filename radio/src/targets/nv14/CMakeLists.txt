@@ -8,12 +8,12 @@ set(SDCARD YES)
 set(EEPROM SDCARD)
 set(HAPTIC YES)
 set(GUI_DIR 480x272)
-set(TARGET_DIR NV14)
+set(TARGET_DIR nv14)
 
 if(BOOTLOADER)
-  set(LINKER_SCRIPT targets/NV14/stm32f4_flash_bootloader.ld)
+  set(LINKER_SCRIPT targets/nv14/stm32f4_flash_bootloader.ld)
 else()
-  set(LINKER_SCRIPT targets/NV14/stm32f4_flash.ld)
+  set(LINKER_SCRIPT targets/nv14/stm32f4_flash.ld)
 endif()
 
 set(RAMBACKUP YES)
@@ -59,6 +59,7 @@ set(GUI_SRC
   ${GUI_SRC}
   bitmapbuffer.cpp
   window.cpp
+  draw_functions.cpp
   curves.cpp
   bitmaps.cpp
   radio_sdmanager.cpp
@@ -130,7 +131,7 @@ set(STM32LIB_SRC
 if(PYTHONINTERP_FOUND)
   add_custom_target(datacopy
     WORKING_DIRECTORY ${RADIO_DIRECTORY}/src
-    COMMAND ${PYTHON_EXECUTABLE} ${RADIO_DIRECTORY}/util/generate_datacopy.py datastructs.h -DPCBFLYSKY -DPCBNV14 -DCPUARM -DCOLORLCD -DCPUARM -DBACKUP > storage/datacopy.cpp
+    COMMAND ${PYTHON_EXECUTABLE} ${RADIO_DIRECTORY}/util/generate_datacopy.py datastructs.h -DPCBFLYSKY -DPCBNV14 -DCPUARM -DCOLORLCD -DBACKUP > storage/datacopy.cpp
     DEPENDS ${RADIO_DIRECTORY}/src/datastructs.h ${RADIO_DIRECTORY}/util/generate_datacopy.py
   )
 endif()

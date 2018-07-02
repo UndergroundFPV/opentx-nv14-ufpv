@@ -23,7 +23,7 @@
 #include "hallStick_driver.h"
 #undef   __HALLSTICK_DRIVER_C__
 
-//Fifo<uint8_t, 512> hallSerialTxFifo;
+// Fifo<uint8_t, 512> hallSerialTxFifo;
 DMAFifo<32> hallSerialTxFifo __DMA (HALL_DMA_Stream_TX);
 DMAFifo<32> hallSerialRxFifo __DMA (HALL_DMA_Stream_RX);
 
@@ -213,14 +213,14 @@ void HALL_UART_TransmitData( unsigned char *pData, U32 length )
 
 
 
-U16 HALL_UART_GetReceiveDataLength( void )
+uint16_t HALL_UART_GetReceiveDataLength( void )
 {
   //return( UART_GetReceiveDataLength( HALLSTICK_UART ) );
 }
 
 void ResetHall( void )
 {
-    U8 Temp[] = {0x55, 0xD1, 0x01, 0x01, 0xff, 0xff};
+    uint8_t Temp[] = {0x55, 0xD1, 0x01, 0x01, 0xff, 0xff};
     unsigned short CRC16 = 0XFFFF;
     CRC16 = Calculation_CRC16(Temp, 4);
     Temp[4] = CRC16 & 0xff;
@@ -230,7 +230,7 @@ void ResetHall( void )
 
 void Get_factory( void )
 {
-    U8 Temp[] = {0x55, 0xD1, 0x01, 0x00, 0xff, 0xff};
+    uint8_t Temp[] = {0x55, 0xD1, 0x01, 0x00, 0xff, 0xff};
     unsigned short CRC16 = 0XFFFF;
     CRC16 = Calculation_CRC16(Temp, 4);
     Temp[4] = CRC16 & 0xff;
@@ -326,8 +326,8 @@ static void Parse_Character(unsigned char Character)
 STRUCT_CHANNEL HallChannel[7];
 void ConvertChannel( void )
 {
-    U16 Value;
-    for(U8 i = 0; i < 4; i++ )
+    uint16_t Value;
+    for(uint8_t i = 0; i < 4; i++ )
     {
         if( Channel.Channel[i] < StickCallbration[i].Mid)
         {
@@ -359,7 +359,7 @@ void ConvertChannel( void )
 void Hall_Task( void )
 {
     unsigned char Character;
-    U8 n = 0;
+    uint8_t n = 0;
     n = HALL_UART_GetReceiveDataLength();
     while( n )
     {
@@ -436,14 +436,14 @@ const unsigned short CRC16Table[256]= {
  0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0
 };
 
-unsigned short  Calculation_CRC16(void *pBuffer,unsigned char BufferSize)
+unsigned short Calculation_CRC16(unsigned char *pBuffer, unsigned char BufferSize)
 {
     unsigned short CRC16;
     CRC16=0xFFFF;
     while (BufferSize)
     {
         CRC16=(CRC16<<8)^CRC16Table[((CRC16>>8)^(*(unsigned char *)pBuffer))&0x00FF];
-        pBuffer=(void *)((unsigned char *)pBuffer+1);
+        pBuffer++;
         BufferSize--;
     }
     return CRC16;

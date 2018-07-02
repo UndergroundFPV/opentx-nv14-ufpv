@@ -367,18 +367,6 @@ bool check_submenu_simple(event_t event, uint8_t maxrow);
     } \
   }
 
-#define MT6S_MENU(title, icons, tab) \
-  if (event == EVT_ENTRY || event == EVT_ENTRY_UP) TRACE("Menu %s displayed ...", title); \
-  menuPageCount = DIM(tab); \
-  { int result = drawMenuTemplate(title, 0, icons, OPTION_MENU_TITLE_BAR); \
-    if (result != 0) { \
-      if (result < 0) popMenu(); \
-      else chainMenu(tab[result - 1]); \
-      return false; \
-    } \
-  }
-
-
 #define CUSTOM_MENU_WITH_OPTIONS(title, icons, tab, tabCount, menu, lines_count) \
     if (event == EVT_ENTRY || event == EVT_ENTRY_UP) TRACE("Menu %s displayed ...", title); \
     if (!check(event, menu, tab, tabCount, mstate_tab, DIM(mstate_tab)-1, lines_count)) return false; \

@@ -86,6 +86,7 @@ foreach(LANGUAGE ${TTS_LANGUAGES})
   string(TOLOWER ${LANGUAGE} lang_lower)
   set(SRC ${SRC} translations/tts_${lang_lower}.cpp)
 endforeach()
+
 set(SRC
   ${SRC}
   main_arm.cpp
@@ -102,6 +103,7 @@ set(SRC
   vario.cpp
   )
 
+
 if(NOT MSVC)
   set(FIRMWARE_SRC
     ${FIRMWARE_SRC}
@@ -111,6 +113,7 @@ if(NOT MSVC)
     ${THIRDPARTY_DIR}/DSP_Lib/Source/FastMathFunctions/arm_sin_cos_f32.c
     )
 endif()
+
 set(FIRMWARE_TARGET_SRC
   ${FIRMWARE_TARGET_SRC}
   keys_driver.cpp
@@ -119,7 +122,6 @@ set(FIRMWARE_TARGET_SRC
 set(TARGET_SRC
   ${TARGET_SRC}
   pulses_driver.cpp
-
   telemetry_driver.cpp
   )
 set(FIRMWARE_SRC

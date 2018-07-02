@@ -21,9 +21,19 @@
 #ifndef _BITMAP_BUFFER_H_
 #define _BITMAP_BUFFER_H_
 
-#include <inttypes.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include "colors.h"
 #include "board.h"
+#include "debug.h"
+
+struct rect_t {
+  coord_t x, y, w, h;
+};
+
+#define MOVE_OFFSET() coord_t offsetX = this->offsetX; x += offsetX; this->offsetX = 0; coord_t offsetY = this->offsetY; y += offsetY; this->offsetY = 0
+#define APPLY_OFFSET() x += offsetX; y += offsetY;
+#define RESTORE_OFFSET()  this->offsetX = offsetX, this->offsetY = offsetY
 
 #if defined(PCBX10) && !defined(SIMU)
   #define MOVE_PIXEL_RIGHT(p, count)   p -= count
@@ -56,6 +66,8 @@ class BitmapBufferBase
       xmax(width),
       ymin(0),
       ymax(height),
+      offsetX(0),
+      offsetY(0),
       data(data),
       data_end(data + (width * height))
     {
@@ -75,6 +87,30 @@ class BitmapBufferBase
       this->xmax = xmax;
       this->ymin = ymin;
       this->ymax = ymax;
+    }
+
+    inline void getClippingRect(coord_t & xmin, coord_t & xmax, coord_t & ymin, coord_t & ymax)
+    {
+      xmin = this->xmin;
+      xmax = this->xmax;
+      ymin = this->ymin;
+      ymax = this->ymax;
+    }
+
+    inline void setOffset(coord_t offsetX, coord_t offsetY)
+    {
+      this->offsetX = offsetX;
+      this->offsetY = offsetY;
+    }
+
+    coord_t getOffsetX() const
+    {
+      return offsetX;
+    }
+
+    coord_t getOffsetY() const
+    {
+      return offsetY;
     }
 
     inline uint8_t getFormat() const
@@ -119,6 +155,8 @@ class BitmapBufferBase
     uint16_t xmax;
     uint16_t ymin;
     uint16_t ymax;
+    coord_t offsetX;
+    coord_t offsetY;
     T * data;
     T * data_end;
 };
@@ -233,19 +271,8 @@ class BitmapBuffer: public BitmapBufferBase<uint16_t>
 
     void drawRect(coord_t x, coord_t y, coord_t w, coord_t h, uint8_t thickness, uint8_t pat, LcdFlags att);
 
-    inline void drawSolidFilledRect(coord_t x, coord_t y, coord_t w, coord_t h, LcdFlags flags)
-    {
-      if (x >= width) return;
-      if (y >= ymax) return;
-      if (h<0) { y+=h; h=-h; }
-      if (y<ymin) { h+=y-ymin; y=ymin; if (h<=0) return; }
-      if (y+h > ymax) { h = ymax - y; }
-      if (!data || h==0 || w==0) return;
-      if (h<0) { y+=h; h=-h; }
-      if (w<0) { x+=w; w=-w; }
+    void drawSolidFilledRect(coord_t x, coord_t y, coord_t w, coord_t h, LcdFlags flags);
 
-      DMAFillRect(data, width, height, (x>0)?x:0, (y>0)?y:0, w, h, lcdColorTable[COLOR_IDX(flags)]);
-    }
 
     void drawFilledRect(coord_t x, coord_t y, coord_t w, coord_t h, uint8_t pat, LcdFlags att);
 
@@ -275,9 +302,15 @@ class BitmapBuffer: public BitmapBufferBase<uint16_t>
 
     void drawSizedText(coord_t x, coord_t y, const char * s, uint8_t len, LcdFlags flags);
 
+    void drawText(coord_t x, coord_t y, const char * s, LcdFlags flags=0) {
+      drawSizedText(x, y, s, 255, flags);
+    }
+
     template<class T>
     void drawBitmap(coord_t x, coord_t y, const T * bmp, coord_t srcx=0, coord_t srcy=0, coord_t w=0, coord_t h=0, float scale=0)
     {
+      APPLY_OFFSET();
+
       if (x >= xmax) return;
       if (y >= ymax) return;
 

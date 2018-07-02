@@ -74,6 +74,8 @@ typedef struct
    short Y;
    short startX;
    short startY;
+   short lastX;
+   short lastY;
    uint32_t Time;
 } STRUCT_TOUCH;
 

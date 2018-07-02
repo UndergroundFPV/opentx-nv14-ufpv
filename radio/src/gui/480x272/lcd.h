@@ -52,14 +52,14 @@ inline void lcdClear()
   lcd->clear();
 }
 
-inline void lcdDrawText(coord_t x, coord_t y, const char * s, LcdFlags attr=0)
-{
-  drawText(lcd, x, y, s, attr);
-}
-
 inline void lcdDrawSizedText(coord_t x, coord_t y, const pm_char * s, uint8_t len, LcdFlags attr=0)
 {
   lcd->drawSizedText(x, y, s, len, attr);
+}
+
+inline void lcdDrawText(coord_t x, coord_t y, const char * s, LcdFlags attr=0)
+{
+  lcdDrawSizedText(x, y, s, 255, attr);
 }
 
 void lcdDrawHexNumber(coord_t x, coord_t y, uint32_t val, LcdFlags mode=0);

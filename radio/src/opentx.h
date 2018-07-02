@@ -273,7 +273,7 @@
 #endif
 
 #if defined(SIMU)
-  //#include "targets/simu/simpgmspace.h"
+  #include "targets/simu/simpgmspace.h"
 #elif defined(CPUARM)
   typedef const unsigned char pm_uchar;
   typedef const char pm_char;
@@ -428,6 +428,7 @@ void memswap(void * a, void * b, uint8_t size);
   #endif
   #define MAX_EXTERNAL_MODULE_CHANNELS()    ((g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_XJT) ? maxChannelsXJT[1+g_model.moduleData[1].rfProtocol] : maxChannelsModules[g_model.moduleData[EXTERNAL_MODULE].type])
   #define MAX_CHANNELS(idx)                 (idx==INTERNAL_MODULE ? MAX_INTERNAL_MODULE_CHANNELS() : (idx==EXTERNAL_MODULE ? MAX_EXTERNAL_MODULE_CHANNELS() : MAX_TRAINER_CHANNELS_M8()))
+  #define MAX_SENT_CHANNELS(idx)            (idx == MODULE_TYPE_DSM2 ? 8 : 16)
   #define NUM_CHANNELS(idx)                 ((IS_MODULE_CROSSFIRE(idx) || (IS_MODULE_MULTIMODULE(idx) && (g_model.moduleData[idx].getMultiProtocol(true) != MM_RF_PROTO_DSM2))) ? CROSSFIRE_CHANNELS_COUNT : (8+g_model.moduleData[idx].channelsCount))
 #elif defined(PCBSKY9X) && !defined(REVA)
   #define IS_MODULE_PPM(idx)                (idx==TRAINER_MODULE || idx==EXTRA_MODULE || (idx==EXTERNAL_MODULE && g_model.moduleData[EXTERNAL_MODULE].type==MODULE_TYPE_PPM))
@@ -893,7 +894,6 @@ void doLoopCommonActions();
 // OS abstraction layer (tasks, semaphores, mutexes, etc)
 #if defined(CPUARM) && !defined(BOOT)
   #include "tasks_arm.h"
-  #include "CoOS.h"
 
   extern OS_MutexID mixerMutex;
   inline void pauseMixerCalculations() { CoEnterMutexSection(mixerMutex); }

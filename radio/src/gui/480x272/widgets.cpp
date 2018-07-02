@@ -21,9 +21,6 @@
 #include <stdio.h>
 #include "opentx.h"
 
-Window menuBodyWindow(0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT);
-Window menuHeaderWindow(TOPBAR_BUTTON_WIDTH + 3, 0, LCD_W - TOPBAR_BUTTON_WIDTH - 3, MENU_HEADER_HEIGHT);
-
 void drawStatusText(const char * text)
 {
   lcdDrawText(MENUS_MARGIN_LEFT, MENU_FOOTER_TOP, text, TEXT_STATUSBAR_COLOR);
@@ -192,8 +189,8 @@ int drawMenuTemplate(const char * title, uint8_t icon, const uint8_t * icons, ui
       // the current page icon which is highlighted (no press detection needed)
       theme->drawMenuIcon(icons[menuPageIndex+1], menuPageIndex, true);
     }
-    menuHeaderWindow.setInnerWidth(TOPBAR_BUTTON_WIDTH * menuPageCount);
-    menuHeaderWindow.scroll();
+//    menuHeaderWindow.setInnerWidth(TOPBAR_BUTTON_WIDTH * menuPageCount);
+//    menuHeaderWindow.scroll();
   }
   else {
     linesDisplayed = NUM_BODY_LINES + 1;
@@ -221,7 +218,7 @@ int drawMenuTemplate(const char * title, uint8_t icon, const uint8_t * icons, ui
   // }
 
   // menuBodyWindow.scroll();
-  menuBodyWindow.drawVerticalScrollbar();
+//  menuBodyWindow.drawVerticalScrollbar();
 
   return 0;
 

@@ -35,7 +35,6 @@ option(WATCHDOG_DISABLED "Disable hardware Watchdog" OFF)
 if(SDL_FOUND)
   option(SIMU_AUDIO "Enable simulator audio." ON)
 endif()
-option(LUA "Enable LUA support" ON)
 option(SIMU_DISKIO "Enable disk IO simulation in simulator. Simulator will use FatFs module and simulated IO layer that  uses \"./sdcard.image\" file as image of SD card. This file must contain whole SD card from first to last sector" OFF)
 option(SIMU_LUA_COMPILER "Pre-compile and save Lua scripts in simulator." ON)
 option(FAS_PROTOTYPE "Support of old FAS prototypes (different resistors)" OFF)
@@ -86,7 +85,7 @@ set(FATFS_SRC
 if(PCB STREQUAL X12S OR PCB STREQUAL X10)
   include(targets/horus/CMakeLists.txt)
 elseif(PCB STREQUAL NV14)
-  include(targets/NV14/CMakeLists.txt)
+  include(targets/nv14/CMakeLists.txt)
 elseif(PCB STREQUAL X9E OR PCB STREQUAL X9D+ OR PCB STREQUAL X9D OR PCB STREQUAL X7 OR PCB STREQUAL XLITE)
   include(targets/taranis/CMakeLists.txt)
 elseif(PCB STREQUAL I8)
@@ -124,10 +123,8 @@ elseif(PCB STREQUAL GRUVIN9X)
 elseif(PCB STREQUAL MEGA2560)
   include(targets/mega2560/CMakeLists.txt)
 else()
-  message(WARNING "Unknown PCB '${PCB}'")
+  message(FATAL_ERROR "Unknown PCB '${PCB}'")
 endif()
-
-#message(WARNING "I'm here!")
 
 if(NOT PCB STREQUAL 9XR AND NOT PCB STREQUAL 9XRPRO AND NOT PCB STREQUAL I8 AND NOT PCB STREQUAL NV14)
   option(DBLKEYS "Double Keys" ON)
@@ -200,7 +197,7 @@ if(TEMPLATES)
 endif()
 
 message(STATUS ${LUA})
-if(NOT LUA STREQUAL OFF)
+if(NOT LUA STREQUAL NO)
   add_definitions(-DLUA)
   if(LUA_COMPILER)
     add_definitions(-DLUA_COMPILER)
@@ -368,6 +365,7 @@ endif(USEHORUSBT)
 if(BOOTLOADER)
   add_definitions(-DBOOTLOADER)
 endif(BOOTLOADER)
+
 set(SRC
   ${SRC}
   opentx.cpp
@@ -470,10 +468,9 @@ use_cxx11()  # ensure gnu++11 in CXX_FLAGS with CMake < 3.1
 find_program(BASH bash HINTS "c:/cygwin/bin/" "c:/msys/bin/" DOC "bash shell for firmware size report (eg. c:/cygwin/bin/bash.exe on Windows).")
 
 if(NOT MSVC)
-  set(OPT "0" CACHE STRING "Optimization mode (0/1/2/s")
+  set(OPT "s" CACHE STRING "Optimization mode (0/1/2/s")
 
   if(ARCH STREQUAL ARM)
-
     enable_language(ASM)
     set(CMAKE_C_COMPILER arm-none-eabi-gcc)
     set(CMAKE_CXX_COMPILER arm-none-eabi-g++)

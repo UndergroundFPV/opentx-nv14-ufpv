@@ -162,7 +162,7 @@ void ResetHall( void );
 void Get_factory( void );
 extern void HallStick_Init(void);
 void HALL_UART_TransmitData( unsigned char *pData, unsigned int Length );
-unsigned short  Calculation_CRC16(unsigned char *pBuffer,unsigned char BufferSize);
+unsigned short  Calculation_CRC16(unsigned char *pBuffer, unsigned char BufferSize);
 void Hall_Task( void );
 
 #endif

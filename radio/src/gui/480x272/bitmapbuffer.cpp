@@ -111,6 +111,20 @@ void BitmapBuffer::drawRect(coord_t x, coord_t y, coord_t w, coord_t h, uint8_t 
   }
 }
 
+void BitmapBuffer::drawSolidFilledRect(coord_t x, coord_t y, coord_t w, coord_t h, LcdFlags flags)
+{
+  APPLY_OFFSET();
+
+  if (x >= xmax) return;
+  if (y >= ymax) return;
+  if (h<0) { y+=h; h=-h; }
+  if (y<ymin) { h+=y-ymin; y=ymin;}
+  if (y+h > ymax) { h = ymax - y; }
+  if (!data || h<=0 || w<=0) return;
+
+  DMAFillRect(data, width, height, x, y, w, h, lcdColorTable[COLOR_IDX(flags)]);
+}
+
 void BitmapBuffer::drawFilledRect(coord_t x, coord_t y, coord_t w, coord_t h, uint8_t pat, LcdFlags att)
 {
   for (coord_t i=y; i<y+h; i++) {
@@ -313,14 +327,18 @@ uint8_t BitmapBuffer::drawCharWithCache(coord_t x, coord_t y, const BitmapBuffer
 
 void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t len, LcdFlags flags)
 {
+  MOVE_OFFSET();
+
 #define INCREMENT_POS(delta) \
   do { if (flags & VERTICAL) y -= delta; else x += delta; } while(0)
 
   int width = getTextWidth(s, len, flags);
   int height = getFontHeight(flags);
 
-  if (y < ymin || y + height >= ymax)
+  if (y < ymin || y + height >= ymax) {
+    RESTORE_OFFSET();
     return;
+  }
 
   uint32_t fontindex = FONTINDEX(flags);
   const pm_uchar * font = fontsTable[fontindex];
@@ -431,6 +449,8 @@ void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t l
     s++;
   }
   lcdNextPos = pos;
+
+  RESTORE_OFFSET();
 }
 
 void BitmapBuffer::drawBitmapPie(int x0, int y0, const uint16_t * img, int startAngle, int endAngle)

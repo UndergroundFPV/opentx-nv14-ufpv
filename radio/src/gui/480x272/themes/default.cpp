@@ -283,8 +283,6 @@ class DefaultTheme: public Theme
       // if (!backgroundBitmap) {
         backgroundBitmap = BitmapBuffer::load(getThemePath("background.png"));
       //}
-      keyboardBitmap = BitmapBuffer::load(getThemePath("keyboard.png"));
-      // TODO leak
       update();
     }
 
@@ -353,20 +351,25 @@ class DefaultTheme: public Theme
       lcd->drawMask(x, y, iconMask[index], flags);
     }
 
+    virtual const BitmapBuffer * getIconBitmap(uint8_t index, bool selected) const
+    {
+      return selected ? menuIconSelected[index] : menuIconNormal[index];
+    }
+
     virtual bool drawMenuIcon(uint8_t index, uint8_t position, bool selected) const
     {
       if (selected) {
-        menuHeaderWindow.drawBitmap(position*TOPBAR_BUTTON_WIDTH, 0, menuIconSelected[index]);
+        lcd->drawBitmap(position*TOPBAR_BUTTON_WIDTH, 0, menuIconSelected[index]);
       }
       else {
-        menuHeaderWindow.drawBitmap(position*TOPBAR_BUTTON_WIDTH, 0, menuIconNormal[index]);
+        lcd->drawBitmap(position*TOPBAR_BUTTON_WIDTH, 0, menuIconNormal[index]);
       }
-      return menuHeaderWindow.touchPressed(position*TOPBAR_BUTTON_WIDTH, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH);
+      // TODO return menuHeaderWindow.touchPressed(position*TOPBAR_BUTTON_WIDTH, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH);
     }
 
   protected:
     static const BitmapBuffer * backgroundBitmap;
-    // static BitmapBuffer * keyboardBitmap;
+    static BitmapBuffer * keyboardBitmap;
     static BitmapBuffer * topleftBitmap;
     static BitmapBuffer * menuIconNormal[MENUS_ICONS_COUNT];
     static BitmapBuffer * menuIconSelected[MENUS_ICONS_COUNT];
