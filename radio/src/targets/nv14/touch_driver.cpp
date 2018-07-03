@@ -366,8 +366,8 @@ void TouchDriver( void )
                       }
                       else {
                           touchState.Event = TE_DOWN;
-                          touchState.startX = touchState.X;
-                          touchState.startY = touchState.Y;
+                          touchState.startX = touchState.lastX = touchState.X;
+                          touchState.startY = touchState.lastY = touchState.Y;
                           putEvent(TOUCH_PRESS);
                       } 
                   }
