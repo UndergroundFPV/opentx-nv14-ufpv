@@ -117,7 +117,7 @@ class Window {
     void checkEvents()
     {
       if (touchState.Event == TE_UP) {
-        onTouch(touchState.startX, touchState.startY);
+        onTouch(touchState.startX - scrollPositionX, touchState.startY - scrollPositionY);
         touchState.Event = TE_NONE;
       }
       else if (touchState.Event == TE_SLIDE) {

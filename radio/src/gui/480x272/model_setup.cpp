@@ -19,6 +19,7 @@
  */
 
 #include <functional>
+#include <vector>
 #include <touch_driver.h>
 #include "opentx.h"
 
@@ -161,8 +162,8 @@ void editTimerMode(int timerIdx, coord_t y, LcdFlags attr, event_t event)
                            115 + 2 * INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
   }
   drawStringWithIndex(MENUS_MARGIN_LEFT, y, STR_TIMER, timerIdx + 1, BOLD);
-  // drawTimerMode(&menuBodyWindow, MODEL_SETUP_2ND_COLUMN, y, timer.mode, (menuHorizontalPosition<=0 ? attr : 0));
-  // drawTimer(&menuBodyWindow, MODEL_SETUP_2ND_COLUMN+50, y, timer.start, (menuHorizontalPosition!=0 ? attr|TIMEHOUR : TIMEHOUR));
+  // drawTimerMode(window, MODEL_SETUP_2ND_COLUMN, y, timer.mode, (menuHorizontalPosition<=0 ? attr : 0));
+  // drawTimer(window, MODEL_SETUP_2ND_COLUMN+50, y, timer.start, (menuHorizontalPosition!=0 ? attr|TIMEHOUR : TIMEHOUR));
   if (attr && s_editMode > 0) {
     switch (menuHorizontalPosition) {
       case 0: {
@@ -240,24 +241,30 @@ int getSwitchWarningsCount()
 
 class KeyboardWindow : public Window {
   public:
-    KeyboardWindow(Window * parent, const rect_t & rect) :
-      Window(parent, rect)
+    KeyboardWindow() :
+      Window(&mainWindow, {0, LCD_H - 270, LCD_W, 0})
     {
     }
 
-    void setField(char * field, uint8_t length = 0)
+    void setField(char * field, uint8_t length, Window * fieldWindow)
     {
       this->field = field;
       this->length = length;
       this->setHeight(270);
-      menuBodyWindow.setHeight(LCD_H - 270 - menuBodyWindow.rect.y);
+      if (fieldWindow) {
+        fieldWindow->setHeight(LCD_H - 270 - fieldWindow->rect.y);
+        this->fieldWindow = fieldWindow;
+      }
     }
 
     void disable()
     {
-      this->field = NULL;
       this->setHeight(0);
-      menuBodyWindow.setHeight(LCD_H - 0 - menuBodyWindow.rect.y);
+      this->field = nullptr;
+      if (fieldWindow) {
+        fieldWindow->setHeight(LCD_H - 0 - fieldWindow->rect.y);
+        fieldWindow = nullptr;
+      }
     }
 
     char * getField()
@@ -353,10 +360,11 @@ class KeyboardWindow : public Window {
     uint8_t length = 0;
     coord_t cursorPos = 0;
     uint8_t cursorIndex = 0;
-    BitmapBuffer * keyboardBitmap = NULL;
+    BitmapBuffer * keyboardBitmap = nullptr;
+    Window * fieldWindow = nullptr;
 };
 
-KeyboardWindow keyboardWindow(&mainWindow, {0, LCD_H - 270, LCD_W, 0});
+KeyboardWindow keyboardWindow;
 
 #if 1
 #define CONTENT_WIDTH     140
@@ -426,10 +434,29 @@ class StaticBitmap: public Window {
 
 class Button : public Window {
   public:
-    Button(Window * parent, const rect_t & rect, const char * label, std::function<uint8_t(void)> onPress):
+    Button(Window * parent, const rect_t & rect, std::function<uint8_t(void)> onPress, uint8_t state=0):
       Window(parent, rect),
-      label(label),
-      onPress(onPress)
+      onPress(onPress),
+      state(state)
+    {
+    }
+
+    bool onTouch(coord_t x, coord_t y)
+    {
+      state = onPress();
+      return true;
+    }
+
+  protected:
+    std::function<uint8_t(void)> onPress;
+    uint8_t state;
+};
+
+class TextButton : public Button {
+  public:
+    TextButton(Window * parent, const rect_t & rect, const char * label, std::function<uint8_t(void)> onPress):
+      Button(parent, rect, onPress),
+      label(label)
     {
     }
 
@@ -442,16 +469,25 @@ class Button : public Window {
         drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, CURVE_AXIS_COLOR);
     }
 
-    bool onTouch(coord_t x, coord_t y)
+  protected:
+    const char * label;
+};
+
+class IconButton: public Button {
+  public:
+    IconButton(Window * parent, const rect_t & rect, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t state=0):
+      Button(parent, rect, onPress, state),
+      icon(icon)
     {
-      state = onPress();
-      return true;
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      dc->drawBitmap(0, 0, theme->getIconBitmap(icon, state));
     }
 
   protected:
-    const char * label;
-    std::function<uint8_t(void)> onPress;
-    uint8_t state = 0;
+    uint8_t icon;
 };
 
 class CheckBox : public Window {
@@ -466,23 +502,22 @@ class CheckBox : public Window {
 
     void paint(BitmapBuffer * dc)
     {
-      // TRACE("PAINT label=%s w=%d offset=%d,%d", label, rect.w, lcd->getOffsetX(), lcd->getOffsetY());
       bool hasFocus = this->hasFocus();
       uint8_t value = getValue();
       if (hasFocus) {
-        dc->drawSolidFilledRect(0, 4, 14, 14, TEXT_INVERTED_BGCOLOR);
-        dc->drawSolidFilledRect(2, 6, 10, 10, TEXT_BGCOLOR);
+        dc->drawSolidFilledRect(0, 6, 14, 14, TEXT_INVERTED_BGCOLOR);
+        dc->drawSolidFilledRect(2, 8, 10, 10, TEXT_BGCOLOR);
         if (value) {
-          dc->drawSolidFilledRect(3, 7, 8, 8, TEXT_INVERTED_BGCOLOR);
+          dc->drawSolidFilledRect(3, 9, 8, 8, TEXT_INVERTED_BGCOLOR);
         }
       }
       else {
         if (value) {
-          dc->drawSolidFilledRect(3, 7, 8, 8, SCROLLBOX_COLOR);
-          drawSolidRect(dc, 1, 5, 12, 12, 1, LINE_COLOR);
+          dc->drawSolidFilledRect(3, 9, 8, 8, SCROLLBOX_COLOR);
+          drawSolidRect(dc, 1, 7, 12, 12, 1, LINE_COLOR);
         }
         else {
-          drawSolidRect(dc, 1, 5, 12, 12, 1, LINE_COLOR);
+          drawSolidRect(dc, 1, 7, 12, 12, 1, LINE_COLOR);
         }
       }
     }
@@ -614,7 +649,7 @@ class TextEdit : public Window {
         lineColor = TEXT_INVERTED_BGCOLOR;
       }
       if (!hasFocus && zlen(value, length) == 0)
-        dc->drawSizedText(3, 3, "---", length, textColor);
+        dc->drawSizedText(3, 3, "---", length, CURVE_AXIS_COLOR);
       else
         dc->drawSizedText(3, 3, value, length, ZCHAR | textColor);
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
@@ -633,7 +668,7 @@ class TextEdit : public Window {
     {
       setFocus();
       if (keyboardWindow.getField() != value) {
-        keyboardWindow.setField(value, length);
+        keyboardWindow.setField(value, length, parent);
       }
       keyboardWindow.setCursorPos(x);
       return true;
@@ -650,7 +685,7 @@ class GridLayout {
       window(window)
     {
     }
-
+    
     rect_t getLabelSlot(bool indent = false)
     {
       coord_t left = indent ? MENUS_MARGIN_LEFT + INDENT_WIDTH : MENUS_MARGIN_LEFT;
@@ -669,9 +704,20 @@ class GridLayout {
       currentY += 30 + 10;
     }
 
+    void addWindow(Window * window)
+    {
+      window->adjustHeight();
+      currentY += window->rect.h + 10;
+    }
+
     void spacer(coord_t height=10)
     {
       currentY += height;
+    }
+
+    coord_t getWindowHeight() const
+    {
+      return currentY;
     }
 
   protected:
@@ -679,19 +725,12 @@ class GridLayout {
     coord_t currentY = 0;
 };
 
-Window internalModuleWindow(&menuBodyWindow, {0, 0, LCD_W, 0});
-Window externalModuleWindow(&menuBodyWindow, {0, 0, LCD_W, 0});
-
-#define GET_DEFAULT(value)  [=]() -> int32_t { return value; }
-#define SET_DEFAULT(value)  [=](int32_t newValue) -> void { value = newValue; }
-#define SUBTITLE(label) { rect.h = 30; rect.x = MENUS_MARGIN_LEFT; new Subtitle(&menuBodyWindow, rect, label); rect.y += rect.h + 10; }
-#define NUMBER_EDIT_WITH_PREFIX(X, label, value, vmin, vmax, prefix) { rect.h = 30; rect.x = X; rect.w = LCD_W - (X) - MENUS_MARGIN_RIGHT; new NumberEdit(&menuBodyWindow, rect, label, vmin, vmax, 1, GET_DEFAULT(value), SET_DEFAULT(value), 0, prefix); rect.y += rect.h + 10; }
-#define LINE_CHOICE_WITH_CUSTOM_SET(X, label, values, value, vmin, vmax, set) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new Choice(&menuBodyWindow, rect, values, vmin, vmax, GET_DEFAULT(value), set); rect.y += rect.h + 10; }
-#define LINE_LABEL(X, label) { rect.h = 30; rect.x = (X); rect.w = LCD_W - (X) - MENUS_MARGIN_RIGHT - CONTENT_WIDTH; new StaticText(&menuBodyWindow, rect, label); }
-#define LINE_CHECKBOX(X, label, value) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new CheckBox(&menuBodyWindow, rect, GET_DEFAULT(value), SET_DEFAULT(value)); rect.y += rect.h + 10; }
-#define LINE_CHECKBOX_INVERTED(X, label, value) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new CheckBox(&menuBodyWindow, rect, [=]() -> uint8_t { return !value; }, [=](uint8_t newValue) -> void { value = !newValue; }); rect.y += rect.h + 10; }
-#define LINE_CHOICE(X, label, values, value, vmin, vmax) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new Choice(&menuBodyWindow, rect, values, vmin, vmax, GET_DEFAULT(value), SET_DEFAULT(value)); rect.y += rect.h + 10; }
-#define LINE_TEXT_EDIT(X, label, text, length) { LINE_LABEL(X, label); rect.x += rect.w; rect.w = LCD_W - rect.x - MENUS_MARGIN_RIGHT; new TextEdit(&menuBodyWindow, rect, text, length); rect.y += rect.h + 10; }
+#define GET_DEFAULT(value)      [=]() -> int32_t { return value; }
+#define SET_DEFAULT(value)      [=](int32_t newValue) -> void { value = newValue; }
+#define GET_SET_DEFAULT(value)  GET_DEFAULT(value), SET_DEFAULT(value)
+#define GET_INVERTED(value)     [=]() -> uint8_t { return !value; }
+#define SET_INVERTED(value)     [=](uint8_t newValue) -> void { value = !newValue; }
+#define GET_SET_INVERTED(value) GET_INVERTED(value), SET_INVERTED(value)
 
 #else
 template <class W>
@@ -737,7 +776,7 @@ bool CheckBox(W * window, rect_t & rect, const char * label, uint8_t & value, Lc
 
 template <class W>
 void drawWidgetLabel(W * window, rect_t & rect, const char * label) {
-  drawText(&menuBodyWindow, rect.x, rect.y, label, TINSIZE);
+  drawText(window, rect.x, rect.y, label, TINSIZE);
 }
 
 template <class W>
@@ -756,9 +795,9 @@ bool Choice(W * window, rect_t & rect, const char * label, const char * values, 
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  drawTextAtIndex(&menuBodyWindow, rect.x, rect.y + 9, values, value, textColor);
-  drawWidgetLine(&menuBodyWindow, rect, lineColor);
-  drawWidgetLabel(&menuBodyWindow, rect, label);
+  drawTextAtIndex(window, rect.x, rect.y + 9, values, value, textColor);
+  drawWidgetLine(window, rect, lineColor);
+  drawWidgetLabel(window, rect, label);
   if (window->touchPressed(rect.x, rect.y, rect.w, rect.h)) {
     // value ^= 1;
     window->setFocus(rect.x, rect.y);
@@ -785,8 +824,8 @@ bool TextEdit(W * window, rect_t & rect, const char * label, char * value, uint8
     menuBodyWindow.drawSizedText(rect.x, rect.y + 9, "---", length, textColor);
   else
     menuBodyWindow.drawSizedText(rect.x, rect.y + 9, value, length, ZCHAR | textColor);
-  drawWidgetLine(&menuBodyWindow, rect, lineColor);
-  drawWidgetLabel(&menuBodyWindow, rect, label);
+  drawWidgetLine(window, rect, lineColor);
+  drawWidgetLabel(window, rect, label);
   if (window->touchPressed(rect.x, rect.y, rect.w, rect.h)) {
     // value ^= 1;
     window->setFocus(rect.x, rect.y);
@@ -796,8 +835,8 @@ bool TextEdit(W * window, rect_t & rect, const char * label, char * value, uint8
     return false;
   }
 }
-#define CHECKBOX(X, label, value) { rect.x = X; rect.w = LCD_W - (X) - 20; uint8_t _value = value; CheckBox(&menuBodyWindow, rect, label, _value); value = _value; rect.y += rect.h + 10; }
-#define CHECKBOX_INVERTED(X, label, value) { rect.x = X; rect.w = LCD_W - (X) - 20; uint8_t _value = !value; CheckBox(&menuBodyWindow, rect, label, _value); value = !_value; rect.y += rect.h + 10; }
+#define CHECKBOX(X, label, value) { rect.x = X; rect.w = LCD_W - (X) - 20; uint8_t _value = value; CheckBox(window, rect, label, _value); value = _value; rect.y += rect.h + 10; }
+#define CHECKBOX_INVERTED(X, label, value) { rect.x = X; rect.w = LCD_W - (X) - 20; uint8_t _value = !value; CheckBox(window, rect, label, _value); value = !_value; rect.y += rect.h + 10; }
 #endif
 
 void editTimerCountdown(int timerIdx, coord_t y, LcdFlags attr, event_t event)
@@ -805,9 +844,9 @@ void editTimerCountdown(int timerIdx, coord_t y, LcdFlags attr, event_t event)
   TimerData &timer = g_model.timers[timerIdx];
 
 //  rect_t rect = {MENUS_MARGIN_LEFT + INDENT_WIDTH, y, LCD_W - (MENUS_MARGIN_LEFT + INDENT_WIDTH) - 20, 30};
-//  drawWidgetLabel(&menuBodyWindow, rect, NO_INDENT(STR_BEEPCOUNTDOWN));
+//  drawWidgetLabel(window, rect, NO_INDENT(STR_BEEPCOUNTDOWN));
   // drawTextAtIndex(MENUS_MARGIN_LEFT + INDENT_WIDTH, y + 10, STR_VBEEPCOUNTDOWN, timer.countdownBeep, (menuHorizontalPosition == 0 ? attr : 0));
-//  drawWidgetLine(&menuBodyWindow, rect, CURVE_AXIS_COLOR);
+//  drawWidgetLine(window, rect, CURVE_AXIS_COLOR);
   if (timer.countdownBeep != COUNTDOWN_SILENT) {
     drawNumber(lcd, MENUS_MARGIN_LEFT + INDENT_WIDTH, y + 10, TIMER_COUNTDOWN_START(timerIdx),
                (menuHorizontalPosition == 1 ? attr : 0) | LEFT, 0, NULL, "s");
@@ -825,51 +864,6 @@ void editTimerCountdown(int timerIdx, coord_t y, LcdFlags attr, event_t event)
   }
 }
 
-void updateInternalModuleWindow(int8_t value)
-{
-  GridLayout grid(internalModuleWindow);
-
-  internalModuleWindow.deleteWindows();
-
-  new StaticText(&internalModuleWindow, grid.getLabelSlot(), STR_MODE);
-  new Choice(&internalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
-             GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].rfProtocol),
-             [&](int32_t newValue) -> void {
-               g_model.moduleData[INTERNAL_MODULE].rfProtocol = newValue - 1;
-               updateInternalModuleWindow(g_model.moduleData[INTERNAL_MODULE].rfProtocol);
-             });
-  grid.nextLine();
-
-  if (value != RF_PROTO_OFF) {
-    new StaticText(&internalModuleWindow, grid.getLabelSlot(), STR_CHANNELRANGE);
-    new NumberEdit(&internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS(0), 1,
-                   GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
-                   [=](int8_t newValue) -> void { g_model.moduleData[INTERNAL_MODULE].channelsStart = newValue - 1; }, 0, STR_CH);
-    new NumberEdit(&internalModuleWindow, grid.getFieldSlot(2, 1), 1 + g_model.moduleData[INTERNAL_MODULE].channelsStart,
-                   min<int8_t>(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart + MAX_CHANNELS(0) + 8, 1 + 32), 1,
-                   GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].channelsCount + 8 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
-                   [=](int8_t newValue) -> void {
-                     g_model.moduleData[INTERNAL_MODULE].channelsCount = newValue - 8 - g_model.moduleData[INTERNAL_MODULE].channelsStart;
-                   }, 0, STR_CH);
-    grid.nextLine();
-
-    new StaticText(&internalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
-    new Choice(&internalModuleWindow, grid.getFieldSlot(), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode),
-               SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode));
-    grid.nextLine();
-
-    new StaticText(&internalModuleWindow, grid.getLabelSlot(), STR_ANTENNASELECTION);
-    new Choice(&internalModuleWindow, grid.getFieldSlot(), STR_VANTENNATYPES, 0, 1,
-               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna),
-               SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna));
-  }
-
-  coord_t delta = internalModuleWindow.adjustHeight();
-  menuBodyWindow.moveWindowsTop(internalModuleWindow.rect.y, delta);
-  menuBodyWindow.innerHeight += delta;
-}
-
 // @3djc don't use NOINDENT anymore (this could be another task later ... remove all these INDENT from translations ...)
 
 void resetModuleSettings(uint8_t module)
@@ -884,233 +878,193 @@ void resetModuleSettings(uint8_t module)
   g_model.moduleData[module].rfProtocol = 0;
 }
 
+class Menu;
 
-void updateExternalModuleWindow()
-{
-  GridLayout grid(externalModuleWindow);
-
-  externalModuleWindow.deleteWindows();
-
-  new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_MODE);
-  new Choice(&externalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
-             GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].type),
-             [&](int32_t newValue) -> void {
-               g_model.moduleData[EXTERNAL_MODULE].type = newValue;
-               resetModuleSettings(EXTERNAL_MODULE);
-               updateExternalModuleWindow();
-             });
-  if (g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_NONE || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
-    coord_t delta = externalModuleWindow.adjustHeight();
-    menuBodyWindow.moveWindowsTop(externalModuleWindow.rect.y, delta);
-    menuBodyWindow.innerHeight += delta;
-    return;
-  }
-
-  if (IS_MODULE_XJT(EXTERNAL_MODULE)) {
-    new Choice(&externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, 1 + RF_PROTO_X16, 1 + RF_PROTO_LAST,
-               GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
-               [=](int32_t newValue) -> void { g_model.moduleData[EXTERNAL_MODULE].rfProtocol = newValue - 1; });
-  }
-  else if (IS_MODULE_DSM2(EXTERNAL_MODULE)) {
-    new Choice(&externalModuleWindow, grid.getFieldSlot(2, 1), STR_DSM_PROTOCOLS, DSM2_PROTO_LP45, DSM2_PROTO_DSMX,
-               GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
-               SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
-  }
-  else if (IS_MODULE_R9M(EXTERNAL_MODULE)) {
-    new Choice(&externalModuleWindow, grid.getFieldSlot(2, 1), STR_R9M_MODES, MODULE_SUBTYPE_R9M_FCC, MODULE_SUBTYPE_R9M_LBT,
-               GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].subType),
-               [&](int32_t newValue) -> void {
-                 g_model.moduleData[EXTERNAL_MODULE].subType = newValue;
-                 updateExternalModuleWindow();
-               });
-  }
-
-  grid.nextLine();
-
-  // Channel Range
-  new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_CHANNELRANGE);
-
-  if (IS_MODULE_CROSSFIRE(EXTERNAL_MODULE)) { // CRSF has a fixed 16ch span
-    // FROM
-    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 0), 1, 17, 1,
-                   GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
-                   [=](int32_t newValue) -> void {
-                     g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
-                     updateExternalModuleWindow();
-                   }, 0, STR_CH);
-    // TO
-    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 1),
-                   0, 32, 1,
-                   GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 16),
-                   [=](int8_t newValue) -> void {
-                     g_model.moduleData[EXTERNAL_MODULE].channelsCount = 8;
-                   }, 0, STR_CH);
-  }
-  else {
-    // FROM
-    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount, 1,
-                   GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
-                   [=](int32_t newValue) -> void {
-                     g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
-                     updateExternalModuleWindow();
-                   }, 0, STR_CH);
-    // TO
-    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 1),
-                   g_model.moduleData[EXTERNAL_MODULE].channelsStart+1, g_model.moduleData[EXTERNAL_MODULE].channelsStart + MAX_CHANNELS(EXTERNAL_MODULE), 1,
-                   GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 8 + g_model.moduleData[EXTERNAL_MODULE].channelsCount),
-                   [=](int8_t newValue) -> void {
-                     g_model.moduleData[EXTERNAL_MODULE].channelsCount = newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
-                     TRACE("Channel count : %d",g_model.moduleData[EXTERNAL_MODULE].channelsCount );
-                     updateExternalModuleWindow();
-                   }, 0, STR_CH);
-  }
-
-  grid.nextLine();
-
-
-  // PPM MODULES
-  if (IS_MODULE_PPM(EXTERNAL_MODULE)) {
-    SET_DEFAULT_PPM_FRAME_LENGTH(EXTERNAL_MODULE);
-    // PPM FRAME
-    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_PPMFRAME);
-    // PPM FRAME LENGTH
-    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225, 5,
-                   GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength * 5 + 225),
-                   [=](int32_t newValue) -> void {
-                     g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength = (newValue - 225) / 5;
-                   }, PREC1, NULL, STR_MS);
-
-    // PPM FRAME DELAY
-    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 1), 100, 800, 50,
-                   GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.delay * 50 + 300),
-                   [=](int32_t newValue) -> void {
-                     g_model.moduleData[EXTERNAL_MODULE].ppm.delay = (newValue - 300) / 50;
-                   }, 0, NULL, "us");
-  }
-
-  if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE) || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
-    // Receiver
-    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_RECEIVER_NUM);
-    // Receiver number
-    new NumberEdit(&externalModuleWindow, grid.getFieldSlot(2, 0), 0, MAX_RX_NUM(EXTERNAL_MODULE), 1,
-                   GET_DEFAULT(g_model.header.modelId[EXTERNAL_MODULE]),
-                   [=](int8_t newValue) -> void { g_model.header.modelId[EXTERNAL_MODULE] = newValue;
-                   }, 0);
-    grid.nextLine();
-
-    // Bind and Range buttons
-    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_MODULE_BIND, BLINK);
-
-    new Button(&externalModuleWindow, grid.getFieldSlot(2, 0), STR_MODULE_BIND,
-               [&]() -> uint8_t {
-                 return 1;
-               });
-    new Button(&externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
-               [&]() -> uint8_t {
-                 return 1;
-               });
-  }
-  grid.nextLine();
-
-  // FAILSAFE
-  if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_R9M(EXTERNAL_MODULE)) {
-    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
-    new Choice(&externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-               GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode),
-               SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode));
-    grid.nextLine();
-  }
-
-  // R9M POWER
-  if (IS_MODULE_R9M_FCC(EXTERNAL_MODULE)) {
-    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
-    new Choice(&externalModuleWindow, grid.getFieldSlot(), STR_R9M_FCC_POWER_VALUES, 0, R9M_FCC_POWER_MAX,
-               GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].pxx.power),
-               [&](int32_t newValue) -> void {
-                 g_model.moduleData[EXTERNAL_MODULE].pxx.power = newValue;
-               });
-  }
-  if (IS_MODULE_R9M_LBT(EXTERNAL_MODULE)) {
-    new StaticText(&externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
-    new Choice(&externalModuleWindow, grid.getFieldSlot(), STR_R9M_LBT_POWER_VALUES, 0, R9M_LBT_POWER_MAX,
-               GET_DEFAULT(min(g_model.moduleData[EXTERNAL_MODULE].pxx.power, (uint8_t) R9M_LBT_POWER_MAX)),
-               [&](int32_t newValue) -> void {
-                 g_model.moduleData[EXTERNAL_MODULE].pxx.power = newValue;
-               });
-  }
-
-  coord_t delta = externalModuleWindow.adjustHeight();
-  menuBodyWindow.moveWindowsTop(externalModuleWindow.rect.y, delta);
-  menuBodyWindow.innerHeight += delta;
-}
-
-class PagesCarousel: public Window {
+class MenuPagesCarousel: public Window {
   public:
-    PagesCarousel(Window * parent):
-      Window(parent, { TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, MENU_HEADER_HEIGHT })
+    MenuPagesCarousel(Window * parent, Menu * menu):
+      Window(parent, { TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, MENU_HEADER_HEIGHT }),
+      menu(menu)
     {
-      setInnerWidth(TOPBAR_BUTTON_WIDTH * (DIM(MODEL_ICONS) - 1));
     }
 
-    void paint(BitmapBuffer * dc)
-    {
-      for (unsigned i=0; i<DIM(MODEL_ICONS) - 1; i++) {
-        theme->drawMenuIcon(MODEL_ICONS[i+1], i, menuPageIndex == i);
-      }
-    }
+    void updateInnerWidth();
+
+    void paint(BitmapBuffer * dc);
+
+    bool onTouch(coord_t x, coord_t y);
+
+  protected:
+    constexpr static uint8_t padding_left = 3;
+    Menu * menu;
+    uint8_t currentPage = 0;
 };
 
 class MenuHeaderWindow: public Window {
+  friend class Menu;
+
   public:
-    MenuHeaderWindow():
-      Window(&mainWindow, { 0, 0, LCD_W, MENU_BODY_TOP })
-    {
-      new PagesCarousel(this);
-    }
+    MenuHeaderWindow(Menu * menu);
 
     void paint(BitmapBuffer * dc)
     {
-      dc->drawBitmap(0, 0, theme->getIconBitmap(ICON_BACK, true));
       dc->drawSolidFilledRect(0, MENU_HEADER_HEIGHT, LCD_W, MENU_TITLE_TOP - MENU_HEADER_HEIGHT, TEXT_BGCOLOR); // the white separation line
       dc->drawSolidFilledRect(0, MENU_TITLE_TOP, LCD_W, MENU_TITLE_HEIGHT, TITLE_BGCOLOR); // the title line background
-      if (1/*title*/) {
-        lcdDrawText(MENUS_MARGIN_LEFT, MENU_TITLE_TOP, STR_MENUSETUP, MENU_TITLE_COLOR);
+      if (title) {
+        lcdDrawText(MENUS_MARGIN_LEFT, MENU_TITLE_TOP, title, MENU_TITLE_COLOR);
       }
+    }
+
+    void setTitle(const char * title)
+    {
+      this->title = title;
+    }
+
+  protected:
+    IconButton back;
+    MenuPagesCarousel carousel;
+    const char * title = nullptr;
+};
+
+class MenuPage {
+  public:
+    MenuPage(const char * title, unsigned icon):
+      title(title),
+      icon(icon)
+    {
+    }
+
+    virtual void build(Window * window) = 0;
+
+    const char * title;
+    unsigned icon;
+};
+
+class Menu: public Window {
+  friend class MenuPagesCarousel;
+
+  public:
+    Menu():
+      Window(&mainWindow, { 0, 0, LCD_W, LCD_H }),
+      header(this),
+      body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
+    {
+    }
+
+    void addPage(MenuPage * page)
+    {
+      pages.push_back(page);
+      if (!currentPage) {
+        setCurrentPage(page);
+      }
+      header.carousel.updateInnerWidth();
+    }
+
+    void setCurrentPage(MenuPage * page)
+    {
+      body.deleteWindows();
+      currentPage = page;
+      page->build(&body);
+      header.setTitle(page->title);
+    }
+
+    void setCurrentPage(unsigned index)
+    {
+      setCurrentPage(pages[index]);
+    }
+
+  protected:
+    MenuHeaderWindow header;
+    Window body;
+    std::vector<MenuPage *> pages;
+    MenuPage * currentPage;
+};
+
+MenuHeaderWindow::MenuHeaderWindow(Menu * menu):
+  Window(menu, { 0, 0, LCD_W, MENU_BODY_TOP }),
+  back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
+    [&]() -> uint8_t {
+      // TODO pop menu
+      return 1;
+    }, 1),
+  carousel(this, menu)
+{
+}
+
+void MenuPagesCarousel::updateInnerWidth()
+{
+  setInnerWidth(padding_left + TOPBAR_BUTTON_WIDTH * menu->pages.size());
+}
+
+void MenuPagesCarousel::paint(BitmapBuffer * dc)
+{
+  dc->drawSolidFilledRect(0, 0, padding_left, TOPBAR_BUTTON_WIDTH, HEADER_BGCOLOR);
+  for (unsigned i=0; i<menu->pages.size(); i++) {
+    dc->drawBitmap(padding_left + i*TOPBAR_BUTTON_WIDTH, 0, theme->getIconBitmap(menu->pages[i]->icon, currentPage == i));
+  }
+}
+
+bool MenuPagesCarousel::onTouch(coord_t x, coord_t y)
+{
+  unsigned index = (x - padding_left) / TOPBAR_BUTTON_WIDTH;
+  menu->setCurrentPage(index);
+  currentPage = index;
+  return true;
+}
+
+class ModelSetupPage: public MenuPage {
+  public:
+    ModelSetupPage():
+      MenuPage(STR_MENUSETUP, ICON_MODEL_SETUP)
+    {
+    }
+
+    void build(Window * window);
+
+  protected:
+    void updateInternalModuleWindow();
+    void updateExternalModuleWindow();
+
+    Window * internalModuleWindow = nullptr;
+    Window * externalModuleWindow = nullptr;
+};
+
+
+class ModelMenu: public Menu {
+  public:
+    ModelMenu():
+      Menu()
+    {
+      addPage(new ModelSetupPage());
+      addPage(new ModelSetupPage());
+      addPage(new ModelSetupPage());
+      addPage(new ModelSetupPage());
+      addPage(new ModelSetupPage());
+      addPage(new ModelSetupPage());
+      addPage(new ModelSetupPage());
+      addPage(new ModelSetupPage());
     }
 };
 
-void buildModelMenuHeader()
+void ModelSetupPage::build(Window * window)
 {
-  new MenuHeaderWindow();
-}
-
-void buildModelSetupMenu()
-{
-  GridLayout grid(menuBodyWindow);
+  GridLayout grid(*window);
   grid.spacer(10);
 
-  buildModelMenuHeader();
-
-  rect_t rect = {MENUS_MARGIN_LEFT, MENUS_MARGIN_LEFT + 40, 0, 0};
-
   // Model name
-#if 0
-  LINE_TEXT_EDIT(MENUS_MARGIN_LEFT, STR_MODELNAME, g_model.header.name, sizeof(g_model.header.name));
-#else
-  new StaticText(&menuBodyWindow, grid.getLabelSlot(), STR_MODELNAME);
-  new TextEdit(&menuBodyWindow, grid.getFieldSlot(), g_model.header.name, sizeof(g_model.header.name));
+  new StaticText(window, grid.getLabelSlot(), STR_MODELNAME);
+  new TextEdit(window, grid.getFieldSlot(), g_model.header.name, sizeof(g_model.header.name));
   grid.nextLine();
-#endif
 
 /*
  * case ITEM_MODEL_BITMAP: {
         rect_t rect = { MENUS_MARGIN_LEFT, y, LCD_W - MENUS_MARGIN_LEFT - 20, 30 };
-        drawWidgetLabel(&menuBodyWindow, rect, STR_BITMAP);
+        drawWidgetLabel(window, rect, STR_BITMAP);
         if (ZEXIST(g_model.header.bitmap))
           menuBodyWindow.drawSizedText(MENUS_MARGIN_LEFT, y + 10, g_model.header.bitmap, sizeof(g_model.header.bitmap), attr);
         else
-          drawTextAtIndex(&menuBodyWindow, MENUS_MARGIN_LEFT, y + 10, STR_VCSWFUNC, 0, attr);
-        drawWidgetLine(&menuBodyWindow, rect, CURVE_AXIS_COLOR);
+          drawTextAtIndex(window, MENUS_MARGIN_LEFT, y + 10, STR_VCSWFUNC, 0, attr);
+        drawWidgetLine(window, rect, CURVE_AXIS_COLOR);
         if (attr && event == EVT_KEY_BREAK(KEY_ENTER) && READ_ONLY_UNLOCKED()) {
           s_editMode = 0;
           if (sdListFiles(BITMAPS_PATH, BITMAPS_EXT, sizeof(g_model.header.bitmap) - LEN_BITMAPS_EXT,
@@ -1128,30 +1082,42 @@ void buildModelSetupMenu()
     // Timer label
     char timerLabel[8];
     strAppendStringWithIndex(timerLabel, STR_TIMER, i + 1);
-    SUBTITLE(timerLabel);
+    new Subtitle(window, grid.getLabelSlot(), timerLabel);
+    grid.nextLine();
 
     // editTimerMode(0, y, attr, event);
+
     // Timer name
-    LINE_TEXT_EDIT(MENUS_MARGIN_LEFT + INDENT_WIDTH, NO_INDENT(STR_TIMER_NAME), g_model.timers[i].name, LEN_TIMER_NAME);
+    new StaticText(window, grid.getLabelSlot(), STR_TIMER_NAME);
+    new TextEdit(window, grid.getFieldSlot(), g_model.timers[i].name, LEN_TIMER_NAME);
+    grid.nextLine();
 
     // Timer minute beep
-    LINE_CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, NO_INDENT(STR_MINUTEBEEP), g_model.timers[i].minuteBeep);
+    new StaticText(window, grid.getLabelSlot(), STR_MINUTEBEEP);
+    new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.timers[i].minuteBeep));
+    grid.nextLine();
 
     // Timer countdown
     // editTimerCountdown(0, y, attr, event);
 
     // Timer persistent
-    LINE_CHOICE(MENUS_MARGIN_LEFT + INDENT_WIDTH, NO_INDENT(STR_PERSISTENT), STR_VPERSISTENT,
-                g_model.timers[i].persistent, 0, 2);
+    new StaticText(window, grid.getLabelSlot(), STR_PERSISTENT);
+    new Choice(window, grid.getFieldSlot(), STR_VPERSISTENT, 0, 2, GET_SET_DEFAULT(g_model.timers[i].persistent));
+    grid.nextLine();
   }
 
   // Extended limits
-  LINE_CHECKBOX(MENUS_MARGIN_LEFT, STR_ELIMITS, g_model.extendedLimits);
+  new StaticText(window, grid.getLabelSlot(), STR_ELIMITS);
+  new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.extendedLimits));
+  grid.nextLine();
 
   // Extended trims
-  LINE_CHECKBOX(MENUS_MARGIN_LEFT, STR_ETRIMS, g_model.extendedTrims);
-/*
-  drawText(&menuBodyWindow, MODEL_SETUP_2ND_COLUMN+18, y, STR_RESET_BTN, menuHorizontalPosition>0  && !NO_HIGHLIGHT() ? attr : 0);
+  new StaticText(window, grid.getLabelSlot(), STR_ETRIMS);
+  new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.extendedTrims));
+  grid.nextLine();
+
+  /*
+  drawText(window, MODEL_SETUP_2ND_COLUMN+18, y, STR_RESET_BTN, menuHorizontalPosition>0  && !NO_HIGHLIGHT() ? attr : 0);
         if (attr && menuHorizontalPosition>0) {
           s_editMode = 0;
           if (event==EVT_KEY_LONG(KEY_ENTER)) {
@@ -1166,48 +1132,62 @@ void buildModelSetupMenu()
         */
 
   // Display trims
-  LINE_CHOICE(MENUS_MARGIN_LEFT, STR_DISPLAY_TRIMS, "\006No\0   ChangeYes", g_model.displayTrims, 0, 2);
+  new StaticText(window, grid.getLabelSlot(), STR_DISPLAY_TRIMS);
+  new Choice(window, grid.getFieldSlot(), "\006No\0   ChangeYes", 0, 2, GET_SET_DEFAULT(g_model.displayTrims));
+  grid.nextLine();
 
   // Trim step
-  LINE_CHOICE(MENUS_MARGIN_LEFT, STR_TRIMINC, STR_VTRIMINC, g_model.trimInc, -2, 2);
+  new StaticText(window, grid.getLabelSlot(), STR_TRIMINC);
+  new Choice(window, grid.getFieldSlot(), STR_VTRIMINC, -2, 2, GET_SET_DEFAULT(g_model.trimInc));
+  grid.nextLine();
 
   // Throttle parameters
   {
-    SUBTITLE(STR_THROTTLE_LABEL);
+    new Subtitle(window, grid.getLabelSlot(), STR_THROTTLE_LABEL);
+    grid.nextLine();
 
     // Throttle reversed
-    LINE_CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_THROTTLEREVERSE, g_model.throttleReversed);
+    new StaticText(window, grid.getLabelSlot(), STR_THROTTLEREVERSE);
+    new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.throttleReversed));
+    grid.nextLine();
 
 /*      case ITEM_MODEL_THROTTLE_TRACE:
       {
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_TTRACE);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_TTRACE);
         if (attr) CHECK_INCDEC_MODELVAR_ZERO(event, g_model.thrTraceSrc, NUM_POTS+NUM_SLIDERS+MAX_OUTPUT_CHANNELS);
         uint8_t idx = g_model.thrTraceSrc + MIXSRC_Thr;
         if (idx > MIXSRC_Thr)
           idx += 1;
         if (idx >= MIXSRC_FIRST_POT+NUM_POTS+NUM_SLIDERS)
           idx += MIXSRC_CH1 - MIXSRC_FIRST_POT - NUM_POTS - NUM_SLIDERS;
-        drawSource(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN, y, idx, attr);
+        drawSource(window,MODEL_SETUP_2ND_COLUMN, y, idx, attr);
         break;
       }*/
 
     // Throttle trim
-    LINE_CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_TTRIM, g_model.thrTrim);
+    new StaticText(window, grid.getLabelSlot(), STR_TTRIM);
+    new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.thrTrim));
+    grid.nextLine();
   }
 
   // Preflight parameters
   {
-    SUBTITLE(STR_PREFLIGHT);
+    new Subtitle(window, grid.getLabelSlot(), STR_PREFLIGHT);
+    grid.nextLine();
 
     // Display checklist
-    LINE_CHECKBOX(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_CHECKLIST, g_model.displayChecklist);
+    new StaticText(window, grid.getLabelSlot(), STR_CHECKLIST);
+    new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.displayChecklist));
+    grid.nextLine();
 
     // Throttle warning
-    LINE_CHECKBOX_INVERTED(MENUS_MARGIN_LEFT + INDENT_WIDTH, STR_THROTTLEWARNING, g_model.disableThrottleWarning);
+    new StaticText(window, grid.getLabelSlot(), STR_THROTTLEWARNING);
+    new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_model.disableThrottleWarning));
+    grid.nextLine();
 
     // Switches warning
     /*
-    drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, STR_SWITCHWARNING);
+    drawText(window,MENUS_MARGIN_LEFT, STR_SWITCHWARNING);
         if (!READ_ONLY() && attr && menuHorizontalPosition<0 && event==EVT_KEY_LONG(KEY_ENTER)) {
           killEvents(event);
           START_NO_HIGHLIGHT();
@@ -1240,7 +1220,7 @@ void buildModelSetupMenu()
             s[0] = 'A' + i;
             s[1] = "x\300-\301"[state];
             s[2] = '\0';
-            drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN+i*25, y, s, color|(menuHorizontalPosition==current ? attr : 0));
+            drawText(window,MODEL_SETUP_2ND_COLUMN+i*25, y, s, color|(menuHorizontalPosition==current ? attr : 0));
             if (!READ_ONLY() && attr && menuHorizontalPosition==current) {
               CHECK_INCDEC_MODELVAR_ZERO_CHECK(event, state, 3, IS_CONFIG_3POS(i) ? NULL : isSwitch2POSWarningStateAvailable);
             }
@@ -1256,23 +1236,228 @@ void buildModelSetupMenu()
 
   // Internal module
   {
-    SUBTITLE(TR_INTERNALRF);
-
-    internalModuleWindow.rect.y = rect.y;
-    updateInternalModuleWindow(g_model.moduleData[INTERNAL_MODULE].rfProtocol);
-    rect.y += internalModuleWindow.rect.h + 10;
+    new Subtitle(window, grid.getLabelSlot(), STR_INTERNALRF);
+    grid.nextLine();
+    internalModuleWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
+    updateInternalModuleWindow();
+    grid.addWindow(internalModuleWindow);
   }
 
   // External module
   {
-    SUBTITLE(TR_EXTERNALRF);
-
-    externalModuleWindow.rect.y = rect.y;
+    new Subtitle(window, grid.getLabelSlot(), STR_EXTERNALRF);
+    grid.nextLine();
+    externalModuleWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
     updateExternalModuleWindow();
-    rect.y += externalModuleWindow.rect.h + 10;
+    grid.addWindow(externalModuleWindow);
   }
 
-  menuBodyWindow.setInnerHeight(rect.y);
+  window->setInnerHeight(grid.getWindowHeight());
+}
+
+void ModelSetupPage::updateInternalModuleWindow()
+{
+  int8_t value = g_model.moduleData[INTERNAL_MODULE].rfProtocol;
+
+  GridLayout grid(*internalModuleWindow);
+
+  internalModuleWindow->deleteWindows();
+
+  new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_MODE);
+  new Choice(internalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
+             GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].rfProtocol),
+             [&](int32_t newValue) -> void {
+               g_model.moduleData[INTERNAL_MODULE].rfProtocol = newValue - 1;
+               updateInternalModuleWindow();
+             });
+  grid.nextLine();
+
+  if (value != RF_PROTO_OFF) {
+    new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_CHANNELRANGE);
+    new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS(0), 1,
+                   GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
+                   [=](int8_t newValue) -> void { g_model.moduleData[INTERNAL_MODULE].channelsStart = newValue - 1; }, 0, STR_CH);
+    new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 1), 1 + g_model.moduleData[INTERNAL_MODULE].channelsStart,
+                   min<int8_t>(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart + MAX_CHANNELS(0) + 8, 1 + 32), 1,
+                   GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].channelsCount + 8 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
+                   [=](int8_t newValue) -> void {
+                     g_model.moduleData[INTERNAL_MODULE].channelsCount = newValue - 8 - g_model.moduleData[INTERNAL_MODULE].channelsStart;
+                   }, 0, STR_CH);
+    grid.nextLine();
+
+    new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
+    new Choice(internalModuleWindow, grid.getFieldSlot(), STR_VFAILSAFE, 0, FAILSAFE_LAST,
+               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode),
+               SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode));
+    grid.nextLine();
+
+    new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_ANTENNASELECTION);
+    new Choice(internalModuleWindow, grid.getFieldSlot(), STR_VANTENNATYPES, 0, 1,
+               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna),
+               SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna));
+  }
+
+  coord_t delta = internalModuleWindow->adjustHeight();
+  internalModuleWindow->parent->moveWindowsTop(internalModuleWindow->rect.y, delta);
+  internalModuleWindow->parent->innerHeight += delta;
+}
+
+void ModelSetupPage::updateExternalModuleWindow()
+{
+  GridLayout grid(*externalModuleWindow);
+
+  externalModuleWindow->deleteWindows();
+
+  new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MODE);
+  new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
+             GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].type),
+             [&](int32_t newValue) -> void {
+               g_model.moduleData[EXTERNAL_MODULE].type = newValue;
+               resetModuleSettings(EXTERNAL_MODULE);
+               updateExternalModuleWindow();
+             });
+  if (g_model.moduleData[EXTERNAL_MODULE].type != MODULE_TYPE_NONE && !IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
+
+    if (IS_MODULE_XJT(EXTERNAL_MODULE)) {
+      new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, 1 + RF_PROTO_X16, 1 + RF_PROTO_LAST,
+                 GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
+                 [=](int32_t newValue) -> void { g_model.moduleData[EXTERNAL_MODULE].rfProtocol = newValue - 1; });
+    } else if (IS_MODULE_DSM2(EXTERNAL_MODULE)) {
+      new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_DSM_PROTOCOLS, DSM2_PROTO_LP45, DSM2_PROTO_DSMX,
+                 GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
+                 SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
+    } else if (IS_MODULE_R9M(EXTERNAL_MODULE)) {
+      new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_R9M_MODES, MODULE_SUBTYPE_R9M_FCC,
+                 MODULE_SUBTYPE_R9M_LBT,
+                 GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].subType),
+                 [&](int32_t newValue) -> void {
+                   g_model.moduleData[EXTERNAL_MODULE].subType = newValue;
+                   updateExternalModuleWindow();
+                 });
+    }
+
+    grid.nextLine();
+
+    // Channel Range
+    new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_CHANNELRANGE);
+
+    if (IS_MODULE_CROSSFIRE(EXTERNAL_MODULE)) { // CRSF has a fixed 16ch span
+      // FROM
+      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1, 17, 1,
+                     GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
+                     [=](int32_t newValue) -> void {
+                       g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
+                       updateExternalModuleWindow();
+                     }, 0, STR_CH);
+      // TO
+      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
+                     0, 32, 1,
+                     GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 16),
+                     [=](int8_t newValue) -> void {
+                       g_model.moduleData[EXTERNAL_MODULE].channelsCount = 8;
+                     }, 0, STR_CH);
+    } else {
+      // FROM
+      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1,
+                     MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount, 1,
+                     GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
+                     [=](int32_t newValue) -> void {
+                       g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
+                       updateExternalModuleWindow();
+                     }, 0, STR_CH);
+      // TO
+      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
+                     g_model.moduleData[EXTERNAL_MODULE].channelsStart + 1,
+                     g_model.moduleData[EXTERNAL_MODULE].channelsStart + MAX_CHANNELS(EXTERNAL_MODULE), 1,
+                     GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 8 +
+                                 g_model.moduleData[EXTERNAL_MODULE].channelsCount),
+                     [=](int8_t newValue) -> void {
+                       g_model.moduleData[EXTERNAL_MODULE].channelsCount =
+                         newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
+                       TRACE("Channel count : %d", g_model.moduleData[EXTERNAL_MODULE].channelsCount);
+                       updateExternalModuleWindow();
+                     }, 0, STR_CH);
+    }
+
+    grid.nextLine();
+
+
+    // PPM MODULES
+    if (IS_MODULE_PPM(EXTERNAL_MODULE)) {
+      SET_DEFAULT_PPM_FRAME_LENGTH(EXTERNAL_MODULE);
+      // PPM FRAME
+      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_PPMFRAME);
+      // PPM FRAME LENGTH
+      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225, 5,
+                     GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength * 5 + 225),
+                     [=](int32_t newValue) -> void {
+                       g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength = (newValue - 225) / 5;
+                     }, PREC1, NULL, STR_MS);
+
+      // PPM FRAME DELAY
+      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1), 100, 800, 50,
+                     GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.delay * 50 + 300),
+                     [=](int32_t newValue) -> void {
+                       g_model.moduleData[EXTERNAL_MODULE].ppm.delay = (newValue - 300) / 50;
+                     }, 0, NULL, "us");
+    }
+
+    if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE) || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
+      // Receiver
+      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_RECEIVER_NUM);
+      // Receiver number
+      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 0, MAX_RX_NUM(EXTERNAL_MODULE), 1,
+                     GET_DEFAULT(g_model.header.modelId[EXTERNAL_MODULE]),
+                     [=](int8_t newValue) -> void {
+                       g_model.header.modelId[EXTERNAL_MODULE] = newValue;
+                     }, 0);
+      grid.nextLine();
+
+      // Bind and Range buttons
+      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MODULE_BIND, BLINK);
+
+      new TextButton(externalModuleWindow, grid.getFieldSlot(2, 0), STR_MODULE_BIND,
+                     [&]() -> uint8_t {
+                       return 1;
+                     });
+      new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
+                     [&]() -> uint8_t {
+                       return 1;
+                     });
+    }
+    grid.nextLine();
+
+    // FAILSAFE
+    if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_R9M(EXTERNAL_MODULE)) {
+      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
+      new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
+                 GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode),
+                 SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode));
+      grid.nextLine();
+    }
+
+    // R9M POWER
+    if (IS_MODULE_R9M_FCC(EXTERNAL_MODULE)) {
+      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
+      new Choice(externalModuleWindow, grid.getFieldSlot(), STR_R9M_FCC_POWER_VALUES, 0, R9M_FCC_POWER_MAX,
+                 GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].pxx.power),
+                 [&](int32_t newValue) -> void {
+                   g_model.moduleData[EXTERNAL_MODULE].pxx.power = newValue;
+                 });
+    }
+    if (IS_MODULE_R9M_LBT(EXTERNAL_MODULE)) {
+      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
+      new Choice(externalModuleWindow, grid.getFieldSlot(), STR_R9M_LBT_POWER_VALUES, 0, R9M_LBT_POWER_MAX,
+                 GET_DEFAULT(min(g_model.moduleData[EXTERNAL_MODULE].pxx.power, (uint8_t) R9M_LBT_POWER_MAX)),
+                 [&](int32_t newValue) -> void {
+                   g_model.moduleData[EXTERNAL_MODULE].pxx.power = newValue;
+                 });
+    }
+  }
+
+  coord_t delta = externalModuleWindow->adjustHeight();
+  externalModuleWindow->parent->moveWindowsTop(externalModuleWindow->rect.y, delta);
+  externalModuleWindow->parent->innerHeight += delta;
 }
 
 bool menuModelSetup(event_t event)
@@ -1317,9 +1502,10 @@ bool menuModelSetup(event_t event)
 */
 
   if (event == EVT_ENTRY) {
-    buildModelSetupMenu();
+    new ModelMenu();
   }
-  else {
+
+  {
     mainWindow.checkEvents();
     // lcd->clear(TEXT_BGCOLOR);
     mainWindow.refresh();
@@ -1330,7 +1516,7 @@ bool menuModelSetup(event_t event)
 #if 0
 
       case ITEM_MODEL_SLIDPOT_WARNING_STATE:
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y,STR_POTWARNINGSTATE);
+        drawText(window,MENUS_MARGIN_LEFT, y,STR_POTWARNINGSTATE);
         lcdDrawTextAtIndex(MODEL_SETUP_2ND_COLUMN, y, PSTR("\004""OFF\0""Man\0""Auto"), g_model.potsWarnMode, attr);
         if (attr) {
           CHECK_INCDEC_MODELVAR(event, g_model.potsWarnMode, POTS_WARN_OFF, POTS_WARN_AUTO);
@@ -1340,7 +1526,7 @@ bool menuModelSetup(event_t event)
 
       case ITEM_MODEL_POTS_WARNING:
       {
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_POTWARNING);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_POTWARNING);
         if (attr) {
           if (!READ_ONLY() && menuHorizontalPosition >= 0 && event==EVT_KEY_LONG(KEY_ENTER)) {
             killEvents(event);
@@ -1378,7 +1564,7 @@ bool menuModelSetup(event_t event)
       }
 
       case ITEM_MODEL_SLIDERS_WARNING:
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_SLIDERWARNING);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_SLIDERWARNING);
         if (attr) {
           if (!READ_ONLY() && menuHorizontalPosition+1 && event==EVT_KEY_LONG(KEY_ENTER)) {
             killEvents(event);
@@ -1415,7 +1601,7 @@ bool menuModelSetup(event_t event)
         break;
 
       case ITEM_MODEL_BEEP_CENTER:
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_BEEPCTR);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_BEEPCTR);
         lcdNextPos = MODEL_SETUP_2ND_COLUMN - 3;
         for (int i=0; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS; i++) {
           LcdFlags flags = ((menuHorizontalPosition==i && attr) ? INVERS : 0);
@@ -1435,17 +1621,17 @@ bool menuModelSetup(event_t event)
         break;
 
       case ITEM_MODEL_USE_GLOBAL_FUNCTIONS:
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_USE_GLOBAL_FUNCS);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_USE_GLOBAL_FUNCS);
         drawCheckBox(MODEL_SETUP_2ND_COLUMN, y, !g_model.noGlobalFunctions, attr);
         if (attr) g_model.noGlobalFunctions = !checkIncDecModel(event, !g_model.noGlobalFunctions, 0, 1);
         break;
 
       case ITEM_MODEL_INTERNAL_MODULE_LABEL:
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, TR_INTERNALRF);
+        drawText(window,MENUS_MARGIN_LEFT, y, TR_INTERNALRF);
         break;
 
       case ITEM_MODEL_INTERNAL_MODULE_MODE:
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_MODE);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_MODE);
         lcdDrawTextAtIndex(MODEL_SETUP_2ND_COLUMN, y, STR_XJT_PROTOCOLS, 1+g_model.moduleData[0].rfProtocol, attr);
         if (attr) {
           g_model.moduleData[INTERNAL_MODULE].rfProtocol = checkIncDec(event, g_model.moduleData[INTERNAL_MODULE].rfProtocol, RF_PROTO_OFF, RF_PROTO_LAST, EE_MODEL, isRfProtocolAvailable);
@@ -1485,11 +1671,11 @@ bool menuModelSetup(event_t event)
         break;
 
       case ITEM_MODEL_EXTERNAL_MODULE_LABEL:
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, TR_EXTERNALRF);
+        drawText(window,MENUS_MARGIN_LEFT, y, TR_EXTERNALRF);
         break;
 
       case ITEM_MODEL_EXTERNAL_MODULE_MODE:
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_MODE);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_MODE);
         lcdDrawTextAtIndex(MODEL_SETUP_2ND_COLUMN, y, STR_TARANIS_PROTOCOLS, g_model.moduleData[EXTERNAL_MODULE].type, menuHorizontalPosition==0 ? attr : 0);
         if (IS_MODULE_XJT(EXTERNAL_MODULE))
           lcdDrawTextAtIndex(MODEL_SETUP_3RD_COLUMN, y, STR_XJT_PROTOCOLS, 1+g_model.moduleData[EXTERNAL_MODULE].rfProtocol, (menuHorizontalPosition==1 ? attr : 0));
@@ -1501,7 +1687,7 @@ bool menuModelSetup(event_t event)
         else if (IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
           int multi_rfProto = g_model.moduleData[EXTERNAL_MODULE].getMultiProtocol(false);
           if (g_model.moduleData[EXTERNAL_MODULE].multi.customProto) {
-            drawText(&menuBodyWindow,MODEL_SETUP_3RD_COLUMN, y, STR_MULTI_CUSTOM, menuHorizontalPosition == 1 ? attr : 0);
+            drawText(window,MODEL_SETUP_3RD_COLUMN, y, STR_MULTI_CUSTOM, menuHorizontalPosition == 1 ? attr : 0);
             lcdDrawNumber(MODEL_SETUP_4TH_COLUMN, y, multi_rfProto, menuHorizontalPosition==2 ? attr : 0, 2);
             lcdDrawNumber(MODEL_SETUP_4TH_COLUMN + MODEL_SETUP_BIND_OFS, y, g_model.moduleData[EXTERNAL_MODULE].subType, menuHorizontalPosition==3 ? attr : 0, 2);
           }
@@ -1580,7 +1766,7 @@ bool menuModelSetup(event_t event)
         break;
 
       case ITEM_MODEL_TRAINER_LABEL:
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_TRAINER);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_TRAINER);
         break;
 
       case ITEM_MODEL_TRAINER_LINE1:
@@ -1590,7 +1776,7 @@ bool menuModelSetup(event_t event)
             s_editMode = 0;
           }
           if (bluetoothDistantAddr[0]) {
-            drawText(&menuBodyWindow,MENUS_MARGIN_LEFT + INDENT_WIDTH, y, bluetoothDistantAddr);
+            drawText(window,MENUS_MARGIN_LEFT + INDENT_WIDTH, y, bluetoothDistantAddr);
             if (bluetoothState != BLUETOOTH_STATE_CONNECTED) {
               drawButton(MODEL_SETUP_2ND_COLUMN, y, "Bind", menuHorizontalPosition == 0 ? attr : 0);
               drawButton(MODEL_SETUP_2ND_COLUMN+60, y, "Clear", menuHorizontalPosition == 1 ? attr : 0);
@@ -1609,7 +1795,7 @@ bool menuModelSetup(event_t event)
             }
           }
           else {
-            drawText(&menuBodyWindow,MENUS_MARGIN_LEFT + INDENT_WIDTH, y, "---");
+            drawText(window,MENUS_MARGIN_LEFT + INDENT_WIDTH, y, "---");
             if (bluetoothState < BLUETOOTH_STATE_IDLE)
               drawButton(MODEL_SETUP_2ND_COLUMN, y, STR_BLUETOOTH_INIT, attr);
             else
@@ -1631,16 +1817,16 @@ bool menuModelSetup(event_t event)
       {
         uint8_t moduleIdx = CURRENT_MODULE_EDITED(i);
         ModuleData & moduleData = g_model.moduleData[moduleIdx];
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_CHANNELRANGE);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_CHANNELRANGE);
         if ((int8_t)PORT_CHANNELS_ROWS(moduleIdx) >= 0) {
           drawStringWithIndex(MODEL_SETUP_2ND_COLUMN, y, STR_CH, moduleData.channelsStart+1, menuHorizontalPosition==0 ? attr : 0);
-          drawText(&menuBodyWindow,lcdNextPos+5, y, "-");
+          drawText(window,lcdNextPos+5, y, "-");
           drawStringWithIndex(lcdNextPos+5, y, STR_CH, moduleData.channelsStart+NUM_CHANNELS(moduleIdx), menuHorizontalPosition==1 ? attr : 0);
           if (IS_R9M_OR_XJTD16(moduleIdx)) {
             if (NUM_CHANNELS(moduleIdx) > 8)
-              drawText(&menuBodyWindow,lcdNextPos + 15, y, "(18ms)");
+              drawText(window,lcdNextPos + 15, y, "(18ms)");
             else
-              drawText(&menuBodyWindow,lcdNextPos + 15, y, "(9ms)");
+              drawText(window,lcdNextPos + 15, y, "(9ms)");
           }
           if (attr && s_editMode>0) {
             switch (menuHorizontalPosition) {
@@ -1667,10 +1853,10 @@ bool menuModelSetup(event_t event)
         uint8_t moduleIdx = CURRENT_MODULE_EDITED(i);
         ModuleData & moduleData = g_model.moduleData[moduleIdx];
         if (IS_MODULE_PPM(moduleIdx)) {
-          drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_PPMFRAME);
+          drawText(window,MENUS_MARGIN_LEFT, y, STR_PPMFRAME);
           lcdDrawNumber(MODEL_SETUP_2ND_COLUMN, y, (int16_t)moduleData.ppm.frameLength*5 + 225, (menuHorizontalPosition<=0 ? attr : 0) | PREC1|LEFT, 0, NULL, STR_MS);
           lcdDrawNumber(MODEL_SETUP_2ND_COLUMN+80, y, (moduleData.ppm.delay*50)+300, (CURSOR_ON_LINE() || menuHorizontalPosition==1) ? attr|LEFT : LEFT, 0, NULL, "us");
-          drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN+160, y, moduleData.ppm.pulsePol ? "+" : "-", (CURSOR_ON_LINE() || menuHorizontalPosition==2) ? attr : 0);
+          drawText(window,MODEL_SETUP_2ND_COLUMN+160, y, moduleData.ppm.pulsePol ? "+" : "-", (CURSOR_ON_LINE() || menuHorizontalPosition==2) ? attr : 0);
           if (attr && s_editMode>0) {
             switch (menuHorizontalPosition) {
               case 0:
@@ -1686,9 +1872,9 @@ bool menuModelSetup(event_t event)
           }
         }
         else if (IS_MODULE_SBUS(moduleIdx)) {
-          drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_REFRESHRATE);
+          drawText(window,MENUS_MARGIN_LEFT, y, STR_REFRESHRATE);
           lcdDrawNumber(MODEL_SETUP_2ND_COLUMN, y, (int16_t)moduleData.ppm.frameLength*5 + 225, (menuHorizontalPosition<=0 ? attr : 0) | PREC1|LEFT, 0, NULL, STR_MS);
-          drawText(&menuBodyWindow,MODEL_SETUP_3RD_COLUMN, y, moduleData.sbus.noninverted ? "not inverted" : "normal", (CURSOR_ON_LINE() || menuHorizontalPosition==1) ? attr : 0);
+          drawText(window,MODEL_SETUP_3RD_COLUMN, y, moduleData.sbus.noninverted ? "not inverted" : "normal", (CURSOR_ON_LINE() || menuHorizontalPosition==1) ? attr : 0);
 
           if (attr && s_editMode>0) {
             switch (menuHorizontalPosition) {
@@ -1706,11 +1892,11 @@ bool menuModelSetup(event_t event)
           coord_t xOffsetBind = MODEL_SETUP_BIND_OFS;
           if (IS_MODULE_XJT(moduleIdx) && IS_D8_RX(moduleIdx)) {
             xOffsetBind = 0;
-            drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_RECEIVER);
+            drawText(window,MENUS_MARGIN_LEFT, y, STR_RECEIVER);
             if (attr) l_posHorz += 1;
           }
           else {
-            drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_RECEIVER_NUM);
+            drawText(window,MENUS_MARGIN_LEFT, y, STR_RECEIVER_NUM);
           }
           if (IS_MODULE_PXX(moduleIdx) || IS_MODULE_DSM2(moduleIdx) || IS_MODULE_MULTIMODULE(moduleIdx)) {
             if (xOffsetBind)
@@ -1786,7 +1972,7 @@ bool menuModelSetup(event_t event)
       {
         uint8_t moduleIdx = CURRENT_MODULE_EDITED(i);
         ModuleData & moduleData = g_model.moduleData[moduleIdx];
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_FAILSAFE);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_FAILSAFE);
         lcdDrawTextAtIndex(MODEL_SETUP_2ND_COLUMN, y, STR_VFAILSAFE, moduleData.failsafeMode, menuHorizontalPosition==0 ? attr : 0);
         if (moduleData.failsafeMode == FAILSAFE_CUSTOM) {
           drawButton(MODEL_SETUP_2ND_COLUMN + MODEL_SETUP_SET_FAILSAFE_OFS, y, STR_SET, menuHorizontalPosition==1 ? attr : 0);
@@ -1824,7 +2010,7 @@ bool menuModelSetup(event_t event)
           const uint8_t multi_proto = g_model.moduleData[EXTERNAL_MODULE].getMultiProtocol(true);
           const mm_protocol_definition *pdef = getMultiProtocolDefinition(multi_proto);
           if (pdef->optionsstr)
-            drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, pdef->optionsstr);
+            drawText(window,MENUS_MARGIN_LEFT, y, pdef->optionsstr);
 
           if (multi_proto == MM_RF_PROTO_FS_AFHDS2A)
             optionValue = 50 + 5 * optionValue;
@@ -1844,16 +2030,16 @@ bool menuModelSetup(event_t event)
         }
 #endif
         if (IS_MODULE_R9M(moduleIdx)) {
-          drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_MODULE_TELEMETRY);
+          drawText(window,MENUS_MARGIN_LEFT, y, STR_MODULE_TELEMETRY);
           if (IS_TELEMETRY_INTERNAL_MODULE()) {
-            drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN, y, STR_DISABLE_INTERNAL);
+            drawText(window,MODEL_SETUP_2ND_COLUMN, y, STR_DISABLE_INTERNAL);
           }
           else {
-            drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN, y, STR_MODULE_TELEM_ON);
+            drawText(window,MODEL_SETUP_2ND_COLUMN, y, STR_MODULE_TELEM_ON);
           }
         }
         else if (IS_MODULE_SBUS(moduleIdx)) {
-          drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_WARN_BATTVOLTAGE);
+          drawText(window,MENUS_MARGIN_LEFT, y, STR_WARN_BATTVOLTAGE);
           drawValueWithUnit(MODEL_SETUP_4TH_COLUMN, y, getBatteryVoltage(), UNIT_VOLTS, attr|PREC2|LEFT);
         }
       }
@@ -1863,18 +2049,18 @@ bool menuModelSetup(event_t event)
       {
         uint8_t moduleIdx = CURRENT_MODULE_EDITED(i);
 
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT+ INDENT_WIDTH, y, "Bind mode");
+        drawText(window,MENUS_MARGIN_LEFT+ INDENT_WIDTH, y, "Bind mode");
         if (g_model.moduleData[moduleIdx].pxx.power == R9M_LBT_POWER_25) {
           if(g_model.moduleData[moduleIdx].pxx.receiver_telem_off == true)
-            drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN, y, STR_BINDING_25MW_CH1_8_TELEM_OFF);
+            drawText(window,MODEL_SETUP_2ND_COLUMN, y, STR_BINDING_25MW_CH1_8_TELEM_OFF);
           else
-            drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN, y, STR_BINDING_25MW_CH1_8_TELEM_ON);
+            drawText(window,MODEL_SETUP_2ND_COLUMN, y, STR_BINDING_25MW_CH1_8_TELEM_ON);
         }
         else {
           if(g_model.moduleData[moduleIdx].pxx.receiver_channel_9_16 == true)
-            drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN, y, STR_BINDING_500MW_CH9_16_TELEM_OFF);
+            drawText(window,MODEL_SETUP_2ND_COLUMN, y, STR_BINDING_500MW_CH9_16_TELEM_OFF);
           else
-            drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN, y, STR_BINDING_500MW_CH1_8_TELEM_OFF);
+            drawText(window,MODEL_SETUP_2ND_COLUMN, y, STR_BINDING_500MW_CH1_8_TELEM_OFF);
         }
         while (menuVerticalPosition==i && menuHorizontalPosition > 0) {
           REPEAT_LAST_CURSOR_MOVE(ITEM_MODEL_SETUP_MAX, true);
@@ -1886,15 +2072,15 @@ bool menuModelSetup(event_t event)
         uint8_t moduleIdx = CURRENT_MODULE_EDITED(i);
         if (IS_MODULE_R9M_FCC(moduleIdx)) {
           // Power selection is only available on R9M FCC
-          drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_MULTI_RFPOWER);
+          drawText(window,MENUS_MARGIN_LEFT, y, STR_MULTI_RFPOWER);
           lcdDrawTextAtIndex(MODEL_SETUP_2ND_COLUMN, y, STR_R9M_FCC_POWER_VALUES, g_model.moduleData[moduleIdx].pxx.power, LEFT | attr);
           if (attr)
             CHECK_INCDEC_MODELVAR(event, g_model.moduleData[moduleIdx].pxx.power, 0, R9M_FCC_POWER_MAX);
         }
 #if defined(MULTIMODULE)
         else if (IS_MODULE_MULTIMODULE(moduleIdx)) {
-          drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_MULTI_LOWPOWER);
-          g_model.moduleData[EXTERNAL_MODULE].multi.lowPowerMode = editCheckBox(&menuBodyWindow, g_model.moduleData[EXTERNAL_MODULE].multi.lowPowerMode, MODEL_SETUP_2ND_COLUMN, y, attr, event);
+          drawText(window,MENUS_MARGIN_LEFT, y, STR_MULTI_LOWPOWER);
+          g_model.moduleData[EXTERNAL_MODULE].multi.lowPowerMode = editCheckBox(window, g_model.moduleData[EXTERNAL_MODULE].multi.lowPowerMode, MODEL_SETUP_2ND_COLUMN, y, attr, event);
         }
 #endif
       }
@@ -1903,24 +2089,24 @@ bool menuModelSetup(event_t event)
 #if defined(MULTIMODULE)
     case ITEM_MODEL_EXTERNAL_MODULE_AUTOBIND:
       if (g_model.moduleData[EXTERNAL_MODULE].getMultiProtocol(true) == MM_RF_PROTO_DSM2)
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_MULTI_DSM_AUTODTECT);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_MULTI_DSM_AUTODTECT);
       else
-        drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_MULTI_AUTOBIND);
-      g_model.moduleData[EXTERNAL_MODULE].multi.autoBindMode = editCheckBox(&menuBodyWindow, g_model.moduleData[EXTERNAL_MODULE].multi.autoBindMode, MODEL_SETUP_2ND_COLUMN, y, attr, event);
+        drawText(window,MENUS_MARGIN_LEFT, y, STR_MULTI_AUTOBIND);
+      g_model.moduleData[EXTERNAL_MODULE].multi.autoBindMode = editCheckBox(window, g_model.moduleData[EXTERNAL_MODULE].multi.autoBindMode, MODEL_SETUP_2ND_COLUMN, y, attr, event);
       break;
     case ITEM_MODEL_EXTERNAL_MODULE_STATUS: {
-      drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_MODULE_STATUS);
+      drawText(window,MENUS_MARGIN_LEFT, y, STR_MODULE_STATUS);
 
       char statusText[64];
       multiModuleStatus.getStatusString(statusText);
-      drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN, y, statusText);
+      drawText(window,MODEL_SETUP_2ND_COLUMN, y, statusText);
       break;
     case ITEM_MODEL_EXTERNAL_MODULE_SYNCSTATUS: {
-      drawText(&menuBodyWindow,MENUS_MARGIN_LEFT, y, STR_MODULE_SYNC);
+      drawText(window,MENUS_MARGIN_LEFT, y, STR_MODULE_SYNC);
 
       char statusText[64];
       multiSyncStatus.getRefreshString(statusText);
-      drawText(&menuBodyWindow,MODEL_SETUP_2ND_COLUMN, y, statusText);
+      drawText(window,MODEL_SETUP_2ND_COLUMN, y, statusText);
       break;
       }
     }

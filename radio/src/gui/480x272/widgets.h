@@ -85,7 +85,5 @@ void drawMainPots();
 void drawTrims(uint8_t flightMode);
 
 extern Window mainWindow;
-extern Window menuBodyWindow;
-// extern Window menuHeaderWindow;
 
 #endif // _WIDGETS_H_

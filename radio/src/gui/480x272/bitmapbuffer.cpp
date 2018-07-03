@@ -115,12 +115,24 @@ void BitmapBuffer::drawSolidFilledRect(coord_t x, coord_t y, coord_t w, coord_t 
 {
   APPLY_OFFSET();
 
-  if (x >= xmax) return;
-  if (y >= ymax) return;
-  if (h<0) { y+=h; h=-h; }
-  if (y<ymin) { h+=y-ymin; y=ymin;}
-  if (y+h > ymax) { h = ymax - y; }
-  if (!data || h<=0 || w<=0) return;
+  if (x >= xmax || y >= ymax)
+    return;
+  if (h < 0) {
+    y += h;
+    h = -h;
+  }
+  if (y < ymin) {
+    h += y-ymin;
+    y = ymin;
+  }
+  if (x < xmin) {
+    w += x - xmin;
+    x = xmin;
+  }
+  if (y+h > ymax)
+    h = ymax - y;
+  if (!data || h<=0 || w<=0)
+    return;
 
   DMAFillRect(data, width, height, x, y, w, h, lcdColorTable[COLOR_IDX(flags)]);
 }

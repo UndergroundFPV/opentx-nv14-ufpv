@@ -567,8 +567,6 @@ bool menuModelExposAll(event_t event)
     }
   }
 
-  menuBodyWindow.setInnerHeight(10 + cur * FH);
-
   if (sub >= linesCount-1) menuVerticalPosition = linesCount-1;
 
   return true;

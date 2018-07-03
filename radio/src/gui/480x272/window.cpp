@@ -3,7 +3,6 @@
 
 Window * Window::focusWindow = NULL;
 Window mainWindow(NULL, { 0, 0, LCD_W, LCD_H });
-Window menuBodyWindow(&mainWindow, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT });
 
 void Window::refresh(rect_t & rect)
 {
@@ -45,12 +44,9 @@ void Window::paintChildren(BitmapBuffer * dc)
 
 bool Window::onTouch(coord_t x, coord_t y)
 {
-  x -= scrollPositionX;
-  y -= scrollPositionY;
-
   for (auto child: children) {
     if (pointInRect(x, y, child->rect)) {
-      if (child->onTouch(x - child->rect.x, y - child->rect.y)) {
+      if (child->onTouch(x - child->rect.x - child->scrollPositionX, y - child->rect.y - child->scrollPositionY)) {
         return true;
       }
     }
