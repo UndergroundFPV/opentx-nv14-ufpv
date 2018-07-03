@@ -151,7 +151,6 @@ bool menuMainView(event_t event)
     g_model.view = 0;
   }
 
-#if 0
   for (uint8_t i=0; i<MAX_CUSTOM_SCREENS; i++) {
     if (customScreens[i]) {
       if (i == g_model.view)
@@ -160,7 +159,6 @@ bool menuMainView(event_t event)
         customScreens[i]->background();
     }
   }
-#endif
 
   if (handleIconButton(20, 68, ICON_MODEL, BUTTON_ON)) {
     pushMenu(menuTabModel[0]);
@@ -174,9 +172,9 @@ bool menuMainView(event_t event)
     pushMenu(menuTabScreensSetup[1]);
   }
 
-  drawNumber(lcd, 50, 200, touchState.Event);
+/*  drawNumber(lcd, 50, 200, touchState.Event);
   drawNumber(lcd, 150, 200, touchState.X);
-  drawNumber(lcd, 250, 200, touchState.Y);
+  drawNumber(lcd, 250, 200, touchState.Y);*/
 
   return true;
 }
