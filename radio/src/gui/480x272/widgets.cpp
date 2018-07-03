@@ -161,6 +161,7 @@ void drawShadow(coord_t x, coord_t y, coord_t w, coord_t h)
 
 int drawMenuTemplate(const char * title, uint8_t icon, const uint8_t * icons, uint32_t options)
 {
+#if 0
   coord_t bodyTop, bodyBottom;
 
   if (theme->drawTopbarBackground(OPTION_TOPBAR_BACK)) {
@@ -219,7 +220,7 @@ int drawMenuTemplate(const char * title, uint8_t icon, const uint8_t * icons, ui
 
   // menuBodyWindow.scroll();
 //  menuBodyWindow.drawVerticalScrollbar();
-
+#endif
   return 0;
 
 }

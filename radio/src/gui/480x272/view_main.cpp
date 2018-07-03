@@ -147,6 +147,9 @@ int getMainViewsCount()
 
 bool menuMainView(event_t event)
 {
+  pushMenu(menuModelSetup);
+
+  /*
   if (g_model.view >= getMainViewsCount()) {
     g_model.view = 0;
   }
@@ -172,10 +175,10 @@ bool menuMainView(event_t event)
     pushMenu(menuTabScreensSetup[1]);
   }
 
-/*  drawNumber(lcd, 50, 200, touchState.Event);
+  drawNumber(lcd, 50, 200, touchState.Event);
   drawNumber(lcd, 150, 200, touchState.X);
-  drawNumber(lcd, 250, 200, touchState.Y);*/
-
+  drawNumber(lcd, 250, 200, touchState.Y);
+*/
   return true;
 }
 
