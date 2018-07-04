@@ -47,21 +47,27 @@ class Button : public Window {
 
 class TextButton : public Button {
   public:
-    TextButton(Window * parent, const rect_t & rect, const char * label, std::function<uint8_t(void)> onPress):
+    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress):
       Button(parent, rect, onPress),
-      label(strdup(label))
+      text(strdup(text))
     {
     }
 
     ~TextButton()
     {
-      free(label);
+      free(text);
+    }
+
+    void setText(const char * text)
+    {
+      free(this->text);
+      this->text = strdup(text);
     }
 
     void paint(BitmapBuffer * dc);
 
   protected:
-    char * label;
+    char * text;
 };
 
 class IconButton: public Button {

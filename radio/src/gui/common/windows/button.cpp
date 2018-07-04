@@ -28,7 +28,7 @@ bool Button::onTouch(coord_t x, coord_t y)
 
 void TextButton::paint(BitmapBuffer * dc)
 {
-  dc->drawText(rect.w / 2, 3, label, CENTERED);
+  dc->drawText(rect.w / 2, 3, text, CENTERED);
   if (state)
     drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, SCROLLBOX_COLOR);
   else
