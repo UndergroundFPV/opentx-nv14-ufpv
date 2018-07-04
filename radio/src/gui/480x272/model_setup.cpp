@@ -602,15 +602,30 @@ void ModelSetupPage::updateExternalModuleWindow()
       grid.nextLine();
 
       // Bind and Range buttons
-      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MODULE_BIND, BLINK);
+      // 3djc
+      //new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MODULE_BIND, BLINK);
 
       new TextButton(externalModuleWindow, grid.getFieldSlot(2, 0), STR_MODULE_BIND,
                      [&]() -> uint8_t {
-                       return 1;
+                       if(moduleFlag[EXTERNAL_MODULE] != MODULE_BIND) {
+                         moduleFlag[EXTERNAL_MODULE] = MODULE_BIND;
+                         return 1;
+                       }
+                       else {
+                         moduleFlag[EXTERNAL_MODULE] = MODULE_NORMAL_MODE;
+                         return 0;
+                       }
                      });
       new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
                      [&]() -> uint8_t {
-                       return 1;
+                       if(moduleFlag[EXTERNAL_MODULE] != MODULE_BIND) {
+                         moduleFlag[EXTERNAL_MODULE] = MODULE_BIND;
+                         return 1;
+                       }
+                       else {
+                         moduleFlag[EXTERNAL_MODULE] = MODULE_NORMAL_MODE;
+                         return 0;
+                       }
                      });
     }
     grid.nextLine();
