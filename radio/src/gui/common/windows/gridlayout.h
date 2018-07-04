@@ -21,9 +21,6 @@
 #ifndef _GRIDLAYOUT_H_
 #define _GRIDLAYOUT_H_
 
-#define CONTENT_WIDTH     140
-#define INDENT_WIDTH      12
-
 class GridLayout {
   public:
     GridLayout(Window &window) :
@@ -31,31 +28,36 @@ class GridLayout {
     {
     }
 
+    void setLabelWidth(coord_t width)
+    {
+      labelWidth = width;
+    }
+
     rect_t getLabelSlot(bool indent = false)
     {
-      coord_t left = indent ? MENUS_MARGIN_LEFT + INDENT_WIDTH : MENUS_MARGIN_LEFT;
-      return { left, currentY, LCD_W - MENUS_MARGIN_RIGHT - CONTENT_WIDTH, 30 };
+      coord_t left = indent ? lineMarginLeft + indentWidth : lineMarginLeft;
+      return { left, currentY, labelWidth - left, lineHeight };
     }
 
     rect_t getFieldSlot(uint8_t count = 1, uint8_t index = 0)
     {
-      coord_t width = (CONTENT_WIDTH - (count - 1) * 10) / count;
-      coord_t left = LCD_W - MENUS_MARGIN_RIGHT - CONTENT_WIDTH + (width + 10) * index;
-      return {left, currentY, width, 30};
+      coord_t width = (LCD_W - labelWidth - lineMarginRight - (count - 1) * lineMargin) / count;
+      coord_t left = labelWidth + (width + lineMargin) * index;
+      return {left, currentY, width, lineHeight};
     }
 
     void nextLine()
     {
-      currentY += 30 + 10;
+      currentY += lineHeight + lineMargin;
     }
 
     void addWindow(Window * window)
     {
       window->adjustHeight();
-      currentY += window->rect.h + 10;
+      currentY += window->rect.h + lineMargin;
     }
 
-    void spacer(coord_t height=10)
+    void spacer(coord_t height=lineMargin)
     {
       currentY += height;
     }
@@ -68,6 +70,12 @@ class GridLayout {
   protected:
     Window &window;
     coord_t currentY = 0;
+    coord_t labelWidth = 140;
+    static constexpr uint8_t lineMargin = 7;
+    static constexpr uint8_t lineMarginLeft = 6;
+    static constexpr uint8_t lineMarginRight = 12;
+    static constexpr uint8_t lineHeight = 30;
+    static constexpr uint8_t indentWidth = 12;
 };
 
 #endif

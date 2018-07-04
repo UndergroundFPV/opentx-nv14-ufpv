@@ -573,7 +573,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       grid.nextLine();
 
       // Bind and Range buttons
-      new TextButton(externalModuleWindow, grid.getFieldSlot(2, 0), STR_MODULE_BIND,
+      externalModuleBind = new TextButton(externalModuleWindow, grid.getFieldSlot(2, 0), STR_MODULE_BIND,
                      [&]() -> uint8_t {
                        if(moduleFlag[EXTERNAL_MODULE] != MODULE_BIND) {
                          moduleFlag[EXTERNAL_MODULE] = MODULE_BIND;
@@ -586,6 +586,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                      });
       new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
                      [&]() -> uint8_t {
+                       externalModuleBind->setState(0);
                        if(moduleFlag[EXTERNAL_MODULE] != MODULE_BIND) {
                          moduleFlag[EXTERNAL_MODULE] = MODULE_BIND;
                          return 1;

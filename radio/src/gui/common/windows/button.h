@@ -33,6 +33,11 @@ class Button : public Window {
     {
     }
 
+    void setState(uint8_t state)
+    {
+      this->state = state;
+    }
+
     bool onTouch(coord_t x, coord_t y)
     {
       state = onPress();
@@ -48,21 +53,19 @@ class TextButton : public Button {
   public:
     TextButton(Window * parent, const rect_t & rect, const char * label, std::function<uint8_t(void)> onPress):
       Button(parent, rect, onPress),
-      label(label)
+      label(strdup(label))
     {
     }
 
-    void paint(BitmapBuffer * dc)
+    ~TextButton()
     {
-      dc->drawText(rect.w / 2, 0, label, CENTERED);
-      if (state)
-        drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, SCROLLBOX_COLOR);
-      else
-        drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, CURVE_AXIS_COLOR);
+      free(label);
     }
+
+    void paint(BitmapBuffer * dc);
 
   protected:
-    const char * label;
+    char * label;
 };
 
 class IconButton: public Button {
@@ -73,10 +76,7 @@ class IconButton: public Button {
     {
     }
 
-    void paint(BitmapBuffer * dc)
-    {
-      dc->drawBitmap(0, 0, theme->getIconBitmap(icon, state));
-    }
+    void paint(BitmapBuffer * dc);
 
   protected:
     uint8_t icon;

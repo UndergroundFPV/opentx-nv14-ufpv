@@ -71,7 +71,8 @@ bool isTrimModeAvailable(int mode)
 void ModelFlightModesPage::build(Window * window)
 {
   GridLayout grid(*window);
-  grid.spacer(10);
+  grid.setLabelWidth(80);
+  grid.spacer();
 
   // TODO
   /* if (menuVerticalPosition<MAX_FLIGHT_MODES && menuHorizontalPosition>=0) {
@@ -82,13 +83,13 @@ void ModelFlightModesPage::build(Window * window)
     char label[16];
     getFlightModeString(label, i+1);
     new StaticText(window, grid.getLabelSlot(), label); // TODO (getFlightMode()==k ? BOLD : 0)
-    // new Choice(window, grid.getFieldSlot(), STR_VSWASHTYPE, 0, SWASH_TYPE_MAX, GET_SET_DEFAULT(g_model.swashR.type));
+    new TextEdit(window, grid.getFieldSlot(3, 0), g_model.flightModeData[i].name, LEN_FLIGHT_MODE_NAME);
     grid.nextLine();
   }
 
   char label[32];
   sprintf(label, "Check FM%d Trims", mixerCurrentFlightMode);
-  new TextButton(window, {50, grid.getWindowHeight(), LCD_W - 50, 30}, label,
+  new TextButton(window, { 50, grid.getWindowHeight(), LCD_W - 100, 30 }, label,
                  [&]() -> uint8_t {
                    if (trimsCheckTimer)
                      trimsCheckTimer = 0;
@@ -96,7 +97,6 @@ void ModelFlightModesPage::build(Window * window)
                      trimsCheckTimer = 200; // 2 seconds trims cancelled
                    return trimsCheckTimer;
                  });
-  grid.nextLine();
 
   window->setInnerHeight(grid.getWindowHeight());
 }

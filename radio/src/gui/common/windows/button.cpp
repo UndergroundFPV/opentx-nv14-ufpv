@@ -20,31 +20,16 @@
 
 #include "opentx.h"
 
-void CheckBox::paint(BitmapBuffer * dc)
+void TextButton::paint(BitmapBuffer * dc)
 {
-  bool hasFocus = this->hasFocus();
-  uint8_t value = getValue();
-  if (hasFocus) {
-    dc->drawSolidFilledRect(0, 6, 14, 14, TEXT_INVERTED_BGCOLOR);
-    dc->drawSolidFilledRect(2, 8, 10, 10, TEXT_BGCOLOR);
-    if (value) {
-      dc->drawSolidFilledRect(3, 9, 8, 8, TEXT_INVERTED_BGCOLOR);
-    }
-  }
-  else {
-    if (value) {
-      dc->drawSolidFilledRect(3, 9, 8, 8, SCROLLBOX_COLOR);
-      drawSolidRect(dc, 1, 7, 12, 12, 1, LINE_COLOR);
-    }
-    else {
-      drawSolidRect(dc, 1, 7, 12, 12, 1, LINE_COLOR);
-    }
-  }
+  dc->drawText(rect.w / 2, 3, label, CENTERED);
+  if (state)
+    drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, SCROLLBOX_COLOR);
+  else
+    drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, CURVE_AXIS_COLOR);
 }
 
-bool CheckBox::onTouch(coord_t x, coord_t y)
+void IconButton::paint(BitmapBuffer * dc)
 {
-  setValue(!getValue());
-  setFocus();
-  return true;
+  dc->drawBitmap(0, 0, theme->getIconBitmap(icon, state));
 }
