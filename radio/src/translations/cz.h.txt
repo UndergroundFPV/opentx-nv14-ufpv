@@ -126,8 +126,8 @@
 #define LEN_VBEEPCOUNTDOWN     "\007"
 #define TR_VBEEPCOUNTDOWN      "Ne\0    ""Zvuk\0  ""Hlas\0  ""Vibrace"
 
-#define LEN_COUNTDOWNVALUES    "\002"
-#define TR_COUNTDOWNVALUES     "5\0""10""20""30"
+#define LEN_COUNTDOWNVALUES    "\003"
+#define TR_COUNTDOWNVALUES     "5s\0""10s""20s""30s"
 
 #define LEN_VVARIOCENTER       "\005"
 #define TR_VVARIOCENTER        "Tón\0 ""Ticho"
