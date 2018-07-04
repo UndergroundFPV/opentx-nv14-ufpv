@@ -573,9 +573,6 @@ void ModelSetupPage::updateExternalModuleWindow()
       grid.nextLine();
 
       // Bind and Range buttons
-      // 3djc
-      //new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MODULE_BIND, BLINK);
-
       new TextButton(externalModuleWindow, grid.getFieldSlot(2, 0), STR_MODULE_BIND,
                      [&]() -> uint8_t {
                        if(moduleFlag[EXTERNAL_MODULE] != MODULE_BIND) {
