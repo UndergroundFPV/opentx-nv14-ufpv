@@ -58,7 +58,6 @@ file(GLOB WIDGETS_SRC RELATIVE ${RADIO_SRC_DIRECTORY}/gui/480x272 ${RADIO_SRC_DI
 set(GUI_SRC
   ${GUI_SRC}
   bitmapbuffer.cpp
-  window.cpp
   draw_functions.cpp
   curves.cpp
   bitmaps.cpp

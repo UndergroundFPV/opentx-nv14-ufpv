@@ -49,9 +49,12 @@ set(SRC
 
 include_directories(gui gui/${GUI_DIR})
 
+include(gui/common/windows/CMakeLists.txt)
+
 if(GUI_DIR STREQUAL 128x64 OR GUI_DIR STREQUAL 212x64)
   include(gui/common/stdlcd/CMakeLists.txt)
 endif()
+
 
 if(ARCH STREQUAL ARM)
   set(SRC

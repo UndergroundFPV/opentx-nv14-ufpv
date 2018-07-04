@@ -23,9 +23,11 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include "lcd_types.h"
 #include "colors.h"
 #include "board.h"
 #include "debug.h"
+#include "opentx_types.h"
 
 struct rect_t {
   coord_t x, y, w, h;

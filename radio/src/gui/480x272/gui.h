@@ -70,6 +70,10 @@
 #define MENU_TITLE_NEXT_POS            (lcdNextPos + 10)
 #define MENU_INIT_VPOS                 -1
 
+#if defined(PCBNV14)
+#include "common/windows/windows.h"
+#endif
+
 #if defined(HELI) && defined(GVARS) && defined(LUA_MODEL_SCRIPTS)
 #define MENU_ICONS_SPACING             31
 #else

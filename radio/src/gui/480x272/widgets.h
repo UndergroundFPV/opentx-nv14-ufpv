@@ -23,7 +23,6 @@
 
 #include <stdio.h>
 #include "opentx.h"
-#include "window.h"
 
 #define OPTION_MENU_NO_FOOTER          0x01
 #define OPTION_MENU_TITLE_BAR          0x02
@@ -83,7 +82,5 @@ void drawShutdownAnimation(uint32_t index, const char * message);
 void drawTopBar();
 void drawMainPots();
 void drawTrims(uint8_t flightMode);
-
-extern Window mainWindow;
 
 #endif // _WIDGETS_H_

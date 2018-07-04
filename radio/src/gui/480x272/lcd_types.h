@@ -31,7 +31,7 @@
 
 #define CENTER
 
-#define lcdint_t                       int32_t
+typedef int32_t lcdint_t;
 
 #define BSS                            0x00
 
