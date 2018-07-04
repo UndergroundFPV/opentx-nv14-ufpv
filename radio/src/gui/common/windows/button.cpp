@@ -22,11 +22,7 @@
 
 bool Button::onTouch(coord_t x, coord_t y)
 {
-  // TODO this looks weird... as soon as we have buttons which destroy themselves we need to keep it!
-  uint8_t oldState = state;
-  uint8_t newState = onPress();
-  if (newState != oldState)
-    state = newState;
+  state = onPress();
   return true;
 }
 

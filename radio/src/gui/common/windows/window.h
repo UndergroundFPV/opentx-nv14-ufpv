@@ -46,6 +46,11 @@ class Window {
       }
     }
 
+    void deleteLater()
+    {
+      trash.push_back(this);
+    }
+
     void clear()
     {
       scrollPositionX = 0;
@@ -53,7 +58,7 @@ class Window {
       innerWidth = rect.w;
       innerHeight = rect.h;
       for (auto window: children) {
-        delete window;
+        window->deleteLater();
       }
       children.clear();
     }
@@ -124,21 +129,6 @@ class Window {
 
     void moveWindowsTop(coord_t y, coord_t delta);
 
-    void checkEvents()
-    {
-      if (touchState.Event == TE_UP) {
-        onTouch(touchState.startX - scrollPositionX, touchState.startY - scrollPositionY);
-        touchState.Event = TE_NONE;
-      }
-      else if (touchState.Event == TE_SLIDE) {
-        coord_t x = touchState.X - touchState.lastX;
-        coord_t y = touchState.Y - touchState.lastY;
-        onSlide(touchState.startX, touchState.startY, x, y);
-        touchState.lastX = touchState.X;
-        touchState.lastY = touchState.Y;
-      }
-    }
-
     void addChild(Window * window) {
       children.push_back(window);
     }
@@ -151,15 +141,21 @@ class Window {
     coord_t scrollPositionX = 0;
     coord_t scrollPositionY = 0;
     static Window * focusWindow;
+    static std::list<Window *> trash;
 };
 
 class MainWindow: public Window {
   public:
     MainWindow():
-      Window(NULL, {0, 0, LCD_W, LCD_H}) {
+      Window(nullptr, {0, 0, LCD_W, LCD_H}) {
     }
+
+    void checkEvents();
+
+  protected:
+    void emptyTrash();
 };
 
-extern Window mainWindow;
+extern MainWindow mainWindow;
 
 #endif

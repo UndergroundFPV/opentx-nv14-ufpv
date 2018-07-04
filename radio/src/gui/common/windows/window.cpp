@@ -20,8 +20,9 @@
 
 #include "window.h"
 
-Window * Window::focusWindow = NULL;
-Window mainWindow(NULL, { 0, 0, LCD_W, LCD_H });
+Window * Window::focusWindow = nullptr;
+std::list<Window *> Window::trash;
+MainWindow mainWindow;
 
 void Window::refresh(rect_t & rect)
 {
@@ -134,4 +135,29 @@ void Window::drawVerticalScrollbar(BitmapBuffer * dc)
       yhgt = h - yofs;
     dc->drawSolidFilledRect(x-1, y + yofs, 3, yhgt, SCROLLBOX_COLOR);
   }
+}
+
+void MainWindow::emptyTrash()
+{
+  for (auto window: trash) {
+    delete window;
+  }
+  trash.clear();
+}
+
+void MainWindow::checkEvents()
+{
+  if (touchState.Event == TE_UP) {
+    onTouch(touchState.startX - scrollPositionX, touchState.startY - scrollPositionY);
+    touchState.Event = TE_NONE;
+  }
+  else if (touchState.Event == TE_SLIDE) {
+    coord_t x = touchState.X - touchState.lastX;
+    coord_t y = touchState.Y - touchState.lastY;
+    onSlide(touchState.startX, touchState.startY, x, y);
+    touchState.lastX = touchState.X;
+    touchState.lastY = touchState.Y;
+  }
+
+  emptyTrash();
 }
