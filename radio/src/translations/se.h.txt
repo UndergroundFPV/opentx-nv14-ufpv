@@ -128,6 +128,9 @@
 #define LEN_VBEEPCOUNTDOWN     "\007"
 #define TR_VBEEPCOUNTDOWN      "Tyst\0  ""Pip\0   ""Röst\0  ""Vibrera"
 
+#define LEN_COUNTDOWNVALUES            "\002"
+#define TR_COUNTDOWNVALUES             "5\0""10""20""30"
+
 #define LEN_VVARIOCENTER       "\004"
 #define TR_VVARIOCENTER        "Pip\0""Tyst"
 

@@ -128,6 +128,9 @@
 #define LEN_VBEEPCOUNTDOWN     "\006"
 #define TR_VBEEPCOUNTDOWN      "NienteSuoni\0Voce\0 Vibra\0"
 
+#define LEN_COUNTDOWNVALUES    "\002"
+#define TR_COUNTDOWNVALUES     "5\0""10""20""30"
+
 #define LEN_VVARIOCENTER       "\006"
 #define TR_VVARIOCENTER        "Tono\0 ""Silent"
 

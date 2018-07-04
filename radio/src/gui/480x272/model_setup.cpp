@@ -265,11 +265,12 @@ void ModelSetupPage::build(Window * window)
                [&](int32_t newValue) -> void {
                    g_model.timers[i].countdownBeep = newValue;
                });
-    new NumberEdit(window, grid.getFieldSlot(2, 1), 5, 30, 5,
-                   GET_DEFAULT(g_model.timers[i].countdownStart > 0 ? 5 : 10 - g_model.timers[i].countdownStart * 10),  // 1=5 , 0=10 , -1=20 , -2=30
-                   [=](int8_t newValue) -> void {
-                       g_model.timers[i].countdownStart =  (newValue > 5) ? 1-(newValue / 10) : 1 ;
-                   }, 0, NULL, "s");
+    new Choice(window, grid.getFieldSlot(2, 1), STR_COUNTDOWNVALUES, 0, 3,
+               GET_DEFAULT(g_model.timers[i].countdownStart + 2 ),
+               [&](int32_t newValue) -> void {
+                  TRACE("newValue : %d", newValue);
+                   g_model.timers[i].countdownStart = newValue - 2;
+               });
     grid.nextLine();
 
 

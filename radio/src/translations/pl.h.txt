@@ -130,6 +130,9 @@
 #define LEN_VBEEPCOUNTDOWN     "\006"
 #define TR_VBEEPCOUNTDOWN      "Cichy Pik  \0DźwiękWibrac"
 
+#define LEN_COUNTDOWNVALUES     "\002"
+#define TR_COUNTDOWNVALUES      "5\0""10""20""30"
+
 #define LEN_VVARIOCENTER       "\006"
 #define TR_VVARIOCENTER        "Ton\0  ""Cicho "
 

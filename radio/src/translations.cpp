@@ -99,6 +99,7 @@ const pm_char STR_OPEN9X[] PROGMEM =
     ISTR(VLCD)
     ISTR(VUNITSSYSTEM)
     ISTR(VBEEPCOUNTDOWN)
+    ISTR(COUNTDOWNVALUES)
     ISTR(VVARIOCENTER)
 #endif
 #if defined(PXX) || defined(CPUARM)

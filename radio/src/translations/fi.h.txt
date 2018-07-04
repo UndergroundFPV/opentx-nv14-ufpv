@@ -128,6 +128,9 @@
 #define LEN_VBEEPCOUNTDOWN     "\006"
 #define TR_VBEEPCOUNTDOWN      "SilentBeeps\0Voice\0Haptic"
 
+#define LEN_COUNTDOWNVALUES     "\002"
+#define TR_COUNTDOWNVALUES      5\0""10""20""30"
+
 #define LEN_VVARIOCENTER       "\006"
 #define TR_VVARIOCENTER        "Tone\0 ""Silent"
 
