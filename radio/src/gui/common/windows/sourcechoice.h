@@ -18,21 +18,31 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#ifndef _SOURCECHOICE_H_
+#define _SOURCECHOICE_H_
 
+#include <functional>
 #include "window.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "textedit.h"
-#include "keyboard.h"
-#include "menu.h"
-#include "gridlayout.h"
-#include "helpers.h"
 
-#endif // _WINDOWS_H_
+class SourceChoice : public Window {
+  public:
+    SourceChoice(Window * parent, const rect_t & rect, int16_t vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):
+      Window(parent, rect),
+      vmax(vmax),
+      getValue(getValue),
+      setValue(setValue)
+    {
+    }
+
+    void paint(BitmapBuffer * dc) override ;
+
+    bool onTouch(coord_t x, coord_t y) override ;
+
+  protected:
+    const char * label;
+    int16_t vmax;
+    std::function<int16_t()> getValue;
+    std::function<void(int16_t)> setValue;
+};
+
+#endif // _SOURCECHOICE_H_

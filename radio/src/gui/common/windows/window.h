@@ -43,8 +43,13 @@ class Window {
     virtual ~Window() {
     }
 
-    void deleteWindows()
+    void clear()
     {
+      scrollPositionX = 0;
+      scrollPositionY = 0;
+      innerWidth = rect.w;
+      innerHeight = rect.h;
+
       for (auto window: children) {
         delete window;
       }
@@ -107,6 +112,8 @@ class Window {
     virtual bool onTouch(coord_t x, coord_t y);
 
     virtual bool onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t slideY);
+
+    void adjustInnerHeight();
 
     coord_t adjustHeight();
 

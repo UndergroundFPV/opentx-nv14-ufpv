@@ -96,13 +96,19 @@ bool Window::onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t sli
   }
 }
 
+void Window::adjustInnerHeight()
+{
+  innerHeight = 0;
+  for (auto child: children) {
+    innerHeight = max(innerHeight, child->rect.y + child->rect.h);
+  }
+}
+
 coord_t Window::adjustHeight()
 {
+  adjustInnerHeight();
   coord_t old = rect.h;
-  rect.h = 0;
-  for (auto child: children) {
-    rect.h = max(rect.h, child->rect.y + child->rect.h);
-  }
+  rect.h = innerHeight;
   return rect.h - old;
 }
 

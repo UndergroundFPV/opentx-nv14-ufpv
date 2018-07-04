@@ -19,10 +19,27 @@
  */
 
 #include "opentx.h"
+#include "model_setup.h"
+#include "model_heli.h"
+
+ModelMenu::ModelMenu():
+  Menu()
+{
+  addPage(new ModelSetupPage());
+#if defined(HELI)
+  addPage(new ModelHeliPage());
+#endif
+  addPage(new ModelSetupPage());
+  addPage(new ModelSetupPage());
+  addPage(new ModelSetupPage());
+  addPage(new ModelSetupPage());
+  addPage(new ModelSetupPage());
+  addPage(new ModelSetupPage());
+}
 
 const MenuHandlerFunc menuTabModel[] = {
-  menuModelSetup,
-  CASE_HELI(menuModelHeli)
+  // menuModelSetup,
+  // CASE_HELI(menuModelHeli)
   CASE_FLIGHT_MODES(menuModelFlightModesAll)
   menuModelExposAll,
   menuModelMixAll,

@@ -72,6 +72,10 @@
 
 #if defined(PCBNV14)
 #include "common/windows/windows.h"
+class ModelMenu: public Menu {
+  public:
+    ModelMenu();
+};
 #endif
 
 #if defined(HELI) && defined(GVARS) && defined(LUA_MODEL_SCRIPTS)
