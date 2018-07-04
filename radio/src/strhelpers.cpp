@@ -230,6 +230,25 @@ char * getGVarString(char * dest, int idx)
   return dest;
 }
 
+char * getFlightModeString(char * dest, int8_t idx)
+{
+  char * s = dest;
+
+  if (idx==0) {
+    strcpy(s, "---");
+    return dest;
+  }
+
+  if (idx < 0) {
+    *s++ = '!';
+    idx = -idx;
+  }
+
+  s = strAppend(s, STR_FP);
+  strAppendUnsigned(s, idx - 1);
+  return dest;
+}
+
 char * getSwitchString(char * dest, swsrc_t idx)
 {
   if (idx == SWSRC_NONE) {

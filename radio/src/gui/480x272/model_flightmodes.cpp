@@ -18,8 +18,13 @@
  * GNU General Public License for more details.
  */
 
-#include <stdio.h>
 #include "opentx.h"
+#include "model_flightmodes.h"
+
+ModelFlightModesPage::ModelFlightModesPage():
+  MenuPage(STR_MENUFLIGHTMODES, ICON_MODEL_FLIGHT_MODES)
+{
+}
 
 FlightModesType editFlightModes(coord_t x, coord_t y, event_t event, FlightModesType value, uint8_t attr)
 {
@@ -63,50 +68,48 @@ bool isTrimModeAvailable(int mode)
 #define FLIGHT_MODES_FADEIN_COLUMN    420
 #define FLIGHT_MODES_FADEOUT_COLUMN   460
 
-bool menuModelFlightModesAll(event_t event)
+void ModelFlightModesPage::build(Window * window)
 {
-  MENU(STR_MENUFLIGHTMODES, MODEL_ICONS, menuTabModel, MENU_MODEL_FLIGHT_MODES, MAX_FLIGHT_MODES+1, { NAVIGATION_LINE_BY_LINE|ITEM_FLIGHT_MODES_LAST, NAVIGATION_LINE_BY_LINE|ITEM_FLIGHT_MODES_LAST, NAVIGATION_LINE_BY_LINE|ITEM_FLIGHT_MODES_LAST, NAVIGATION_LINE_BY_LINE|NAVIGATION_LINE_BY_LINE|ITEM_FLIGHT_MODES_LAST, NAVIGATION_LINE_BY_LINE|ITEM_FLIGHT_MODES_LAST, NAVIGATION_LINE_BY_LINE|ITEM_FLIGHT_MODES_LAST, NAVIGATION_LINE_BY_LINE|ITEM_FLIGHT_MODES_LAST, NAVIGATION_LINE_BY_LINE|ITEM_FLIGHT_MODES_LAST, NAVIGATION_LINE_BY_LINE|ITEM_FLIGHT_MODES_LAST, 0});
+  GridLayout grid(*window);
+  grid.spacer(10);
 
-  if (menuVerticalPosition==0 && menuHorizontalPosition==ITEM_FLIGHT_MODES_SWITCH) {
-    menuHorizontalPosition += CURSOR_MOVED_LEFT(event) ? -1 : +1;
+  // TODO
+  /* if (menuVerticalPosition<MAX_FLIGHT_MODES && menuHorizontalPosition>=0) {
+    drawColumnHeader(STR_PHASES_HEADERS, NULL, menuHorizontalPosition);
+  }*/
+
+  for (int i = 0; i < MAX_FLIGHT_MODES; i++) {
+    char label[16];
+    getFlightModeString(label, i+1);
+    new StaticText(window, grid.getLabelSlot(), label); // TODO (getFlightMode()==k ? BOLD : 0)
+    // new Choice(window, grid.getFieldSlot(), STR_VSWASHTYPE, 0, SWASH_TYPE_MAX, GET_SET_DEFAULT(g_model.swashR.type));
+    grid.nextLine();
   }
 
-  if (menuVerticalPosition<MAX_FLIGHT_MODES && menuHorizontalPosition>=0) {
-    drawColumnHeader(STR_PHASES_HEADERS, NULL, menuHorizontalPosition);
+  char label[32];
+  sprintf(label, "Check FM%d Trims", mixerCurrentFlightMode);
+  new TextButton(window, {50, grid.getWindowHeight(), LCD_W - 50, 30}, label,
+                 [&]() -> uint8_t {
+                   if (trimsCheckTimer)
+                     trimsCheckTimer = 0;
+                   else
+                     trimsCheckTimer = 200; // 2 seconds trims cancelled
+                   return trimsCheckTimer;
+                 });
+  grid.nextLine();
+
+  window->setInnerHeight(grid.getWindowHeight());
+}
+
+bool menuModelFlightModesAll(event_t event)
+{
+  if (menuVerticalPosition==0 && menuHorizontalPosition==ITEM_FLIGHT_MODES_SWITCH) {
+    menuHorizontalPosition += CURSOR_MOVED_LEFT(event) ? -1 : +1;
   }
 
   for (uint8_t i=0; i<NUM_BODY_LINES; i++) {
     coord_t y = MENU_CONTENT_TOP + i*FH;
     int k = i+menuVerticalOffset;
-
-    if (k==MAX_FLIGHT_MODES) {
-      // last line available - add the "check trims" line
-      LcdFlags attr = 0;
-      if (menuVerticalPosition==MAX_FLIGHT_MODES) {
-        if (!trimsCheckTimer) {
-          if (event == EVT_KEY_FIRST(KEY_ENTER)) {
-            trimsCheckTimer = 200; // 2 seconds trims cancelled
-            s_editMode = 1;
-            killEvents(event);
-          }
-          else {
-            attr |= INVERS;
-            s_editMode = 0;
-          }
-        }
-        else {
-          if (event == EVT_KEY_FIRST(KEY_EXIT)) {
-            trimsCheckTimer = 0;
-            s_editMode = 0;
-            killEvents(event);
-          }
-        }
-      }
-      char s[32];
-      sprintf(s, "Check FM%d Trims", mixerCurrentFlightMode);
-      lcdDrawText(LCD_W/2, y, s, CENTERED|attr);
-      return true;
-    }
 
     FlightModeData * p = flightModeAddress(k);
 

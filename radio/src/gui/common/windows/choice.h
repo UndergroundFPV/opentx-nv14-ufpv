@@ -55,8 +55,8 @@ class Choice : public Window {
       int16_t value = getValue() + 1;
       if (value > vmax)
         value = vmin;
-      setValue(value);
       setFocus();
+      setValue(value);
       return true;
     }
 

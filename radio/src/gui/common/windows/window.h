@@ -32,15 +32,16 @@ class Window {
       parent(parent),
       rect(rect),
       innerWidth(rect.w),
-      innerHeight(rect.h),
-      scrollPositionX(0),
-      scrollPositionY(0) {
+      innerHeight(rect.h)
+    {
       if (parent) {
         parent->addChild(this);
       }
     }
 
     virtual ~Window() {
+      if (focusWindow == this)
+        focusWindow = nullptr;
     }
 
     void clear()
@@ -143,7 +144,8 @@ class Window {
     std::list<Window *> children;
     rect_t rect;
     coord_t innerWidth, innerHeight;
-    coord_t scrollPositionX, scrollPositionY;
+    coord_t scrollPositionX = 0;
+    coord_t scrollPositionY = 0;
     static Window * focusWindow;
 };
 

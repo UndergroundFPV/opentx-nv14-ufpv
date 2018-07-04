@@ -28,21 +28,5 @@ void lcdDrawMMM(coord_t x, coord_t y, LcdFlags flags)
 #if defined(FLIGHT_MODES)
 void drawFlightMode(coord_t x, coord_t y, int8_t idx, LcdFlags att)
 {
-  if (idx==0) {
-    lcdDrawMMM(x, y, att);
-    return;
-  }
-  // TODO this code was not included in Taranis! and used with abs(...) on Horus
-  if (idx < 0) {
-    lcdDrawChar(x-2, y, '!', att);
-    idx = -idx;
-  }
-#if defined(CONDENSED)
-  if (att & CONDENSED) {
-    lcdDrawNumber(x+FW*1, y, idx-1, (att & ~CONDENSED), 1);
-    return;
-  }
-#endif
-  drawStringWithIndex(x, y, STR_FP, idx-1, att);
 }
 #endif

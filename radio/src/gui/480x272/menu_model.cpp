@@ -21,6 +21,7 @@
 #include "opentx.h"
 #include "model_setup.h"
 #include "model_heli.h"
+#include "model_flightmodes.h"
 
 ModelMenu::ModelMenu():
   Menu()
@@ -29,7 +30,7 @@ ModelMenu::ModelMenu():
 #if defined(HELI)
   addPage(new ModelHeliPage());
 #endif
-  addPage(new ModelSetupPage());
+  addPage(new ModelFlightModesPage());
   addPage(new ModelSetupPage());
   addPage(new ModelSetupPage());
   addPage(new ModelSetupPage());
@@ -40,7 +41,7 @@ ModelMenu::ModelMenu():
 const MenuHandlerFunc menuTabModel[] = {
   // menuModelSetup,
   // CASE_HELI(menuModelHeli)
-  CASE_FLIGHT_MODES(menuModelFlightModesAll)
+  // CASE_FLIGHT_MODES(menuModelFlightModesAll)
   menuModelExposAll,
   menuModelMixAll,
   menuModelLimits,
