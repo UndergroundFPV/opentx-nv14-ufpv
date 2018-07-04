@@ -14,4 +14,5 @@ class ModelSetupPage: public MenuPage {
     Window * externalModuleWindow = nullptr;
 
     Button * externalModuleBind = nullptr;
+    Button * externalModuleRange = nullptr;
 };
