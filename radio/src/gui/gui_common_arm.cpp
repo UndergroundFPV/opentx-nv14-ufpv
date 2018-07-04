@@ -256,15 +256,6 @@ bool isInputSourceAvailable(int source)
   return false;
 }
 
-enum SwitchContext
-{
-  LogicalSwitchesContext,
-  ModelCustomFunctionsContext,
-  GeneralCustomFunctionsContext,
-  TimersContext,
-  MixesContext
-};
-
 bool isLogicalSwitchAvailable(int index)
 {
   LogicalSwitchData * lsw = lswAddress(index);

@@ -8,4 +8,5 @@ set(SRC
     ${WINDOWS_DIRECTORY}/checkbox.cpp
     ${WINDOWS_DIRECTORY}/menu.cpp
     ${WINDOWS_DIRECTORY}/sourcechoice.cpp
+    ${WINDOWS_DIRECTORY}/switchchoice.cpp
     )

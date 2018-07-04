@@ -81,3 +81,9 @@ void drawSource(BitmapBuffer * dc, coord_t x, coord_t y, mixsrc_t idx, LcdFlags 
   dc->drawText(x, y, s, flags);
 }
 
+void drawSwitch(BitmapBuffer * dc, coord_t x, coord_t y, int32_t idx, LcdFlags flags)
+{
+  char s[8];
+  getSwitchString(s, idx);
+  dc->drawText(x, y, s, flags);
+}

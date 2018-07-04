@@ -41,37 +41,15 @@ FlightModesType editFlightModes(coord_t x, coord_t y, event_t event, FlightModes
   return value;
 }
 
-enum FlightModesItems {
-  ITEM_FLIGHT_MODES_NAME,
-  ITEM_FLIGHT_MODES_SWITCH,
-  ITEM_FLIGHT_MODES_TRIM_RUD,
-  ITEM_FLIGHT_MODES_TRIM_ELE,
-  ITEM_FLIGHT_MODES_TRIM_THR,
-  ITEM_FLIGHT_MODES_TRIM_AIL,
-  ITEM_FLIGHT_MODES_TRIM_T5,
-  ITEM_FLIGHT_MODES_TRIM_T6,
-  ITEM_FLIGHT_MODES_FADE_IN,
-  ITEM_FLIGHT_MODES_FADE_OUT,
-  ITEM_FLIGHT_MODES_COUNT,
-  ITEM_FLIGHT_MODES_LAST = ITEM_FLIGHT_MODES_COUNT-1
-};
-
 bool isTrimModeAvailable(int mode)
 {
   return (mode < 0 || (mode%2) == 0 || (mode/2) != menuVerticalPosition);
 }
 
-#define FLIGHT_MODES_NAME_COLUMN      50
-#define FLIGHT_MODES_SWITCH_COLUMN    180
-#define FLIGHT_MODES_TRIMS_COLUMN     175
-#define FLIGHT_MODES_TRIM_WIDTH       26
-#define FLIGHT_MODES_FADEIN_COLUMN    420
-#define FLIGHT_MODES_FADEOUT_COLUMN   460
-
 void ModelFlightModesPage::build(Window * window)
 {
   GridLayout grid(*window);
-  grid.setLabelWidth(80);
+  grid.setLabelWidth(50);
   grid.spacer();
 
   // TODO
@@ -84,12 +62,15 @@ void ModelFlightModesPage::build(Window * window)
     getFlightModeString(label, i+1);
     new StaticText(window, grid.getLabelSlot(), label); // TODO (getFlightMode()==k ? BOLD : 0)
     new TextEdit(window, grid.getFieldSlot(3, 0), g_model.flightModeData[i].name, LEN_FLIGHT_MODE_NAME);
+    new SwitchChoice(window, grid.getFieldSlot(3, 1), MixesContext, GET_SET_DEFAULT(g_model.flightModeData[i].swtch));
+    // TODOif (k == 0)
+    //      lcdDrawText(FLIGHT_MODES_SWITCH_COLUMN, y, "N/A");
     grid.nextLine();
   }
 
   char label[32];
   sprintf(label, "Check FM%d Trims", mixerCurrentFlightMode);
-  new TextButton(window, { 50, grid.getWindowHeight(), LCD_W - 100, 30 }, label,
+  new TextButton(window, { 60, grid.getWindowHeight() + 5, LCD_W - 120, 30 }, label,
                  [&]() -> uint8_t {
                    if (trimsCheckTimer)
                      trimsCheckTimer = 0;
@@ -101,6 +82,7 @@ void ModelFlightModesPage::build(Window * window)
   window->setInnerHeight(grid.getWindowHeight());
 }
 
+#if 0
 bool menuModelFlightModesAll(event_t event)
 {
   if (menuVerticalPosition==0 && menuHorizontalPosition==ITEM_FLIGHT_MODES_SWITCH) {
@@ -116,20 +98,7 @@ bool menuModelFlightModesAll(event_t event)
     drawFlightMode(MENUS_MARGIN_LEFT, y, k+1, (getFlightMode()==k ? BOLD : 0) | ((menuVerticalPosition==k && menuHorizontalPosition<0) ? INVERS : 0));
 
     for (uint8_t j=0; j<ITEM_FLIGHT_MODES_COUNT; j++) {
-      LcdFlags attr = ((menuVerticalPosition==k && menuHorizontalPosition==j) ? ((s_editMode>0) ? BLINK|INVERS : INVERS) : 0);
-      LcdFlags active = (attr && s_editMode>0) ;
-      switch (j) {
-        case ITEM_FLIGHT_MODES_NAME:
-          editName(FLIGHT_MODES_NAME_COLUMN, y, p->name, sizeof(p->name), event, attr);
-          break;
 
-        case ITEM_FLIGHT_MODES_SWITCH:
-          if (active) CHECK_INCDEC_MODELSWITCH(event, p->swtch, SWSRC_FIRST_IN_MIXES, SWSRC_LAST_IN_MIXES, isSwitchAvailableInMixes);
-          if (k == 0)
-            lcdDrawText(FLIGHT_MODES_SWITCH_COLUMN, y, "N/A");
-          else
-            drawSwitch(FLIGHT_MODES_SWITCH_COLUMN, y, p->swtch, attr);
-          break;
 
         case ITEM_FLIGHT_MODES_TRIM_RUD:
         case ITEM_FLIGHT_MODES_TRIM_ELE:
@@ -163,3 +132,4 @@ bool menuModelFlightModesAll(event_t event)
 
   return true;
 }
+#endif

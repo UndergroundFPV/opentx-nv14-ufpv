@@ -18,22 +18,32 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#include "opentx.h"
 
-#include "window.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "keyboard.h"
-#include "menu.h"
-#include "gridlayout.h"
-#include "helpers.h"
+void SwitchChoice::paint(BitmapBuffer * dc)
+{
+  bool hasFocus = this->hasFocus();
+  LcdFlags textColor = 0;
+  LcdFlags lineColor = CURVE_AXIS_COLOR;
+  if (hasFocus) {
+    textColor = TEXT_INVERTED_BGCOLOR;
+    lineColor = TEXT_INVERTED_BGCOLOR;
+  }
+  drawSwitch(dc, 3, 3, getValue(), textColor);
+  drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
+}
 
-#endif // _WINDOWS_H_
+bool SwitchChoice::onTouch(coord_t x, coord_t y)
+{
+  int16_t value = getValue();
+
+  do {
+    value += 1;
+    if (value > SWSRC_LAST)
+      value = SWSRC_FIRST;
+  } while (!isSwitchAvailable(value, context));
+
+  setValue(value);
+  setFocus();
+  return true;
+}

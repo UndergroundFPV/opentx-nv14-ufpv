@@ -18,22 +18,31 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#ifndef _SWITCHCHOICE_H_
+#define _SWITCHCHOICE_H_
 
+#include <functional>
 #include "window.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "keyboard.h"
-#include "menu.h"
-#include "gridlayout.h"
-#include "helpers.h"
 
-#endif // _WINDOWS_H_
+class SwitchChoice : public Window {
+  public:
+    SwitchChoice(Window * parent, const rect_t & rect, SwitchContext context, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):
+      Window(parent, rect),
+      context(context),
+      getValue(getValue),
+      setValue(setValue)
+    {
+    }
+
+    void paint(BitmapBuffer * dc) override ;
+
+    bool onTouch(coord_t x, coord_t y) override ;
+
+  protected:
+    const char * label;
+    SwitchContext context;
+    std::function<int16_t()> getValue;
+    std::function<void(int16_t)> setValue;
+};
+
+#endif // _SWITCHCHOICE_H_

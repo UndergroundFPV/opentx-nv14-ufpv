@@ -42,6 +42,16 @@ bool isTrimModeAvailable(int mode);
 bool isInputAvailable(int input);
 bool isInputSourceAvailable(int source);
 bool isThrottleSourceAvailable(int source);
+
+enum SwitchContext
+{
+  LogicalSwitchesContext,
+  ModelCustomFunctionsContext,
+  GeneralCustomFunctionsContext,
+  TimersContext,
+  MixesContext
+};
+bool isSwitchAvailable(int swtch, SwitchContext context);
 bool isLogicalSwitchFunctionAvailable(int function);
 bool isLogicalSwitchAvailable(int index);
 bool isAssignableFunctionAvailable(int function);
