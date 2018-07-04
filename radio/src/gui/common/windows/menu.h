@@ -79,29 +79,11 @@ class Menu: public Window {
     friend class MenuPagesCarousel;
 
   public:
-    Menu():
-      Window(&mainWindow, { 0, 0, LCD_W, LCD_H }),
-      header(this),
-      body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
-    {
-    }
+    Menu();
 
-    void addPage(MenuPage * page)
-    {
-      pages.push_back(page);
-      if (!currentPage) {
-        setCurrentPage(page);
-      }
-      header.carousel.updateInnerWidth();
-    }
+    void addPage(MenuPage * page);
 
-    void setCurrentPage(MenuPage * page)
-    {
-      body.clear();
-      currentPage = page;
-      page->build(&body);
-      header.setTitle(page->title);
-    }
+    void setCurrentPage(MenuPage * page);
 
     void setCurrentPage(unsigned index)
     {

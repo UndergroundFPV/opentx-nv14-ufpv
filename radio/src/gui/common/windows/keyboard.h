@@ -28,6 +28,8 @@ class Keyboard : public Window {
   public:
     Keyboard();
 
+    ~Keyboard();
+
     void setField(char * field, uint8_t length, Window * fieldWindow);
 
     void disable();

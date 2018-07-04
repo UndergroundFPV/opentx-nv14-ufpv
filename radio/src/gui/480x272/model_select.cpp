@@ -229,7 +229,7 @@ void onModelSelectMenu(const char * result)
     loadModel(g_eeGeneral.currModelFilename, false);
     storageDirty(EE_GENERAL);
     storageCheck(true);
-    chainMenu(menuMainView);
+    // chainMenu(menuMainView);
     postModelLoad(true);
   }
   else if (result == STR_DELETE_MODEL) {

@@ -276,7 +276,7 @@ bool menuFirstCalib(event_t event)
   
   if (event == EVT_KEY_FIRST(KEY_EXIT) || menuCalibrationState == CALIB_FINISHED) {
     menuCalibrationState = CALIB_START;
-    chainMenu(menuMainView);
+    // chainMenu(menuMainView);
     return false;
   }
   else {

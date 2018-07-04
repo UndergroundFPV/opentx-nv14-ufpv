@@ -73,6 +73,8 @@ class Theme
 
     virtual const BitmapBuffer * getIconBitmap(uint8_t index, bool selected) const { return nullptr; }
 
+    virtual const BitmapBuffer * getIconMask(uint8_t index) const { return nullptr; }
+
     virtual bool drawTopbarBackground(uint32_t options=0) const = 0;
 
     virtual void drawIcon(coord_t x, coord_t y, uint8_t index, LcdFlags flags) const { }

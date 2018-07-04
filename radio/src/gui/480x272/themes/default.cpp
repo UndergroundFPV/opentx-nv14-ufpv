@@ -355,6 +355,11 @@ class DefaultTheme: public Theme
       return selected ? menuIconSelected[index] : menuIconNormal[index];
     }
 
+    virtual const BitmapBuffer * getIconMask(uint8_t index) const
+    {
+      return iconMask[index];
+    }
+
     virtual bool drawMenuIcon(uint8_t index, uint8_t position, bool selected) const
     {
       if (selected) {

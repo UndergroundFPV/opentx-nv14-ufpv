@@ -2033,7 +2033,7 @@ void opentxResume()
 {
   TRACE("opentxResume");
 
-  menuHandlers[0] = menuMainView;
+  // menuHandlers[0] = menuMainView;
 
   sdMount();
   storageReadAll();
@@ -2508,7 +2508,7 @@ void opentxInit(OPENTX_INIT_ARGS)
   TRACE("opentxInit");
 
 #if defined(GUI)
-  menuHandlers[0] = menuMainView;//menuMainView;
+  // menuHandlers[0] = menuMainView;//menuMainView;
   #if MENUS_LOCK != 2/*no menus*/
     // menuHandlers[1] = menuModelSetup;//menuModelSelect;
     new MainView();

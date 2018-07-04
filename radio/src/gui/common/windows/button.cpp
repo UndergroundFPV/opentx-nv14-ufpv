@@ -34,11 +34,19 @@ void TextButton::paint(BitmapBuffer * dc)
 
 void IconButton::paint(BitmapBuffer * dc)
 {
-  if (0) {
-    dc->drawBitmap(0, 0, &ALPHA_BUTTON_OFF);
-    theme->drawIcon((68-36)/2, (68-36)/2, icon, TEXT_BGCOLOR);
-  }
-  else {
-    dc->drawBitmap(0, 0, theme->getIconBitmap(icon, state));
-  }
+  dc->drawBitmap(0, 0, theme->getIconBitmap(icon, state));
+}
+
+FabIconButton::FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t state):
+  Button(parent, { x - 34, y - 34, 68, 68 }, onPress, state),
+  icon(icon)
+{
+}
+
+
+void FabIconButton::paint(BitmapBuffer * dc)
+{
+  dc->drawBitmap(0, 0, state ? &ALPHA_BUTTON_ON : &ALPHA_BUTTON_OFF);
+  const BitmapBuffer * mask = theme->getIconMask(icon);
+  dc->drawMask((68-mask->getWidth())/2, (68-mask->getHeight())/2, mask, TEXT_BGCOLOR);
 }

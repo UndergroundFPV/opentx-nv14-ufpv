@@ -258,7 +258,7 @@ void BitmapBuffer::drawPie(int x0, int y0, int radius, int startAngle, int endAn
   }
 }
 
-void BitmapBuffer::drawMask(coord_t x, coord_t y, BitmapBuffer * mask, LcdFlags flags, coord_t offset, coord_t width)
+void BitmapBuffer::drawMask(coord_t x, coord_t y, const BitmapBuffer * mask, LcdFlags flags, coord_t offset, coord_t width)
 {
   if (mask == NULL) {
     return;
@@ -281,7 +281,7 @@ void BitmapBuffer::drawMask(coord_t x, coord_t y, BitmapBuffer * mask, LcdFlags 
 
   for (coord_t row=0; row<height; row++) {
     display_t * p = getPixelPtr(x, y+row);
-    display_t * q = mask->getPixelPtr(offset, row);
+    const display_t * q = mask->getPixelPtr(offset, row);
     for (coord_t col=0; col<width; col++) {
       drawAlphaPixel(p, *((uint8_t *)q), color);
       MOVE_TO_NEXT_RIGHT_PIXEL(p);

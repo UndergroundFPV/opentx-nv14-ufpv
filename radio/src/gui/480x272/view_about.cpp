@@ -65,7 +65,7 @@ bool menuAboutView(event_t event)
       killEvents(event);
       break;
     case EVT_KEY_FIRST(KEY_EXIT):
-      chainMenu(menuMainView);
+      // chainMenu(menuMainView);
       break;
   }
 
@@ -145,7 +145,7 @@ bool menuAboutView(event_t event)
   if (++greyIndex == screenDuration) {
     greyIndex = 0;
     if (++screenIndex == ABOUT_COUNT) {
-      chainMenu(menuMainView);
+      // chainMenu(menuMainView);
     }
   }
 

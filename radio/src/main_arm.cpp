@@ -468,7 +468,7 @@ void perMain()
   if (usbPlugged() && getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
     // disable access to menus
     lcdClear();
-    menuMainView(0);
+    // menuMainView(0);
     lcdRefresh();
     return;
   }

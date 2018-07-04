@@ -20,9 +20,17 @@
 
 #include "opentx.h"
 
+Keyboard * keyboard = nullptr;
+
 Keyboard::Keyboard() :
   Window(&mainWindow, {0, LCD_H - 270, LCD_W, 0})
 {
+  keyboard = this;
+}
+
+Keyboard::~Keyboard()
+{
+  keyboard = nullptr;
 }
 
 bool Keyboard::onTouch(coord_t x, coord_t y)
@@ -123,6 +131,3 @@ void Keyboard::paint(BitmapBuffer * dc)
     keyboardBitmap = BitmapBuffer::load(getThemePath("keyboard.png"));
   dc->drawBitmap(0, 0, keyboardBitmap);
 }
-
-
-Keyboard * keyboard;

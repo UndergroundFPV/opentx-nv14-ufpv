@@ -284,8 +284,7 @@ long Open9xSim::onMouseUp(FXObject*,FXSelector,void*v)
 long Open9xSim::onMouseMove(FXObject*,FXSelector,void*v)
 {
   FXEvent *evt=(FXEvent*)v;
-  if (evt->state & LEFTBUTTONMASK) {
-    // TRACE("onMouseMove %d %d", evt->win_x, evt->win_y);
+  if (evt->state & LEFTBUTTONMASK && (touchState.Event == TE_SLIDE || abs(evt->win_x - touchState.X) > 5 || abs(evt->win_y - touchState.Y) > 5)) {
     touchState.Event = TE_SLIDE;
     touchState.X = evt->win_x;
     touchState.Y = evt->win_y;

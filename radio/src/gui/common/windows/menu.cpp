@@ -24,7 +24,8 @@ MenuHeaderWindow::MenuHeaderWindow(Menu * menu):
   Window(menu, { 0, 0, LCD_W, MENU_BODY_TOP }),
   back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
        [&]() -> uint8_t {
-         // TODO pop menu
+         mainWindow.clear();
+         new MainView();
          return 1;
        }, 1),
   carousel(this, menu)
@@ -66,3 +67,29 @@ bool MenuPagesCarousel::onTouch(coord_t x, coord_t y)
   currentPage = index;
   return true;
 }
+
+Menu::Menu():
+  Window(&mainWindow, { 0, 0, LCD_W, LCD_H }),
+  header(this),
+  body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
+{
+  new Keyboard();
+}
+
+void Menu::addPage(MenuPage * page)
+{
+  pages.push_back(page);
+  if (!currentPage) {
+    setCurrentPage(page);
+  }
+  header.carousel.updateInnerWidth();
+}
+
+void Menu::setCurrentPage(MenuPage * page)
+{
+  body.clear();
+  currentPage = page;
+  page->build(&body);
+  header.setTitle(page->title);
+}
+
