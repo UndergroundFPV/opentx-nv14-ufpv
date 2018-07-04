@@ -38,11 +38,7 @@ class Button : public Window {
       this->state = state;
     }
 
-    bool onTouch(coord_t x, coord_t y)
-    {
-      state = onPress();
-      return true;
-    }
+    bool onTouch(coord_t x, coord_t y);
 
   protected:
     std::function<uint8_t(void)> onPress;
