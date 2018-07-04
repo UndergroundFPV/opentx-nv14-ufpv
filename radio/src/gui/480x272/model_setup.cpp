@@ -259,6 +259,19 @@ void ModelSetupPage::build(Window * window)
 
     // Timer countdown
     // editTimerCountdown(0, y, attr, event);
+    new StaticText(window, grid.getLabelSlot(), STR_BEEPCOUNTDOWN);
+    new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1,
+               GET_DEFAULT(g_model.timers[i].countdownBeep),
+               [&](int32_t newValue) -> void {
+                   g_model.timers[i].countdownBeep = newValue;
+               });
+    new NumberEdit(window, grid.getFieldSlot(2, 1), 5, 30, 5,
+                   GET_DEFAULT(g_model.timers[i].countdownStart > 0 ? 5 : 10 - g_model.timers[i].countdownStart * 10),  // 1=5 , 0=10 , -1=20 , -2=30
+                   [=](int8_t newValue) -> void {
+                       g_model.timers[i].countdownStart =  (newValue > 5) ? 1-(newValue / 10) : 1 ;
+                   }, 0, NULL, "s");
+    grid.nextLine();
+
 
     // Timer persistent
     new StaticText(window, grid.getLabelSlot(), STR_PERSISTENT);
