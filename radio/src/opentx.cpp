@@ -538,8 +538,6 @@ void modelDefault(uint8_t id)
     g_model.switchWarningState |= (1 << (3*i));
   }
 #endif
-
-
 }
 
 #if defined(VIRTUAL_INPUTS)
@@ -2577,11 +2575,7 @@ void opentxInit(OPENTX_INIT_ARGS)
     rambackupRestore();
   }
   else {
-
-
     storageReadAll();
-
-
   }
 #else
   storageReadAll();
@@ -2646,7 +2640,7 @@ void opentxInit(OPENTX_INIT_ARGS)
   }
 
 #if defined(CPUARM) || defined(CPUM2560)
-    // TODO Horus does not need this
+  // TODO Horus does not need this
   if (!g_eeGeneral.unexpectedShutdown) {
     g_eeGeneral.unexpectedShutdown = 1;
     storageDirty(EE_GENERAL);
@@ -2670,7 +2664,6 @@ void opentxInit(OPENTX_INIT_ARGS)
 
   wdt_enable(WDTO_500MS);
 }
-
 
 #if defined(SIMU)
 void * simuMain(void *)
@@ -2700,7 +2693,7 @@ int main()
 
   boardInit();
 
-  #if defined(PCBX7)
+#if defined(PCBX7)
   bluetoothInit(BLUETOOTH_DEFAULT_BAUDRATE);   //BT is turn on for a brief period to differentiate X7 and X7S
 #endif
 
@@ -2717,10 +2710,8 @@ int main()
   // lcdSetRefVolt(25);
 #endif
 
-#if 1
 #if defined(SPLASH) && (defined(PCBTARANIS) || defined(COLORLCD))
   drawSplash();
-#endif
 #endif
 
   sei(); // interrupts needed now
@@ -2764,10 +2755,6 @@ int main()
     runFatalErrorScreen(STR_NO_SDCARD);
   }
 #endif
-
-  TRACE("INIT HEADER BG idx=%d = %x", COLOR_IDX(HEADER_BGCOLOR), lcdColorTable[COLOR_IDX(HEADER_BGCOLOR)]);
-
-
 
 #if defined(CPUARM)
   tasksStart();

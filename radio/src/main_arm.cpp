@@ -97,7 +97,6 @@ void checkEeprom()
 #else
 void checkEeprom()
 {
-  return;
 #if defined(RAMBACKUP)
   if (TIME_TO_RAMBACKUP()) {
     rambackupWrite();
@@ -325,14 +324,12 @@ void handleGui(event_t event) {
       }
     }
     menuHandlers[menuLevel](event);
-    tototo
     // todo     drawStatusLine(); here???
   }
   else
 #endif
   {
     lcdClear();
-    totototo
     menuHandlers[menuLevel](event);
     drawStatusLine();
   }

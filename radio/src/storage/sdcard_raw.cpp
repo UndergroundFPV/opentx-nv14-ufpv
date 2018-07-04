@@ -176,9 +176,9 @@ void storageReadAll()
 {
   TRACE("storageReadAll");
 
-   if (loadRadioSettingsSettings() != NULL) {
+  if (loadRadioSettingsSettings() != NULL) {
     storageEraseAll(true);
-   }
+  }
 
 #if defined(CPUARM)
   for (uint8_t i=0; languagePacks[i]!=NULL; i++) {

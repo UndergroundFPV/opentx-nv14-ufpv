@@ -148,21 +148,21 @@ int getMainViewsCount()
 MainView::MainView():
   Window(&mainWindow, { 0, 0, LCD_W, LCD_H })
 {
-  new FabIconButton(this, 54, 68, ICON_MODEL,
+  new FabIconButton(this, 50, 100, ICON_MODEL,
                     [&]() -> uint8_t {
                       mainWindow.clear();
                       new ModelMenu();
                       return 0;
                     });
 
-  new FabIconButton(this, LCD_W/2, 68, ICON_RADIO,
+  new FabIconButton(this, LCD_W/2, 100, ICON_RADIO,
                     [&]() -> uint8_t {
                       // mainWindow.clear();
                       // new RadioMenu();
                       return 0;
                     });
 
-  new FabIconButton(this, LCD_W-54, 68, ICON_THEME,
+  new FabIconButton(this, LCD_W-50, 100, ICON_THEME,
                     [&]() -> uint8_t {
                       // mainWindow.clear();
                       // new ModelMenu();
@@ -181,7 +181,6 @@ void MainView::paint(BitmapBuffer * dc)
   for (uint8_t i=0; i<MAX_CUSTOM_SCREENS; i++) {
     if (customScreens[i]) {
       if (i == g_model.view) {
-        TRACE("ICI CUSTOM SCREEN");
         customScreens[i]->refresh(); }
       else
         customScreens[i]->background();
