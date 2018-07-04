@@ -264,6 +264,8 @@ void BitmapBuffer::drawMask(coord_t x, coord_t y, BitmapBuffer * mask, LcdFlags 
     return;
   }
 
+  APPLY_OFFSET();
+
   coord_t w = mask->getWidth();
   coord_t height = mask->getHeight();
 

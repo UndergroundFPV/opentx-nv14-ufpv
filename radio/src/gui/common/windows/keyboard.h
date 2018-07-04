@@ -57,6 +57,6 @@ class Keyboard : public Window {
     Window * fieldWindow = nullptr;
 };
 
-extern Keyboard keyboard;
+extern Keyboard * keyboard;
 
 #endif

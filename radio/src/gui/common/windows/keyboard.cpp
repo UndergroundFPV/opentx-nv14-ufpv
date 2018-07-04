@@ -125,4 +125,4 @@ void Keyboard::paint(BitmapBuffer * dc)
 }
 
 
-Keyboard keyboard;
+Keyboard * keyboard;

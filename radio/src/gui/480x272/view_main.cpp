@@ -145,9 +145,38 @@ int getMainViewsCount()
   return MAX_CUSTOM_SCREENS;
 }
 
+MainView::MainView():
+  Window(&mainWindow, { 0, 0, LCD_W, LCD_H })
+{
+  new IconButton(this, { 20, 68, 68, 68 }, ICON_MODEL,
+                 [&]() -> uint8_t {
+                   mainWindow.clear();
+                   new ModelMenu();
+                   return 0;
+                 });
+
+  new IconButton(this, { LCD_W/2-34, 68, 68, 68 }, ICON_RADIO,
+                 [&]() -> uint8_t {
+                   // mainWindow.clear();
+                   // new RadioMenu();
+                   return 0;
+                 });
+
+  new IconButton(this, { LCD_W-20-68, 68, 68, 68 }, ICON_THEME,
+                 [&]() -> uint8_t {
+                   // mainWindow.clear();
+                   // new ModelMenu();
+                   return 0;
+                 });
+}
+
+void MainView::paint(BitmapBuffer * dc)
+{
+  theme->drawBackground();
+}
+
 bool menuMainView(event_t event)
 {
-  pushMenu(menuModelSetup);
 
   /*
   if (g_model.view >= getMainViewsCount()) {
@@ -162,22 +191,6 @@ bool menuMainView(event_t event)
         customScreens[i]->background();
     }
   }
-
-  if (handleIconButton(20, 68, ICON_MODEL, BUTTON_ON)) {
-    pushMenu(menuTabModel[0]);
-  }
-
-  if (handleIconButton(LCD_W/2-34, 68, ICON_RADIO, BUTTON_OFF)) {
-    pushMenu(menuTabGeneral[0]);
-  }
-
-  if (handleIconButton(LCD_W-20-68, 68, ICON_THEME, BUTTON_OFF)) {
-    pushMenu(menuTabScreensSetup[1]);
-  }
-
-  drawNumber(lcd, 50, 200, touchState.Event);
-  drawNumber(lcd, 150, 200, touchState.X);
-  drawNumber(lcd, 250, 200, touchState.Y);
 */
   return true;
 }

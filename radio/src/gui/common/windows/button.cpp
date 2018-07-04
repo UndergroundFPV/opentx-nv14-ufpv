@@ -29,7 +29,16 @@ void TextButton::paint(BitmapBuffer * dc)
     drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, CURVE_AXIS_COLOR);
 }
 
+#include "alpha_button_on.lbm"
+#include "alpha_button_off.lbm"
+
 void IconButton::paint(BitmapBuffer * dc)
 {
-  dc->drawBitmap(0, 0, theme->getIconBitmap(icon, state));
+  if (0) {
+    dc->drawBitmap(0, 0, &ALPHA_BUTTON_OFF);
+    theme->drawIcon((68-36)/2, (68-36)/2, icon, TEXT_BGCOLOR);
+  }
+  else {
+    dc->drawBitmap(0, 0, theme->getIconBitmap(icon, state));
+  }
 }

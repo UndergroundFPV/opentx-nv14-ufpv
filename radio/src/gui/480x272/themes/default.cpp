@@ -279,9 +279,9 @@ class DefaultTheme: public Theme
     {
       loadColors();
       Theme::load();
-      // if (!backgroundBitmap) {
+      if (!backgroundBitmap) {
         backgroundBitmap = BitmapBuffer::load(getThemePath("background.png"));
-      //}
+      }
       update();
     }
 

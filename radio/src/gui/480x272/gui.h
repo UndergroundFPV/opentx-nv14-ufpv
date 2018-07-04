@@ -76,6 +76,11 @@ class ModelMenu: public Menu {
   public:
     ModelMenu();
 };
+class MainView: public Window {
+  public:
+    MainView();
+    void paint(BitmapBuffer * dc) override;
+};
 #endif
 
 #if defined(HELI) && defined(GVARS) && defined(LUA_MODEL_SCRIPTS)

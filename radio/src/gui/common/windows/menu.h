@@ -112,7 +112,7 @@ class Menu: public Window {
     MenuHeaderWindow header;
     Window body;
     std::vector<MenuPage *> pages;
-    MenuPage * currentPage;
+    MenuPage * currentPage = nullptr;
 };
 
 #endif
