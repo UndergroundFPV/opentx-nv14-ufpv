@@ -22,6 +22,13 @@ set(GUI_SRC
   view_statistics.cpp
   )
 
+if(HELI)
+  set(GUI_SRC
+    ${GUI_SRC}
+    model_heli.cpp
+    )
+endif()
+
 if(GUI_DIR STREQUAL 128x64)
   if (ARCH STREQUAL ARM)
     set(GUI_SRC
@@ -64,10 +71,6 @@ if(ARCH STREQUAL ARM)
 endif()
 
 if(PCB STREQUAL X12S OR PCB STREQUAL X10 OR PCB STREQUAL NV14)
-  if(HELI)
-    set(HELI_SRC gui/common/colorlcd/model_heli.cpp)
-  endif()
-
   set(SRC
     ${SRC}
     gui/common/colorlcd/widgets.cpp

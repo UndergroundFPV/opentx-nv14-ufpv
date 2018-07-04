@@ -97,7 +97,7 @@ class Menu: public Window {
 
     void setCurrentPage(MenuPage * page)
     {
-      body.deleteWindows();
+      body.clear();
       currentPage = page;
       page->build(&body);
       header.setTitle(page->title);

@@ -263,7 +263,12 @@ void guiMain(event_t evt)
           popupDisplayed = false;
         }
         DEBUG_TIMER_START(debugTimerMenuHandlers);
-        refreshNeeded = menuHandlers[menuLevel](evt);
+
+        mainWindow.checkEvents();
+        // lcd->clear(TEXT_BGCOLOR);
+        mainWindow.refresh();
+
+        refreshNeeded = true; // menuHandlers[menuLevel](evt);
         DEBUG_TIMER_STOP(debugTimerMenuHandlers);
       }
 
@@ -320,12 +325,14 @@ void handleGui(event_t event) {
       }
     }
     menuHandlers[menuLevel](event);
+    tototo
     // todo     drawStatusLine(); here???
   }
   else
 #endif
   {
     lcdClear();
+    totototo
     menuHandlers[menuLevel](event);
     drawStatusLine();
   }

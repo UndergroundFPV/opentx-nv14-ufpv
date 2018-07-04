@@ -2510,7 +2510,8 @@ void opentxInit(OPENTX_INIT_ARGS)
 #if defined(GUI)
   menuHandlers[0] = menuMainView;//menuMainView;
   #if MENUS_LOCK != 2/*no menus*/
-    menuHandlers[1] = menuModelSetup;//menuModelSelect;
+    // menuHandlers[1] = menuModelSetup;//menuModelSelect;
+    new ModelMenu();
   #endif
 #endif
 

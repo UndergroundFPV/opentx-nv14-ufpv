@@ -73,3 +73,11 @@ void drawSolidRect(BitmapBuffer * dc, coord_t x, coord_t y, coord_t w, coord_t h
   dc->drawSolidFilledRect(x, y, w, thickness, att);
   dc->drawSolidFilledRect(x, y+h-thickness, w, thickness, att);
 }
+
+void drawSource(BitmapBuffer * dc, coord_t x, coord_t y, mixsrc_t idx, LcdFlags flags)
+{
+  char s[16];
+  getSourceString(s, idx);
+  dc->drawText(x, y, s, flags);
+}
+

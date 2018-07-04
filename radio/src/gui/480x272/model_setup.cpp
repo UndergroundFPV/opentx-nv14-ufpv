@@ -19,6 +19,12 @@
  */
 
 #include "opentx.h"
+#include "model_setup.h"
+
+ModelSetupPage::ModelSetupPage():
+  MenuPage(STR_MENUSETUP, ICON_MODEL_SETUP)
+{
+}
 
 uint8_t g_moduleIdx;
 
@@ -199,40 +205,6 @@ void resetModuleSettings(uint8_t module)
     g_model.moduleData[module].channelsCount = MAX_SENT_CHANNELS(g_model.moduleData[module].type) - 8;
   g_model.moduleData[module].rfProtocol = 0;
 }
-
-class ModelSetupPage: public MenuPage {
-  public:
-    ModelSetupPage():
-      MenuPage(STR_MENUSETUP, ICON_MODEL_SETUP)
-    {
-    }
-
-    void build(Window * window);
-
-  protected:
-    void updateInternalModuleWindow();
-    void updateExternalModuleWindow();
-
-    Window * internalModuleWindow = nullptr;
-    Window * externalModuleWindow = nullptr;
-};
-
-
-class ModelMenu: public Menu {
-  public:
-    ModelMenu():
-      Menu()
-    {
-      addPage(new ModelSetupPage());
-      addPage(new ModelSetupPage());
-      addPage(new ModelSetupPage());
-      addPage(new ModelSetupPage());
-      addPage(new ModelSetupPage());
-      addPage(new ModelSetupPage());
-      addPage(new ModelSetupPage());
-      addPage(new ModelSetupPage());
-    }
-};
 
 void ModelSetupPage::build(Window * window)
 {
@@ -449,7 +421,7 @@ void ModelSetupPage::updateInternalModuleWindow()
 
   GridLayout grid(*internalModuleWindow);
 
-  internalModuleWindow->deleteWindows();
+  internalModuleWindow->clear();
 
   new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_MODE);
   new Choice(internalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
@@ -494,7 +466,7 @@ void ModelSetupPage::updateExternalModuleWindow()
 {
   GridLayout grid(*externalModuleWindow);
 
-  externalModuleWindow->deleteWindows();
+  externalModuleWindow->clear();
 
   new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MODE);
   new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
@@ -568,7 +540,6 @@ void ModelSetupPage::updateExternalModuleWindow()
     }
 
     grid.nextLine();
-
 
     // PPM MODULES
     if (IS_MODULE_PPM(EXTERNAL_MODULE)) {
@@ -662,18 +633,6 @@ bool menuModelSetup(event_t event)
     moduleFlag[1] = 0;
   }
 */
-
-  if (event == EVT_ENTRY) {
-    new ModelMenu();
-  }
-
-  {
-    mainWindow.checkEvents();
-    // lcd->clear(TEXT_BGCOLOR);
-    mainWindow.refresh();
-  }
-
-  return true;
 
 #if 0
 
