@@ -39,9 +39,11 @@ class Window {
       }
     }
 
-    virtual ~Window() {
-      if (focusWindow == this)
+    virtual ~Window()
+    {
+      if (focusWindow == this) {
         focusWindow = nullptr;
+      }
     }
 
     void clear()
@@ -50,7 +52,6 @@ class Window {
       scrollPositionY = 0;
       innerWidth = rect.w;
       innerHeight = rect.h;
-
       for (auto window: children) {
         delete window;
       }
@@ -62,9 +63,11 @@ class Window {
       return focusWindow == this;
     }
 
-    void clearFocus() {
-      if (focusWindow)
+    void clearFocus()
+    {
+      if (focusWindow) {
         focusWindow->onFocusLost();
+      }
       focusWindow = NULL;
     }
 
@@ -104,7 +107,8 @@ class Window {
 
     void fullPaint(BitmapBuffer * dc);
 
-    bool pointInRect(coord_t x, coord_t y, rect_t & rect) {
+    bool pointInRect(coord_t x, coord_t y, rect_t & rect)
+    {
       return (x >= rect.x && x < rect.x + rect.w && y >= rect.y && y < rect.y + rect.h);
     }
 
