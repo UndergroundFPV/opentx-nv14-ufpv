@@ -21,6 +21,8 @@
 #include "opentx.h"
 #include "model_setup.h"
 
+#define SET_DIRTY()     storageDirty(EE_MODEL)
+
 ModelSetupPage::ModelSetupPage():
   MenuPage(STR_MENUSETUP, ICON_MODEL_SETUP)
 {

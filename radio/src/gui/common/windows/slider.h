@@ -18,23 +18,34 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#ifndef _SLIDER_H_
+#define _SLIDER_H_
 
+#include <functional>
 #include "window.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "slider.h"
-#include "keyboard.h"
-#include "menu.h"
-#include "gridlayout.h"
-#include "helpers.h"
 
-#endif // _WINDOWS_H_
+class Slider : public Window {
+  public:
+    Slider(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue):
+      Window(parent, rect),
+      vmin(vmin),
+      vmax(vmax),
+      getValue(getValue),
+      setValue(setValue)
+    {
+    }
+
+    void paint(BitmapBuffer * dc);
+
+    bool onTouch(coord_t x, coord_t y);
+
+    bool onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t slideY);
+
+  protected:
+    int32_t vmin;
+    int32_t vmax;
+    std::function<int32_t()> getValue;
+    std::function<void(int32_t)> setValue;
+};
+
+#endif

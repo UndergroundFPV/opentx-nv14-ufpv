@@ -24,21 +24,6 @@ Window * Window::focusWindow = nullptr;
 std::list<Window *> Window::trash;
 MainWindow mainWindow;
 
-void Window::refresh(rect_t & rect)
-{
-  if (parent) {
-    rect.x += this->rect.x;
-    rect.y += this->rect.y;
-    parent->refresh(rect);
-  }
-  else {
-    lcd->setOffset(0, 0);
-    lcd->setClippingRect(0, LCD_W, 0, LCD_H);
-    lcd->clear(TEXT_BGCOLOR);
-    fullPaint(lcd);
-  }
-}
-
 void Window::fullPaint(BitmapBuffer * dc)
 {
   paint(dc);
@@ -77,24 +62,25 @@ bool Window::onTouch(coord_t x, coord_t y)
 
 bool Window::onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t slideY)
 {
+  for (auto child: children) {
+    if (pointInRect(startX, startY, child->rect)) {
+      if (child->onSlide(startX - child->rect.x, startY - child->rect.y, slideX, slideY)) {
+        return true;
+      }
+    }
+  }
+
   if (slideY && innerHeight > rect.h) {
     scrollPositionY = limit<coord_t>(-innerHeight + rect.h, scrollPositionY + slideY, 0);
     return true;
   }
-  else if (slideX && innerWidth > rect.w) {
+
+  if (slideX && innerWidth > rect.w) {
     scrollPositionX = limit<coord_t>(-innerWidth + rect.w, scrollPositionX + slideX, 0);
     return true;
   }
-  else {
-    for (auto child: children) {
-      if (pointInRect(startX, startY, child->rect)) {
-        if (child->onSlide(startX - child->rect.x, startY - child->rect.y, slideX, slideY)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+
+  return false;
 }
 
 void Window::adjustInnerHeight()
@@ -160,4 +146,12 @@ void MainWindow::checkEvents()
   }
 
   emptyTrash();
+}
+
+void MainWindow::refresh(rect_t & rect)
+{
+  lcd->setOffset(0, 0);
+  lcd->setClippingRect(rect.x, rect.right(), rect.y, rect.bottom());
+  lcd->clear(TEXT_BGCOLOR);
+  fullPaint(lcd);
 }

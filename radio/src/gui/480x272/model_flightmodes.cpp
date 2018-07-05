@@ -21,6 +21,8 @@
 #include "opentx.h"
 #include "model_flightmodes.h"
 
+#define SET_DIRTY()     storageDirty(EE_MODEL)
+
 ModelFlightModesPage::ModelFlightModesPage():
   MenuPage(STR_MENUFLIGHTMODES, ICON_MODEL_FLIGHT_MODES)
 {

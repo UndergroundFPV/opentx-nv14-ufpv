@@ -98,12 +98,6 @@ class Window {
       innerHeight = h;
     }
 
-    void refresh(rect_t & rect);
-
-    void refresh() {
-      refresh(rect);
-    }
-
     virtual void paint(BitmapBuffer * dc) { }
 
     void drawVerticalScrollbar(BitmapBuffer * dc);
@@ -151,6 +145,13 @@ class MainWindow: public Window {
     }
 
     void checkEvents();
+
+    void refresh()
+    {
+      refresh(rect);
+    }
+
+    void refresh(rect_t & rect);
 
   protected:
     void emptyTrash();

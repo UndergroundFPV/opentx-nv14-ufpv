@@ -292,6 +292,8 @@ void BitmapBuffer::drawMask(coord_t x, coord_t y, const BitmapBuffer * mask, Lcd
 
 void BitmapBuffer::drawBitmapPattern(coord_t x, coord_t y, const uint8_t * bmp, LcdFlags flags, coord_t offset, coord_t width)
 {
+  APPLY_OFFSET();
+
   coord_t w = *((uint16_t *)bmp);
   coord_t height = *(((uint16_t *)bmp)+1);
 

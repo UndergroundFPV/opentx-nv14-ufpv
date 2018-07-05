@@ -117,7 +117,6 @@ void Keyboard::setField(char * field, uint8_t length, Window * fieldWindow)
 
 void Keyboard::disable()
 {
-  storageDirty(EE_MODEL);
   this->setHeight(0);
   this->field = nullptr;
   if (fieldWindow) {

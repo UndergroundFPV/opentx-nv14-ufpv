@@ -31,6 +31,10 @@
 
 struct rect_t {
   coord_t x, y, w, h;
+  constexpr coord_t left() { return x; }
+  constexpr coord_t right() { return x + w; }
+  constexpr coord_t top() { return y; }
+  constexpr coord_t bottom() { return y + h; }
 };
 
 #define MOVE_OFFSET() coord_t offsetX = this->offsetX; x += offsetX; this->offsetX = 0; coord_t offsetY = this->offsetY; y += offsetY; this->offsetY = 0

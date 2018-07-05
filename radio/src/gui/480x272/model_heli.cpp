@@ -21,6 +21,8 @@
 #include "opentx.h"
 #include "model_heli.h"
 
+#define SET_DIRTY()     storageDirty(EE_MODEL)
+
 ModelHeliPage::ModelHeliPage():
   MenuPage(STR_MENUHELISETUP, ICON_MODEL_HELI)
 {
