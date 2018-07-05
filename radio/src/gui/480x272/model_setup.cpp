@@ -258,18 +258,16 @@ void ModelSetupPage::build(Window * window)
     grid.nextLine();
 
     // Timer countdown
-    // editTimerCountdown(0, y, attr, event);
     new StaticText(window, grid.getLabelSlot(), STR_BEEPCOUNTDOWN);
     new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1,
                GET_DEFAULT(g_model.timers[i].countdownBeep),
                [&](int32_t newValue) -> void {
-                   g_model.timers[i].countdownBeep = newValue;
+                 g_model.timers[i].countdownBeep = newValue;
                });
     new Choice(window, grid.getFieldSlot(2, 1), STR_COUNTDOWNVALUES, 0, 3,
-               GET_DEFAULT(g_model.timers[i].countdownStart + 2 ),
+               GET_DEFAULT(g_model.timers[i].countdownStart + 2),
                [&](int32_t newValue) -> void {
-                  TRACE("newValue : %d", newValue);
-                   g_model.timers[i].countdownStart = newValue - 2;
+                 g_model.timers[i].countdownStart = newValue - 2;
                });
     grid.nextLine();
 
@@ -461,14 +459,12 @@ void ModelSetupPage::updateInternalModuleWindow()
 
     new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
     new Choice(internalModuleWindow, grid.getFieldSlot(), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode),
-               SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode));
+               GET_SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode));
     grid.nextLine();
 
     new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_ANTENNASELECTION);
     new Choice(internalModuleWindow, grid.getFieldSlot(), STR_VANTENNATYPES, 0, 1,
-               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna),
-               SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna));
+               GET_SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna));
   }
 
   coord_t delta = internalModuleWindow->adjustHeight();
@@ -498,8 +494,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                  [=](int32_t newValue) -> void { g_model.moduleData[EXTERNAL_MODULE].rfProtocol = newValue - 1; });
     } else if (IS_MODULE_DSM2(EXTERNAL_MODULE)) {
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_DSM_PROTOCOLS, DSM2_PROTO_LP45, DSM2_PROTO_DSMX,
-                 GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
-                 SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
+                 GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
     } else if (IS_MODULE_R9M(EXTERNAL_MODULE)) {
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_R9M_MODES, MODULE_SUBTYPE_R9M_FCC,
                  MODULE_SUBTYPE_R9M_LBT,
@@ -548,7 +543,6 @@ void ModelSetupPage::updateExternalModuleWindow()
                      [=](int8_t newValue) -> void {
                        g_model.moduleData[EXTERNAL_MODULE].channelsCount =
                          newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
-                       TRACE("Channel count : %d", g_model.moduleData[EXTERNAL_MODULE].channelsCount);
                        updateExternalModuleWindow();
                      }, 0, STR_CH);
     }
@@ -580,10 +574,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_RECEIVER_NUM);
       // Receiver number
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 0, MAX_RX_NUM(EXTERNAL_MODULE), 1,
-                     GET_DEFAULT(g_model.header.modelId[EXTERNAL_MODULE]),
-                     [=](int8_t newValue) -> void {
-                       g_model.header.modelId[EXTERNAL_MODULE] = newValue;
-                     }, 0);
+                     GET_SET_DEFAULT(g_model.header.modelId[EXTERNAL_MODULE]), 0);
       grid.nextLine();
 
       // Bind and Range buttons
@@ -628,8 +619,7 @@ void ModelSetupPage::updateExternalModuleWindow()
     if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_R9M(EXTERNAL_MODULE)) {
       new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-                 GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode),
-                 SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode));
+                 GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode));
       grid.nextLine();
     }
 

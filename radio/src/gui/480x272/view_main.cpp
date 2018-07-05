@@ -157,8 +157,8 @@ MainView::MainView():
 
   new FabIconButton(this, LCD_W/2, 100, ICON_RADIO,
                     [&]() -> uint8_t {
-                      // mainWindow.clear();
-                      // new RadioMenu();
+                      mainWindow.clear();
+                      new RadioMenu();
                       return 0;
                     });
 

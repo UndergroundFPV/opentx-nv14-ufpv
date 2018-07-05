@@ -44,26 +44,7 @@ void chainMenu(MenuHandlerFunc newMenu)
 
 void pushMenu(MenuHandlerFunc newMenu)
 {
-  killEvents(KEY_ENTER);
 
-  if (menuLevel == 0) {
-    if (newMenu == menuRadioSetup)
-      menuVerticalPositions[0] = 1;
-    if (newMenu == menuModelSetup)
-      menuVerticalPositions[0] = 0;
-  }
-  else {
-    menuVerticalPositions[menuLevel] = menuVerticalPosition;
-  }
-
-  menuLevel++;
-
-  assert(menuLevel < DIM(menuHandlers));
-
-  menuHandlers[menuLevel] = newMenu;
-  menuEvent = EVT_ENTRY;
-  AUDIO_KEY_PRESS();
-  TRACE("pushMenu(%d, %p)", menuLevel, newMenu);
 }
 
 bool menuModelNotes(event_t event)

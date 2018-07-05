@@ -19,9 +19,15 @@
  */
 
 #include "opentx.h"
+#include "radio_setup.h"
+
+RadioMenu::RadioMenu():
+  Menu()
+{
+  addPage(new RadioSetupPage());
+}
 
 const MenuHandlerFunc menuTabGeneral[] = {
-  menuRadioSetup,
   menuRadioSdManager,
   menuRadioSpecialFunctions,
   menuRadioTrainer,

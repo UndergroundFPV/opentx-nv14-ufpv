@@ -76,6 +76,10 @@ class ModelMenu: public Menu {
   public:
     ModelMenu();
 };
+class RadioMenu: public Menu {
+  public:
+    RadioMenu();
+};
 class MainView: public Window {
   public:
     MainView();
