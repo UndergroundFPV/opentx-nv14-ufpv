@@ -23,7 +23,7 @@
 
 class StaticText : public Window {
   public:
-    StaticText(Window * parent, const rect_t & rect, const char * text, LcdFlags flags = SMLSIZE) :
+    StaticText(Window * parent, const rect_t & rect, const char * text, LcdFlags flags = 0) :
       Window(parent, rect),
       flags(flags),
       text(strdup(text))
