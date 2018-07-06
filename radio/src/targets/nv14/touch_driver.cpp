@@ -360,16 +360,17 @@ void TouchDriver( void )
                     y = Ty - Tyold;
 
                     if( ( x >= SLIDE_RANGE ) || ( x <= -SLIDE_RANGE ) || ( y >= SLIDE_RANGE ) || ( y <= -SLIDE_RANGE ) )
-                      {
-                          TouchState = TOUCH_SLIDE;
-                          touchState.Event = TE_SLIDE;
-                      }
-                      else {
-                          touchState.Event = TE_DOWN;
-                          touchState.startX = touchState.lastX = touchState.X;
-                          touchState.startY = touchState.lastY = touchState.Y;
-                          putEvent(TOUCH_PRESS);
-                      } 
+                    {
+                        TouchState = TOUCH_SLIDE;
+                        touchState.Event = TE_SLIDE;
+                    }
+                    else
+                    {
+                        touchState.Event = TE_DOWN;
+                        touchState.startX = touchState.lastX = touchState.X;
+                        touchState.startY = touchState.lastY = touchState.Y;
+                        putEvent(TOUCH_PRESS);
+                    }
                   }
                   else if ( TOUCH_SLIDE == TouchState )
                   {
@@ -385,14 +386,15 @@ void TouchDriver( void )
           }
           else 
           {
-              if( TOUCH_CLICK == TouchState )
+              if ( TOUCH_CLICK == TouchState )
               {
                   touchState.X = Txold;
                   touchState.Y = Tyold;
                   touchState.Event = TE_UP;
                   touchState.Time = get_tmr10ms();
               }
-              else if (get_tmr10ms() > touchState.Time + 50) {
+              else if (get_tmr10ms() > touchState.Time + 50)
+              {
                   touchState.X = LCD_WIDTH;
                   touchState.Y = LCD_HEIGHT;
                   touchState.Event = TE_NONE;

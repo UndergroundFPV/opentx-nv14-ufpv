@@ -43,6 +43,7 @@ option(TEMPLATES "Model templates menu" OFF)
 option(TRACE_SIMPGMSPACE "Turn on traces in simpgmspace.cpp" ON)
 option(TRACE_LUA_INTERNALS "Turn on traces for Lua internals" OFF)
 option(FRSKY_STICKS "Reverse sticks for FrSky sticks" OFF)
+option(FLYSKY_HALL_STICKS "Reverse sticks for FlySky hall sticks" ON)
 option(NANO "Use nano newlib and binalloc")
 option(NIGHTLY_BUILD_WARNING "Warn this is a nightly build" OFF)
 option(USEHORUSBT "X9E BT module replaced by Horus BT module" OFF)
@@ -346,6 +347,11 @@ if(FRSKY_STICKS)
   add_definitions(-DFRSKY_STICKS)
 endif()
 
+if (FLYSKY_HALL_STICKS)
+  add_definitions(-DFLYSKY_HALL_STICKS)
+endif()
+
+
 if(NOT FONT STREQUAL "")
   add_definitions(-DFONT=${DEFAULT_MODE})
 endif()
@@ -468,7 +474,7 @@ use_cxx11()  # ensure gnu++11 in CXX_FLAGS with CMake < 3.1
 find_program(BASH bash HINTS "c:/cygwin/bin/" "c:/msys/bin/" DOC "bash shell for firmware size report (eg. c:/cygwin/bin/bash.exe on Windows).")
 
 if(NOT MSVC)
-  set(OPT "s" CACHE STRING "Optimization mode (0/1/2/s")
+  set(OPT "0" CACHE STRING "Optimization mode (0/1/2/s")
 
   if(ARCH STREQUAL ARM)
     enable_language(ASM)

@@ -80,6 +80,7 @@ void interrupt1ms()
     pre_scale = 0;
 #if !defined(SIMU)
     TouchDriver();
+    hall_stick_loop();
 #endif
     DEBUG_TIMER_START(debugTimerPer10ms);
     DEBUG_TIMER_SAMPLE(debugTimerPer10msPeriod);
@@ -111,8 +112,6 @@ void delay_self(int count)
    }
 }
 
-//uint8_t  * TestSDRAM = (uint8_t * )0xC0400000;
-
 
 void boardInit()
 {
@@ -136,8 +135,7 @@ void boardInit()
                          AUDIO_RCC_AHB1Periph |
                          HAPTIC_RCC_AHB1Periph |
                          //INTMODULE_RCC_AHB1Periph |
-                         RCC_APB1Periph_UART4 |
-                         RCC_AHB1Periph_DMA1 |
+                         HALL_RCC_AHB1Periph |
                          EXTMODULE_RCC_AHB1Periph,
                          ENABLE);
 
@@ -149,6 +147,7 @@ void boardInit()
                          TELEMETRY_RCC_APB1Periph |
                          TRAINER_RCC_APB1Periph |
                          //INTMODULE_RCC_APB1Periph |
+                         HALL_RCC_APB1Periph |
                          EXTMODULE_RCC_APB1Periph |
                          BACKLIGHT_RCC_APB1Periph,
                          ENABLE);
@@ -179,15 +178,14 @@ void boardInit()
   // and this section is un-initialized
   memset(&g_FATFS_Obj, 0, sizeof(g_FATFS_Obj));
 
- // *TestSDRAM = 85;
- // *TestSDRAM = 86;
-
-  //HallStick_Init();
   monitorInit();
   keysInit();
   adcInit();
   backlightInit();
   lcdInit();
+#if defined(FLYSKY_HALL_STICKS)
+  hall_stick_init(FLYSKY_HALL_BAUDRATE);
+#endif
 
 
   init2MhzTimer();
@@ -196,6 +194,7 @@ void boardInit()
   hapticInit();
 
   TouchInit();
+
 
 #if defined(DEBUG)
   DBGMCU_APB1PeriphConfig(DBGMCU_IWDG_STOP|DBGMCU_TIM1_STOP|DBGMCU_TIM2_STOP|DBGMCU_TIM3_STOP|DBGMCU_TIM4_STOP|DBGMCU_TIM5_STOP|DBGMCU_TIM6_STOP|DBGMCU_TIM7_STOP|DBGMCU_TIM8_STOP|DBGMCU_TIM9_STOP|DBGMCU_TIM10_STOP|DBGMCU_TIM11_STOP|DBGMCU_TIM12_STOP|DBGMCU_TIM13_STOP|DBGMCU_TIM14_STOP, ENABLE);

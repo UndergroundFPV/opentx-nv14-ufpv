@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -20,387 +20,22 @@
 
 #define  __HALLSTICK_DRIVER_C__
 #include "opentx.h"
-#include "hallStick_driver.h"
 #undef   __HALLSTICK_DRIVER_C__
 
-// Fifo<uint8_t, 512> hallSerialTxFifo;
-DMAFifo<32> hallSerialTxFifo __DMA (HALL_DMA_Stream_TX);
-DMAFifo<32> hallSerialRxFifo __DMA (HALL_DMA_Stream_RX);
+DMAFifo<HALLSTICK_BUFF_SIZE> hallDMAFifo __DMA (HALL_DMA_Stream_RX);
+unsigned char HallCmd[64] __DMA;
 
 STRUCT_HALL HallProtocol =
                         {
                           0,
                           GET_START,
                         };
-STRUCT_CHANNEL Channel;
+
+STRUCT_HALL_CHANNEL Channel;
 STRUCT_STICK_CALIBRATION StickCallbration[4] = {{0, 0, 0}};
+signed short HallChVal[4];
 
-void HallStick_Init(void)
-{
-#if 0
-  STRUCT_GPIO_CONFIG Gpio;
-  STRUCT_UART_CONFIG Config;
-
-  Gpio.Mode = IO_MODE_ALTERNATE;
-  Gpio.Alternate = IO_AF_UART4;
-  Gpio.OpenDrainOut = 0;
-  Gpio.PUPD = IO_PULL_UP;
-  Gpio.Speed = IO_SPEED_HIGH;
-  Gpio.Port = PORTA;
-  Gpio.Pin = 0;
-  GPIO_Config( &Gpio );
-  Gpio.Pin = 1;
-  GPIO_Config( &Gpio );
-
-  Config.UART = HALLSTICK_UART;
-  Config.BaudRate = 921600;
-  Config.MSB = 0;
-  Config.Tx = 1;
-  Config.Rx = 1;
-  Config.TxDma = 1;
-  Config.RxDma = 1;
-  Config.Enable = 1;
-  MCU_UART_Config( &Config );
-  MCU_UART_ReceiveData( HALLSTICK_UART, ( U32 )HALL_DataBuffer, HALLSTICK_BUFF_SIZE );
-  UART_BufferSize[HALLSTICK_UART] = HALLSTICK_BUFF_SIZE;
-  UART_DMA_LastValue[HALLSTICK_UART] = HALLSTICK_BUFF_SIZE;
-#endif
-  NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannel = HALL_SERIAL_RX_DMA_Stream_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
-
-  GPIO_PinAFConfig(HALL_SERIAL_GPIO, HALL_SERIAL_RX_GPIO_PinSource, HALL_SERIAL_GPIO_AF);
-  GPIO_PinAFConfig(HALL_SERIAL_GPIO, HALL_SERIAL_TX_GPIO_PinSource, HALL_SERIAL_GPIO_AF);
-
-  GPIO_InitTypeDef GPIO_InitStructure;
-  GPIO_InitStructure.GPIO_Pin = HALL_SERIAL_TX_GPIO_PIN | HALL_SERIAL_RX_GPIO_PIN;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-  GPIO_Init(HALL_SERIAL_GPIO, &GPIO_InitStructure);
-#if 1
-  USART_InitTypeDef USART_InitStructure;
-  USART_InitStructure.USART_BaudRate = FLYSKY_HALL_BAUDRATE;
-  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-  USART_InitStructure.USART_StopBits = USART_StopBits_1;
-  USART_InitStructure.USART_Parity = USART_Parity_No;
-  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-  USART_Init(HALL_SERIAL_USART, &USART_InitStructure);
-
-  DMA_InitTypeDef DMA_InitStructure;
-  hallSerialRxFifo.clear();
-
-
-  DMA_DeInit(HALL_DMA_Stream_RX);
-  USART_ITConfig(HALL_SERIAL_USART, USART_IT_RXNE, DISABLE);
-  USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, DISABLE);
-  DMA_InitStructure.DMA_Channel = HALL_DMA_Channel_RX;
-  DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&HALL_SERIAL_USART->DR);
-  DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(hallSerialRxFifo.buffer());
-  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
-  DMA_InitStructure.DMA_BufferSize = hallSerialRxFifo.size();
-  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-  DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
-  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
-  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
-  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-  DMA_Init(HALL_DMA_Stream_RX, &DMA_InitStructure);
-  DMA_Cmd(HALL_DMA_Stream_RX, ENABLE);
-
-#if 0
-
-  /* DMA1 Channel4 (triggered by USART1 Tx event) Config */
-  DMA_DeInit(HALL_DMA_Stream_TX);
-  DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&HALL_SERIAL_USART->DR);
-  DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(hallSerialTxFifo.buffer());
-  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-  DMA_InitStructure.DMA_BufferSize = 0;
-  DMA_Init(HALL_DMA_Stream_TX, &DMA_InitStructure);//初始化
-  USART_Cmd(HALL_SERIAL_USART, ENABLE);
-
-#endif
-
-  // no DMA ...
-  USART_ClearFlag(HALL_SERIAL_USART, USART_FLAG_TC);
-  //USART_ITConfig(AUX_SERIAL_USART, USART_IT_RXNE, ENABLE);
-  //USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, DISABLE);DMA_GetCurrDataCounter
-
-  USART_ITConfig(HALL_SERIAL_USART, USART_IT_IDLE, ENABLE);
-  USART_ITConfig(HALL_SERIAL_USART, USART_IT_TC, ENABLE);
-  USART_DMACmd(HALL_SERIAL_USART, USART_DMAReq_Rx | USART_DMAReq_Tx, ENABLE);
-
-  //NVIC_SetPriority(HALL_SERIAL_RX_DMA_Stream_IRQn, 6);
-  //NVIC_EnableIRQ(HALL_SERIAL_RX_DMA_Stream_IRQn);
-#endif
-  //ResetHall();
-}
-
-
-extern "C" void HALL_SERIAL_USART_IRQHandler(void)
-{
-  // Send
-  if (USART_GetITStatus(HALL_SERIAL_USART, USART_IT_TXE) != RESET) {
-    uint8_t txchar;
-
-    if (hallSerialTxFifo.pop(txchar)) {
-      /* Write one byte to the transmit data register */
-      USART_SendData(HALL_SERIAL_USART, txchar);
-    }
-    else {
-      USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, DISABLE);
-    }
-  }
-}
-
-extern "C" void HALL_RX_DMA_Stream_IRQHandler(void)
-{
-  if (DMA_GetITStatus(HALL_DMA_Stream_RX, USART_IT_IDLE)) {
-    // TODO we could send the 8 next channels here (when needed)
-    DMA_ClearITPendingBit(HALL_DMA_Stream_RX, USART_IT_IDLE);
-  }
-}
-
-void hallSerialPutc(char c)
-{
-#if 0
-#if !defined(SIMU)
-  int n = 0;
-  while (hallSerialTxFifo.isFull()) {
-    delay_ms(1);
-    //delay(10);
-    if (++n > 100) return;
-  }
-  hallSerialTxFifo.push(c);
-  USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, ENABLE);
-#endif
-#endif
-}
-
-
-void HALL_UART_TransmitData( unsigned char *pData, U32 length )
-{
-  //MCU_UART_TransmitData( HALLSTICK_UART, ( U32 )pData, Length );
-#if 0
-  int n = 0;
-  int i = 0;
-
-  for (i = 0; i < length; i++)
-  {
-      while (hallSerialTxFifo.isFull())
-      {
-        delay_ms(1);
-        //delay(10);
-        if (++n > 100) return;
-      }
-
-      hallSerialTxFifo.push(*pData);
-      pData++;
-  }
-
-  USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, ENABLE);
-#endif
-}
-
-
-
-uint16_t HALL_UART_GetReceiveDataLength( void )
-{
-  //return( UART_GetReceiveDataLength( HALLSTICK_UART ) );
-}
-
-void ResetHall( void )
-{
-    uint8_t Temp[] = {0x55, 0xD1, 0x01, 0x01, 0xff, 0xff};
-    unsigned short CRC16 = 0XFFFF;
-    CRC16 = Calculation_CRC16(Temp, 4);
-    Temp[4] = CRC16 & 0xff;
-    Temp[5] = CRC16>>8 & 0xff ;
-    HALL_UART_TransmitData( Temp, 6);
-}
-
-void Get_factory( void )
-{
-    uint8_t Temp[] = {0x55, 0xD1, 0x01, 0x00, 0xff, 0xff};
-    unsigned short CRC16 = 0XFFFF;
-    CRC16 = Calculation_CRC16(Temp, 4);
-    Temp[4] = CRC16 & 0xff;
-    Temp[5] = CRC16>>8 & 0xff ;
-    HALL_UART_TransmitData( Temp, 6);
-}
-
-
-
-static void Parse_Character(unsigned char Character)
-{
-    switch( HallProtocol.Status )
-    {
-        case GET_START:
-                    {
-                        if( HALL_PROTOLO_HEAD == Character )
-                        {
-                            HallProtocol.Head  = HALL_PROTOLO_HEAD;
-                            HallProtocol.Status = GET_ID;
-                        }
-                        break;
-                    }
-        case GET_ID:
-                    {
-                        HallProtocol.HallID.ID = Character;
-                        HallProtocol.Status = GET_LENGTH;
-                        break;
-                    }
-        case GET_LENGTH:
-                    {
-                        HallProtocol.Length = Character;
-                        HallProtocol.DataIndex = 0;
-                        HallProtocol.Status = GET_DATA;
-                        if( 0 == HallProtocol.Length )
-                        {
-                            HallProtocol.Status = GET_CHECKSUM;
-                            HallProtocol.CheckSum=0;
-                        }
-                        break;
-                    }
-        case GET_DATA:
-                    {
-                        HallProtocol.Data[HallProtocol.DataIndex++] = Character;
-                        if( HallProtocol.DataIndex >= HallProtocol.Length)
-                        {
-                            HallProtocol.CheckSum = 0;
-                            HallProtocol.DataIndex = 0;
-                            HallProtocol.Status = GET_STATE;
-                        }
-                        break;
-                    }
-        case GET_STATE:
-                    {
-                        //HallProtocol.StickState = HallProtocol.Data[HallProtocol.Length-1];
-                        HallProtocol.CheckSum = 0;
-                        HallProtocol.DataIndex = 0;
-                        HallProtocol.Status = GET_CHECKSUM;
-                    }
-        case GET_CHECKSUM:
-                    {
-                        HallProtocol.CheckSum |= Character<<((HallProtocol.DataIndex++)*8);
-                        if(HallProtocol.DataIndex >= 2 )
-                        {
-                            HallProtocol.DataIndex = 0;
-                            HallProtocol.Status = CHECKSUM;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-        case CHECKSUM:
-                    {
-                        if(HallProtocol.CheckSum == Calculation_CRC16( (U8*)&HallProtocol.Head, HallProtocol.Length+3 ) )
-                        {
-                            HallProtocol.msg_OK = 1;
-                            goto Label_restart;
-                        }
-                        else
-                        {
-                            goto Label_error;
-                        }
-                    }
-    }
-    return;
-
-    Label_error:
-    Label_restart:
-        HallProtocol.Status = GET_START;
-    return ;
-}
-
-STRUCT_CHANNEL HallChannel[7];
-void ConvertChannel( void )
-{
-    uint16_t Value;
-    for(uint8_t i = 0; i < 4; i++ )
-    {
-        if( Channel.Channel[i] < StickCallbration[i].Mid)
-        {
-            Value = StickCallbration[i].Mid-StickCallbration[i].Min;
-            Value= ( 500 * (StickCallbration[i].Mid-Channel.Channel[i] ) ) / ( Value );
-            if( Value >= 500 )
-            {
-                Value = 500;
-            }
-            HallChannel[i].ServoValue =1500 - Value;
-        }
-        else
-        {
-            Value = StickCallbration[i].Max-StickCallbration[i].Mid;
-            Value = ( 500 * (Channel.Channel[i] - StickCallbration[i].Mid ) ) / ( Value );
-            if( Value >= 500 )
-            {
-                Value = 500;
-            }
-            HallChannel[i].ServoValue = Value + 1500;
-        }
-    }
-    HallChannel[4].ServoValue = 1000;
-    HallChannel[5].ServoValue = 1500;
-    HallChannel[6].ServoValue = 1600;
-
-}
-
-void Hall_Task( void )
-{
-    unsigned char Character;
-    uint8_t n = 0;
-    n = HALL_UART_GetReceiveDataLength();
-    while( n )
-    {
-        n--;
-        Character = HALL_DataBuffer[HallProtocol.Index++];
-        if( HallProtocol.Index >= HALLSTICK_BUFF_SIZE )
-        {
-            HallProtocol.Index = 0;
-        }
-        Parse_Character( Character );
-        if( HallProtocol.msg_OK )
-        {
-            HallProtocol.msg_OK = 0;
-            HallProtocol.StickState = HallProtocol.Data[HallProtocol.Length-1];
-            if( 0x01 == HallProtocol.HallID.Hall_Id.ReceiverID )
-            {
-                if( 0x0e == HallProtocol.HallID.Hall_Id.PacketID )
-                {
-                    memcpy(&StickCallbration,HallProtocol.Data,sizeof(StickCallbration));
-                }
-                else if( 0x0c == HallProtocol.HallID.Hall_Id.PacketID )
-                {
-                    memcpy(&Channel,HallProtocol.Data,sizeof(Channel));
-
-                    ConvertChannel();
-
-                }
-            }
-        }
-    }
-    if( (0 == StickCallbration[0].Max) && (0 == StickCallbration[0].Mid) && (0== StickCallbration[0].Min) )
-    {
-        Get_factory();
-    }
-
-}
-
-
-/* CRC16 implementation according to CCITT standards */
-
-/* CRC16 implementation according to CCITT standards */
+/* crc16 implementation according to CCITT standards */
 const unsigned short CRC16Table[256]= {
  0x0000,0x1021,0x2042,0x3063,0x4084,0x50a5,0x60c6,0x70e7,
  0x8108,0x9129,0xa14a,0xb16b,0xc18c,0xd1ad,0xe1ce,0xf1ef,
@@ -436,16 +71,349 @@ const unsigned short CRC16Table[256]= {
  0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0
 };
 
-unsigned short Calculation_CRC16(unsigned char *pBuffer, unsigned char BufferSize)
+unsigned short  calc_crc16(void *pBuffer,unsigned char BufferSize)
 {
-    unsigned short CRC16;
-    CRC16=0xFFFF;
+    unsigned short crc16;
+    crc16 = 0xffff;
     while (BufferSize)
     {
-        CRC16=(CRC16<<8)^CRC16Table[((CRC16>>8)^(*(unsigned char *)pBuffer))&0x00FF];
-        pBuffer++;
+        crc16 = (crc16 << 8) ^ CRC16Table[((crc16>>8) ^ (*(unsigned char *)pBuffer)) & 0x00ff];
+        pBuffer = (void *)((unsigned char *)pBuffer + 1);
         BufferSize--;
     }
-    return CRC16;
+    return crc16;
 }
+
+uint16_t hallIn(uint8_t chan)
+{
+  if (chan > FLYSKY_HALL_CHANNEL_COUNT - 1)
+  {
+    return 0;
+  }
+
+  return HallChVal[chan];
+}
+
+void hall_stick_init(uint32_t baudrate)
+{
+  if (baudrate == 0)
+  {
+    USART_DeInit(HALL_SERIAL_USART);
+    return;
+  }
+
+  NVIC_InitTypeDef NVIC_InitStructure;
+  NVIC_InitStructure.NVIC_IRQChannel = HALL_SERIAL_RX_DMA_Stream_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+  USART_InitTypeDef USART_InitStructure;
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  GPIO_PinAFConfig(HALL_SERIAL_GPIO, HALL_SERIAL_RX_GPIO_PinSource, HALL_SERIAL_GPIO_AF);
+  GPIO_PinAFConfig(HALL_SERIAL_GPIO, HALL_SERIAL_TX_GPIO_PinSource, HALL_SERIAL_GPIO_AF);
+
+  GPIO_InitStructure.GPIO_Pin = HALL_SERIAL_TX_GPIO_PIN | HALL_SERIAL_RX_GPIO_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_Init(HALL_SERIAL_GPIO, &GPIO_InitStructure);
+
+  USART_InitStructure.USART_BaudRate = baudrate;
+  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+  USART_InitStructure.USART_StopBits = USART_StopBits_1;
+  USART_InitStructure.USART_Parity = USART_Parity_No;
+  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+  USART_Init(HALL_SERIAL_USART, &USART_InitStructure);
+
+  DMA_Cmd(HALL_DMA_Stream_RX, DISABLE);
+  USART_DMACmd(HALL_SERIAL_USART, USART_DMAReq_Rx, DISABLE);
+  DMA_DeInit(HALL_DMA_Stream_RX);
+
+  DMA_InitTypeDef DMA_InitStructure;
+  hallDMAFifo.clear();
+
+  USART_ITConfig(HALL_SERIAL_USART, USART_IT_RXNE, DISABLE);
+  USART_ITConfig(HALL_SERIAL_USART, USART_IT_TXE, DISABLE);
+
+  DMA_InitStructure.DMA_Channel = HALL_DMA_Channel;
+  DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&HALL_SERIAL_USART->DR);
+  DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(hallDMAFifo.buffer());
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
+  DMA_InitStructure.DMA_BufferSize = hallDMAFifo.size();
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
+  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+  DMA_Init(HALL_DMA_Stream_RX, &DMA_InitStructure);
+  USART_DMACmd(HALL_SERIAL_USART, USART_DMAReq_Rx, ENABLE);
+  USART_Cmd(HALL_SERIAL_USART, ENABLE);
+  DMA_Cmd(HALL_DMA_Stream_RX, ENABLE);
+
+  reset_hall_stick();
+}
+
+void HallSendBuffer(uint8_t * buffer, uint32_t count)
+{
+
+  DMA_InitTypeDef DMA_InitStructure;
+  DMA_DeInit(HALL_DMA_Stream_TX);
+  DMA_InitStructure.DMA_Channel = HALL_DMA_Channel;
+  DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&HALL_SERIAL_USART->DR);
+  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+  DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(buffer);
+  DMA_InitStructure.DMA_BufferSize = count;
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+  DMA_Init(HALL_DMA_Stream_TX, &DMA_InitStructure);
+  DMA_Cmd(HALL_DMA_Stream_TX, ENABLE);
+  USART_DMACmd(HALL_SERIAL_USART, USART_DMAReq_Tx, ENABLE);
+  DMA_ITConfig(HALL_DMA_Stream_TX, DMA_IT_TC, ENABLE);
+
+  /* enable interrupt and set it's priority */
+  NVIC_EnableIRQ(HALL_SERIAL_TX_DMA_Stream_IRQn);
+  NVIC_SetPriority(HALL_SERIAL_TX_DMA_Stream_IRQn, 7);
+}
+
+extern "C" void HALL_TX_DMA_Stream_IRQHandler(void)
+{
+  DEBUG_INTERRUPT(INT_TELEM_DMA);
+
+  if (DMA_GetITStatus(HALL_DMA_Stream_TX, HALL_DMA_TX_FLAG_TC))
+  {
+    DMA_ClearITPendingBit(HALL_DMA_Stream_TX, HALL_DMA_TX_FLAG_TC);
+    HALL_SERIAL_USART->CR1 |= USART_CR1_TCIE;
+  }
+}
+
+uint8_t HallGetByte(uint8_t * byte)
+{
+    return hallDMAFifo.pop(*byte);
+}
+
+
+void reset_hall_stick( void )
+{
+    unsigned short crc16 = 0xffff;
+
+    HallCmd[0] = 0x55;
+    HallCmd[1] = 0xD1;
+    HallCmd[2] = 0x01;
+    HallCmd[3] = 0x01;
+
+    crc16 = calc_crc16(HallCmd, 4);
+
+    HallCmd[4] = crc16 & 0xff;
+    HallCmd[5] = crc16 >>8 & 0xff;
+
+    HallSendBuffer( HallCmd, 6);
+}
+
+void get_hall_config( void )
+{
+    unsigned short crc16 = 0xffff;
+
+    HallCmd[0] = 0x55;
+    HallCmd[1] = 0xD1;
+    HallCmd[2] = 0x01;
+    HallCmd[3] = 0x00;
+
+    crc16 = calc_crc16(HallCmd, 4);
+
+    HallCmd[4] = crc16 & 0xff;
+    HallCmd[5] = crc16 >>8 & 0xff ;
+
+    HallSendBuffer( HallCmd, 6);
+}
+
+static void Parse_Character(unsigned char ch)
+{
+    switch( HallProtocol.status )
+    {
+        case GET_START:
+        {
+            if ( HALL_PROTOLO_HEAD == ch )
+            {
+                HallProtocol.head  = HALL_PROTOLO_HEAD;
+                HallProtocol.status = GET_ID;
+            }
+            break;
+        }
+        case GET_ID:
+        {
+            HallProtocol.hallID.ID = ch;
+            HallProtocol.status = GET_LENGTH;
+            break;
+        }
+        case GET_LENGTH:
+        {
+            HallProtocol.length = ch;
+            HallProtocol.dataIndex = 0;
+            HallProtocol.status = GET_DATA;
+            if( 0 == HallProtocol.length )
+            {
+                HallProtocol.status = GET_CHECKSUM;
+                HallProtocol.checkSum=0;
+            }
+            break;
+        }
+        case GET_DATA:
+        {
+            HallProtocol.data[HallProtocol.dataIndex++] = ch;
+            if( HallProtocol.dataIndex >= HallProtocol.length)
+            {
+                HallProtocol.checkSum = 0;
+                HallProtocol.dataIndex = 0;
+                HallProtocol.status = GET_STATE;
+            }
+            break;
+        }
+        case GET_STATE:
+        {
+            HallProtocol.checkSum = 0;
+            HallProtocol.dataIndex = 0;
+            HallProtocol.status = GET_CHECKSUM;
+        }
+        case GET_CHECKSUM:
+        {
+            HallProtocol.checkSum |= ch << ((HallProtocol.dataIndex++) * 8);
+            if( HallProtocol.dataIndex >= 2 )
+            {
+                HallProtocol.dataIndex = 0;
+                HallProtocol.status = CHECKSUM;
+            }
+            else
+            {
+                break;
+            }
+        }
+        case CHECKSUM:
+        {
+            if(HallProtocol.checkSum == calc_crc16( (U8*)&HallProtocol.head, HallProtocol.length + 3 ) )
+            {
+                HallProtocol.msg_OK = 1;
+                goto Label_restart;
+            }
+            else
+            {
+                goto Label_error;
+            }
+        }
+    }
+
+    return;
+
+    Label_error:
+    Label_restart:
+        HallProtocol.status = GET_START;
+
+    return ;
+}
+
+STRUCT_HALL_CHANNEL HallChannel[4];
+
+void ConvertChannel( void )
+{
+    U16 value;
+
+    for (U8 i = 0; i < 4; i++ )
+    {
+        if( Channel.channel[i] < StickCallbration[i].mid)
+        {
+            value = StickCallbration[i].mid - StickCallbration[i].min;
+            value = ( 500 * (StickCallbration[i].mid - Channel.channel[i] ) ) / ( value );
+
+            if( value >= 500 )
+            {
+                value = 500;
+            }
+
+            HallChannel[i].servoValue = 1500 - value;
+        }
+        else
+        {
+            value = StickCallbration[i].max - StickCallbration[i].mid;
+
+            value = ( 500 * (Channel.channel[i] - StickCallbration[i].mid ) ) / ( value );
+
+            if( value >= 500 )
+            {
+                value = 500;
+            }
+
+            HallChannel[i].servoValue = value + 1500;
+        }
+
+        HallChVal[i] = HallChannel[i].servoValue;
+    }
+}
+
+/* Run it in 1ms timer routine */
+void hall_stick_loop( void )
+{
+    unsigned char ch;
+    static unsigned int getCfgTime = get_tmr10ms();
+
+    while( HallGetByte(&ch) )
+    {
+        HallProtocol.index++;
+
+        if ( HallProtocol.index >= HALLSTICK_BUFF_SIZE )
+        {
+            HallProtocol.index = 0;
+        }
+
+        Parse_Character( ch );
+
+        if ( HallProtocol.msg_OK )
+        {
+            HallProtocol.msg_OK = 0;
+            HallProtocol.stickState = HallProtocol.data[HallProtocol.length - 1];
+
+            if ( 0x01 == HallProtocol.hallID.hall_Id.receiverID )
+            {
+                if ( 0x0e == HallProtocol.hallID.hall_Id.packetID )
+                {
+                    memcpy(&StickCallbration, HallProtocol.data, sizeof(StickCallbration));
+                }
+                else if ( 0x0c == HallProtocol.hallID.hall_Id.packetID )
+                {
+                    memcpy(&Channel, HallProtocol.data, sizeof(Channel));
+
+                    ConvertChannel();
+                }
+            }
+        }
+    }
+
+    if ( (0 == StickCallbration[0].max) && (0 == StickCallbration[0].mid) && (0== StickCallbration[0].min) )
+    {
+        if ((get_tmr10ms() - getCfgTime) > 200)
+        {
+            get_hall_config();
+            getCfgTime = get_tmr10ms();
+        }
+    }
+}
+
+
+
 
