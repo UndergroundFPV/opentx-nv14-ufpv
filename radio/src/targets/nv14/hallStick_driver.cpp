@@ -84,7 +84,7 @@ unsigned short  calc_crc16(void *pBuffer,unsigned char BufferSize)
     return crc16;
 }
 
-uint16_t hallIn(uint8_t chan)
+int16_t hallADValue(uint8_t chan)
 {
   if (chan > FLYSKY_HALL_CHANNEL_COUNT - 1)
   {

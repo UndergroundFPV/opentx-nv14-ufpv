@@ -345,23 +345,27 @@
 // Internal Module
 #if 1
 #define INTMODULE
-#define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA2)
-#define INTMODULE_PWR_GPIO              GPIOA
-#define INTMODULE_PWR_GPIO_PIN          GPIO_Pin_8  // PA.08
-#define INTMODULE_TX_GPIO               GPIOB
-#define INTMODULE_TX_GPIO_PIN           GPIO_Pin_6  // PB.06
-#define INTMODULE_RX_GPIO               GPIOB
-#define INTMODULE_RX_GPIO_PIN           GPIO_Pin_7  // PB.07
-#define INTMODULE_TX_GPIO_PinSource     GPIO_PinSource6
-#define INTMODULE_RX_GPIO_PinSource     GPIO_PinSource7
-#define INTMODULE_USART                 USART1
-#define INTMODULE_TX_GPIO_AF            GPIO_AF_USART1
-#define INTMODULE_USART_IRQn            USART1_IRQn
-#define INTMODULE_TX_DMA_STREAM         DMA2_Stream7
-#define INTMODULE_TX_DMA_Stream_IRQn    DMA2_Stream7_IRQn
-#define INTMODULE_TX_DMA_Stream_IRQHandler DMA2_Stream7_IRQHandler
-#define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF7
-#define INTMODULE_DMA_CHANNEL           DMA_Channel_4
+#define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOF | RCC_AHB1Periph_DMA1)
+#define INTMODULE_PWR_GPIO              GPIOF
+#define INTMODULE_PWR_GPIO_PIN          GPIO_Pin_9  // PF.09
+#define INTMODULE_TX_GPIO               GPIOF
+#define INTMODULE_TX_GPIO_PIN           GPIO_Pin_7  // PF.07
+#define INTMODULE_RX_GPIO               GPIOF
+#define INTMODULE_RX_GPIO_PIN           GPIO_Pin_6  // PF.06
+#define INTMODULE_TX_GPIO_PinSource     GPIO_PinSource7
+#define INTMODULE_RX_GPIO_PinSource     GPIO_PinSource6
+#define INTMODULE_USART                 UART7
+#define INTMODULE_TX_GPIO_AF            GPIO_AF_UART7
+#define INTMODULE_USART_IRQn            UART7_IRQn
+#define INTMODULE_USART_IRQHandler      UART7_IRQHandler
+#define INTMODULE_RX_DMA_STREAM         DMA1_Stream3
+#define INTMODULE_RX_DMA_Stream_IRQn    DMA1_Stream3_IRQn
+#define INTMODULE_RX_DMA_Stream_IRQHandler DMA1_Stream3_IRQHandler
+#define INTMODULE_TX_DMA_STREAM         DMA1_Stream1
+#define INTMODULE_TX_DMA_Stream_IRQn    DMA1_Stream1_IRQn
+#define INTMODULE_TX_DMA_Stream_IRQHandler DMA1_Stream1_IRQHandler
+#define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF1
+#define INTMODULE_DMA_CHANNEL           DMA_Channel_5
 
 #if defined(PCBX12S)
   #define INTMODULE_BOOT_GPIO           GPIOI
@@ -378,8 +382,8 @@
   #define INTMODULE_TIMER_IRQHandler    TIM2_IRQHandler
   #define INTMODULE_TIMER_FREQ          (PERI1_FREQUENCY * TIMER_MULT_APB1)
 #else
-  #define INTMODULE_RCC_APB1Periph      0
-  #define INTMODULE_RCC_APB2Periph      (RCC_APB2Periph_TIM1 | RCC_APB2Periph_USART1)
+  #define INTMODULE_RCC_APB1Periph      (RCC_APB1Periph_UART7)
+  #define INTMODULE_RCC_APB2Periph      (RCC_APB2Periph_TIM1)
   #define INTMODULE_TIMER               TIM1
   #define INTMODULE_TIMER_IRQn          TIM1_CC_IRQn
   #define INTMODULE_TIMER_IRQHandler    TIM1_CC_IRQHandler
