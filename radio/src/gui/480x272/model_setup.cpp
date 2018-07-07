@@ -190,17 +190,17 @@ void ModelSetupPage::build(Window * window)
     // editTimerMode(0, y, attr, event);
 
     // Timer name
-    new StaticText(window, grid.getLabelSlot(true), STR_TIMER_NAME, true);
+    new StaticText(window, grid.getLabelSlot(true), STR_TIMER_NAME);
     new TextEdit(window, grid.getFieldSlot(), g_model.timers[i].name, LEN_TIMER_NAME);
     grid.nextLine();
 
     // Timer minute beep
-    new StaticText(window, grid.getLabelSlot(true), STR_MINUTEBEEP, true);
+    new StaticText(window, grid.getLabelSlot(true), STR_MINUTEBEEP);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.timers[i].minuteBeep));
     grid.nextLine();
 
     // Timer countdown
-    new StaticText(window, grid.getLabelSlot(true), STR_BEEPCOUNTDOWN, true);
+    new StaticText(window, grid.getLabelSlot(true), STR_BEEPCOUNTDOWN);
     new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1, GET_SET_DEFAULT(g_model.timers[i].countdownBeep));
     new Choice(window, grid.getFieldSlot(2, 1), STR_COUNTDOWNVALUES, 0, 3,
                GET_DEFAULT(g_model.timers[i].countdownStart + 2),
@@ -239,12 +239,12 @@ void ModelSetupPage::build(Window * window)
         */
 
   // Display trims
-  new StaticText(window, grid.getLabelSlot(), STR_DISPLAY_TRIMS);
+  new StaticText(window, grid.getLabelSlot(true), STR_DISPLAY_TRIMS);
   new Choice(window, grid.getFieldSlot(), "\006No\0   ChangeYes", 0, 2, GET_SET_DEFAULT(g_model.displayTrims));
   grid.nextLine();
 
   // Trim step
-  new StaticText(window, grid.getLabelSlot(), STR_TRIMINC);
+  new StaticText(window, grid.getLabelSlot(true), STR_TRIMINC);
   new Choice(window, grid.getFieldSlot(), STR_VTRIMINC, -2, 2, GET_SET_DEFAULT(g_model.trimInc));
   grid.nextLine();
 
@@ -254,7 +254,7 @@ void ModelSetupPage::build(Window * window)
     grid.nextLine();
 
     // Throttle reversed
-    new StaticText(window, grid.getLabelSlot(), STR_THROTTLEREVERSE);
+    new StaticText(window, grid.getLabelSlot(true), STR_THROTTLEREVERSE);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.throttleReversed));
     grid.nextLine();
 
@@ -272,7 +272,7 @@ void ModelSetupPage::build(Window * window)
       }*/
 
     // Throttle trim
-    new StaticText(window, grid.getLabelSlot(), STR_TTRIM);
+    new StaticText(window, grid.getLabelSlot(true), STR_TTRIM);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.thrTrim));
     grid.nextLine();
   }
@@ -283,12 +283,12 @@ void ModelSetupPage::build(Window * window)
     grid.nextLine();
 
     // Display checklist
-    new StaticText(window, grid.getLabelSlot(), STR_CHECKLIST);
+    new StaticText(window, grid.getLabelSlot(true), STR_CHECKLIST);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.displayChecklist));
     grid.nextLine();
 
     // Throttle warning
-    new StaticText(window, grid.getLabelSlot(), STR_THROTTLEWARNING);
+    new StaticText(window, grid.getLabelSlot(true), STR_THROTTLEWARNING);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_model.disableThrottleWarning));
     grid.nextLine();
 
@@ -370,7 +370,7 @@ void ModelSetupPage::updateInternalModuleWindow()
 
   internalModuleWindow->clear();
 
-  new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_MODE);
+  new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_MODE);
   new Choice(internalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
              GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].rfProtocol),
              [=](int32_t newValue) -> void {
@@ -381,7 +381,7 @@ void ModelSetupPage::updateInternalModuleWindow()
   grid.nextLine();
 
   if (value != RF_PROTO_OFF) {
-    new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_CHANNELRANGE);
+    new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_CHANNELRANGE);
     new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS(0), 1,
                    GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
                    [=](int8_t newValue) -> void { g_model.moduleData[INTERNAL_MODULE].channelsStart = newValue - 1; }, 0, STR_CH);
@@ -392,12 +392,12 @@ void ModelSetupPage::updateInternalModuleWindow()
                    0, STR_CH);
     grid.nextLine();
 
-    new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
+    new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_FAILSAFE);
     new Choice(internalModuleWindow, grid.getFieldSlot(), STR_VFAILSAFE, 0, FAILSAFE_LAST,
                GET_SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].failsafeMode));
     grid.nextLine();
 
-    new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_ANTENNASELECTION);
+    new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_ANTENNASELECTION);
     new Choice(internalModuleWindow, grid.getFieldSlot(), STR_VANTENNATYPES, 0, 1,
                GET_SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna));
   }
@@ -413,7 +413,7 @@ void ModelSetupPage::updateExternalModuleWindow()
 
   externalModuleWindow->clear();
 
-  new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MODE);
+  new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_MODE);
   new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
              GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].type),
              [=](int32_t newValue) -> void {
@@ -422,8 +422,8 @@ void ModelSetupPage::updateExternalModuleWindow()
                resetModuleSettings(EXTERNAL_MODULE);
                updateExternalModuleWindow();
              });
-  if (g_model.moduleData[EXTERNAL_MODULE].type != MODULE_TYPE_NONE && !IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
 
+  if (g_model.moduleData[EXTERNAL_MODULE].type != MODULE_TYPE_NONE && !IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
     if (IS_MODULE_XJT(EXTERNAL_MODULE)) {
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, 1 + RF_PROTO_X16, 1 + RF_PROTO_LAST,
                  GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
@@ -443,11 +443,10 @@ void ModelSetupPage::updateExternalModuleWindow()
                    updateExternalModuleWindow();
                  });
     }
-
     grid.nextLine();
 
     // Channel Range
-    new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_CHANNELRANGE);
+    new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_CHANNELRANGE);
 
     if (IS_MODULE_CROSSFIRE(EXTERNAL_MODULE)) { // CRSF has a fixed 16ch span
       // FROM
@@ -464,7 +463,8 @@ void ModelSetupPage::updateExternalModuleWindow()
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 16),
                      SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].channelsCount, 8),
                      0, STR_CH);
-    } else {
+    }
+    else {
       // FROM
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1,
                      MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount, 1,
@@ -486,14 +486,13 @@ void ModelSetupPage::updateExternalModuleWindow()
                        updateExternalModuleWindow();
                      }, 0, STR_CH);
     }
-
     grid.nextLine();
 
     // PPM MODULES
     if (IS_MODULE_PPM(EXTERNAL_MODULE)) {
       SET_DEFAULT_PPM_FRAME_LENGTH(EXTERNAL_MODULE);
       // PPM FRAME
-      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_PPMFRAME);
+      new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_PPMFRAME);
       // PPM FRAME LENGTH
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225, 5,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength * 5 + 225),
@@ -509,7 +508,7 @@ void ModelSetupPage::updateExternalModuleWindow()
 
     if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE) || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
       // Receiver
-      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_RECEIVER_NUM);
+      new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_RECEIVER_NUM);
       // Receiver number
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 0, MAX_RX_NUM(EXTERNAL_MODULE), 1,
                      GET_SET_DEFAULT(g_model.header.modelId[EXTERNAL_MODULE]), 0);
@@ -555,7 +554,7 @@ void ModelSetupPage::updateExternalModuleWindow()
 
     // FAILSAFE
     if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_R9M(EXTERNAL_MODULE)) {
-      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
+      new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_FAILSAFE);
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
                  GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode));
       grid.nextLine();
@@ -563,12 +562,12 @@ void ModelSetupPage::updateExternalModuleWindow()
 
     // R9M POWER
     if (IS_MODULE_R9M_FCC(EXTERNAL_MODULE)) {
-      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
+      new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_MULTI_RFPOWER);
       new Choice(externalModuleWindow, grid.getFieldSlot(), STR_R9M_FCC_POWER_VALUES, 0, R9M_FCC_POWER_MAX,
                  GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].pxx.power));
     }
-    if (IS_MODULE_R9M_LBT(EXTERNAL_MODULE)) {
-      new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
+    else if (IS_MODULE_R9M_LBT(EXTERNAL_MODULE)) {
+      new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_MULTI_RFPOWER);
       new Choice(externalModuleWindow, grid.getFieldSlot(), STR_R9M_LBT_POWER_VALUES, 0, R9M_LBT_POWER_MAX,
                  GET_DEFAULT(min<uint8_t>(g_model.moduleData[EXTERNAL_MODULE].pxx.power, R9M_LBT_POWER_MAX)),
                  SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].pxx.power));
