@@ -74,7 +74,7 @@ class GridLayout {
     static constexpr uint8_t lineMargin = 7;
     static constexpr uint8_t lineMarginLeft = 6;
     static constexpr uint8_t lineMarginRight = 12;
-    static constexpr uint8_t lineHeight = 30;
+    static constexpr uint8_t lineHeight = 25;
     static constexpr uint8_t indentWidth = 12;
 };
 

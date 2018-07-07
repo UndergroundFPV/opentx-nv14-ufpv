@@ -14,5 +14,6 @@ class ModelSetupPage: public MenuPage {
     Window * externalModuleWindow = nullptr;
 
     Button * externalModuleBind = nullptr;
+    Button * switchWarn[NUM_SWITCHES]= {nullptr};
     Button * externalModuleRange = nullptr;
 };

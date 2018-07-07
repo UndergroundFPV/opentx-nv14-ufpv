@@ -332,7 +332,7 @@ STRUCT_HALL_CHANNEL HallChannel[4];
 
 void ConvertChannel( void )
 {
-    U16 value;
+    uint16_t value;
 
     for (U8 i = 0; i < 4; i++ )
     {

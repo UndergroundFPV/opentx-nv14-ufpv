@@ -325,18 +325,9 @@ void ModelSetupPage::build(Window * window)
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.throttleReversed));
     grid.nextLine();
 
-/*      case ITEM_MODEL_THROTTLE_TRACE:
-      {
-        drawText(window,MENUS_MARGIN_LEFT, y, STR_TTRACE);
-        if (attr) CHECK_INCDEC_MODELVAR_ZERO(event, g_model.thrTraceSrc, NUM_POTS+NUM_SLIDERS+MAX_OUTPUT_CHANNELS);
-        uint8_t idx = g_model.thrTraceSrc + MIXSRC_Thr;
-        if (idx > MIXSRC_Thr)
-          idx += 1;
-        if (idx >= MIXSRC_FIRST_POT+NUM_POTS+NUM_SLIDERS)
-          idx += MIXSRC_CH1 - MIXSRC_FIRST_POT - NUM_POTS - NUM_SLIDERS;
-        drawSource(window,MODEL_SETUP_2ND_COLUMN, y, idx, attr);
-        break;
-      }*/
+    new StaticText(window, grid.getLabelSlot(), STR_TTRACE);
+    new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.thrTraceSrc));
+    grid.nextLine();
 
     // Throttle trim
     new StaticText(window, grid.getLabelSlot(), STR_TTRIM);
@@ -360,6 +351,21 @@ void ModelSetupPage::build(Window * window)
     grid.nextLine();
 
     // Switches warning
+    // TODO this is just UI, actions need to be added
+    new StaticText(window, grid.getLabelSlot(), STR_SWITCHWARNING);
+    for (int i=0; i< NUM_SWITCHES; i++) {
+      unsigned int state = ((g_model.switchWarningState >> (3*i)) & 0x07);
+      char s[3];
+      s[0] = 'A' + i;
+      s[1] = "x\300-\301"[state];
+      s[2] = '\0';
+      if (i && !(i%3)) grid.nextLine();
+      switchWarn[i] = new TextButton(window, grid.getFieldSlot(3, i%3), s,
+                                          [&]() -> uint8_t {
+                                              return 1;
+                                          });
+    }
+    grid.nextLine();
     /*
     drawText(window,MENUS_MARGIN_LEFT, STR_SWITCHWARNING);
         if (!READ_ONLY() && attr && menuHorizontalPosition<0 && event==EVT_KEY_LONG(KEY_ENTER)) {
@@ -406,6 +412,20 @@ void ModelSetupPage::build(Window * window)
         break;
       }
       */
+  }
+
+  // Center beeps
+  {
+    new StaticText(window, grid.getLabelSlot(), STR_BEEPCTR);
+    //TODO reta
+    grid.nextLine();
+  }
+
+  // Gloabal functions
+  {
+    new StaticText(window, grid.getLabelSlot(), STR_USE_GLOBAL_FUNCS);
+    new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_model.noGlobalFunctions));
+    grid.nextLine();
   }
 
   // Internal module
