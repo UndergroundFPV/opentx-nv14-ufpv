@@ -71,14 +71,20 @@ bool Window::onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t sli
   }
 
   if (slideY && innerHeight > rect.h) {
-    scrollPositionY = limit<coord_t>(-innerHeight + rect.h, scrollPositionY + slideY, 0);
-    invalidate();
+    coord_t newScrollPosition = limit<coord_t>(-innerHeight + rect.h, scrollPositionY + slideY, 0);
+    if (newScrollPosition != scrollPositionY) {
+      scrollPositionY = newScrollPosition;
+      invalidate();
+    }
     return true;
   }
 
   if (slideX && innerWidth > rect.w) {
-    scrollPositionX = limit<coord_t>(-innerWidth + rect.w, scrollPositionX + slideX, 0);
-    invalidate();
+    coord_t newScrollPosition = limit<coord_t>(-innerWidth + rect.w, scrollPositionX + slideX, 0);
+    if (newScrollPosition != scrollPositionX) {
+      scrollPositionX = newScrollPosition;
+      invalidate();
+    }
     return true;
   }
 
@@ -173,10 +179,10 @@ bool MainWindow::refresh()
 {
   if (invalidatedRect.w) {
     TRACE("Refresh rect: left=%d top=%d width=%d height=%d", invalidatedRect.left(), invalidatedRect.top(), invalidatedRect.w, invalidatedRect.h);
-    if (invalidatedRect.w < LCD_W && invalidatedRect.h < LCD_H) {
+    if (invalidatedRect.x > 0 || invalidatedRect.y > 0 || invalidatedRect.w < LCD_W || invalidatedRect.h < LCD_H) {
       BitmapBuffer * previous = lcd;
       lcdNextLayer();
-      DMAcopy(previous->getData(), lcd->getData(), DISPLAY_BUFFER_SIZE);
+      DMACopy(previous->getData(), lcd->getData(), DISPLAY_BUFFER_SIZE);
     }
     else {
       lcdNextLayer();

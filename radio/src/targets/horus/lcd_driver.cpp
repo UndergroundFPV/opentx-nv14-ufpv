@@ -527,7 +527,7 @@ void DMABitmapConvert(uint16_t * dest, const uint8_t * src, uint16_t w, uint16_t
   while (DMA2D_GetFlagStatus(DMA2D_FLAG_TC) == RESET);
 }
 
-void DMAcopy(void * src, void * dest, int len)
+void DMACopy(void * src, void * dest, int len)
 {
   DMA2D_DeInit();
 
@@ -562,12 +562,12 @@ void DMAcopy(void * src, void * dest, int len)
 
 void lcdStoreBackupBuffer()
 {
-  DMAcopy(lcd->getData(), LCD_BACKUP_FRAME_BUFFER, DISPLAY_BUFFER_SIZE);
+  DMACopy(lcd->getData(), LCD_BACKUP_FRAME_BUFFER, DISPLAY_BUFFER_SIZE);
 }
 
 int lcdRestoreBackupBuffer()
 {
-  DMAcopy(LCD_BACKUP_FRAME_BUFFER, lcd->getData(), DISPLAY_BUFFER_SIZE);
+  DMACopy(LCD_BACKUP_FRAME_BUFFER, lcd->getData(), DISPLAY_BUFFER_SIZE);
   return 1;
 }
 
