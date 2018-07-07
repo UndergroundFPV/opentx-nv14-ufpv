@@ -35,39 +35,23 @@ class TextEdit : public Window {
     {
     }
 
-    void paint(BitmapBuffer * dc)
+    uint8_t getMaxLength()
     {
-      bool hasFocus = this->hasFocus();
-      LcdFlags textColor = 0;
-      LcdFlags lineColor = CURVE_AXIS_COLOR;
-      if (hasFocus) {
-        textColor = TEXT_INVERTED_BGCOLOR;
-        lineColor = TEXT_INVERTED_BGCOLOR;
-      }
-      if (!hasFocus && zlen(value, length) == 0)
-        dc->drawSizedText(3, 3, "---", length, CURVE_AXIS_COLOR);
-      else
-        dc->drawSizedText(3, 3, value, length, ZCHAR | textColor);
-      drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
-      if (hasFocus) {
-        coord_t cursorPos = keyboard->getCursorPos();
-        dc->drawSolidFilledRect(cursorPos + 2, 3, 2, 22, 0); // TEXT_INVERTED_BGCOLOR);
-      }
+      return length;
     }
+
+    char * getData()
+    {
+      return value;
+    }
+
+    void paint(BitmapBuffer * dc);
+
+    bool onTouch(coord_t x, coord_t y);
 
     void onFocusLost()
     {
       keyboard->disable();
-    }
-
-    bool onTouch(coord_t x, coord_t y)
-    {
-      setFocus();
-      if (keyboard->getField() != value) {
-        keyboard->setField(value, length, parent);
-      }
-      keyboard->setCursorPos(x);
-      return true;
     }
 
   protected:

@@ -59,5 +59,6 @@ bool NumberEdit::onTouch(coord_t x, coord_t y)
   else {
     setFocus();
   }
+  invalidate();
   return true;
 }

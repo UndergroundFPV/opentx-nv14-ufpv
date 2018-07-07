@@ -24,17 +24,19 @@
 #include "window.h"
 #include "lcd_types.h"
 
+class TextEdit;
+
 class Keyboard : public Window {
   public:
-    Keyboard();
+    Keyboard(Window * parent);
 
     ~Keyboard();
 
-    void setField(char * field, uint8_t length, Window * fieldWindow);
+    void setField(TextEdit * field);
 
     void disable();
 
-    char * getField()
+    TextEdit * getField()
     {
       return field;
     }
@@ -51,14 +53,12 @@ class Keyboard : public Window {
     bool onTouch(coord_t x, coord_t y) override;
 
   protected:
-    char * field = nullptr;
-    uint8_t length = 0;
+    TextEdit * field = nullptr;
     coord_t cursorPos = 0;
     uint8_t cursorIndex = 0;
     BitmapBuffer * keyboardBitmap = nullptr;
-    Window * fieldWindow = nullptr;
 };
 
-extern Keyboard * keyboard;
+extern Keyboard * keyboard; // is created in Menu constructor
 
 #endif

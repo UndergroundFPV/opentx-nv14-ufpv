@@ -31,10 +31,10 @@
 
 struct rect_t {
   coord_t x, y, w, h;
-  constexpr coord_t left() { return x; }
-  constexpr coord_t right() { return x + w; }
-  constexpr coord_t top() { return y; }
-  constexpr coord_t bottom() { return y + h; }
+  constexpr coord_t left() const { return x; };
+  constexpr coord_t right() const { return x + w; };
+  constexpr coord_t top() const { return y; };
+  constexpr coord_t bottom() const { return y + h; };
 };
 
 #define MOVE_OFFSET() coord_t offsetX = this->offsetX; x += offsetX; this->offsetX = 0; coord_t offsetY = this->offsetY; y += offsetY; this->offsetY = 0
@@ -278,7 +278,6 @@ class BitmapBuffer: public BitmapBufferBase<uint16_t>
     void drawRect(coord_t x, coord_t y, coord_t w, coord_t h, uint8_t thickness, uint8_t pat, LcdFlags att);
 
     void drawSolidFilledRect(coord_t x, coord_t y, coord_t w, coord_t h, LcdFlags flags);
-
 
     void drawFilledRect(coord_t x, coord_t y, coord_t w, coord_t h, uint8_t pat, LcdFlags att);
 

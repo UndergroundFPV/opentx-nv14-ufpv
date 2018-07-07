@@ -134,66 +134,6 @@ int getSwitchWarningsCount()
   return count;
 }
 
-#define IF_INTERNAL_MODULE_ON(x)          (IS_INTERNAL_MODULE_ENABLED() ? (uint8_t)(x) : HIDDEN_ROW)
-#define IF_EXTERNAL_MODULE_ON(x)          (IS_EXTERNAL_MODULE_ENABLED() ? (uint8_t)(x) : HIDDEN_ROW)
-
-#define INTERNAL_MODULE_MODE_ROWS         (uint8_t)0
-#define INTERNAL_MODULE_CHANNELS_ROWS     IF_INTERNAL_MODULE_ON(1)
-#define PORT_CHANNELS_ROWS(x)             (x==INTERNAL_MODULE ? INTERNAL_MODULE_CHANNELS_ROWS : (x==EXTERNAL_MODULE ? EXTERNAL_MODULE_CHANNELS_ROWS : 1))
-
-#define TIMER_ROWS(x)                     NAVIGATION_LINE_BY_LINE|1, 0, 0, 0, g_model.timers[x].countdownBeep != COUNTDOWN_SILENT ? (uint8_t)1 : (uint8_t)0
-
-#define EXTERNAL_MODULE_MODE_ROWS         (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE)) ? (uint8_t)1 : IS_MODULE_MULTIMODULE(EXTERNAL_MODULE) ? MULTIMODULE_MODE_ROWS(EXTERNAL_MODULE) : (uint8_t)0
-
-#if TIMERS == 1
-#define TIMERS_ROWS                     TIMER_ROWS(0)
-#elif TIMERS == 2
-#define TIMERS_ROWS                     TIMER_ROWS(0), TIMER_ROWS(1)
-#elif TIMERS == 3
-#define TIMERS_ROWS                     TIMER_ROWS(0), TIMER_ROWS(1), TIMER_ROWS(2)
-#endif
-
-#define SW_WARN_ITEMS()                   uint8_t(NAVIGATION_LINE_BY_LINE|(getSwitchWarningsCount()-1))
-#define POT_WARN_ROWS                     (uint8_t)0
-#define POT_WARN_ITEMS()                  ((g_model.potsWarnMode) ? uint8_t(NAVIGATION_LINE_BY_LINE|(NUM_POTS-1)) : (uint8_t)0)
-#define SLIDER_WARN_ITEMS()               ((g_model.potsWarnMode) ? uint8_t(NAVIGATION_LINE_BY_LINE|(NUM_SLIDERS-1)) : (uint8_t)0)
-
-#if defined(BLUETOOTH)
-#define TRAINER_LINE1_BLUETOOTH_M_ROWS    ((bluetoothDistantAddr[0] == 0 || bluetoothState == BLUETOOTH_STATE_CONNECTED) ? (uint8_t)0 : (uint8_t)1)
-#define TRAINER_LINE1_ROWS                (g_model.trainerMode == TRAINER_MODE_SLAVE ? (uint8_t)1 : (g_model.trainerMode == TRAINER_MODE_MASTER_BLUETOOTH ? TRAINER_LINE1_BLUETOOTH_M_ROWS : (g_model.trainerMode == TRAINER_MODE_SLAVE_BLUETOOTH ? (uint8_t)1 : HIDDEN_ROW)))
-#else
-#define TRAINER_LINE1_ROWS                HIDDEN_ROW
-#endif
-
-#define TRAINER_LINE2_ROWS                (g_model.trainerMode == TRAINER_MODE_SLAVE ? (uint8_t)2 : HIDDEN_ROW)
-
-
-
-void editTimerCountdown(int timerIdx, coord_t y, LcdFlags attr, event_t event)
-{
-  TimerData &timer = g_model.timers[timerIdx];
-
-//  rect_t rect = {MENUS_MARGIN_LEFT + INDENT_WIDTH, y, LCD_W - (MENUS_MARGIN_LEFT + INDENT_WIDTH) - 20, 30};
-//  drawWidgetLabel(window, rect, NO_INDENT(STR_BEEPCOUNTDOWN));
-  // drawTextAtIndex(MENUS_MARGIN_LEFT + INDENT_WIDTH, y + 10, STR_VBEEPCOUNTDOWN, timer.countdownBeep, (menuHorizontalPosition == 0 ? attr : 0));
-//  drawWidgetLine(window, rect, CURVE_AXIS_COLOR);
-  if (timer.countdownBeep != COUNTDOWN_SILENT) {
-    drawNumber(lcd, MENUS_MARGIN_LEFT + INDENT_WIDTH, y + 10, TIMER_COUNTDOWN_START(timerIdx),
-               (menuHorizontalPosition == 1 ? attr : 0) | LEFT, 0, NULL, "s");
-  }
-
-  if (attr && s_editMode > 0) {
-    switch (menuHorizontalPosition) {
-      case 0:
-        CHECK_INCDEC_MODELVAR(event, timer.countdownBeep, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1);
-        break;
-      case 1:
-        timer.countdownStart = -checkIncDecModel(event, -timer.countdownStart, -1, +2);
-        break;
-    }
-  }
-}
-
 // @3djc don't use NOINDENT anymore (this could be another task later ... remove all these INDENT from translations ...)
 
 void resetModuleSettings(uint8_t module)
@@ -244,49 +184,42 @@ void ModelSetupPage::build(Window * window)
     // Timer label
     char timerLabel[8];
     strAppendStringWithIndex(timerLabel, STR_TIMER, i + 1);
-    new Subtitle(window, grid.getLabelSlot(), timerLabel);
+    new Subtitle(window, grid.getLineSlot(), timerLabel);
     grid.nextLine();
 
     // editTimerMode(0, y, attr, event);
 
     // Timer name
-    new StaticText(window, grid.getLabelSlot(), STR_TIMER_NAME);
+    new StaticText(window, grid.getLabelSlot(true), STR_TIMER_NAME, true);
     new TextEdit(window, grid.getFieldSlot(), g_model.timers[i].name, LEN_TIMER_NAME);
     grid.nextLine();
 
     // Timer minute beep
-    new StaticText(window, grid.getLabelSlot(), STR_MINUTEBEEP);
+    new StaticText(window, grid.getLabelSlot(true), STR_MINUTEBEEP, true);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.timers[i].minuteBeep));
     grid.nextLine();
 
     // Timer countdown
-    new StaticText(window, grid.getLabelSlot(), STR_BEEPCOUNTDOWN);
-    new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1,
-               GET_DEFAULT(g_model.timers[i].countdownBeep),
-               [&](int32_t newValue) -> void {
-                 g_model.timers[i].countdownBeep = newValue;
-               });
+    new StaticText(window, grid.getLabelSlot(true), STR_BEEPCOUNTDOWN, true);
+    new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1, GET_SET_DEFAULT(g_model.timers[i].countdownBeep));
     new Choice(window, grid.getFieldSlot(2, 1), STR_COUNTDOWNVALUES, 0, 3,
                GET_DEFAULT(g_model.timers[i].countdownStart + 2),
-               [&](int32_t newValue) -> void {
-                 g_model.timers[i].countdownStart = newValue - 2;
-               });
+               SET_VALUE(g_model.timers[i].countdownStart, newValue - 2));
     grid.nextLine();
 
-
     // Timer persistent
-    new StaticText(window, grid.getLabelSlot(), STR_PERSISTENT);
+    new StaticText(window, grid.getLabelSlot(true), STR_PERSISTENT);
     new Choice(window, grid.getFieldSlot(), STR_VPERSISTENT, 0, 2, GET_SET_DEFAULT(g_model.timers[i].persistent));
     grid.nextLine();
   }
 
   // Extended limits
-  new StaticText(window, grid.getLabelSlot(), STR_ELIMITS);
+  new StaticText(window, grid.getLabelSlot(true), STR_ELIMITS);
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.extendedLimits));
   grid.nextLine();
 
   // Extended trims
-  new StaticText(window, grid.getLabelSlot(), STR_ETRIMS);
+  new StaticText(window, grid.getLabelSlot(true), STR_ETRIMS);
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.extendedTrims));
   grid.nextLine();
 
@@ -317,7 +250,7 @@ void ModelSetupPage::build(Window * window)
 
   // Throttle parameters
   {
-    new Subtitle(window, grid.getLabelSlot(), STR_THROTTLE_LABEL);
+    new Subtitle(window, grid.getLineSlot(), STR_THROTTLE_LABEL);
     grid.nextLine();
 
     // Throttle reversed
@@ -337,7 +270,7 @@ void ModelSetupPage::build(Window * window)
 
   // Preflight parameters
   {
-    new Subtitle(window, grid.getLabelSlot(), STR_PREFLIGHT);
+    new Subtitle(window, grid.getLineSlot(), STR_PREFLIGHT);
     grid.nextLine();
 
     // Display checklist
@@ -438,7 +371,7 @@ void ModelSetupPage::build(Window * window)
 
   // Internal module
   {
-    new Subtitle(window, grid.getLabelSlot(), STR_INTERNALRF);
+    new Subtitle(window, grid.getLineSlot(), STR_INTERNALRF);
     grid.nextLine();
     internalModuleWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
     updateInternalModuleWindow();
@@ -447,7 +380,7 @@ void ModelSetupPage::build(Window * window)
 
   // External module
   {
-    new Subtitle(window, grid.getLabelSlot(), STR_EXTERNALRF);
+    new Subtitle(window, grid.getLineSlot(), STR_EXTERNALRF);
     grid.nextLine();
     externalModuleWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
     updateExternalModuleWindow();
@@ -468,8 +401,9 @@ void ModelSetupPage::updateInternalModuleWindow()
   new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_MODE);
   new Choice(internalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
              GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].rfProtocol),
-             [&](int32_t newValue) -> void {
+             [=](int32_t newValue) -> void {
                g_model.moduleData[INTERNAL_MODULE].rfProtocol = newValue - 1;
+               SET_DIRTY();
                updateInternalModuleWindow();
              });
   grid.nextLine();
@@ -482,9 +416,8 @@ void ModelSetupPage::updateInternalModuleWindow()
     new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 1), 1 + g_model.moduleData[INTERNAL_MODULE].channelsStart,
                    min<int8_t>(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart + MAX_CHANNELS(0) + 8, 1 + 32), 1,
                    GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].channelsCount + 8 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
-                   [=](int8_t newValue) -> void {
-                     g_model.moduleData[INTERNAL_MODULE].channelsCount = newValue - 8 - g_model.moduleData[INTERNAL_MODULE].channelsStart;
-                   }, 0, STR_CH);
+                   SET_VALUE(g_model.moduleData[INTERNAL_MODULE].channelsCount, newValue - 8 - g_model.moduleData[INTERNAL_MODULE].channelsStart),
+                   0, STR_CH);
     grid.nextLine();
 
     new StaticText(internalModuleWindow, grid.getLabelSlot(), STR_FAILSAFE);
@@ -511,8 +444,9 @@ void ModelSetupPage::updateExternalModuleWindow()
   new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MODE);
   new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
              GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].type),
-             [&](int32_t newValue) -> void {
+             [=](int32_t newValue) -> void {
                g_model.moduleData[EXTERNAL_MODULE].type = newValue;
+               SET_DIRTY();
                resetModuleSettings(EXTERNAL_MODULE);
                updateExternalModuleWindow();
              });
@@ -521,16 +455,19 @@ void ModelSetupPage::updateExternalModuleWindow()
     if (IS_MODULE_XJT(EXTERNAL_MODULE)) {
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, 1 + RF_PROTO_X16, 1 + RF_PROTO_LAST,
                  GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
-                 [=](int32_t newValue) -> void { g_model.moduleData[EXTERNAL_MODULE].rfProtocol = newValue - 1; });
-    } else if (IS_MODULE_DSM2(EXTERNAL_MODULE)) {
+                 SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].rfProtocol, newValue - 1));
+    }
+    else if (IS_MODULE_DSM2(EXTERNAL_MODULE)) {
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_DSM_PROTOCOLS, DSM2_PROTO_LP45, DSM2_PROTO_DSMX,
                  GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
-    } else if (IS_MODULE_R9M(EXTERNAL_MODULE)) {
+    }
+    else if (IS_MODULE_R9M(EXTERNAL_MODULE)) {
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_R9M_MODES, MODULE_SUBTYPE_R9M_FCC,
                  MODULE_SUBTYPE_R9M_LBT,
                  GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].subType),
-                 [&](int32_t newValue) -> void {
+                 [=](int32_t newValue) -> void {
                    g_model.moduleData[EXTERNAL_MODULE].subType = newValue;
+                   SET_DIRTY();
                    updateExternalModuleWindow();
                  });
     }
@@ -546,15 +483,15 @@ void ModelSetupPage::updateExternalModuleWindow()
                      GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
                      [=](int32_t newValue) -> void {
                        g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
+                       SET_DIRTY();
                        updateExternalModuleWindow();
                      }, 0, STR_CH);
       // TO
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
                      0, 32, 1,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 16),
-                     [=](int8_t newValue) -> void {
-                       g_model.moduleData[EXTERNAL_MODULE].channelsCount = 8;
-                     }, 0, STR_CH);
+                     SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].channelsCount, 8),
+                     0, STR_CH);
     } else {
       // FROM
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1,
@@ -562,6 +499,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                      GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
                      [=](int32_t newValue) -> void {
                        g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
+                       SET_DIRTY();
                        updateExternalModuleWindow();
                      }, 0, STR_CH);
       // TO
@@ -571,8 +509,8 @@ void ModelSetupPage::updateExternalModuleWindow()
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 8 +
                                  g_model.moduleData[EXTERNAL_MODULE].channelsCount),
                      [=](int8_t newValue) -> void {
-                       g_model.moduleData[EXTERNAL_MODULE].channelsCount =
-                         newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
+                       g_model.moduleData[EXTERNAL_MODULE].channelsCount = newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
+                       SET_DIRTY();
                        updateExternalModuleWindow();
                      }, 0, STR_CH);
     }
@@ -587,16 +525,14 @@ void ModelSetupPage::updateExternalModuleWindow()
       // PPM FRAME LENGTH
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225, 5,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength * 5 + 225),
-                     [=](int32_t newValue) -> void {
-                       g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength = (newValue - 225) / 5;
-                     }, PREC1, NULL, STR_MS);
+                     SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength, (newValue - 225) / 5),
+                     PREC1, NULL, STR_MS);
 
       // PPM FRAME DELAY
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1), 100, 800, 50,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.delay * 50 + 300),
-                     [=](int32_t newValue) -> void {
-                       g_model.moduleData[EXTERNAL_MODULE].ppm.delay = (newValue - 300) / 50;
-                     }, 0, NULL, "us");
+                     SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].ppm.delay, (newValue - 300) / 50),
+                     0, NULL, "us");
     }
 
     if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE) || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
@@ -610,7 +546,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       // Bind and Range buttons
       // TODO use greyed button when available
       externalModuleBind = new TextButton(externalModuleWindow, grid.getFieldSlot(2, 0), STR_MODULE_BIND,
-                     [&]() -> uint8_t {
+                     [=]() -> uint8_t {
                          if(moduleFlag[EXTERNAL_MODULE] == MODULE_RANGECHECK) {
                            moduleFlag[EXTERNAL_MODULE] = MODULE_BIND;
                            externalModuleRange->setState(0);
@@ -627,7 +563,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                      });
 
       externalModuleRange = new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
-                     [&]() -> uint8_t {
+                     [=]() -> uint8_t {
                        if(moduleFlag[EXTERNAL_MODULE] == MODULE_BIND) {
                          moduleFlag[EXTERNAL_MODULE] = MODULE_RANGECHECK;
                          externalModuleBind->setState(0);
@@ -657,18 +593,13 @@ void ModelSetupPage::updateExternalModuleWindow()
     if (IS_MODULE_R9M_FCC(EXTERNAL_MODULE)) {
       new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
       new Choice(externalModuleWindow, grid.getFieldSlot(), STR_R9M_FCC_POWER_VALUES, 0, R9M_FCC_POWER_MAX,
-                 GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].pxx.power),
-                 [&](int32_t newValue) -> void {
-                   g_model.moduleData[EXTERNAL_MODULE].pxx.power = newValue;
-                 });
+                 GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].pxx.power));
     }
     if (IS_MODULE_R9M_LBT(EXTERNAL_MODULE)) {
       new StaticText(externalModuleWindow, grid.getLabelSlot(), STR_MULTI_RFPOWER);
       new Choice(externalModuleWindow, grid.getFieldSlot(), STR_R9M_LBT_POWER_VALUES, 0, R9M_LBT_POWER_MAX,
-                 GET_DEFAULT(min(g_model.moduleData[EXTERNAL_MODULE].pxx.power, (uint8_t) R9M_LBT_POWER_MAX)),
-                 [&](int32_t newValue) -> void {
-                   g_model.moduleData[EXTERNAL_MODULE].pxx.power = newValue;
-                 });
+                 GET_DEFAULT(min<uint8_t>(g_model.moduleData[EXTERNAL_MODULE].pxx.power, R9M_LBT_POWER_MAX)),
+                 SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].pxx.power));
     }
   }
 
@@ -677,8 +608,6 @@ void ModelSetupPage::updateExternalModuleWindow()
   externalModuleWindow->parent->innerHeight += delta;
 }
 
-bool menuModelSetup(event_t event)
-{
   // Switch to external antenna confirmation
   //  bool newAntennaSel;
   //  if (warningResult) {
@@ -1301,8 +1230,6 @@ bool menuModelSetup(event_t event)
   }
 #endif
 
-  return true;
-}
 
 bool menuModelFailsafe(event_t event)
 {

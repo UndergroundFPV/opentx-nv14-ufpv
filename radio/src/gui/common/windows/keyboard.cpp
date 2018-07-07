@@ -20,10 +20,8 @@
 
 #include "opentx.h"
 
-Keyboard * keyboard = nullptr;
-
-Keyboard::Keyboard() :
-  Window(&mainWindow, {0, LCD_H - 270, LCD_W, 0})
+Keyboard::Keyboard(Window * parent) :
+  Window(parent, {0, parent->height() - 270, parent->width(), 0})
 {
   keyboard = this;
 }
@@ -35,6 +33,12 @@ Keyboard::~Keyboard()
 
 bool Keyboard::onTouch(coord_t x, coord_t y)
 {
+  if (!field)
+    return false;
+
+  uint8_t size = field->getMaxLength();
+  char * data = field->getData();
+
   uint8_t row = y / 54;
   char c = 0;
   if (row == 0) {
@@ -53,9 +57,9 @@ bool Keyboard::onTouch(coord_t x, coord_t y)
     if (x > 270) {
       if (cursorIndex > 0) {
         // backspace
-        char c = idx2char(field[cursorIndex - 1]);
-        memmove(field + cursorIndex - 1, field + cursorIndex, length - cursorIndex);
-        field[length - 1] = '\0';
+        char c = idx2char(data[cursorIndex - 1]);
+        memmove(data + cursorIndex - 1, data + cursorIndex, size - cursorIndex);
+        data[size - 1] = '\0';
         cursorPos -= getCharWidth(c, fontspecsTable[0]);
         cursorIndex -= 1;
       }
@@ -69,6 +73,7 @@ bool Keyboard::onTouch(coord_t x, coord_t y)
     if (x > 240) {
       // enter
       disable();
+      return true;
     }
     else if (x > 207) {
       c = ',';
@@ -80,21 +85,28 @@ bool Keyboard::onTouch(coord_t x, coord_t y)
       c = '.';
     }
   }
-  if (c && zlen(field, length) < length) {
-    memmove(field + cursorIndex + 1, field + cursorIndex, length - cursorIndex - 1);
-    field[cursorIndex++] = char2idx(c);
+  if (c && zlen(data, size) < size) {
+    memmove(data + cursorIndex + 1, data + cursorIndex, size - cursorIndex - 1);
+    data[cursorIndex++] = char2idx(c);
     cursorPos += getCharWidth(c, fontspecsTable[0]);
   }
+
+  field->invalidate();
   return true;
 }
 
 void Keyboard::setCursorPos(coord_t x)
 {
+  if (!field)
+    return;
+
+  uint8_t size = field->getMaxLength();
+  char * data = field->getData();
   coord_t rest = x;
-  for (cursorIndex = 0; cursorIndex < length; cursorIndex++) {
-    if (field[cursorIndex] == '\0')
+  for (cursorIndex = 0; cursorIndex < size; cursorIndex++) {
+    if (data[cursorIndex] == '\0')
       break;
-    char c = field[cursorIndex];
+    char c = data[cursorIndex];
     c = idx2char(c);
     uint8_t w = getCharWidth(c, fontspecsTable[0]);
     if (rest < w)
@@ -102,26 +114,25 @@ void Keyboard::setCursorPos(coord_t x)
     rest -= w;
   }
   cursorPos = x - rest;
+  field->invalidate();
 }
 
-void Keyboard::setField(char * field, uint8_t length, Window * fieldWindow)
+void Keyboard::setField(TextEdit * field)
 {
   this->field = field;
-  this->length = length;
   this->setHeight(270);
-  if (fieldWindow) {
-    fieldWindow->setHeight(LCD_H - 270 - fieldWindow->rect.y);
-    this->fieldWindow = fieldWindow;
-  }
+  Window * w = field->getParent();
+  w->setHeight(LCD_H - 270 - w->rect.y);
+  invalidate();
 }
 
 void Keyboard::disable()
 {
   this->setHeight(0);
-  this->field = nullptr;
-  if (fieldWindow) {
-    fieldWindow->setHeight(LCD_H - 0 - fieldWindow->rect.y);
-    fieldWindow = nullptr;
+  if (field) {
+    Window * w = field->getParent();
+    w->setHeight(LCD_H - 0 - w->rect.y);
+    field = nullptr;
   }
 }
 

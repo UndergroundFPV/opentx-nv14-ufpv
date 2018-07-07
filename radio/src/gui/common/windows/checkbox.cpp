@@ -46,5 +46,6 @@ bool CheckBox::onTouch(coord_t x, coord_t y)
 {
   setValue(!getValue());
   setFocus();
+  invalidate({0, 0, 20, 20});
   return true;
 }

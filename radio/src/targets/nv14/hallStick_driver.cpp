@@ -334,15 +334,13 @@ void ConvertChannel( void )
 {
     uint16_t value;
 
-    for (U8 i = 0; i < 4; i++ )
-    {
-        if( Channel.channel[i] < StickCallbration[i].mid)
+    for (uint8_t i = 0; i < 4; i++ ) {
+        if (Channel.channel[i] < StickCallbration[i].mid)
         {
             value = StickCallbration[i].mid - StickCallbration[i].min;
             value = ( 500 * (StickCallbration[i].mid - Channel.channel[i] ) ) / ( value );
 
-            if( value >= 500 )
-            {
+            if (value >= 500 ) {
                 value = 500;
             }
 
@@ -352,9 +350,9 @@ void ConvertChannel( void )
         {
             value = StickCallbration[i].max - StickCallbration[i].mid;
 
-            value = ( 500 * (Channel.channel[i] - StickCallbration[i].mid ) ) / ( value );
+            value = (500 * (Channel.channel[i] - StickCallbration[i].mid ) ) / (value );
 
-            if( value >= 500 )
+            if(value >= 500 )
             {
                 value = 500;
             }
@@ -367,7 +365,7 @@ void ConvertChannel( void )
 }
 
 /* Run it in 1ms timer routine */
-void hall_stick_loop( void )
+void hall_stick_loop(void )
 {
     unsigned char ch;
     static unsigned int getCfgTime = get_tmr10ms();
@@ -375,11 +373,6 @@ void hall_stick_loop( void )
     while( HallGetByte(&ch) )
     {
         HallProtocol.index++;
-
-        if ( HallProtocol.index >= HALLSTICK_BUFF_SIZE )
-        {
-            HallProtocol.index = 0;
-        }
 
         Parse_Character( ch );
 

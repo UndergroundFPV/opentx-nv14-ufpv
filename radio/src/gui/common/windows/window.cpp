@@ -39,10 +39,10 @@ void Window::paintChildren(BitmapBuffer * dc)
   dc->getClippingRect(xmin, xmax, ymin, ymax);
   for (auto child: children) {
     dc->setOffset(x + child->rect.x + child->scrollPositionX, y + child->rect.y + child->scrollPositionY);
-    dc->setClippingRect(max(xmin, x + child->rect.x),
-                        min(xmax, x + child->rect.x + child->rect.w),
-                        max(ymin, y + child->rect.y),
-                        min(ymax, y + child->rect.y + child->rect.h));
+    dc->setClippingRect(max(xmin, x + child->rect.left()),
+                        min(xmax, x + child->rect.right()),
+                        max(ymin, y + child->rect.top()),
+                        min(ymax, y + child->rect.bottom()));
     child->fullPaint(dc);
   }
 }
@@ -72,11 +72,13 @@ bool Window::onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t sli
 
   if (slideY && innerHeight > rect.h) {
     scrollPositionY = limit<coord_t>(-innerHeight + rect.h, scrollPositionY + slideY, 0);
+    invalidate();
     return true;
   }
 
   if (slideX && innerWidth > rect.w) {
     scrollPositionX = limit<coord_t>(-innerWidth + rect.w, scrollPositionX + slideX, 0);
+    invalidate();
     return true;
   }
 
@@ -106,6 +108,11 @@ void Window::moveWindowsTop(coord_t y, coord_t delta)
       child->rect.y += delta;
     }
   }
+}
+
+void Window::invalidate(const rect_t & rect)
+{
+  parent->invalidate({this->rect.x + rect.x + parent->scrollPositionX, this->rect.y + rect.y + parent->scrollPositionY, rect.w, rect.h});
 }
 
 void Window::drawVerticalScrollbar(BitmapBuffer * dc)
@@ -148,10 +155,28 @@ void MainWindow::checkEvents()
   emptyTrash();
 }
 
-void MainWindow::refresh(rect_t & rect)
+void MainWindow::invalidate(const rect_t & rect)
 {
-  lcd->setOffset(0, 0);
-  lcd->setClippingRect(rect.x, rect.right(), rect.y, rect.bottom());
-  lcd->clear(TEXT_BGCOLOR);
-  fullPaint(lcd);
+  if (invalidatedRect.w) {
+    coord_t left = min(invalidatedRect.left(), rect.left());
+    coord_t right = max(invalidatedRect.right(), rect.right());
+    coord_t top = min(invalidatedRect.top(), rect.top());
+    coord_t bottom = max(invalidatedRect.bottom(), rect.bottom());
+    invalidatedRect = {left, top, right - left, bottom - top};
+  }
+  else {
+    invalidatedRect = rect;
+  }
+}
+
+void MainWindow::refresh()
+{
+  if (invalidatedRect.w) {
+    TRACE("Refresh rect: left=%d top=%d width=%d height=%d", invalidatedRect.left(), invalidatedRect.top(), invalidatedRect.w, invalidatedRect.h);
+    lcd->setOffset(0, 0);
+    lcd->setClippingRect(invalidatedRect.left(), invalidatedRect.right(), invalidatedRect.top(), invalidatedRect.bottom());
+    lcd->clear(TEXT_BGCOLOR);
+    fullPaint(lcd);
+    invalidatedRect.w = 0;
+  }
 }

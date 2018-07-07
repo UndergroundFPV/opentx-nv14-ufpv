@@ -71,7 +71,9 @@ void lcdPutFontPattern(coord_t x, coord_t y, const uint8_t * font, const uint16_
 {
   coord_t offset = spec[index];
   coord_t width = spec[index+1] - offset;
-  if (width > 0) lcdDrawBitmapPattern(x, y, font, flags, offset, width);
+  if (width > 0) {
+    lcdDrawBitmapPattern(x, y, font, flags, offset, width);
+  }
   lcdNextPos = x + width;
 }
 

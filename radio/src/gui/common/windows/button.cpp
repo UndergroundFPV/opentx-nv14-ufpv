@@ -23,6 +23,7 @@
 bool Button::onTouch(coord_t x, coord_t y)
 {
   state = onPress();
+  invalidate();
   return true;
 }
 
@@ -48,7 +49,6 @@ FabIconButton::FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon
   icon(icon)
 {
 }
-
 
 void FabIconButton::paint(BitmapBuffer * dc)
 {

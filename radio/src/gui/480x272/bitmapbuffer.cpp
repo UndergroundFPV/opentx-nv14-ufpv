@@ -117,6 +117,7 @@ void BitmapBuffer::drawSolidFilledRect(coord_t x, coord_t y, coord_t w, coord_t 
 
   if (x >= xmax || y >= ymax)
     return;
+
   if (h < 0) {
     y += h;
     h = -h;
@@ -129,8 +130,11 @@ void BitmapBuffer::drawSolidFilledRect(coord_t x, coord_t y, coord_t w, coord_t 
     w += x - xmin;
     x = xmin;
   }
-  if (y+h > ymax)
+  if (y + h > ymax)
     h = ymax - y;
+  if (x + w > xmax)
+    w = xmax - x;
+
   if (!data || h<=0 || w<=0)
     return;
 
@@ -301,16 +305,19 @@ void BitmapBuffer::drawBitmapPattern(coord_t x, coord_t y, const uint8_t * bmp, 
     width = w;
   }
 
-  if (x+width > this->width) {
-    width = this->width-x;
+  if (x + width > xmax) {
+    width = xmax - x;
   }
 
-  if (y > ymax) return;
+  if (y >= ymax || x >= xmax || width <= 0 || x + width < xmin || y + height < ymin) {
+    return;
+  }
 
   display_t color = lcdColorTable[COLOR_IDX(flags)];
 
   for (coord_t row=0; row<height; row++) {
-    if (y+row < ymin || y+row >= ymax) continue;
+    if (y+row < ymin || y+row >= ymax)
+      continue;
     const uint8_t * q = bmp + 4 + row*w + offset;
     for (coord_t col=0; col<width; col++) {
       display_t * p;
@@ -329,7 +336,9 @@ uint8_t BitmapBuffer::drawCharWithoutCache(coord_t x, coord_t y, const uint8_t *
 {
   coord_t offset = spec[index];
   coord_t width = spec[index+1] - offset;
-  if (width > 0) drawBitmapPattern(x, y, font, flags, offset, width);
+  if (width > 0) {
+    drawBitmapPattern(x, y, font, flags, offset, width);
+  }
   return width;
 }
 

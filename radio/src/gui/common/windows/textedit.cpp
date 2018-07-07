@@ -20,7 +20,7 @@
 
 #include "opentx.h"
 
-void SourceChoice::paint(BitmapBuffer * dc)
+void TextEdit::paint(BitmapBuffer * dc)
 {
   bool hasFocus = this->hasFocus();
   LcdFlags textColor = 0;
@@ -29,22 +29,23 @@ void SourceChoice::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  drawSource(dc, 3, 3, getValue(), textColor);
+  if (!hasFocus && zlen(value, length) == 0)
+    dc->drawSizedText(3, 3, "---", length, CURVE_AXIS_COLOR);
+  else
+    dc->drawSizedText(3, 3, value, length, ZCHAR | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
+  if (hasFocus) {
+    coord_t cursorPos = keyboard->getCursorPos();
+    dc->drawSolidFilledRect(cursorPos + 2, 3, 2, 22, 0); // TEXT_INVERTED_BGCOLOR);
+  }
 }
 
-bool SourceChoice::onTouch(coord_t x, coord_t y)
+bool TextEdit::onTouch(coord_t x, coord_t y)
 {
-  int16_t value = getValue();
-
-  do {
-    value += 1;
-    if (value > vmax)
-      value = 0;
-  } while (!isSourceAvailable(value));
-
-  setValue(value);
   setFocus();
-  invalidate();
+  if (keyboard->getField() != this) {
+    keyboard->setField(this);
+  }
+  keyboard->setCursorPos(x);
   return true;
 }
