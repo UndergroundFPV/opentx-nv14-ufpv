@@ -34,7 +34,7 @@ if(Qt5Widgets_FOUND)
   add_dependencies(${SIMULATOR_TARGET} ${FIRMWARE_DEPENDENCIES})
   target_compile_definitions(${SIMULATOR_TARGET} PUBLIC ${APP_COMMON_DEFINES})  # set in top-level CMakeLists
   target_link_libraries(${SIMULATOR_TARGET} ${SDL_LIBRARY})
-  qt5_use_modules(${SIMULATOR_TARGET} Core)
+  target_link_libraries(${SIMULATOR_TARGET} Core)
   add_custom_target(libsimulator DEPENDS ${SIMULATOR_TARGET})
 
   # Prepare the "all-simu-libs" target to build simulator libraries for *every* supported PCB type (PCB_TYPES list)
