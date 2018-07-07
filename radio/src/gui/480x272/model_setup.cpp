@@ -415,9 +415,17 @@ void ModelSetupPage::build(Window * window)
   }
 
   // Center beeps
+  // TODO add actions
   {
     new StaticText(window, grid.getLabelSlot(), STR_BEEPCTR);
-    //TODO reta
+    for (int i=0; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS; i++) {
+      char s[2];
+      if (i && !(i%4)) grid.nextLine();
+      switchWarn[i] = new TextButton(window, grid.getFieldSlot(4, i%4), getStringAtIndex(s, STR_RETA123, i),
+                                     [&]() -> uint8_t {
+                                         return 1;
+                                     });
+    }
     grid.nextLine();
   }
 
