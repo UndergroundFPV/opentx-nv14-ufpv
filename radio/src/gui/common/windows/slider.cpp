@@ -23,7 +23,7 @@
 void Slider::paint(BitmapBuffer * dc)
 {
   int val = limit(vmin, getValue(), vmax);
-  int w = divRoundClosest((rect.w - 10) * (val - vmin), vmax - vmin) - 5;
+  int w = divRoundClosest((rect.w - 16) * (val - vmin), vmax - vmin);
 
   dc->drawBitmapPattern(0, 11, LBM_SLIDER_BAR_LEFT, LINE_COLOR);
   dc->drawSolidFilledRect(4, 11, rect.w - 8, 4, LINE_COLOR);

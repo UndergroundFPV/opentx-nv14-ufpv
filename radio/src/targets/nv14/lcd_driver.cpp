@@ -662,7 +662,6 @@ void lcdRefresh()
   if (CurrentLayer == LCD_FIRST_LAYER) {
     LTDC_LayerAlpha(LTDC_Layer1, 255);
     LTDC_LayerAlpha(LTDC_Layer2, 0);
-    LCD_SetLayer(LCD_SECOND_LAYER);
   }
   else {
     LTDC_LayerAlpha(LTDC_Layer2, 255);
@@ -670,4 +669,14 @@ void lcdRefresh()
     LCD_SetLayer(LCD_FIRST_LAYER);
   }
   LTDC_ReloadConfig(LTDC_IMReload);
+}
+
+void lcdNextLayer()
+{
+  if (CurrentLayer == LCD_FIRST_LAYER) {
+    LCD_SetLayer(LCD_SECOND_LAYER);
+  }
+  else {
+    LCD_SetLayer(LCD_FIRST_LAYER);
+  }
 }

@@ -18,7 +18,7 @@
  * GNU General Public License for more details.
  */
 
-#include "window.h"
+#include "opentx.h"
 
 Window * Window::focusWindow = nullptr;
 std::list<Window *> Window::trash;
@@ -169,14 +169,26 @@ void MainWindow::invalidate(const rect_t & rect)
   }
 }
 
-void MainWindow::refresh()
+bool MainWindow::refresh()
 {
   if (invalidatedRect.w) {
     TRACE("Refresh rect: left=%d top=%d width=%d height=%d", invalidatedRect.left(), invalidatedRect.top(), invalidatedRect.w, invalidatedRect.h);
+    if (invalidatedRect.w < LCD_W && invalidatedRect.h < LCD_H) {
+      BitmapBuffer * previous = lcd;
+      lcdNextLayer();
+      DMAcopy(previous->getData(), lcd->getData(), DISPLAY_BUFFER_SIZE);
+    }
+    else {
+      lcdNextLayer();
+    }
     lcd->setOffset(0, 0);
     lcd->setClippingRect(invalidatedRect.left(), invalidatedRect.right(), invalidatedRect.top(), invalidatedRect.bottom());
     lcd->clear(TEXT_BGCOLOR);
     fullPaint(lcd);
     invalidatedRect.w = 0;
+    return true;
+  }
+  else {
+    return false;
   }
 }
