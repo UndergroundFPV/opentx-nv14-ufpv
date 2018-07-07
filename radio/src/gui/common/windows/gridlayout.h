@@ -33,6 +33,11 @@ class GridLayout {
       labelWidth = width;
     }
 
+    rect_t getLineSlot()
+    {
+      return { lineMarginLeft, currentY, LCD_W - lineMarginRight - lineMarginLeft, lineHeight };
+    }
+
     rect_t getLabelSlot(bool indent = false)
     {
       coord_t left = indent ? lineMarginLeft + indentWidth : lineMarginLeft;

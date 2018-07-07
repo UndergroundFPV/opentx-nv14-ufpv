@@ -184,7 +184,7 @@ void ModelSetupPage::build(Window * window)
     // Timer label
     char timerLabel[8];
     strAppendStringWithIndex(timerLabel, STR_TIMER, i + 1);
-    new Subtitle(window, grid.getLabelSlot(), timerLabel);
+    new Subtitle(window, grid.getLineSlot(), timerLabel);
     grid.nextLine();
 
     // editTimerMode(0, y, attr, event);
@@ -250,7 +250,7 @@ void ModelSetupPage::build(Window * window)
 
   // Throttle parameters
   {
-    new Subtitle(window, grid.getLabelSlot(), STR_THROTTLE_LABEL);
+    new Subtitle(window, grid.getLineSlot(), STR_THROTTLE_LABEL);
     grid.nextLine();
 
     // Throttle reversed
@@ -279,7 +279,7 @@ void ModelSetupPage::build(Window * window)
 
   // Preflight parameters
   {
-    new Subtitle(window, grid.getLabelSlot(), STR_PREFLIGHT);
+    new Subtitle(window, grid.getLineSlot(), STR_PREFLIGHT);
     grid.nextLine();
 
     // Display checklist
@@ -343,7 +343,7 @@ void ModelSetupPage::build(Window * window)
 
   // Internal module
   {
-    new Subtitle(window, grid.getLabelSlot(), STR_INTERNALRF);
+    new Subtitle(window, grid.getLineSlot(), STR_INTERNALRF);
     grid.nextLine();
     internalModuleWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
     updateInternalModuleWindow();
@@ -352,7 +352,7 @@ void ModelSetupPage::build(Window * window)
 
   // External module
   {
-    new Subtitle(window, grid.getLabelSlot(), STR_EXTERNALRF);
+    new Subtitle(window, grid.getLineSlot(), STR_EXTERNALRF);
     grid.nextLine();
     externalModuleWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
     updateExternalModuleWindow();
@@ -437,7 +437,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_R9M_MODES, MODULE_SUBTYPE_R9M_FCC,
                  MODULE_SUBTYPE_R9M_LBT,
                  GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].subType),
-                 [&](int32_t newValue) -> void {
+                 [=](int32_t newValue) -> void {
                    g_model.moduleData[EXTERNAL_MODULE].subType = newValue;
                    SET_DIRTY();
                    updateExternalModuleWindow();
@@ -535,7 +535,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                      });
 
       externalModuleRange = new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
-                     [&]() -> uint8_t {
+                     [=]() -> uint8_t {
                        if(moduleFlag[EXTERNAL_MODULE] == MODULE_BIND) {
                          moduleFlag[EXTERNAL_MODULE] = MODULE_RANGECHECK;
                          externalModuleBind->setState(0);

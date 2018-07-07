@@ -337,7 +337,6 @@ uint8_t BitmapBuffer::drawCharWithoutCache(coord_t x, coord_t y, const uint8_t *
   coord_t offset = spec[index];
   coord_t width = spec[index+1] - offset;
   if (width > 0) {
-    TRACE("index=%d", index);
     drawBitmapPattern(x, y, font, flags, offset, width);
   }
   return width;
