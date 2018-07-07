@@ -20,6 +20,8 @@
 
 #include "opentx.h"
 
+Keyboard * keyboard = nullptr;
+
 MenuHeaderWindow::MenuHeaderWindow(Menu * menu):
   Window(menu, { 0, 0, LCD_W, MENU_BODY_TOP }),
   back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
@@ -73,7 +75,7 @@ Menu::Menu():
   header(this),
   body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
 {
-  new Keyboard();
+  keyboard = new Keyboard(&mainWindow);
 }
 
 void Menu::addPage(MenuPage * page)
@@ -88,8 +90,10 @@ void Menu::addPage(MenuPage * page)
 void Menu::setCurrentPage(MenuPage * page)
 {
   body.clear();
+  keyboard->disable();
   currentPage = page;
   page->build(&body);
   header.setTitle(page->title);
+  invalidate();
 }
 

@@ -45,5 +45,6 @@ bool SwitchChoice::onTouch(coord_t x, coord_t y)
 
   setValue(value);
   setFocus();
+  invalidate();
   return true;
 }

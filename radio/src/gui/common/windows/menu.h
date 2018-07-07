@@ -26,6 +26,8 @@
 
 class Menu;
 
+extern Keyboard * keyboard;
+
 class MenuPage {
   public:
     MenuPage(const char * title, unsigned icon):

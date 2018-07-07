@@ -17,23 +17,6 @@ class Window
 
     coord_t x, y, width, height, offsetX, offsetY, innerWidth, innerHeight, focusX, focusY;
 
-/*
-    void drawIconButton(uint32_t x, uint32_t y, uint8_t index, LcdFlags flags)
-    {
-      lcd->setClippingRect(this->x, this->x + this->width, this->y, this->y + this->height);
-      ::drawIconButton(x + this->x, y + this->y + this->offsetY, index, flags);
-      lcd->clearClippingRect();
-    }
-
-    bool handleIconButton(uint32_t x, uint32_t y, const char * text, uint32_t flags)
-    {
-      drawButton(x, y, text, flags);
-      if (touch(x, y, getTextWidth(text, 0, 0)+20, 21)) {
-        return true;
-      }
-      return false;
-    }
-*/
     void scroll() {
       if (touchState.Event == TE_SLIDE) {
         if (innerHeight > height && touchState.startX >= this->x && touchState.startX <= this->x + this->width) {

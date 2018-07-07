@@ -234,31 +234,25 @@ void RadioSetupPage::build(Window * window)
     new Subtitle(window, grid.getLabelSlot(), STR_ALARMS_LABEL);
     grid.nextLine();
 
-#if 0
-    case ITEM_SETUP_BATTERY_WARNING:
-      lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BATTERYWARNING);
-      drawValueWithUnit(RADIO_SETUP_2ND_COLUMN, y, g_eeGeneral.vBatWarn, UNIT_VOLTS, attr|PREC1|LEFT);
-      if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.vBatWarn, 40, 120); //4-12V
-      break;
-#endif
+    // Battery warning
+    new StaticText(window, grid.getLabelSlot(), STR_BATTERYWARNING, true);
+    new NumberEdit(window, grid.getFieldSlot(), 40, 120, 1, GET_SET_DEFAULT(g_eeGeneral.vBatWarn), PREC1, nullptr, "v");
+    grid.nextLine();
 
     // Alarms warning
-    new StaticText(window, grid.getLabelSlot(), STR_ALARMWARNING);
+    new StaticText(window, grid.getLabelSlot(), STR_ALARMWARNING, true);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_eeGeneral.disableAlarmWarning));
     grid.nextLine();
 
     // RSSI shutdown alarm
-    new StaticText(window, grid.getLabelSlot(), STR_RSSISHUTDOWNALARM);
+    new StaticText(window, grid.getLabelSlot(), STR_RSSISHUTDOWNALARM, true);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_eeGeneral.disableRssiPoweroffAlarm));
     grid.nextLine();
 
-#if 0
-    case ITEM_SETUP_INACTIVITY_ALARM:
-      lcdDrawText(MENUS_MARGIN_LEFT,  y,STR_INACTIVITYALARM);
-      lcdDrawNumber(RADIO_SETUP_2ND_COLUMN, y, g_eeGeneral.inactivityTimer, attr|LEFT, 0, NULL, "m");
-      if (attr) g_eeGeneral.inactivityTimer = checkIncDec(event, g_eeGeneral.inactivityTimer, 0, 250, EE_GENERAL); //0..250minutes
-      break;
-#endif
+    // Inactivity alarm
+    new StaticText(window, grid.getLabelSlot(), STR_INACTIVITYALARM, true);
+    new NumberEdit(window, grid.getFieldSlot(), 0, 250, 1, GET_SET_DEFAULT(g_eeGeneral.inactivityTimer), 0, nullptr, "m");
+    grid.nextLine();
   }
 
   new Subtitle(window, grid.getLabelSlot(), STR_BACKLIGHT_LABEL);

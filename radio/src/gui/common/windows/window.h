@@ -36,6 +36,7 @@ class Window {
     {
       if (parent) {
         parent->addChild(this);
+        invalidate();
       }
     }
 
@@ -44,6 +45,11 @@ class Window {
       if (focusWindow == this) {
         focusWindow = nullptr;
       }
+    }
+
+    Window * getParent() const
+    {
+      return parent;
     }
 
     void deleteLater()
@@ -61,9 +67,10 @@ class Window {
         window->deleteLater();
       }
       children.clear();
+      invalidate();
     }
 
-    bool hasFocus()
+    bool hasFocus() const
     {
       return focusWindow == this;
     }
@@ -73,7 +80,7 @@ class Window {
       if (focusWindow) {
         focusWindow->onFocusLost();
       }
-      focusWindow = NULL;
+      focusWindow = nullptr;
     }
 
     void setFocus()
@@ -82,23 +89,41 @@ class Window {
       focusWindow = this;
     }
 
-    void setWidth(coord_t w) {
+    void setWidth(coord_t w)
+    {
       rect.w = w;
+      invalidate();
     }
 
-    void setHeight(coord_t h) {
+    void setHeight(coord_t h)
+    {
       rect.h = h;
+      invalidate();
     }
 
-    void setInnerWidth(coord_t w) {
+    coord_t width() const
+    {
+      return rect.w;
+    }
+
+    coord_t height() const
+    {
+      return rect.h;
+    }
+
+    void setInnerWidth(coord_t w)
+    {
       innerWidth = w;
     }
 
-    void setInnerHeight(coord_t h) {
+    void setInnerHeight(coord_t h)
+    {
       innerHeight = h;
     }
 
-    virtual void paint(BitmapBuffer * dc) { }
+    virtual void paint(BitmapBuffer * dc)
+    {
+    }
 
     void drawVerticalScrollbar(BitmapBuffer * dc);
 
@@ -111,7 +136,7 @@ class Window {
       return (x >= rect.x && x < rect.x + rect.w && y >= rect.y && y < rect.y + rect.h);
     }
 
-    virtual void onFocusLost() { };
+    virtual void onFocusLost() { invalidate(); };
 
     virtual bool onTouch(coord_t x, coord_t y);
 
@@ -123,8 +148,16 @@ class Window {
 
     void moveWindowsTop(coord_t y, coord_t delta);
 
-    void addChild(Window * window) {
+    void addChild(Window * window)
+    {
       children.push_back(window);
+    }
+
+    virtual void invalidate(const rect_t & rect);
+
+    void invalidate()
+    {
+      invalidate({0, 0, rect.w, rect.h});
     }
 
   public: // TODO protected later ...
@@ -141,20 +174,20 @@ class Window {
 class MainWindow: public Window {
   public:
     MainWindow():
-      Window(nullptr, {0, 0, LCD_W, LCD_H}) {
+      Window(nullptr, {0, 0, LCD_W, LCD_H}),
+      invalidatedRect(rect)
+    {
     }
 
     void checkEvents();
 
-    void refresh()
-    {
-      refresh(rect);
-    }
+    virtual void invalidate(const rect_t & rect) override;
 
-    void refresh(rect_t & rect);
+    void refresh();
 
   protected:
     void emptyTrash();
+    rect_t invalidatedRect;
 };
 
 extern MainWindow mainWindow;
