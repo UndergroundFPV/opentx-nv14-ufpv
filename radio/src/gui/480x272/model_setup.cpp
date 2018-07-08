@@ -361,7 +361,7 @@ void ModelSetupPage::build(Window * window)
                        SET_DIRTY();
                        return (g_model.beepANACenter & ((BeepANACenter)1<<i)) ? 1 : 0;
                      },
-                     (g_model.beepANACenter & ((BeepANACenter)1<<i))) ? 1 : 0;
+                     (g_model.beepANACenter & ((BeepANACenter)1<<i)) ? 1 : 0);
     }
     grid.nextLine();
   }

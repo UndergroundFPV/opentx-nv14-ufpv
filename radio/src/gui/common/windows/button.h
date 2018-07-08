@@ -33,6 +33,16 @@ class Button : public Window {
     {
     }
 
+    void enable(uint8_t enabled)
+    {
+      this->enabled = enabled;
+    }
+
+    void disable()
+    {
+      enable(false);
+    }
+
     void setState(uint8_t state)
     {
       this->state = state;
@@ -43,6 +53,7 @@ class Button : public Window {
   protected:
     std::function<uint8_t(void)> onPress;
     uint8_t state;
+    uint8_t enabled;
 };
 
 class TextButton : public Button {

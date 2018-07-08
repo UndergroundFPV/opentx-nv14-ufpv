@@ -22,18 +22,17 @@
 
 bool Button::onTouch(coord_t x, coord_t y)
 {
-  state = onPress();
-  invalidate();
+  if (enabled) {
+    state = onPress();
+    invalidate();
+  }
   return true;
 }
 
 void TextButton::paint(BitmapBuffer * dc)
 {
-  dc->drawText(rect.w / 2, 2, text, CENTERED);
-  if (state)
-    drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, SCROLLBOX_COLOR);
-  else
-    drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, CURVE_AXIS_COLOR);
+  dc->drawText(rect.w / 2, 2, text, CENTERED | (enabled ? 0 : TEXT_DISABLE_COLOR));
+  drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, state ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
 }
 
 #include "alpha_button_on.lbm"
