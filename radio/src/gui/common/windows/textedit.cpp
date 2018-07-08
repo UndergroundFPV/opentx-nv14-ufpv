@@ -36,7 +36,7 @@ void TextEdit::paint(BitmapBuffer * dc)
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
   if (hasFocus) {
     coord_t cursorPos = keyboard->getCursorPos();
-    dc->drawSolidFilledRect(cursorPos + 2, 3, 2, 22, 0); // TEXT_INVERTED_BGCOLOR);
+    dc->drawSolidFilledRect(cursorPos + 2, 2, 2, 21, 0); // TEXT_INVERTED_BGCOLOR);
   }
 }
 
