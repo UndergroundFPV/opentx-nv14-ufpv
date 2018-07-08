@@ -258,7 +258,7 @@ void ModelSetupPage::build(Window * window)
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.throttleReversed));
     grid.nextLine();
 
-    new StaticText(window, grid.getLabelSlot(), STR_TTRACE);
+    new StaticText(window, grid.getLabelSlot(true), STR_TTRACE);
     new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.thrTraceSrc));
     grid.nextLine();
 
@@ -285,7 +285,7 @@ void ModelSetupPage::build(Window * window)
 
     // Switches warning
     // TODO this is just UI, actions need to be added
-    new StaticText(window, grid.getLabelSlot(), STR_SWITCHWARNING);
+    new StaticText(window, grid.getLabelSlot(true), STR_SWITCHWARNING);
     for (int i=0; i< NUM_SWITCHES; i++) {
       unsigned int state = ((g_model.switchWarningState >> (3*i)) & 0x07);
       char s[3];
