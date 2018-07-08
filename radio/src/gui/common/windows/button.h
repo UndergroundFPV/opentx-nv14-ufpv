@@ -53,7 +53,7 @@ class Button : public Window {
   protected:
     std::function<uint8_t(void)> onPress;
     uint8_t state;
-    uint8_t enabled;
+    uint8_t enabled = 1;
 };
 
 class TextButton : public Button {
