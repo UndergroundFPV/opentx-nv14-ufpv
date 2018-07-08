@@ -403,13 +403,14 @@ void ModelSetupPage::updateInternalModuleWindow()
   internalModuleWindow->clear();
 
   new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_MODE);
-  new Choice(internalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
-             GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].rfProtocol),
-             [=](int32_t newValue) -> void {
-               g_model.moduleData[INTERNAL_MODULE].rfProtocol = newValue - 1;
-               SET_DIRTY();
-               updateInternalModuleWindow();
-             });
+  internalModuleChoice = new Choice(internalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
+                                    GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].rfProtocol),
+                                    [=](int32_t newValue) -> void {
+                                      g_model.moduleData[INTERNAL_MODULE].rfProtocol = newValue - 1;
+                                      SET_DIRTY();
+                                      updateInternalModuleWindow();
+                                      internalModuleChoice->setFocus();
+                                    });
   grid.nextLine();
 
   if (value != RF_PROTO_OFF) {
@@ -446,14 +447,15 @@ void ModelSetupPage::updateExternalModuleWindow()
   externalModuleWindow->clear();
 
   new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_MODE);
-  new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
-             GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].type),
-             [=](int32_t newValue) -> void {
-               g_model.moduleData[EXTERNAL_MODULE].type = newValue;
-               SET_DIRTY();
-               resetModuleSettings(EXTERNAL_MODULE);
-               updateExternalModuleWindow();
-             });
+  externalModuleChoice = new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
+                                    GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].type),
+                                    [=](int32_t newValue) -> void {
+                                      g_model.moduleData[EXTERNAL_MODULE].type = newValue;
+                                      SET_DIRTY();
+                                      resetModuleSettings(EXTERNAL_MODULE);
+                                      updateExternalModuleWindow();
+                                      externalModuleChoice->setFocus();
+                                    });
 
   if (g_model.moduleData[EXTERNAL_MODULE].type != MODULE_TYPE_NONE && !IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
     if (IS_MODULE_XJT(EXTERNAL_MODULE)) {

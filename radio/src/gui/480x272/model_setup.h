@@ -13,7 +13,10 @@ class ModelSetupPage: public MenuPage {
     Window * internalModuleWindow = nullptr;
     Window * externalModuleWindow = nullptr;
 
+    Choice * internalModuleChoice = nullptr;
+    Choice * externalModuleChoice = nullptr;
+
     Button * externalModuleBind = nullptr;
-    Button * switchWarn[NUM_SWITCHES]= {nullptr};
+    Button * switchWarn[NUM_SWITCHES] = {nullptr};
     Button * externalModuleRange = nullptr;
 };
