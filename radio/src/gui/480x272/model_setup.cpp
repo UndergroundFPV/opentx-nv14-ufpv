@@ -287,7 +287,7 @@ void ModelSetupPage::build(Window * window)
     // Switches warning
     // TODO this is just UI, actions need to be added
     new StaticText(window, grid.getLabelSlot(true), STR_SWITCHWARNING);
-    for (int i=0; i< NUM_SWITCHES; i++) {
+    for (int i=0; i<NUM_SWITCHES; i++) {
       unsigned int state = ((g_model.switchWarningState >> (3*i)) & 0x07);
       char s[3];
       s[0] = 'A' + i;
