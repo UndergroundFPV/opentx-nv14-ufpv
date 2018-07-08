@@ -220,23 +220,18 @@ void ModelSetupPage::build(Window * window)
 
   // Extended trims
   new StaticText(window, grid.getLabelSlot(), STR_ETRIMS);
-  new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.extendedTrims));
+  new CheckBox(window, grid.getFieldSlot(2, 0), GET_SET_DEFAULT(g_model.extendedTrims));
+  new TextButton(window, grid.getFieldSlot(2, 1),STR_RESET_BTN,
+                 [&]() -> uint8_t {
+                     START_NO_HIGHLIGHT();
+                     for (uint8_t i=0; i<MAX_FLIGHT_MODES; i++) {
+                       memclear(&g_model.flightModeData[i], TRIMS_ARRAY_SIZE);
+                     }
+                     storageDirty(EE_MODEL);
+                     AUDIO_WARNING1();
+                     return 0;
+                 });
   grid.nextLine();
-
-  /*
-  drawText(window, MODEL_SETUP_2ND_COLUMN+18, y, STR_RESET_BTN, menuHorizontalPosition>0  && !NO_HIGHLIGHT() ? attr : 0);
-        if (attr && menuHorizontalPosition>0) {
-          s_editMode = 0;
-          if (event==EVT_KEY_LONG(KEY_ENTER)) {
-            START_NO_HIGHLIGHT();
-            for (uint8_t i=0; i<MAX_FLIGHT_MODES; i++) {
-              memclear(&g_model.flightModeData[i], TRIMS_ARRAY_SIZE);
-            }
-            storageDirty(EE_MODEL);
-            AUDIO_WARNING1();
-          }
-        }
-        */
 
   // Display trims
   new StaticText(window, grid.getLabelSlot(), STR_DISPLAY_TRIMS);
