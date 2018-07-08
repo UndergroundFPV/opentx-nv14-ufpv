@@ -214,12 +214,12 @@ void ModelSetupPage::build(Window * window)
   }
 
   // Extended limits
-  new StaticText(window, grid.getLabelSlot(true), STR_ELIMITS);
+  new StaticText(window, grid.getLabelSlot(), STR_ELIMITS);
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.extendedLimits));
   grid.nextLine();
 
   // Extended trims
-  new StaticText(window, grid.getLabelSlot(true), STR_ETRIMS);
+  new StaticText(window, grid.getLabelSlot(), STR_ETRIMS);
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.extendedTrims));
   grid.nextLine();
 
@@ -239,12 +239,12 @@ void ModelSetupPage::build(Window * window)
         */
 
   // Display trims
-  new StaticText(window, grid.getLabelSlot(true), STR_DISPLAY_TRIMS);
+  new StaticText(window, grid.getLabelSlot(), STR_DISPLAY_TRIMS);
   new Choice(window, grid.getFieldSlot(), "\006No\0   ChangeYes", 0, 2, GET_SET_DEFAULT(g_model.displayTrims));
   grid.nextLine();
 
   // Trim step
-  new StaticText(window, grid.getLabelSlot(true), STR_TRIMINC);
+  new StaticText(window, grid.getLabelSlot(), STR_TRIMINC);
   new Choice(window, grid.getFieldSlot(), STR_VTRIMINC, -2, 2, GET_SET_DEFAULT(g_model.trimInc));
   grid.nextLine();
 
@@ -258,6 +258,7 @@ void ModelSetupPage::build(Window * window)
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.throttleReversed));
     grid.nextLine();
 
+    // Throttle source
     new StaticText(window, grid.getLabelSlot(true), STR_TTRACE);
     new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.thrTraceSrc));
     grid.nextLine();
@@ -362,7 +363,7 @@ void ModelSetupPage::build(Window * window)
     grid.nextLine();
   }
 
-  // Gloabal functions
+  // Global functions
   {
     new StaticText(window, grid.getLabelSlot(), STR_USE_GLOBAL_FUNCS);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_model.noGlobalFunctions));

@@ -35,15 +35,15 @@ void SourceChoice::paint(BitmapBuffer * dc)
 
 bool SourceChoice::onTouch(coord_t x, coord_t y)
 {
-  int16_t value = getValue();
-
-  do {
-    value += 1;
-    if (value > vmax)
-      value = 0;
-  } while (!isSourceAvailable(value));
-
-  setValue(value);
+  if (hasFocus()) {
+    int16_t value = getValue();
+    do {
+      value += 1;
+      if (value > vmax)
+        value = 0;
+    } while (!isSourceAvailable(value));
+    setValue(value);
+  }
   setFocus();
   invalidate();
   return true;

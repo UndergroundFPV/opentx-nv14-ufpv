@@ -38,7 +38,6 @@ def createFontBitmap(filename, fontname, fontsize, fontoffset, foreground, backg
     try:
         extraImage = Image.open(extraFilename)
         extraImage = extraImage.convert('RGB');
-
     except IOError:
         print('Missing extra symbol filename %s' % extraFilename)
 

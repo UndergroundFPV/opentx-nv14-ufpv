@@ -344,13 +344,13 @@ char * getSourceString(char * dest, mixsrc_t idx)
   }
   else if (idx <= MIXSRC_LAST_INPUT) {
     idx -= MIXSRC_FIRST_INPUT;
-    *dest++ = '\314';
+    *dest = '\314';
     if (ZEXIST(g_model.inputNames[idx])) {
-      zchar2str(dest, g_model.inputNames[idx], LEN_INPUT_NAME);
-      dest[LEN_INPUT_NAME] = '\0';
+      zchar2str(dest+1, g_model.inputNames[idx], LEN_INPUT_NAME);
+      dest[LEN_INPUT_NAME+1] = '\0';
     }
     else {
-      strAppendUnsigned(dest, idx+1, 2);
+      strAppendUnsigned(dest+1, idx+1, 2);
     }
   }
 #if defined(LUA_INPUTS)

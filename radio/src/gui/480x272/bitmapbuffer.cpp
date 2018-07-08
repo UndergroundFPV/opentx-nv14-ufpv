@@ -346,7 +346,9 @@ uint8_t BitmapBuffer::drawCharWithCache(coord_t x, coord_t y, const BitmapBuffer
 {
   coord_t offset = spec[index];
   coord_t width = spec[index+1] - offset;
-  drawBitmap(x, y, font, offset, 0, width);
+  if (width > 0) {
+    drawBitmap(x, y, font, offset, 0, width);
+  }
   return width;
 }
 
