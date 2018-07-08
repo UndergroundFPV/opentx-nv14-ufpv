@@ -30,9 +30,9 @@ void TextEdit::paint(BitmapBuffer * dc)
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
   if (!hasFocus && zlen(value, length) == 0)
-    dc->drawSizedText(3, 3, "---", length, CURVE_AXIS_COLOR);
+    dc->drawSizedText(3, 2, "---", length, CURVE_AXIS_COLOR);
   else
-    dc->drawSizedText(3, 3, value, length, ZCHAR | textColor);
+    dc->drawSizedText(3, 2, value, length, ZCHAR | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
   if (hasFocus) {
     coord_t cursorPos = keyboard->getCursorPos();

@@ -29,7 +29,7 @@ void SwitchChoice::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  drawSwitch(dc, 3, 3, getValue(), textColor);
+  drawSwitch(dc, 3, 2, getValue(), textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 

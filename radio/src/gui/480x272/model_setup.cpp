@@ -349,16 +349,19 @@ void ModelSetupPage::build(Window * window)
   }
 
   // Center beeps
-  // TODO add actions
   {
     new StaticText(window, grid.getLabelSlot(), STR_BEEPCTR);
     for (int i=0; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS; i++) {
       char s[2];
-      if (i && !(i%4)) grid.nextLine();
-      switchWarn[i] = new TextButton(window, grid.getFieldSlot(4, i%4), getStringAtIndex(s, STR_RETA123, i),
-                                     [&]() -> uint8_t {
-                                         return 1;
-                                     });
+      if (i > 0 && (i % 4) == 0)
+        grid.nextLine();
+      new TextButton(window, grid.getFieldSlot(4, i % 4), getStringAtIndex(s, STR_RETA123, i),
+                     [=]() -> uint8_t {
+                       g_model.beepANACenter ^= ((BeepANACenter)1<<i);
+                       SET_DIRTY();
+                       return (g_model.beepANACenter & ((BeepANACenter)1<<i)) ? 1 : 0;
+                     },
+                     (g_model.beepANACenter & ((BeepANACenter)1<<i))) ? 1 : 0;
     }
     grid.nextLine();
   }
@@ -704,26 +707,6 @@ void ModelSetupPage::updateExternalModuleWindow()
             }
             lcdDrawTextAtIndex(x, y, STR_VSRCRAW, NUM_STICKS+1+i, flags);
             x += MODEL_SETUP_SLIDPOT_SPACING;
-          }
-        }
-        break;
-
-      case ITEM_MODEL_BEEP_CENTER:
-        drawText(window,MENUS_MARGIN_LEFT, y, STR_BEEPCTR);
-        lcdNextPos = MODEL_SETUP_2ND_COLUMN - 3;
-        for (int i=0; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS; i++) {
-          LcdFlags flags = ((menuHorizontalPosition==i && attr) ? INVERS : 0);
-          flags |= (g_model.beepANACenter & ((BeepANACenter)1<<i)) ? TEXT_COLOR : (TEXT_DISABLE_COLOR | NO_FONTCACHE);
-          if (attr && menuHorizontalPosition < 0) flags |= INVERS;
-          lcdDrawTextAtIndex(lcdNextPos+3, y, STR_RETA123, i, flags);
-        }
-        if (attr && CURSOR_ON_CELL) {
-          if (event==EVT_KEY_BREAK(KEY_ENTER)) {
-            if (READ_ONLY_UNLOCKED()) {
-              s_editMode = 0;
-              g_model.beepANACenter ^= ((BeepANACenter)1<<menuHorizontalPosition);
-              storageDirty(EE_MODEL);
-            }
           }
         }
         break;

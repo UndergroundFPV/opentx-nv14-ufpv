@@ -47,8 +47,8 @@ class Button : public Window {
 
 class TextButton : public Button {
   public:
-    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress):
-      Button(parent, rect, onPress),
+    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress, uint8_t state=0):
+      Button(parent, rect, onPress, state),
       text(strdup(text))
     {
     }

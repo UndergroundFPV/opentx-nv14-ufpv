@@ -44,7 +44,7 @@ void NumberEdit::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  drawNumber(dc, 3, 3, getValue(), textColor | flags, 0, prefix, suffix);
+  drawNumber(dc, 3, 2, getValue(), textColor | flags, 0, prefix, suffix);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
