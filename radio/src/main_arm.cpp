@@ -261,13 +261,10 @@ void guiMain(event_t evt)
           }
           popupDisplayed = false;
         }
+
         DEBUG_TIMER_START(debugTimerMenuHandlers);
-
         mainWindow.checkEvents();
-        // lcd->clear(TEXT_BGCOLOR);
-        mainWindow.refresh();
-
-        refreshNeeded = true; // menuHandlers[menuLevel](evt);
+        refreshNeeded = mainWindow.refresh();
         DEBUG_TIMER_STOP(debugTimerMenuHandlers);
       }
 

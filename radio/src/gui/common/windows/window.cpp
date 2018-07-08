@@ -18,7 +18,7 @@
  * GNU General Public License for more details.
  */
 
-#include "window.h"
+#include "opentx.h"
 
 Window * Window::focusWindow = nullptr;
 std::list<Window *> Window::trash;
@@ -71,14 +71,20 @@ bool Window::onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t sli
   }
 
   if (slideY && innerHeight > rect.h) {
-    scrollPositionY = limit<coord_t>(-innerHeight + rect.h, scrollPositionY + slideY, 0);
-    invalidate();
+    coord_t newScrollPosition = limit<coord_t>(-innerHeight + rect.h, scrollPositionY + slideY, 0);
+    if (newScrollPosition != scrollPositionY) {
+      scrollPositionY = newScrollPosition;
+      invalidate();
+    }
     return true;
   }
 
   if (slideX && innerWidth > rect.w) {
-    scrollPositionX = limit<coord_t>(-innerWidth + rect.w, scrollPositionX + slideX, 0);
-    invalidate();
+    coord_t newScrollPosition = limit<coord_t>(-innerWidth + rect.w, scrollPositionX + slideX, 0);
+    if (newScrollPosition != scrollPositionX) {
+      scrollPositionX = newScrollPosition;
+      invalidate();
+    }
     return true;
   }
 
@@ -169,14 +175,26 @@ void MainWindow::invalidate(const rect_t & rect)
   }
 }
 
-void MainWindow::refresh()
+bool MainWindow::refresh()
 {
   if (invalidatedRect.w) {
     TRACE("Refresh rect: left=%d top=%d width=%d height=%d", invalidatedRect.left(), invalidatedRect.top(), invalidatedRect.w, invalidatedRect.h);
+    if (invalidatedRect.x > 0 || invalidatedRect.y > 0 || invalidatedRect.w < LCD_W || invalidatedRect.h < LCD_H) {
+      BitmapBuffer * previous = lcd;
+      lcdNextLayer();
+      DMACopy(previous->getData(), lcd->getData(), DISPLAY_BUFFER_SIZE);
+    }
+    else {
+      lcdNextLayer();
+    }
     lcd->setOffset(0, 0);
     lcd->setClippingRect(invalidatedRect.left(), invalidatedRect.right(), invalidatedRect.top(), invalidatedRect.bottom());
     lcd->clear(TEXT_BGCOLOR);
     fullPaint(lcd);
     invalidatedRect.w = 0;
+    return true;
+  }
+  else {
+    return false;
   }
 }

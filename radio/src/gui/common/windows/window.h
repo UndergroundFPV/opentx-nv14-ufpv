@@ -183,7 +183,7 @@ class MainWindow: public Window {
 
     virtual void invalidate(const rect_t & rect) override;
 
-    void refresh();
+    bool refresh();
 
   protected:
     void emptyTrash();

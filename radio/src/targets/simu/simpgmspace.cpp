@@ -409,6 +409,10 @@ void lcdOff()
 }
 #endif
 
+void lcdNextLayer()
+{
+}
+
 void lcdRefresh()
 {
   static bool lightEnabled = (bool)isBacklightEnabled();
