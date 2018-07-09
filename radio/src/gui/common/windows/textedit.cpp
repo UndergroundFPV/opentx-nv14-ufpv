@@ -40,7 +40,7 @@ void TextEdit::paint(BitmapBuffer * dc)
   }
 }
 
-bool TextEdit::onTouch(coord_t x, coord_t y)
+bool TextEdit::onTouchEnd(coord_t x, coord_t y)
 {
   setFocus();
   if (keyboard->getField() != this) {

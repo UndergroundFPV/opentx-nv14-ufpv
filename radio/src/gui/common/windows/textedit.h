@@ -47,7 +47,7 @@ class TextEdit : public Window {
 
     void paint(BitmapBuffer * dc);
 
-    bool onTouch(coord_t x, coord_t y);
+    bool onTouchEnd(coord_t x, coord_t y);
 
     void onFocusLost()
     {

@@ -255,7 +255,7 @@ char * getSwitchWarningString(char * dest, swsrc_t idx)
   uint8_t state = g_model.switchWarningState >> (3*idx) & 0x07;
 
   *s++ = 'A' + idx;
-  if(state == 0)
+  if (state == 0)
     *s = '\0';
   else {
     *s++ = "x\300-\301"[state];

@@ -50,7 +50,7 @@ class Keyboard : public Window {
 
     void paint(BitmapBuffer * dc);
 
-    bool onTouch(coord_t x, coord_t y) override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     TextEdit * field = nullptr;

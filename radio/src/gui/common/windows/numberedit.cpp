@@ -48,7 +48,7 @@ void NumberEdit::paint(BitmapBuffer * dc)
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
-bool NumberEdit::onTouch(coord_t x, coord_t y)
+bool NumberEdit::onTouchEnd(coord_t x, coord_t y)
 {
   if (hasFocus()) {
     int32_t value = getValue() + step;

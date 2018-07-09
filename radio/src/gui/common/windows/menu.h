@@ -50,7 +50,7 @@ class MenuPagesCarousel: public Window {
 
     void paint(BitmapBuffer * dc);
 
-    bool onTouch(coord_t x, coord_t y);
+    bool onTouchEnd(coord_t x, coord_t y);
 
   protected:
     constexpr static uint8_t padding_left = 3;

@@ -36,7 +36,7 @@ class SwitchChoice : public Window {
 
     void paint(BitmapBuffer * dc) override ;
 
-    bool onTouch(coord_t x, coord_t y) override ;
+    bool onTouchEnd(coord_t x, coord_t y) override ;
 
   protected:
     const char * label;

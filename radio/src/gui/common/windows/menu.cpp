@@ -62,7 +62,7 @@ void MenuPagesCarousel::paint(BitmapBuffer * dc)
   }
 }
 
-bool MenuPagesCarousel::onTouch(coord_t x, coord_t y)
+bool MenuPagesCarousel::onTouchEnd(coord_t x, coord_t y)
 {
   unsigned index = (x - padding_left) / TOPBAR_BUTTON_WIDTH;
   menu->setCurrentPage(index);

@@ -37,11 +37,14 @@ class Slider : public Window {
 
     void paint(BitmapBuffer * dc);
 
-    bool onTouch(coord_t x, coord_t y);
+    bool onTouchStart(coord_t x, coord_t y);
 
-    bool onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t slideY);
+    bool onTouchEnd(coord_t x, coord_t y);
+
+    bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY);
 
   protected:
+    int tick(coord_t x) const;
     int32_t vmin;
     int32_t vmax;
     std::function<int32_t()> getValue;

@@ -18,6 +18,7 @@
  * GNU General Public License for more details.
  */
 
+#include <touch_driver.h>
 #include "opentx.h"
 
 Window * Window::focusWindow = nullptr;
@@ -47,11 +48,11 @@ void Window::paintChildren(BitmapBuffer * dc)
   }
 }
 
-bool Window::onTouch(coord_t x, coord_t y)
+bool Window::onTouchStart(coord_t x, coord_t y)
 {
   for (auto child: children) {
     if (pointInRect(x, y, child->rect)) {
-      if (child->onTouch(x - child->rect.x - child->scrollPositionX, y - child->rect.y - child->scrollPositionY)) {
+      if (child->onTouchStart(x - child->rect.x - child->scrollPositionX, y - child->rect.y - child->scrollPositionY)) {
         return true;
       }
     }
@@ -60,11 +61,24 @@ bool Window::onTouch(coord_t x, coord_t y)
   return false;
 }
 
-bool Window::onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t slideY)
+bool Window::onTouchEnd(coord_t x, coord_t y)
+{
+  for (auto child: children) {
+    if (pointInRect(x, y, child->rect)) {
+      if (child->onTouchEnd(x - child->rect.x - child->scrollPositionX, y - child->rect.y - child->scrollPositionY)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+bool Window::onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY)
 {
   for (auto child: children) {
     if (pointInRect(startX, startY, child->rect)) {
-      if (child->onSlide(startX - child->rect.x, startY - child->rect.y, slideX, slideY)) {
+      if (child->onTouchSlide(x - child->rect.x, y - child->rect.y, startX - child->rect.x, startY - child->rect.y, slideX, slideY)) {
         return true;
       }
     }
@@ -146,14 +160,18 @@ void MainWindow::emptyTrash()
 
 void MainWindow::checkEvents()
 {
-  if (touchState.Event == TE_UP) {
-    onTouch(touchState.startX - scrollPositionX, touchState.startY - scrollPositionY);
+  if (touchState.Event == TE_DOWN) {
+    onTouchStart(touchState.X - scrollPositionX, touchState.Y - scrollPositionY);
+    // touchState.Event = TE_NONE;
+  }
+  else if (touchState.Event == TE_UP) {
+    onTouchEnd(touchState.startX - scrollPositionX, touchState.startY - scrollPositionY);
     touchState.Event = TE_NONE;
   }
   else if (touchState.Event == TE_SLIDE) {
     coord_t x = touchState.X - touchState.lastX;
     coord_t y = touchState.Y - touchState.lastY;
-    onSlide(touchState.startX, touchState.startY, x, y);
+    onTouchSlide(touchState.X, touchState.Y, touchState.startX, touchState.startY, x, y);
     touchState.lastX = touchState.X;
     touchState.lastY = touchState.Y;
   }

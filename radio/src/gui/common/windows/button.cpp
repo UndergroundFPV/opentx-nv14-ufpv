@@ -20,7 +20,7 @@
 
 #include "opentx.h"
 
-bool Button::onTouch(coord_t x, coord_t y)
+bool Button::onTouchEnd(coord_t x, coord_t y)
 {
   if (enabled) {
     state = onPress();

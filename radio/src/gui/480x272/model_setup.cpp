@@ -283,26 +283,23 @@ void ModelSetupPage::build(Window * window)
     new StaticText(window, grid.getLabelSlot(true), STR_SWITCHWARNING);
     for (int i=0; i<NUM_SWITCHES; i++) {
       char s[3];
-      if (i > 0 && (i%3) == 0)
+      if (i > 0 && (i % 3) == 0)
         grid.nextLine();
 
-      switchWarn[i] = new TextButton(window, grid.getFieldSlot(3, i%3), getSwitchWarningString(s, i),
+      switchWarn[i] = new TextButton(window, grid.getFieldSlot(3, i % 3), getSwitchWarningString(s, i),
                                      [=]() -> uint8_t {
-                                         uint8_t newstate = ((g_model.switchWarningState >> (3*i)) & 0x07);
-                                         char s[3];
-                                         if(newstate == 1 && !IS_3POS(i))
+                                         uint8_t newstate = BF_GET(g_model.switchWarningState, 3*i, 3);
+                                         if (newstate == 1 && !IS_3POS(i))
                                            newstate = 3;
                                          else
                                            newstate = (newstate + 1) % 4;
                                          BF_SET(g_model.switchWarningState, newstate, 3*i, 3);
                                          SET_DIRTY();
+                                         char s[3];
                                          switchWarn[i]->setText(getSwitchWarningString(s, i));
-                                         if (newstate == 0)
-                                           return 0;
-                                         else
-                                           return 1;
+                                         return newstate > 0 ? 1 : 0;
                                      });
-      if((g_model.switchWarningState >> (3*i) & 0x07) > 0)
+      if (BF_GET(g_model.switchWarningState, 3*i, 3) > 0)
         switchWarn[i]->setState(1);
     }
     grid.nextLine();
@@ -313,9 +310,9 @@ void ModelSetupPage::build(Window * window)
     new StaticText(window, grid.getLabelSlot(), STR_BEEPCTR);
     for (int i=0; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS; i++) {
       char s[2];
-      if (i > 0 && (i % 4) == 0)
+      if (i > 0 && (i % 3) == 0)
         grid.nextLine();
-      new TextButton(window, grid.getFieldSlot(4, i % 4), getStringAtIndex(s, STR_RETA123, i),
+      new TextButton(window, grid.getFieldSlot(3, i % 3), getStringAtIndex(s, STR_RETA123, i),
                      [=]() -> uint8_t {
                        g_model.beepANACenter ^= ((BeepANACenter)1<<i);
                        SET_DIRTY();
@@ -443,7 +440,7 @@ void ModelSetupPage::updateExternalModuleWindow()
     new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_CHANNELRANGE);
 
     if (IS_MODULE_CROSSFIRE(EXTERNAL_MODULE)) { // CRSF has a fixed 16ch span
-      // FROM
+      // From
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1, 17, 1,
                      GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
                      [=](int32_t newValue) -> void {
@@ -451,7 +448,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                        SET_DIRTY();
                        updateExternalModuleWindow();
                      }, 0, STR_CH);
-      // TO
+      // To
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
                      0, 32, 1,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 16),
@@ -459,7 +456,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                      0, STR_CH);
     }
     else {
-      // FROM
+      // From
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1,
                      MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount, 1,
                      GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
@@ -468,7 +465,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                        SET_DIRTY();
                        updateExternalModuleWindow();
                      }, 0, STR_CH);
-      // TO
+      // To
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
                      g_model.moduleData[EXTERNAL_MODULE].channelsStart + 1,
                      g_model.moduleData[EXTERNAL_MODULE].channelsStart + MAX_CHANNELS(EXTERNAL_MODULE), 1,
@@ -482,18 +479,18 @@ void ModelSetupPage::updateExternalModuleWindow()
     }
     grid.nextLine();
 
-    // PPM MODULES
+    // PPM modules
     if (IS_MODULE_PPM(EXTERNAL_MODULE)) {
       SET_DEFAULT_PPM_FRAME_LENGTH(EXTERNAL_MODULE);
-      // PPM FRAME
+      // PPM frame
       new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_PPMFRAME);
-      // PPM FRAME LENGTH
+      // PPM frame length
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225, 5,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength * 5 + 225),
                      SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength, (newValue - 225) / 5),
                      PREC1, NULL, STR_MS);
 
-      // PPM FRAME DELAY
+      // PPM frame delay
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1), 100, 800, 50,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.delay * 50 + 300),
                      SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].ppm.delay, (newValue - 300) / 50),
@@ -546,7 +543,7 @@ void ModelSetupPage::updateExternalModuleWindow()
     }
     grid.nextLine();
 
-    // FAILSAFE
+    // Failsafe
     if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_R9M(EXTERNAL_MODULE)) {
       new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_FAILSAFE);
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
@@ -554,7 +551,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       grid.nextLine();
     }
 
-    // R9M POWER
+    // R9M Power
     if (IS_MODULE_R9M_FCC(EXTERNAL_MODULE)) {
       new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_MULTI_RFPOWER);
       new Choice(externalModuleWindow, grid.getFieldSlot(), STR_R9M_FCC_POWER_VALUES, 0, R9M_FCC_POWER_MAX,

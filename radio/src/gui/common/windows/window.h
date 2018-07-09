@@ -138,9 +138,11 @@ class Window {
 
     virtual void onFocusLost() { invalidate(); };
 
-    virtual bool onTouch(coord_t x, coord_t y);
+    virtual bool onTouchStart(coord_t x, coord_t y);
 
-    virtual bool onSlide(coord_t startX, coord_t startY, coord_t slideX, coord_t slideY);
+    virtual bool onTouchEnd(coord_t x, coord_t y);
+
+    virtual bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY);
 
     void adjustInnerHeight();
 

@@ -7,7 +7,7 @@ class NumberEdit : public Window {
 
     void paint(BitmapBuffer * dc);
 
-    bool onTouch(coord_t x, coord_t y);
+    bool onTouchEnd(coord_t x, coord_t y);
 
     int32_t vmin;
     int32_t vmax;

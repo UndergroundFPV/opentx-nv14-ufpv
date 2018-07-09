@@ -42,7 +42,7 @@ void CheckBox::paint(BitmapBuffer * dc)
   }
 }
 
-bool CheckBox::onTouch(coord_t x, coord_t y)
+bool CheckBox::onTouchEnd(coord_t x, coord_t y)
 {
   setValue(!getValue());
   setFocus();

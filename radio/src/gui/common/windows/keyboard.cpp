@@ -31,7 +31,7 @@ Keyboard::~Keyboard()
   keyboard = nullptr;
 }
 
-bool Keyboard::onTouch(coord_t x, coord_t y)
+bool Keyboard::onTouchEnd(coord_t x, coord_t y)
 {
   if (!field)
     return false;

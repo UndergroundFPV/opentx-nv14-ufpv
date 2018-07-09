@@ -48,7 +48,7 @@ class Button : public Window {
       this->state = state;
     }
 
-    bool onTouch(coord_t x, coord_t y);
+    bool onTouchEnd(coord_t x, coord_t y);
 
   protected:
     std::function<uint8_t(void)> onPress;

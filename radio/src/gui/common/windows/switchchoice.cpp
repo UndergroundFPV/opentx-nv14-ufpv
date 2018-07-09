@@ -33,7 +33,7 @@ void SwitchChoice::paint(BitmapBuffer * dc)
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
-bool SwitchChoice::onTouch(coord_t x, coord_t y)
+bool SwitchChoice::onTouchEnd(coord_t x, coord_t y)
 {
   int16_t value = getValue();
 

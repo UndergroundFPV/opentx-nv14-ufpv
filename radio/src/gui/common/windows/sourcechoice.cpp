@@ -33,7 +33,7 @@ void SourceChoice::paint(BitmapBuffer * dc)
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
-bool SourceChoice::onTouch(coord_t x, coord_t y)
+bool SourceChoice::onTouchEnd(coord_t x, coord_t y)
 {
   if (hasFocus()) {
     int16_t value = getValue();

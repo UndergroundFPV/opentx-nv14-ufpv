@@ -44,7 +44,7 @@ void Choice::paint(BitmapBuffer * dc)
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
-bool Choice::onTouch(coord_t x, coord_t y)
+bool Choice::onTouchEnd(coord_t x, coord_t y)
 {
   if (hasFocus()) {
     int16_t value = getValue() + 1;
