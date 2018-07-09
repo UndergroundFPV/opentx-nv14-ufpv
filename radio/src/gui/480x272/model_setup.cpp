@@ -280,67 +280,31 @@ void ModelSetupPage::build(Window * window)
     grid.nextLine();
 
     // Switches warning
-    // TODO this is just UI, actions need to be added
     new StaticText(window, grid.getLabelSlot(true), STR_SWITCHWARNING);
     for (int i=0; i<NUM_SWITCHES; i++) {
-      unsigned int state = ((g_model.switchWarningState >> (3*i)) & 0x07);
       char s[3];
-      s[0] = 'A' + i;
-      s[1] = "x\300-\301"[state];
-      s[2] = '\0';
-      if (i && !(i%3)) grid.nextLine();
-      switchWarn[i] = new TextButton(window, grid.getFieldSlot(3, i%3), s,
-                                          [&]() -> uint8_t {
-                                              return 1;
-                                          });
+      if (i && !(i%3))
+        grid.nextLine();
+
+      switchWarn[i] = new TextButton(window, grid.getFieldSlot(3, i%3), getSwitchWarningString(s, i, g_model.switchWarningState >> (3*i) & 0x07),
+                                     [=]() -> uint8_t {
+                                         unsigned int newstate = ((g_model.switchWarningState >> (3*i)) & 0x07);
+                                         char s[3];
+                                         if(newstate == 1 && !IS_3POS(i))
+                                           newstate = 3;
+                                         else
+                                           newstate = (newstate + 1) % 4;
+                                         switchWarn[i]->setText(getSwitchWarningString(s, i, newstate));
+                                         BF_SET(g_model.switchWarningState, newstate, 3*i, 3);
+                                         SET_DIRTY();
+                                         if (newstate)
+                                           return 1;
+                                         else
+                                           return 0;
+                                     });
     }
+
     grid.nextLine();
-    /*
-    drawText(window,MENUS_MARGIN_LEFT, STR_SWITCHWARNING);
-        if (!READ_ONLY() && attr && menuHorizontalPosition<0 && event==EVT_KEY_LONG(KEY_ENTER)) {
-          killEvents(event);
-          START_NO_HIGHLIGHT();
-          getMovedSwitch();
-          for (int i=0; i<NUM_SWITCHES; i++) {
-            bool enabled = ((g_model.switchWarningState >> (3*i)) & 0x07);
-            if (enabled) {
-              g_model.switchWarningState &= ~(0x07 << (3*i));
-              unsigned int newState = (switches_states >> (2*i) & 0x03) + 1;
-              g_model.switchWarningState |= (newState << (3*i));
-            }
-          }
-          AUDIO_WARNING1();
-          storageDirty(EE_MODEL);
-        }
-
-        if (attr && menuHorizontalPosition < 0) {
-          lcdDrawSolidFilledRect(MODEL_SETUP_2ND_COLUMN-INVERT_HORZ_MARGIN, y-INVERT_VERT_MARGIN+1, (NUM_SWITCHES-1)*25+INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
-        }
-
-        unsigned int newStates = 0;
-        for (int i=0, current=0; i<NUM_SWITCHES; i++) {
-          if (SWITCH_WARNING_ALLOWED(i)) {
-            unsigned int state = ((g_model.switchWarningState >> (3*i)) & 0x07);
-            LcdFlags color = (state > 0 ? TEXT_COLOR : TEXT_DISABLE_COLOR);
-            if (attr && menuHorizontalPosition < 0) {
-              color |= INVERS;
-            }
-            char s[3];
-            s[0] = 'A' + i;
-            s[1] = "x\300-\301"[state];
-            s[2] = '\0';
-            drawText(window,MODEL_SETUP_2ND_COLUMN+i*25, y, s, color|(menuHorizontalPosition==current ? attr : 0));
-            if (!READ_ONLY() && attr && menuHorizontalPosition==current) {
-              CHECK_INCDEC_MODELVAR_ZERO_CHECK(event, state, 3, IS_CONFIG_3POS(i) ? NULL : isSwitch2POSWarningStateAvailable);
-            }
-            newStates |= (state << (3*i));
-            ++current;
-          }
-        }
-        g_model.switchWarningState = newStates;
-        break;
-      }
-      */
   }
 
   // Center beeps

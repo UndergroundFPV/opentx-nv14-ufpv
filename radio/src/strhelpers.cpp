@@ -249,6 +249,17 @@ char * getFlightModeString(char * dest, int8_t idx)
   return dest;
 }
 
+char * getSwitchWarningString(char * dest, swsrc_t idx, unsigned int state)
+{
+  char * s = dest;
+
+  *s++ = 'A' + idx;
+  *s++ = "x\300-\301"[state];
+  *s = '\0';
+
+  return dest;
+}
+
 char * getSwitchString(char * dest, swsrc_t idx)
 {
   if (idx == SWSRC_NONE) {
