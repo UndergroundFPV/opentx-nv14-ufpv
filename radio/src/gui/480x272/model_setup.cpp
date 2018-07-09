@@ -298,9 +298,8 @@ void ModelSetupPage::build(Window * window)
                                          char s[3];
                                          switchWarn[i]->setText(getSwitchWarningString(s, i));
                                          return newstate > 0 ? 1 : 0;
-                                     });
-      if (BF_GET(g_model.switchWarningState, 3*i, 3) > 0)
-        switchWarn[i]->setState(1);
+                                     },
+                                     (BF_GET(g_model.switchWarningState, 3*i, 3) == 0 ? 0 : 1));
     }
     grid.nextLine();
   }
