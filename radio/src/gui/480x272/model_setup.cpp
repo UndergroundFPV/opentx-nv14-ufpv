@@ -297,10 +297,10 @@ void ModelSetupPage::build(Window * window)
                                          switchWarn[i]->setText(getSwitchWarningString(s, i, newstate));
                                          BF_SET(g_model.switchWarningState, newstate, 3*i, 3);
                                          SET_DIRTY();
-                                         if (newstate)
-                                           return 1;
-                                         else
+                                         if (newstate == 0)
                                            return 0;
+                                         else
+                                           return 1;
                                      });
     }
 
