@@ -249,9 +249,10 @@ char * getFlightModeString(char * dest, int8_t idx)
   return dest;
 }
 
-char * getSwitchWarningString(char * dest, swsrc_t idx, unsigned int state)
+char * getSwitchWarningString(char * dest, swsrc_t idx)
 {
   char * s = dest;
+  uint8_t state = g_model.switchWarningState >> (3*idx) & 0x07;
 
   *s++ = 'A' + idx;
   if(state == 0)

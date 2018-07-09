@@ -35,7 +35,7 @@ char * strAppendStringWithIndex(char * dest, const char * s, int idx);
 char * getTimerString(char * dest, int32_t tme, uint8_t hours=0);
 char * getCurveString(char * dest, int idx);
 char * getGVarString(char * dest, int idx);
-char * getSwitchWarningString(char * dest, swsrc_t idx, unsigned int state);
+char * getSwitchWarningString(char * dest, swsrc_t idx);
 char * getSwitchString(char * dest, swsrc_t idx);
 char * getFlightModeString(char * dest, int8_t idx);
 char * getSourceString(char * dest, mixsrc_t idx);

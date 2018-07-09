@@ -286,7 +286,7 @@ void ModelSetupPage::build(Window * window)
       if (i > 0 && (i%3) == 0)
         grid.nextLine();
 
-      switchWarn[i] = new TextButton(window, grid.getFieldSlot(3, i%3), getSwitchWarningString(s, i, g_model.switchWarningState >> (3*i) & 0x07),
+      switchWarn[i] = new TextButton(window, grid.getFieldSlot(3, i%3), getSwitchWarningString(s, i),
                                      [=]() -> uint8_t {
                                          uint8_t newstate = ((g_model.switchWarningState >> (3*i)) & 0x07);
                                          char s[3];
@@ -294,9 +294,9 @@ void ModelSetupPage::build(Window * window)
                                            newstate = 3;
                                          else
                                            newstate = (newstate + 1) % 4;
-                                         switchWarn[i]->setText(getSwitchWarningString(s, i, newstate));
                                          BF_SET(g_model.switchWarningState, newstate, 3*i, 3);
                                          SET_DIRTY();
+                                         switchWarn[i]->setText(getSwitchWarningString(s, i));
                                          if (newstate == 0)
                                            return 0;
                                          else
