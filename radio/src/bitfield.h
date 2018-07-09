@@ -25,9 +25,12 @@
 
 // A set of bitfield handling macros
 #define BF_BIT(n)                  ( 1<<(n) )
+#define BF_BIT_GET(y, mask)        ( y & (mask) )
 #define BF_BIT_SET(y, mask)        ( y |=  (mask) )
 #define BF_BIT_CLEAR(y, mask)      ( y &= ~(mask) )
 #define BF_BIT_FLIP(y, mask)       ( y ^=  (mask) )
+#define BF_SINGLE_BIT_GET(y, i)    BF_BIT_GET(y, BF_BIT(i))
+#define BF_SINGLE_BIT_SET(y, i)    BF_BIT_SET(y, BF_BIT(i))
 
 //! Create a bitmask of length 'len'.
 #define BF_BITMASK(len)           ( BF_BIT(len)-1 )

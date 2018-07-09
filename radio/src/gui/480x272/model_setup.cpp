@@ -312,13 +312,14 @@ void ModelSetupPage::build(Window * window)
       char s[2];
       if (i > 0 && (i % 3) == 0)
         grid.nextLine();
+
       new TextButton(window, grid.getFieldSlot(3, i % 3), getStringAtIndex(s, STR_RETA123, i),
                      [=]() -> uint8_t {
-                       g_model.beepANACenter ^= ((BeepANACenter)1<<i);
+                       BF_BIT_FLIP(g_model.beepANACenter, BF_BIT(i));
                        SET_DIRTY();
-                       return (g_model.beepANACenter & ((BeepANACenter)1<<i)) ? 1 : 0;
+                       return BF_SINGLE_BIT_GET(g_model.beepANACenter, i);
                      },
-                     (g_model.beepANACenter & ((BeepANACenter)1<<i)) ? 1 : 0);
+                     BF_SINGLE_BIT_GET(g_model.beepANACenter, i));
     }
     grid.nextLine();
   }
