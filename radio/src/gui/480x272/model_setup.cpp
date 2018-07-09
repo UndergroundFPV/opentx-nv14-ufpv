@@ -283,12 +283,12 @@ void ModelSetupPage::build(Window * window)
     new StaticText(window, grid.getLabelSlot(true), STR_SWITCHWARNING);
     for (int i=0; i<NUM_SWITCHES; i++) {
       char s[3];
-      if (i && !(i%3))
+      if (i > 0 && (i%3) == 0)
         grid.nextLine();
 
       switchWarn[i] = new TextButton(window, grid.getFieldSlot(3, i%3), getSwitchWarningString(s, i, g_model.switchWarningState >> (3*i) & 0x07),
                                      [=]() -> uint8_t {
-                                         unsigned int newstate = ((g_model.switchWarningState >> (3*i)) & 0x07);
+                                         uint8_t newstate = ((g_model.switchWarningState >> (3*i)) & 0x07);
                                          char s[3];
                                          if(newstate == 1 && !IS_3POS(i))
                                            newstate = 3;
@@ -302,8 +302,9 @@ void ModelSetupPage::build(Window * window)
                                          else
                                            return 1;
                                      });
+      if((g_model.switchWarningState >> (3*i) & 0x07) > 0)
+        switchWarn[i]->setState(1);
     }
-
     grid.nextLine();
   }
 

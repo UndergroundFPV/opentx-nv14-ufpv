@@ -592,7 +592,7 @@ if(NOT MSVC)
         DEPENDS ${SRC}
         )
     else()
-      set(ALLSRC ${SRC})
+      set(ALLSRC ${SRC} bitfield.h)
     endif()
     add_executable(firmware ${ALLSRC})
 

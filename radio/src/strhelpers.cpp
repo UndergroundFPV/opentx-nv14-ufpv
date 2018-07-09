@@ -254,9 +254,12 @@ char * getSwitchWarningString(char * dest, swsrc_t idx, unsigned int state)
   char * s = dest;
 
   *s++ = 'A' + idx;
-  *s++ = "x\300-\301"[state];
-  *s = '\0';
-
+  if(state == 0)
+    *s = '\0';
+  else {
+    *s++ = "x\300-\301"[state];
+    *s = '\0';
+  }
   return dest;
 }
 
