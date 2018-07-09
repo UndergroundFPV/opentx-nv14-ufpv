@@ -27,19 +27,19 @@
 #define BF_BIT_CLEAR(y, mask)      ( y &= ~(mask) )
 #define BF_BIT_FLIP(y, mask)       ( y ^=  (mask) )
 
-//! Create a bitmask of length \a len.
+//! Create a bitmask of length 'len'.
 #define BF_BITMASK(len)           ( BF_BIT(len)-1 )
 
-//! Create a bitfield mask of length \a starting at bit \a start.
+//! Create a bitfield mask of length 'len' starting at bit 'start'.
 #define BF_MASK(start, len)     ( BF_BITMASK(len)<<(start) )
 
 //! Prepare a bitmask for insertion or combining.
 #define BF_PREP(x, start, len)  ( ((x)&BF_BITMASK(len)) << (start) )
 
-//! Extract a bitfield of length \a len starting at bit \a start from \a y.
+//! Extract a bitfield of length 'len' starting at bit 'start' from  'y'.
 #define BF_GET(y, start, len)   ( ((y)>>(start)) & BF_BITMASK(len) )
 
-//! Insert a new bitfield value \a x into \a y.
+//! Insert 'len' bits of 'x 'into 'y', starting at bit 'start' from  'y'.
 #define BF_SET(y, x, start, len)    \
     ( y= ((y) &~ BF_MASK(start, len)) | BF_PREP(x, start, len) )
 
