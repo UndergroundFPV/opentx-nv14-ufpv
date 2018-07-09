@@ -6,6 +6,8 @@
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
+ * This file is based on work published at http://www.coranac.com/documents/working-with-bits-and-bitfields
+ *
  * License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html
  *
  * This program is free software; you can redistribute it and/or modify
