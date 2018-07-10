@@ -546,8 +546,22 @@ void ModelSetupPage::updateExternalModuleWindow()
     // Failsafe
     if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_R9M(EXTERNAL_MODULE)) {
       new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_FAILSAFE);
-      new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-                 GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode));
+      failSafeChoice = new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
+                 GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode),
+                 [=](int32_t newValue) -> void {
+                     g_model.moduleData[EXTERNAL_MODULE].failsafeMode = newValue;
+                     SET_DIRTY();
+                     updateExternalModuleWindow();
+                     failSafeChoice->setFocus();
+                 });
+      if(g_model.moduleData[EXTERNAL_MODULE].failsafeMode == FAILSAFE_CUSTOM)
+      {
+        new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_SET,
+                       [=]() -> uint8_t {
+                         // TODO launch the failsafe window
+                         return 1;
+                       });
+      }
       grid.nextLine();
     }
 
