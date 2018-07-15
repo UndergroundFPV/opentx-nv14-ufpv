@@ -84,7 +84,17 @@ unsigned short  calc_crc16(void *pBuffer,unsigned char BufferSize)
     return crc16;
 }
 
-int16_t hallADValue(uint8_t chan)
+int16_t getHallADValue(uint8_t chan)
+{
+  if (chan > FLYSKY_HALL_CHANNEL_COUNT - 1)
+  {
+    return 0;
+  }
+
+  return Channel.channel[chan];
+}
+
+int16_t hallValue(uint8_t chan)
 {
   if (chan > FLYSKY_HALL_CHANNEL_COUNT - 1)
   {
@@ -93,6 +103,7 @@ int16_t hallADValue(uint8_t chan)
 
   return HallChVal[chan];
 }
+
 
 void hall_stick_init(uint32_t baudrate)
 {
@@ -361,6 +372,8 @@ void ConvertChannel( void )
         }
 
         HallChVal[i] = HallChannel[i].servoValue;
+        extern void setFlySkyChannelData(int channel, int16_t steroValue);
+        setFlySkyChannelData(i, HallChannel[i].servoValue);
     }
 }
 

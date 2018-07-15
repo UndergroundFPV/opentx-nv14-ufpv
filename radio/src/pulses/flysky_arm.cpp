@@ -67,6 +67,7 @@ enum DEBUG_RF_FRAME_PRINT_E {
 #define DEBUG_RF_FRAME_PRINT            FRAME_PRINT_OFF
 #define FLYSKY_MODULE_TIMEOUT           55 /* ms */
 #define NUM_OF_NV14_CHANNELS            (4) // = FLYSKY_HALL_CHANNEL_COUNT
+#define VALID_CH_DATA(v)                ((v) > 900 && (v) < 2100)
 
 enum FlySkySensorType_E {
     FLYSKY_SENSOR_RX_VOLTAGE,
@@ -181,6 +182,7 @@ typedef struct RX_INFO_S {
     uint8_t   pulse;
     uint8_t   port;
     uint8_t   freq[2];
+    int16_t   stero_value[NUM_OF_NV14_CHANNELS];
     rx_ibus_t ibus;
     fw_info_t fw_info;
 } rx_info_t;
@@ -204,6 +206,7 @@ static rx_info_t rx_info = {
     .pulse            = FLYSKY_PWM,
     .port             = FLYSKY_IBUS,
     .freq             = {50,0},
+    .stero_value      = {1500,1500,1500,1500},
     .ibus             = {{0,0}, {0,0}},
     .fw_info          = {0}
 };
@@ -513,9 +516,24 @@ void setFlySkyChannelDataNormalMode(uint8_t port)
     rf_info.channel_data_type = FLYSKY_CHANNEL_DATA_NORMAL;
 }
 
-void setFlySkyChannelData(int channel, int16_t adcValue)
+void setFlySkyChannelOutputs(int channel, int16_t outValue)
 {
-    channelOutputs[channel] = adcValue;
+    channelOutputs[channel] = outValue;
+}
+
+static uint32_t set_loop_cnt = 0;
+void setFlySkyChannelData(int channel, int16_t steroValue)
+{
+    if(channel < NUM_OF_NV14_CHANNELS && VALID_CH_DATA(steroValue)) {
+        rx_info.stero_value[channel] = steroValue;
+    }
+
+    if((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY) && set_loop_cnt++ % 2000 ==0) {
+        for(int idx=0; idx < NUM_OF_NV14_CHANNELS; idx++) {
+            TRACE_NOCRLF("CH%0d:%0d; ", idx+1, rx_info.stero_value[idx]);
+        }
+        //TRACE_NOCRLF("CH%0d:%0d; ", channel+1, steroValue);
+    }
 }
 
 
@@ -763,7 +781,7 @@ void putFlySkySendChannelData(uint8_t port)
   uint8_t channels_count = rf_info.num_of_channel;
   putFlySkyFrameByte(port, channels_count);
   for (uint8_t channel=0; channel<channels_count; channel++) {
-    uint16_t value = anaIn(channel);// TBD: channelOutputs[channel] + 2 * PPM_CH_CENTER(channel) - 2 * PPM_CENTER;
+    uint16_t value = rx_info.stero_value[channel]; // anaIn(channel);// TBD: channelOutputs[channel] + 2 * PPM_CH_CENTER(channel) - 2 * PPM_CENTER;
     putFlySkyFrameByte(port, value & 0xff);
     putFlySkyFrameByte(port, value >> 8);
   }

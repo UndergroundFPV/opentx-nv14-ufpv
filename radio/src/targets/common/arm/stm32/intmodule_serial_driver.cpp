@@ -22,6 +22,7 @@
 #include "debug.h"
 
 Fifo<uint8_t, 64> intmoduleRxFifo;
+DMAFifo<512> intmoduleDMAFifo __DMA (INTMODULE_RX_DMA_STREAM);
 
 void intmoduleStop()
 {
@@ -59,6 +60,8 @@ void intmoduleNoneStart()
   NVIC_SetPriority(INTMODULE_TIMER_IRQn, 7);
 }
 
+//#define INTMODULE_RX_INT
+static uint8_t intmodule_hal_inited = 0;
 void intmodulePxxStart()
 {
   INTERNAL_MODULE_ON();
@@ -91,11 +94,42 @@ void intmodulePxxStart()
   USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
   USART_Init(INTMODULE_USART, &USART_InitStructure);
 
+#ifdef INTMODULE_RX_INT
   USART_Cmd(INTMODULE_USART, ENABLE);
   USART_ITConfig(INTMODULE_USART, USART_IT_RXNE, ENABLE);
   USART_ITConfig(INTMODULE_USART, USART_IT_TXE, DISABLE);
   NVIC_SetPriority(INTMODULE_USART_IRQn, 7);
   NVIC_EnableIRQ(INTMODULE_USART_IRQn);
+#else // RX by DMA
+  DMA_Cmd(INTMODULE_RX_DMA_STREAM, DISABLE);
+  USART_DMACmd(INTMODULE_USART, USART_DMAReq_Rx, DISABLE);
+  DMA_DeInit(INTMODULE_RX_DMA_STREAM);
+
+  DMA_InitTypeDef DMA_InitStructure;
+  intmoduleDMAFifo.clear();
+
+  DMA_InitStructure.DMA_Channel = INTMODULE_DMA_CHANNEL;
+  DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&INTMODULE_USART->DR);
+  DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(intmoduleDMAFifo.buffer());
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
+  DMA_InitStructure.DMA_BufferSize = intmoduleDMAFifo.size();
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
+  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+  DMA_Init(INTMODULE_RX_DMA_STREAM, &DMA_InitStructure);
+  USART_DMACmd(INTMODULE_USART, USART_DMAReq_Rx, ENABLE);
+  USART_ITConfig(INTMODULE_USART, USART_IT_RXNE, DISABLE);
+  USART_ITConfig(INTMODULE_USART, USART_IT_TXE, DISABLE);
+  USART_Cmd(INTMODULE_USART, ENABLE);
+  DMA_Cmd(INTMODULE_RX_DMA_STREAM, ENABLE); // TRACE("RF DMA receive started...");
+ #endif
 
   // Timer
   INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
@@ -112,6 +146,8 @@ void intmodulePxxStart()
 
   NVIC_SetPriority(INTMODULE_TIMER_IRQn, 7);
   NVIC_EnableIRQ(INTMODULE_TIMER_IRQn);
+
+  intmodule_hal_inited = 1;
 }
 
 extern "C" void INTMODULE_USART_IRQHandler(void)
@@ -140,7 +176,14 @@ extern "C" void INTMODULE_TX_DMA_Stream_IRQHandler(void)
 
 uint8_t intmoduleGetByte(uint8_t * byte)
 {
-  return intmoduleRxFifo.pop(*byte);
+    if (intmodule_hal_inited == 0) {
+        return 0; // incase of call before initialization
+    }
+#ifdef INTMODULE_RX_INT
+    return intmoduleRxFifo.pop(*byte);
+#else
+    return intmoduleDMAFifo.pop(*byte);
+#endif
 }
 
 void intmoduleSendNextFrame()
