@@ -394,24 +394,24 @@
 // External Module
 #define EXTMODULE
 #define EXTMODULE_PULSES
-#define EXTMODULE_PWR_GPIO
-#define EXTMODULE_PWR_GPIO_PIN
-#define EXTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_DMA2)
+#define EXTMODULE_PWR_GPIO              GPIOD
+#define EXTMODULE_PWR_GPIO_PIN          GPIO_Pin_11
+#define EXTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_DMA2)
 #define EXTMODULE_RCC_APB1Periph        0
-#define EXTMODULE_RCC_APB2Periph        RCC_APB2Periph_TIM1
+#define EXTMODULE_RCC_APB2Periph        RCC_APB2Periph_TIM8
 #define EXTMODULE_TX_GPIO               GPIOC
 #define EXTMODULE_TX_GPIO_PIN           GPIO_Pin_6 // PC.06
 #define EXTMODULE_TX_GPIO_PinSource     GPIO_PinSource6
-#define EXTMODULE_TX_GPIO_AF            GPIO_AF_TIM1
-#define EXTMODULE_TIMER                 TIM1
-#define EXTMODULE_TIMER_IRQn            TIM1_CC_IRQn
-#define EXTMODULE_TIMER_IRQHandler      TIM1_CC_IRQHandler
-#define EXTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
-#define EXTMODULE_DMA_CHANNEL           DMA_Channel_6
-#define EXTMODULE_DMA_STREAM            DMA2_Stream5
-#define EXTMODULE_DMA_IRQn              DMA2_Stream5_IRQn
-#define EXTMODULE_DMA_IRQHandler        DMA2_Stream5_IRQHandler
-#define EXTMODULE_DMA_FLAG_TC           DMA_IT_TCIF5
+#define EXTMODULE_TX_GPIO_AF            GPIO_AF_TIM8
+#define EXTMODULE_TIMER                 TIM8
+#define EXTMODULE_TIMER_IRQn            TIM8_CC_IRQn
+#define EXTMODULE_TIMER_IRQHandler      TIM8_CC_IRQHandler
+#define EXTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB1)
+#define EXTMODULE_DMA_CHANNEL           DMA_Channel_7
+#define EXTMODULE_DMA_STREAM            DMA2_Stream1
+#define EXTMODULE_DMA_IRQn              DMA2_Stream1_IRQn
+#define EXTMODULE_DMA_IRQHandler        DMA2_Stream1_IRQHandler
+#define EXTMODULE_DMA_FLAG_TC           DMA_IT_TCIF1
 #define EXTMODULE_USART                 USART6 // TODO
 
 // Heartbeat (not used)

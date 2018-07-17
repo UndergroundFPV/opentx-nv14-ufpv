@@ -124,7 +124,7 @@ void extmodulePpmStart()
 
 void extmodulePxxStart()
 {
-#if 0
+
   EXTERNAL_MODULE_ON();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, EXTMODULE_TX_GPIO_AF);
@@ -150,6 +150,17 @@ void extmodulePxxStart()
   EXTMODULE_TIMER->DIER |= TIM_DIER_UDE; // Enable DMA on update
   EXTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2;
   EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
+#elif defined(PCBNV14)
+{
+    EXTMODULE_TIMER->CCER = TIM_CCER_CC1E | TIM_CCER_CC1NE;
+    EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE; // Enable outputs
+    EXTMODULE_TIMER->CCR1 = 18;
+    EXTMODULE_TIMER->CCMR1 = TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_0; // Force O/P high
+    EXTMODULE_TIMER->EGR = 1; // Restart
+    EXTMODULE_TIMER->DIER |= TIM_DIER_UDE; // Enable DMA on update
+    EXTMODULE_TIMER->CCMR1 = TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2;
+    EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
+}
 #else
   EXTMODULE_TIMER->CCER = TIM_CCER_CC1E | TIM_CCER_CC1P | TIM_CCER_CC1NE | TIM_CCER_CC1NP; //  TIM_CCER_CC1E | TIM_CCER_CC1P;
   EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE; // Enable outputs
@@ -167,7 +178,6 @@ void extmodulePxxStart()
   NVIC_SetPriority(EXTMODULE_DMA_IRQn, 7);
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
-#endif
 }
 
 #if defined(DSM2)
@@ -252,7 +262,6 @@ void extmoduleCrossfireStart()
 
 void extmoduleSendNextFrame()
 {
-#if 0
   if (s_current_protocol[EXTERNAL_MODULE] == PROTO_PPM) {
 #if defined(PCBX10) || PCBREV >= 13
     EXTMODULE_TIMER->CCR3 = GET_PPM_DELAY(EXTERNAL_MODULE)*2;
@@ -276,6 +285,8 @@ void extmoduleSendNextFrame()
     EXTMODULE_TIMER->CCR2 = *(modulePulsesData[EXTERNAL_MODULE].pxx.ptr - 1) - 4000; // 2mS in advance
     EXTMODULE_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
 #if defined(PCBX10) || PCBREV >= 13
+    EXTMODULE_DMA_STREAM->CR |= EXTMODULE_DMA_CHANNEL | DMA_SxCR_DIR_0 | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0 | DMA_SxCR_MSIZE_0 | DMA_SxCR_PL_0 | DMA_SxCR_PL_1;
+#elif defined(PCBNV14)
     EXTMODULE_DMA_STREAM->CR |= EXTMODULE_DMA_CHANNEL | DMA_SxCR_DIR_0 | DMA_SxCR_MINC | DMA_SxCR_PSIZE_0 | DMA_SxCR_MSIZE_0 | DMA_SxCR_PL_0 | DMA_SxCR_PL_1;
 #else
     EXTMODULE_DMA_STREAM->CR |= EXTMODULE_DMA_CHANNEL | DMA_SxCR_DIR_0 | DMA_SxCR_MINC | DMA_SxCR_PSIZE_1 | DMA_SxCR_MSIZE_1 | DMA_SxCR_PL_0 | DMA_SxCR_PL_1;
@@ -305,10 +316,9 @@ void extmoduleSendNextFrame()
   else {
     EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;
   }
-#endif
 }
 
-#if 0
+
 extern "C" void EXTMODULE_DMA_IRQHandler()
 {
   if (!DMA_GetITStatus(EXTMODULE_DMA_STREAM, EXTMODULE_DMA_FLAG_TC))
@@ -316,15 +326,14 @@ extern "C" void EXTMODULE_DMA_IRQHandler()
 
   DMA_ClearITPendingBit(EXTMODULE_DMA_STREAM, EXTMODULE_DMA_FLAG_TC);
 
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF; // Clear flag
-  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE; // Enable this interrupt
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC1IF; // Clear flag
+  EXTMODULE_TIMER->DIER |= TIM_DIER_CC1IE; // Enable this interrupt
 }
 
 extern "C" void EXTMODULE_TIMER_IRQHandler()
 {
-  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE; // Stop this interrupt
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;
+  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC1IE; // Stop this interrupt
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC1IF;
   setupPulses(EXTERNAL_MODULE);
   extmoduleSendNextFrame();
 }
-#endif
