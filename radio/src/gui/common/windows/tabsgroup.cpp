@@ -60,6 +60,11 @@ void TabsGroupCarousel::paint(BitmapBuffer * dc)
   for (unsigned i=0; i<menu->tabs.size(); i++) {
     dc->drawBitmap(padding_left + i*TOPBAR_BUTTON_WIDTH, 0, theme->getIconBitmap(menu->tabs[i]->icon, currentPage == i));
   }
+  coord_t x = padding_left + TOPBAR_BUTTON_WIDTH * menu->tabs.size();
+  coord_t w = width() - x;
+  if (w > 0) {
+    dc->drawSolidFilledRect(x, 0, w, TOPBAR_BUTTON_WIDTH, HEADER_BGCOLOR);
+  }
 }
 
 bool TabsGroupCarousel::onTouchEnd(coord_t x, coord_t y)
@@ -89,11 +94,13 @@ void TabsGroup::addTab(PageTab * page)
 
 void TabsGroup::setCurrentTab(PageTab * tab)
 {
-  body.clear();
-  keyboard->disable();
-  currentTab = tab;
-  tab->build(&body);
-  header.setTitle(tab->title);
-  invalidate();
+  if (tab != currentTab) {
+    body.clear();
+    keyboard->disable();
+    currentTab = tab;
+    tab->build(&body);
+    header.setTitle(tab->title);
+    invalidate();
+  }
 }
 

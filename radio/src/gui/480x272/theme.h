@@ -83,7 +83,7 @@ class Theme
 
     virtual void drawMessageBox(const char * title, const char * text, const char * action, uint32_t flags) const;
 
-  protected:
+  public:
     const char * name;
     const ZoneOption * options;
     BitmapBuffer * thumb;

@@ -122,7 +122,7 @@ void Keyboard::setField(TextEdit * field)
   this->field = field;
   this->setHeight(270);
   Window * w = field->getParent();
-  w->setHeight(LCD_H - 270 - w->rect.y);
+  w->setHeight(LCD_H - 270 - w->top());
   invalidate();
 }
 
@@ -131,7 +131,7 @@ void Keyboard::disable()
   this->setHeight(0);
   if (field) {
     Window * w = field->getParent();
-    w->setHeight(LCD_H - 0 - w->rect.y);
+    w->setHeight(LCD_H - 0 - w->top());
     field = nullptr;
   }
 }

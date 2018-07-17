@@ -89,7 +89,9 @@ class TabsGroup: public Window {
 
     void setCurrentTab(unsigned index)
     {
-      setCurrentTab(tabs[index]);
+      if (index < tabs.size()) {
+        setCurrentTab(tabs[index]);
+      }
     }
 
   protected:

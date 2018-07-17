@@ -18,25 +18,29 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#ifndef _ALERT_H_
+#define _ALERT_H_
 
 #include "window.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "slider.h"
-#include "keyboard.h"
-#include "tabsgroup.h"
-#include "menu.h"
-#include "alert.h"
-#include "gridlayout.h"
-#include "helpers.h"
 
-#endif // _WINDOWS_H_
+class Alert : public Window {
+  public:
+    Alert(uint8_t type, const char * title, const char * message=nullptr, const char * action=nullptr);
+
+    virtual ~Alert();
+
+    virtual void paint(BitmapBuffer * dc) override;
+
+    virtual bool onTouchEnd(coord_t x, coord_t y) override {
+      deleteLater();
+      return true;
+    }
+
+  protected:
+    uint8_t type;
+    char * title;
+    char * message;
+    char * action;
+};
+
+#endif

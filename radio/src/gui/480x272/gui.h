@@ -80,6 +80,10 @@ class RadioMenu: public TabsGroup {
   public:
     RadioMenu();
 };
+class ModelselectMenu: public TabsGroup {
+  public:
+    ModelselectMenu();
+};
 class MainView: public Window {
   public:
     MainView();

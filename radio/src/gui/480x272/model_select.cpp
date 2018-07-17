@@ -514,3 +514,24 @@ bool menuModelSelect(event_t event)
 
   return true;
 }
+
+class ModelselectPage: public PageTab {
+  public:
+    ModelselectPage():
+      PageTab(STR_MODEL_SELECT, ICON_MODEL_SELECT)
+    {
+    }
+
+    virtual void build(Window * window) override;
+};
+
+void ModelselectPage::build(Window * window)
+{
+
+}
+
+ModelselectMenu::ModelselectMenu():
+  TabsGroup()
+{
+  addTab(new ModelselectPage());
+}

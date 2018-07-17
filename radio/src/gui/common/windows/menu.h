@@ -25,24 +25,27 @@
 #include <functional>
 #include "window.h"
 
-class Menu : public Window {
+class Menu;
+
+class MenuWindow: public Window {
   struct MenuLine {
     const char * text;
     std::function<void()> onPress;
   };
 
   public:
-    Menu():
-      Window(&mainWindow, {LCD_W/2 - 100, LCD_H/2, 200, 0})
+    MenuWindow(Menu * parent);
+
+    void clear()
     {
+      lines.clear();
+      updatePosition();
     }
 
     void addLine(const char * text, std::function<void()> onPress)
     {
       lines.push_back({text, onPress});
-      coord_t h = height() + lineHeight;
-      setTop((LCD_H - h) / 2);
-      setHeight(h);
+      updatePosition();
     }
 
     virtual void paint(BitmapBuffer * dc) override;
@@ -52,6 +55,32 @@ class Menu : public Window {
   protected:
     std::vector<MenuLine> lines;
     static constexpr uint8_t lineHeight = 30;
+    void updatePosition();
 };
+
+class Menu : public Window {
+  public:
+    Menu() :
+      Window(&mainWindow, {0, 0, LCD_W, LCD_H}),
+      menuWindow(this)
+    {
+    }
+
+    void clear()
+    {
+      menuWindow.clear();
+    }
+
+    void addLine(const char * text, std::function<void()> onPress)
+    {
+      menuWindow.addLine(text, onPress);
+    }
+
+    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+
+  protected:
+    MenuWindow menuWindow;
+};
+
 
 #endif

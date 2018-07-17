@@ -93,33 +93,8 @@ void drawTrims(uint8_t flightMode)
 
 void onMainViewMenu(const char *result)
 {
-  if (result == STR_MODEL_SELECT) {
-    chainMenu(menuModelSelect);
-  }
-  else if (result == STR_RESET_TIMER1) {
-    timerReset(0);
-  }
-  else if (result == STR_RESET_TIMER2) {
-    timerReset(1);
-  }
-  else if (result == STR_RESET_TIMER3) {
-    timerReset(2);
-  }
-  else if (result == STR_VIEW_NOTES) {
+  if (result == STR_VIEW_NOTES) {
     pushModelNotes();
-  }
-  else if (result == STR_RESET_SUBMENU) {
-    POPUP_MENU_ADD_ITEM(STR_RESET_FLIGHT);
-    POPUP_MENU_ADD_ITEM(STR_RESET_TIMER1);
-    POPUP_MENU_ADD_ITEM(STR_RESET_TIMER2);
-    POPUP_MENU_ADD_ITEM(STR_RESET_TIMER3);
-    POPUP_MENU_ADD_ITEM(STR_RESET_TELEMETRY);
-  }
-  else if (result == STR_RESET_TELEMETRY) {
-    telemetryReset();
-  }
-  else if (result == STR_RESET_FLIGHT) {
-    flightReset();
   }
   else if (result == STR_STATISTICS) {
     pushMenu(menuTabStats[0]);
@@ -172,15 +147,14 @@ MainView::MainView():
 
 bool MainView::onTouchEnd(coord_t x, coord_t y)
 {
-  bool result = Window::onTouchEnd(x, y);
-  if (result)
+  if (Window::onTouchEnd(x, y))
     return true;
 
   if (x < 60 && y < 60) {
     Menu * menu = new Menu();
     menu->addLine(STR_MODEL_SELECT, [=]() -> void {
-      menu->deleteLater();
-      // new ModelSelectMenu();
+      mainWindow.clear();
+      new ModelselectMenu();
     });
     if (modelHasNotes()) {
       menu->addLine(STR_VIEW_NOTES, [=]() -> void {
@@ -193,8 +167,27 @@ bool MainView::onTouchEnd(coord_t x, coord_t y)
       // TODO
     });
     menu->addLine(STR_RESET_SUBMENU, [=]() -> void {
-      menu->deleteLater();
-      // TODO
+      menu->clear();
+      menu->addLine(STR_RESET_FLIGHT, [=]() -> void {
+        flightReset();
+        menu->deleteLater();
+      });
+      menu->addLine(STR_RESET_TIMER1, [=]() -> void {
+        timerReset(0);
+        menu->deleteLater();
+      });
+      menu->addLine(STR_RESET_TIMER2, [=]() -> void {
+        timerReset(1);
+        menu->deleteLater();
+      });
+      menu->addLine(STR_RESET_TIMER3, [=]() -> void {
+        timerReset(2);
+        menu->deleteLater();
+      });
+      menu->addLine(STR_RESET_TELEMETRY, [=]() -> void {
+        telemetryReset();
+        menu->deleteLater();
+      });
     });
     menu->addLine(STR_STATISTICS, [=]() -> void {
       menu->deleteLater();

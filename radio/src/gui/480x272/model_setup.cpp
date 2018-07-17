@@ -393,8 +393,9 @@ void ModelSetupPage::updateInternalModuleWindow()
   }
 
   coord_t delta = internalModuleWindow->adjustHeight();
-  internalModuleWindow->parent->moveWindowsTop(internalModuleWindow->rect.y, delta);
-  internalModuleWindow->parent->innerHeight += delta;
+  Window * parent = internalModuleWindow->getParent();
+  parent->moveWindowsTop(internalModuleWindow->top(), delta);
+  parent->innerHeight += delta;
 }
 
 void ModelSetupPage::updateExternalModuleWindow()
@@ -580,8 +581,9 @@ void ModelSetupPage::updateExternalModuleWindow()
   }
 
   coord_t delta = externalModuleWindow->adjustHeight();
-  externalModuleWindow->parent->moveWindowsTop(externalModuleWindow->rect.y, delta);
-  externalModuleWindow->parent->innerHeight += delta;
+  Window * parent = externalModuleWindow->getParent();
+  parent->moveWindowsTop(externalModuleWindow->top(), delta);
+  parent->innerHeight += delta;
 }
 
   // Switch to external antenna confirmation

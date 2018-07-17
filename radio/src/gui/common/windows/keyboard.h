@@ -27,6 +27,8 @@
 class TextEdit;
 
 class Keyboard : public Window {
+  friend class TextEdit;
+
   public:
     Keyboard(Window * parent);
 

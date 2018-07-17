@@ -26,7 +26,11 @@
 
 uint8_t zlen(const char *str, uint8_t size);
 
+class Keyboard;
+
 class TextEdit : public Window {
+  friend class Keyboard;
+
   public:
     TextEdit(Window * parent, const rect_t &rect, char * value, uint8_t length, LcdFlags flags = 0) :
       Window(parent, rect),

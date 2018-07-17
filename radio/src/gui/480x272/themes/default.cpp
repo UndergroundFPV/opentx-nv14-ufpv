@@ -110,6 +110,7 @@ class DefaultTheme: public Theme
       loadMenuIcon(ICON_OPENTX, "mask_opentx.png");
 #endif
 
+      loadMenuIcon(ICON_NEXT, "mask_next.png");
       loadMenuIcon(ICON_BACK, "mask_back.png");
       loadMenuIcon(ICON_RADIO, "mask_menu_radio.png");
       loadMenuIcon(ICON_RADIO_SETUP, "mask_radio_setup.png");
@@ -119,6 +120,7 @@ class DefaultTheme: public Theme
       loadMenuIcon(ICON_RADIO_HARDWARE, "mask_radio_hardware.png");
       loadMenuIcon(ICON_RADIO_CALIBRATION, "mask_radio_calibration.png");
       loadMenuIcon(ICON_RADIO_VERSION, "mask_radio_version.png");
+      loadMenuIcon(ICON_MODEL_SELECT, "mask_modelselect.png");
       loadMenuIcon(ICON_MODEL, "mask_menu_model.png");
       loadMenuIcon(ICON_MODEL_SETUP, "mask_model_setup.png");
       loadMenuIcon(ICON_MODEL_HELI, "mask_model_heli.png");

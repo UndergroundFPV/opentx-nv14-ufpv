@@ -14,4 +14,5 @@ set(SRC
     ${WINDOWS_DIRECTORY}/switchchoice.cpp
     ${WINDOWS_DIRECTORY}/slider.cpp
     ${WINDOWS_DIRECTORY}/menu.cpp
+    ${WINDOWS_DIRECTORY}/alert.cpp
     )

@@ -25,6 +25,49 @@ Window * Window::focusWindow = nullptr;
 std::list<Window *> Window::trash;
 MainWindow mainWindow;
 
+Window::Window(Window * parent, const rect_t & rect):
+  parent(parent),
+  rect(rect),
+  innerWidth(rect.w),
+  innerHeight(rect.h)
+{
+  if (parent) {
+    parent->addChild(this);
+    invalidate();
+  }
+}
+
+Window::~Window()
+{
+  if (focusWindow == this) {
+    focusWindow = nullptr;
+  }
+}
+
+void Window::deleteChildren()
+{
+  for (auto window: children) {
+    delete window;
+  }
+  children.clear();
+}
+
+void Window::detach()
+{
+  if (parent) {
+    parent->removeChild(this);
+    parent = nullptr;
+  }
+}
+
+void Window::deleteLater(bool detach)
+{
+  if (detach) {
+    this->detach();
+  }
+  trash.push_back(this);
+}
+
 void Window::clear()
 {
   scrollPositionX = 0;
@@ -63,7 +106,8 @@ void Window::paintChildren(BitmapBuffer * dc)
 
 bool Window::onTouchStart(coord_t x, coord_t y)
 {
-  for (auto child: children) {
+  for (auto it = children.rbegin(); it != children.rend(); ++it) {
+    auto child = *it;
     if (pointInRect(x, y, child->rect)) {
       if (child->onTouchStart(x - child->rect.x - child->scrollPositionX, y - child->rect.y - child->scrollPositionY)) {
         return true;
@@ -76,7 +120,8 @@ bool Window::onTouchStart(coord_t x, coord_t y)
 
 bool Window::onTouchEnd(coord_t x, coord_t y)
 {
-  for (auto child: children) {
+  for (auto it = children.rbegin(); it != children.rend(); ++it) {
+    auto child = *it;
     if (pointInRect(x, y, child->rect)) {
       if (child->onTouchEnd(x - child->rect.x - child->scrollPositionX, y - child->rect.y - child->scrollPositionY)) {
         return true;
@@ -89,7 +134,8 @@ bool Window::onTouchEnd(coord_t x, coord_t y)
 
 bool Window::onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY)
 {
-  for (auto child: children) {
+  for (auto it = children.rbegin(); it != children.rend(); ++it) {
+    auto child = *it;
     if (pointInRect(startX, startY, child->rect)) {
       if (child->onTouchSlide(x - child->rect.x, y - child->rect.y, startX - child->rect.x, startY - child->rect.y, slideX, slideY)) {
         return true;
@@ -145,7 +191,9 @@ void Window::moveWindowsTop(coord_t y, coord_t delta)
 
 void Window::invalidate(const rect_t & rect)
 {
-  parent->invalidate({this->rect.x + rect.x + parent->scrollPositionX, this->rect.y + rect.y + parent->scrollPositionY, rect.w, rect.h});
+  if (parent) {
+    parent->invalidate({this->rect.x + rect.x + parent->scrollPositionX, this->rect.y + rect.y + parent->scrollPositionY, rect.w, rect.h});
+  }
 }
 
 void Window::drawVerticalScrollbar(BitmapBuffer * dc)

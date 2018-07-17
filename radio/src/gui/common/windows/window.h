@@ -27,39 +27,18 @@
 #include "debug.h"
 
 class Window {
+  friend class GridLayout;
+
   public:
-    Window(Window * parent, const rect_t & rect):
-      parent(parent),
-      rect(rect),
-      innerWidth(rect.w),
-      innerHeight(rect.h)
-    {
-      if (parent) {
-        parent->addChild(this);
-        invalidate();
-      }
-    }
+    Window(Window * parent, const rect_t & rect);
 
-    virtual ~Window()
-    {
-      if (focusWindow == this) {
-        focusWindow = nullptr;
-      }
-    }
+    virtual ~Window();
 
-    Window * getParent() const
-    {
+    Window * getParent() const {
       return parent;
     }
 
-    void deleteLater(bool detach=true)
-    {
-      if (detach && parent) {
-        parent->removeChild(this);
-        parent = nullptr;
-      }
-      trash.push_back(this);
-    }
+    void deleteLater(bool detach=true);
 
     void clear();
 
@@ -99,6 +78,11 @@ class Window {
     {
       rect.y = y;
       invalidate();
+    }
+
+    coord_t top()
+    {
+      return rect.y;
     }
 
     coord_t width() const
@@ -150,6 +134,19 @@ class Window {
 
     void moveWindowsTop(coord_t y, coord_t delta);
 
+    coord_t innerWidth, innerHeight; // TODO protected later
+  protected:
+    Window * parent;
+    std::list<Window *> children;
+    rect_t rect;
+
+    coord_t scrollPositionX = 0;
+    coord_t scrollPositionY = 0;
+    static Window * focusWindow;
+    static std::list<Window *> trash;
+    void detach();
+
+    void deleteChildren();
     void addChild(Window * window)
     {
       children.push_back(window);
@@ -167,16 +164,6 @@ class Window {
     {
       invalidate({0, 0, rect.w, rect.h});
     }
-
-  public: // TODO protected later ...
-    Window * parent;
-    std::list<Window *> children;
-    rect_t rect;
-    coord_t innerWidth, innerHeight;
-    coord_t scrollPositionX = 0;
-    coord_t scrollPositionY = 0;
-    static Window * focusWindow;
-    static std::list<Window *> trash;
 };
 
 class MainWindow: public Window {
