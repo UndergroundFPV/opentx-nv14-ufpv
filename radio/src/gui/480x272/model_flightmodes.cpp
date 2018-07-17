@@ -24,7 +24,7 @@
 #define SET_DIRTY()     storageDirty(EE_MODEL)
 
 ModelFlightModesPage::ModelFlightModesPage():
-  MenuPage(STR_MENUFLIGHTMODES, ICON_MODEL_FLIGHT_MODES)
+  PageTab(STR_MENUFLIGHTMODES, ICON_MODEL_FLIGHT_MODES)
 {
 }
 

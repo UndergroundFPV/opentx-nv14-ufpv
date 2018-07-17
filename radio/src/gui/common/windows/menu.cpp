@@ -20,80 +20,19 @@
 
 #include "opentx.h"
 
-Keyboard * keyboard = nullptr;
-
-MenuHeaderWindow::MenuHeaderWindow(Menu * menu):
-  Window(menu, { 0, 0, LCD_W, MENU_BODY_TOP }),
-  back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
-       [&]() -> uint8_t {
-         mainWindow.clear();
-         new MainView();
-         return 1;
-       }, 1),
-  carousel(this, menu)
+bool Menu::onTouchEnd(coord_t x, coord_t y)
 {
-}
-
-void MenuHeaderWindow::paint(BitmapBuffer * dc)
-{
-  dc->drawSolidFilledRect(0, MENU_HEADER_HEIGHT, LCD_W, MENU_TITLE_TOP - MENU_HEADER_HEIGHT, TEXT_BGCOLOR); // the white separation line
-  dc->drawSolidFilledRect(0, MENU_TITLE_TOP, LCD_W, MENU_TITLE_HEIGHT, TITLE_BGCOLOR); // the title line background
-  if (title) {
-    lcdDrawText(MENUS_MARGIN_LEFT, MENU_TITLE_TOP, title, MENU_TITLE_COLOR);
-  }
-}
-
-MenuPagesCarousel::MenuPagesCarousel(Window * parent, Menu * menu):
-  Window(parent, { TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, MENU_HEADER_HEIGHT }),
-  menu(menu)
-{
-}
-
-void MenuPagesCarousel::updateInnerWidth()
-{
-  setInnerWidth(padding_left + TOPBAR_BUTTON_WIDTH * menu->pages.size());
-}
-
-void MenuPagesCarousel::paint(BitmapBuffer * dc)
-{
-  dc->drawSolidFilledRect(0, 0, padding_left, TOPBAR_BUTTON_WIDTH, HEADER_BGCOLOR);
-  for (unsigned i=0; i<menu->pages.size(); i++) {
-    dc->drawBitmap(padding_left + i*TOPBAR_BUTTON_WIDTH, 0, theme->getIconBitmap(menu->pages[i]->icon, currentPage == i));
-  }
-}
-
-bool MenuPagesCarousel::onTouchEnd(coord_t x, coord_t y)
-{
-  unsigned index = (x - padding_left) / TOPBAR_BUTTON_WIDTH;
-  menu->setCurrentPage(index);
-  currentPage = index;
+  int index = y / lineHeight;
+  lines[index].onPress();
   return true;
 }
 
-Menu::Menu():
-  Window(&mainWindow, { 0, 0, LCD_W, LCD_H }),
-  header(this),
-  body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
+void Menu::paint(BitmapBuffer * dc)
 {
-  keyboard = new Keyboard(&mainWindow);
-}
-
-void Menu::addPage(MenuPage * page)
-{
-  pages.push_back(page);
-  if (!currentPage) {
-    setCurrentPage(page);
+  dc->clear(HEADER_BGCOLOR);
+  for (unsigned i=0; i<lines.size(); i++) {
+    dc->drawText(10, i * lineHeight + 5, lines[i].text, MENU_TITLE_COLOR);
+    if (i > 0)
+      dc->drawSolidHorizontalLine(0, i * lineHeight, 200, CURVE_AXIS_COLOR);
   }
-  header.carousel.updateInnerWidth();
 }
-
-void Menu::setCurrentPage(MenuPage * page)
-{
-  body.clear();
-  keyboard->disable();
-  currentPage = page;
-  page->build(&body);
-  header.setTitle(page->title);
-  invalidate();
-}
-

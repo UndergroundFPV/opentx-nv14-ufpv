@@ -22,9 +22,9 @@
 #include "radio_setup.h"
 
 RadioMenu::RadioMenu():
-  Menu()
+  TabsGroup()
 {
-  addPage(new RadioSetupPage());
+  addTab(new RadioSetupPage());
 }
 
 const MenuHandlerFunc menuTabGeneral[] = {

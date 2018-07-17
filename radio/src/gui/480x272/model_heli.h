@@ -1,6 +1,6 @@
 #include "gui/common/windows/windows.h"
 
-class ModelHeliPage: public MenuPage {
+class ModelHeliPage: public PageTab {
   public:
     ModelHeliPage();
 

@@ -52,23 +52,16 @@ class Window {
       return parent;
     }
 
-    void deleteLater()
+    void deleteLater(bool detach=true)
     {
+      if (detach && parent) {
+        parent->removeChild(this);
+        parent = nullptr;
+      }
       trash.push_back(this);
     }
 
-    void clear()
-    {
-      scrollPositionX = 0;
-      scrollPositionY = 0;
-      innerWidth = rect.w;
-      innerHeight = rect.h;
-      for (auto window: children) {
-        window->deleteLater();
-      }
-      children.clear();
-      invalidate();
-    }
+    void clear();
 
     bool hasFocus() const
     {
@@ -87,6 +80,7 @@ class Window {
     {
       clearFocus();
       focusWindow = this;
+      invalidate();
     }
 
     void setWidth(coord_t w)
@@ -98,6 +92,12 @@ class Window {
     void setHeight(coord_t h)
     {
       rect.h = h;
+      invalidate();
+    }
+
+    void setTop(coord_t y)
+    {
+      rect.y = y;
       invalidate();
     }
 
@@ -153,6 +153,12 @@ class Window {
     void addChild(Window * window)
     {
       children.push_back(window);
+    }
+
+    void removeChild(Window * window)
+    {
+      children.remove(window);
+      invalidate();
     }
 
     virtual void invalidate(const rect_t & rect);

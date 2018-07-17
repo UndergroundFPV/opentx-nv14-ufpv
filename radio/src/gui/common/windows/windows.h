@@ -33,6 +33,7 @@
 #include "textedit.h"
 #include "slider.h"
 #include "keyboard.h"
+#include "tabsgroup.h"
 #include "menu.h"
 #include "gridlayout.h"
 #include "helpers.h"

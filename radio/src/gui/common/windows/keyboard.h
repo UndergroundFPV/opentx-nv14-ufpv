@@ -59,6 +59,6 @@ class Keyboard : public Window {
     BitmapBuffer * keyboardBitmap = nullptr;
 };
 
-extern Keyboard * keyboard; // is created in Menu constructor
+extern Keyboard * keyboard; // is created in TabsGroup constructor
 
 #endif

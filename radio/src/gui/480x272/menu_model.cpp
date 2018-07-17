@@ -24,18 +24,18 @@
 #include "model_flightmodes.h"
 
 ModelMenu::ModelMenu():
-  Menu()
+  TabsGroup()
 {
-  addPage(new ModelSetupPage());
+  addTab(new ModelSetupPage());
 #if defined(HELI)
-  addPage(new ModelHeliPage());
+  addTab(new ModelHeliPage());
 #endif
-  addPage(new ModelFlightModesPage());
-  addPage(new ModelSetupPage());
-  addPage(new ModelSetupPage());
-  addPage(new ModelSetupPage());
-  addPage(new ModelSetupPage());
-  addPage(new ModelSetupPage());
+  addTab(new ModelFlightModesPage());
+  addTab(new ModelSetupPage());
+  addTab(new ModelSetupPage());
+  addTab(new ModelSetupPage());
+  addTab(new ModelSetupPage());
+  addTab(new ModelSetupPage());
 }
 
 const MenuHandlerFunc menuTabModel[] = {

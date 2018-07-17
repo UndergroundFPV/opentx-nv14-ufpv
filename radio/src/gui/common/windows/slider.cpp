@@ -36,38 +36,35 @@ void Slider::paint(BitmapBuffer * dc)
     dc->drawBitmapPattern(w, 5, LBM_SLIDER_POINT_IN, TEXT_INVERTED_BGCOLOR);
 }
 
-int Slider::tick(coord_t x) const
+int Slider::value(coord_t x) const
 {
-  return ((vmax - vmin) * x + (rect.w / 2)) / rect.w;
+  return vmin + ((vmax - vmin) * x + (rect.w / 2)) / rect.w;
 }
 
 bool Slider::onTouchStart(coord_t x, coord_t y)
 {
-  TRACE("Slider::onTouchStart");
-  if (!hasFocus() && vmin + tick(x) == getValue()) {
+  if (!hasFocus()) {
     setFocus();
-    invalidate();
-    return true;
   }
+  sliding = (value(x) == getValue());
+  return true;
 }
 
 bool Slider::onTouchEnd(coord_t x, coord_t y)
 {
-  if (hasFocus()) {
-    setValue(vmin + tick(x));
-    invalidate();
-  }
+  setValue(value(x));
+  invalidate();
   return true;
 }
 
 bool Slider::onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY)
 {
-  if (hasFocus()) {
-    int newValue = vmin + tick(x);
+  if (hasFocus() && sliding) {
+    int newValue = value(x);
     if (getValue() != newValue) {
       setValue(newValue);
       invalidate();
     }
-    return true;
   }
+  return true;
 }

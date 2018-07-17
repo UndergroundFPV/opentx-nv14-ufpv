@@ -1,6 +1,6 @@
 #include "gui/common/windows/windows.h"
 
-class RadioTrainerPage: public MenuPage {
+class RadioTrainerPage: public PageTab {
   public:
     RadioTrainerPage();
 

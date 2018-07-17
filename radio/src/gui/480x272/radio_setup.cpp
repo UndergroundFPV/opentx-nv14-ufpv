@@ -26,7 +26,7 @@
 #define SET_DIRTY()     storageDirty(EE_GENERAL)
 
 RadioSetupPage::RadioSetupPage():
-  MenuPage(STR_MENURADIOSETUP, ICON_RADIO_SETUP)
+  PageTab(STR_MENURADIOSETUP, ICON_RADIO_SETUP)
 {
 }
 

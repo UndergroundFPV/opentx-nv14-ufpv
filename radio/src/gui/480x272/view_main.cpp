@@ -149,25 +149,65 @@ MainView::MainView():
   Window(&mainWindow, { 0, 0, LCD_W, LCD_H })
 {
   new FabIconButton(this, 50, 100, ICON_MODEL,
-                    [&]() -> uint8_t {
+                    [=]() -> uint8_t {
                       mainWindow.clear();
                       new ModelMenu();
                       return 0;
                     });
 
   new FabIconButton(this, LCD_W/2, 100, ICON_RADIO,
-                    [&]() -> uint8_t {
+                    [=]() -> uint8_t {
                       mainWindow.clear();
                       new RadioMenu();
                       return 0;
                     });
 
   new FabIconButton(this, LCD_W-50, 100, ICON_THEME,
-                    [&]() -> uint8_t {
+                    [=]() -> uint8_t {
                       // mainWindow.clear();
                       // new ModelMenu();
                       return 0;
                     });
+}
+
+bool MainView::onTouchEnd(coord_t x, coord_t y)
+{
+  bool result = Window::onTouchEnd(x, y);
+  if (result)
+    return true;
+
+  if (x < 60 && y < 60) {
+    Menu * menu = new Menu();
+    menu->addLine(STR_MODEL_SELECT, [=]() -> void {
+      menu->deleteLater();
+      // new ModelSelectMenu();
+    });
+    if (modelHasNotes()) {
+      menu->addLine(STR_VIEW_NOTES, [=]() -> void {
+        menu->deleteLater();
+        // TODO
+      });
+    }
+    menu->addLine(STR_MONITOR_SCREENS, [=]() -> void {
+      menu->deleteLater();
+      // TODO
+    });
+    menu->addLine(STR_RESET_SUBMENU, [=]() -> void {
+      menu->deleteLater();
+      // TODO
+    });
+    menu->addLine(STR_STATISTICS, [=]() -> void {
+      menu->deleteLater();
+      // TODO
+    });
+    menu->addLine(STR_ABOUT_US, [=]() -> void {
+      menu->deleteLater();
+      // TODO
+    });
+    return true;
+  }
+
+  return false;
 }
 
 void MainView::paint(BitmapBuffer * dc)

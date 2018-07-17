@@ -24,7 +24,7 @@
 #define SET_DIRTY()     storageDirty(EE_MODEL)
 
 ModelHeliPage::ModelHeliPage():
-  MenuPage(STR_MENUHELISETUP, ICON_MODEL_HELI)
+  PageTab(STR_MENUHELISETUP, ICON_MODEL_HELI)
 {
 }
 

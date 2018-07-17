@@ -1,6 +1,6 @@
 #include "gui/common/windows/windows.h"
 
-class ModelSetupPage: public MenuPage {
+class ModelSetupPage: public PageTab {
   public:
     ModelSetupPage();
 

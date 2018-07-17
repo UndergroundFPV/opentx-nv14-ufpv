@@ -72,18 +72,19 @@
 
 #if defined(PCBNV14)
 #include "common/windows/windows.h"
-class ModelMenu: public Menu {
+class ModelMenu: public TabsGroup {
   public:
     ModelMenu();
 };
-class RadioMenu: public Menu {
+class RadioMenu: public TabsGroup {
   public:
     RadioMenu();
 };
 class MainView: public Window {
   public:
     MainView();
-    void paint(BitmapBuffer * dc) override;
+    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    virtual void paint(BitmapBuffer * dc) override;
 };
 #endif
 

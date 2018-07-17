@@ -25,6 +25,19 @@ Window * Window::focusWindow = nullptr;
 std::list<Window *> Window::trash;
 MainWindow mainWindow;
 
+void Window::clear()
+{
+  scrollPositionX = 0;
+  scrollPositionY = 0;
+  innerWidth = rect.w;
+  innerHeight = rect.h;
+  for (auto window: children) {
+    window->deleteLater(false);
+  }
+  children.clear();
+  invalidate();
+}
+
 void Window::fullPaint(BitmapBuffer * dc)
 {
   paint(dc);

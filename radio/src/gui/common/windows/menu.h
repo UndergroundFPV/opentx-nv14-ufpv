@@ -22,81 +22,36 @@
 #define _MENU_H_
 
 #include <vector>
+#include <functional>
 #include "window.h"
 
-class Menu;
+class Menu : public Window {
+  struct MenuLine {
+    const char * text;
+    std::function<void()> onPress;
+  };
 
-extern Keyboard * keyboard;
-
-class MenuPage {
   public:
-    MenuPage(const char * title, unsigned icon):
-      title(title),
-      icon(icon)
+    Menu():
+      Window(&mainWindow, {LCD_W/2 - 100, LCD_H/2, 200, 0})
     {
     }
 
-    virtual void build(Window * window) = 0;
-
-    const char * title;
-    unsigned icon;
-};
-
-class MenuPagesCarousel: public Window {
-  public:
-    MenuPagesCarousel(Window * parent, Menu * menu);
-
-    void updateInnerWidth();
-
-    void paint(BitmapBuffer * dc);
-
-    bool onTouchEnd(coord_t x, coord_t y);
-
-  protected:
-    constexpr static uint8_t padding_left = 3;
-    Menu * menu;
-    uint8_t currentPage = 0;
-};
-
-class MenuHeaderWindow: public Window {
-    friend class Menu;
-
-  public:
-    MenuHeaderWindow(Menu * menu);
-
-    void paint(BitmapBuffer * dc);
-
-    void setTitle(const char * title)
+    void addLine(const char * text, std::function<void()> onPress)
     {
-      this->title = title;
+      lines.push_back({text, onPress});
+      coord_t h = height() + lineHeight;
+      setTop((LCD_H - h) / 2);
+      setHeight(h);
     }
 
-  protected:
-    IconButton back;
-    MenuPagesCarousel carousel;
-    const char * title = nullptr;
-};
+    virtual void paint(BitmapBuffer * dc) override;
 
-class Menu: public Window {
-    friend class MenuPagesCarousel;
-
-  public:
-    Menu();
-
-    void addPage(MenuPage * page);
-
-    void setCurrentPage(MenuPage * page);
-
-    void setCurrentPage(unsigned index)
-    {
-      setCurrentPage(pages[index]);
-    }
+    virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
-    MenuHeaderWindow header;
-    Window body;
-    std::vector<MenuPage *> pages;
-    MenuPage * currentPage = nullptr;
+    std::vector<MenuLine> lines;
+    static constexpr uint8_t lineHeight = 30;
 };
 
 #endif

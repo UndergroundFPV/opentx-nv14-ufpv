@@ -1,6 +1,6 @@
 #include "gui/common/windows/windows.h"
 
-class RadioSetupPage: public MenuPage {
+class RadioSetupPage: public PageTab {
   public:
     RadioSetupPage();
 

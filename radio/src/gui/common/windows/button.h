@@ -48,7 +48,7 @@ class Button : public Window {
       this->state = state;
     }
 
-    bool onTouchEnd(coord_t x, coord_t y);
+    virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     std::function<uint8_t(void)> onPress;
@@ -75,7 +75,7 @@ class TextButton : public Button {
       this->text = strdup(text);
     }
 
-    void paint(BitmapBuffer * dc);
+    virtual void paint(BitmapBuffer * dc) override;
 
   protected:
     char * text;
@@ -89,7 +89,7 @@ class IconButton: public Button {
     {
     }
 
-    void paint(BitmapBuffer * dc);
+    virtual void paint(BitmapBuffer * dc) override;
 
   protected:
     uint8_t icon;
@@ -99,7 +99,7 @@ class FabIconButton: public Button {
   public:
     FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t state=0);
 
-    void paint(BitmapBuffer * dc);
+    virtual void paint(BitmapBuffer * dc) override;
 
   protected:
     uint8_t icon;
