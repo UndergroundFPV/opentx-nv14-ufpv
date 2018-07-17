@@ -388,6 +388,7 @@ void TouchDriver( void )
                         touchState.Event = TE_DOWN;
                         touchState.startX = touchState.lastX = touchState.X;
                         touchState.startY = touchState.lastY = touchState.Y;
+                        putEvent(TOUCH_PRESS); // TODO don't remove this or it will be impossible to skip alert screens
                     }
                   }
                   else if ( TOUCH_SLIDE == TouchState )

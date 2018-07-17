@@ -18,21 +18,20 @@
  * GNU General Public License for more details.
  */
 
-#define  __HALLSTICK_DRIVER_C__
 #include "opentx.h"
-#undef   __HALLSTICK_DRIVER_C__
 
 DMAFifo<HALLSTICK_BUFF_SIZE> hallDMAFifo __DMA (HALL_DMA_Stream_RX);
 unsigned char HallCmd[64] __DMA;
 
-STRUCT_HALL HallProtocol =
-                        {
-                          0,
-                          GET_START,
-                        };
+STRUCT_HALL HallProtocol = {
+  0,
+  GET_START,
+};
 
 STRUCT_HALL_CHANNEL Channel;
-STRUCT_STICK_CALIBRATION StickCallbration[4] = {{0, 0, 0}};
+STRUCT_STICK_CALIBRATION StickCallbration[4] = {
+  {0, 0, 0}
+};
 signed short HallChVal[4];
 
 /* crc16 implementation according to CCITT standards */
@@ -419,7 +418,3 @@ void hall_stick_loop(void )
         }
     }
 }
-
-
-
-
