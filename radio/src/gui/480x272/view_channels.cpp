@@ -81,7 +81,7 @@ class ChannelsMonitorFooter: public Window {
 class ChannelsMonitorPage: public PageTab {
   public:
     ChannelsMonitorPage() :
-      PageTab(STR_MONITOR_CHANNELS[0], ICON_MONITOR_CHANNELS1)
+      PageTab(STR_CHANNELS_MONITOR, ICON_MONITOR_CHANNELS1)
     {
     }
 
