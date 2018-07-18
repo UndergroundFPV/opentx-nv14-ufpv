@@ -54,6 +54,11 @@ class ChannelsMonitorBody: public Window {
 
     void paint(BitmapBuffer * dc) {
       // TODO here the bars ...
+
+      for(uint8_t i=0; i < 8; i++) {
+        drawComboOutputBar(Y_OUTBAR, i * ROW_HEIGHT + BAR_HEIGHT, LCD_W - 2 * Y_OUTBAR, BAR_HEIGHT, i);
+        drawSingleMixerBar(Y_OUTBAR, i * ROW_HEIGHT + 3 * BAR_HEIGHT + 2, LCD_W - 2 * Y_OUTBAR, BAR_HEIGHT, i);
+      }
     }
 };
 
