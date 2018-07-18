@@ -95,9 +95,12 @@ class ChannelsMonitorPage: public PageTab {
 
     virtual void build(Window * window) override
     {
-      new ChannelsMonitorBody(window, {0, 0, LCD_W, window->height() - 30});
-      new ChannelsMonitorFooter(window, {0, window->height() - 30, LCD_W, 30});
+      new ChannelsMonitorBody(window, {0, 0, LCD_W, window->height() - footerHeight});
+      new ChannelsMonitorFooter(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
     }
+
+  protected:
+    static constexpr coord_t footerHeight = 30;
 };
 
 class LogicalSwitchesMonitorPage: public PageTab {
