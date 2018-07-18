@@ -43,6 +43,65 @@ bool menuChannelsMonitor(event_t event)
   return menuChannelsMonitor(event, index);
 }
 
+class ChannelsMonitorBody: public Window {
+  using Window::Window;
+  public:
+    void paint(BitmapBuffer * dc) {
+      // TODO here the bars ...
+    }
+};
+
+class ChannelsMonitorFooter: public Window {
+  using Window::Window;
+  public:
+    void paint(BitmapBuffer * dc) {
+      // TODO here the legend
+    }
+};
+
+class ChannelsMonitorPage: public PageTab {
+  public:
+    ChannelsMonitorPage(uint8_t index) :
+      PageTab(STR_MONITOR_CHANNELS[index], ICON_MONITOR_CHANNELS1 + index),
+      pageIndex(index)
+    {
+    }
+
+    virtual void build(Window * window) override
+    {
+      new ChannelsMonitorBody(window, {0, 0, LCD_W, window->height() - 30});
+      new ChannelsMonitorFooter(window, {0, window->height() - 30, LCD_W, 30});
+    }
+
+  protected:
+    uint8_t pageIndex;
+};
+
+class LogicalSwitchesMonitorPage: public PageTab {
+  public:
+    LogicalSwitchesMonitorPage() :
+      PageTab(STR_MONITOR_SWITCHES, ICON_MONITOR_LOGICAL_SWITCHES)
+    {
+    }
+
+    virtual void build(Window * window) override
+    {
+    }
+
+  protected:
+
+};
+
+ChannelsMonitorMenu::ChannelsMonitorMenu():
+  TabsGroup()
+{
+  for (uint8_t i=0; i<4; i++) {
+    addTab(new ChannelsMonitorPage(i));
+  }
+  addTab(new LogicalSwitchesMonitorPage());
+}
+
+
 const MenuHandlerFunc menuTabMonitors[] PROGMEM = {
   menuChannelsMonitor<0>,
   menuChannelsMonitor<1>,

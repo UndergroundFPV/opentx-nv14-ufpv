@@ -90,6 +90,10 @@ class MainView: public Window {
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
     virtual void paint(BitmapBuffer * dc) override;
 };
+class ChannelsMonitorMenu: public TabsGroup {
+  public:
+    ChannelsMonitorMenu();
+};
 #endif
 
 #if defined(HELI) && defined(GVARS) && defined(LUA_MODEL_SCRIPTS)

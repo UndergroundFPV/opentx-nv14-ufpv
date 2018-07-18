@@ -163,8 +163,8 @@ bool MainView::onTouchEnd(coord_t x, coord_t y)
       });
     }
     menu->addLine(STR_MONITOR_SCREENS, [=]() -> void {
-      menu->deleteLater();
-      // TODO
+      mainWindow.clear();
+      new ChannelsMonitorMenu();
     });
     menu->addLine(STR_RESET_SUBMENU, [=]() -> void {
       menu->clear();
