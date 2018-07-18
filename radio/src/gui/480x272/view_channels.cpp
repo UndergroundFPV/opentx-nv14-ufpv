@@ -74,7 +74,16 @@ class ChannelsMonitorFooter: public Window {
   using Window::Window;
   public:
     void paint(BitmapBuffer * dc) {
-      // TODO here the legend
+      coord_t x = 1;
+      dc->drawSolidFilledRect(x, 1, rect.w, rect.h, TITLE_BGCOLOR);
+      dc->drawSolidFilledRect(x + 4, 2, rect.h - 4, rect.h - 4, BARGRAPH_BGCOLOR);
+      dc->drawSolidFilledRect(x + 6, 4, rect.h - 8, rect.h - 8, BARGRAPH1_COLOR);
+      dc->drawText(x + rect.h + 5, rect.h - 25, STR_MONITOR_OUTPUT_DESC, TEXT_INVERTED_COLOR);
+      x = rect.h + 5 + getTextWidth(STR_MONITOR_OUTPUT_DESC) + 10;
+      dc->drawSolidFilledRect(x, 1, rect.w, rect.h, TITLE_BGCOLOR);
+      dc->drawSolidFilledRect(x + 4, 2, rect.h - 4, rect.h - 4, BARGRAPH_BGCOLOR);
+      dc->drawSolidFilledRect(x + 6, 4, rect.h - 8, rect.h - 8, BARGRAPH2_COLOR);
+      dc->drawText(x + rect.h + 5, rect.h - 25, STR_MONITOR_MIXER_DESC, TEXT_INVERTED_COLOR);
     }
 };
 
