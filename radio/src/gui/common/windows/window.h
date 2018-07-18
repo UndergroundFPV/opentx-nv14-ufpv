@@ -47,20 +47,11 @@ class Window {
       return focusWindow == this;
     }
 
-    void clearFocus()
-    {
-      if (focusWindow) {
-        focusWindow->onFocusLost();
-      }
-      focusWindow = nullptr;
-    }
+    void scrollTo(Window * child);
 
-    void setFocus()
-    {
-      clearFocus();
-      focusWindow = this;
-      invalidate();
-    }
+    void clearFocus();
+
+    void setFocus();
 
     void setWidth(coord_t w)
     {
@@ -80,9 +71,14 @@ class Window {
       invalidate();
     }
 
-    coord_t top()
+    coord_t top() const
     {
       return rect.y;
+    }
+
+    coord_t bottom() const
+    {
+      return rect.y + rect.h;
     }
 
     coord_t width() const
@@ -135,6 +131,7 @@ class Window {
     void moveWindowsTop(coord_t y, coord_t delta);
 
     coord_t innerWidth, innerHeight; // TODO protected later
+
   protected:
     Window * parent;
     std::list<Window *> children;
@@ -146,7 +143,7 @@ class Window {
     static std::list<Window *> trash;
     void detach();
 
-    void deleteChildren();
+
     void addChild(Window * window)
     {
       children.push_back(window);

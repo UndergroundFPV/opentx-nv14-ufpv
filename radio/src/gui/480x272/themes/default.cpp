@@ -331,11 +331,6 @@ class DefaultTheme: public Theme
         lcd->drawBitmap(0, 0, menuIconSelected[ICON_OPENTX]);
         lcd->drawSolidFilledRect(TOPBAR_BUTTON_WIDTH, 0, LCD_W-TOPBAR_BUTTON_WIDTH, MENU_HEADER_HEIGHT, HEADER_BGCOLOR);
       }
-      else if (options & OPTION_TOPBAR_BACK) {
-        lcd->drawBitmap(0, 0, menuIconSelected[ICON_BACK]);
-        result = touchPressed(0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH);
-        lcd->drawSolidFilledRect(TOPBAR_BUTTON_WIDTH, 0, LCD_W-TOPBAR_BUTTON_WIDTH, MENU_HEADER_HEIGHT, HEADER_BGCOLOR);
-      }
       else {
         lcd->drawSolidFilledRect(0, 0, LCD_W, MENU_HEADER_HEIGHT, HEADER_BGCOLOR);
       }

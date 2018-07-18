@@ -18,6 +18,7 @@
  * GNU General Public License for more details.
  */
 
+#include <algorithm>
 #include "opentx.h"
 #include "storage/modelslist.h"
 
@@ -74,15 +75,15 @@ uint16_t categoriesVerticalOffset = 0;
 uint16_t categoriesVerticalPosition = 0;
 #define MODEL_INDEX()       (menuVerticalPosition*2+menuHorizontalPosition)
 
+#if 0
 void setCurrentModel(unsigned int index)
 {
-  std::list<ModelCell *>::iterator it = currentCategory->begin();
+  auto it = currentCategory->begin();
   std::advance(it, index);
   currentModel = *it;
-  menuVerticalPosition = index / 2;
-  menuHorizontalPosition = index & 1;
-  menuVerticalOffset = limit<int>(menuVerticalPosition-2, menuVerticalOffset, min<int>(menuVerticalPosition, max<int>(0, (currentCategory->size()-7)/2)));
 }
+#endif
+
 
 void setCurrentCategory(unsigned int index)
 {
@@ -92,10 +93,10 @@ void setCurrentCategory(unsigned int index)
   currentCategory = *it;
   categoriesVerticalPosition = index;
   categoriesVerticalOffset = limit<int>(categoriesVerticalPosition-4, categoriesVerticalOffset, min<int>(categoriesVerticalPosition, max<int>(0, modelslist.categories.size()-5)));
-  if (currentCategory->size() > 0)
+  /*if (currentCategory->size() > 0)
     setCurrentModel(0);
   else
-    currentModel = NULL;
+    currentModel = NULL;*/
 }
 
 #if defined(LUA)
@@ -219,6 +220,7 @@ bool menuModelWizard(event_t event)
 }
 #endif
 
+#if 0
 void onModelSelectMenu(const char * result)
 {
   if (result == STR_SELECT_MODEL) {
@@ -283,6 +285,7 @@ void onModelSelectMenu(const char * result)
     }
   }
 }
+#endif
 
 void initModelsList()
 {
@@ -307,20 +310,19 @@ void initModelsList()
   index = 0;
   for (ModelsCategory::iterator it = currentCategory->begin(); it != currentCategory->end(); ++it, ++index) {
     if (*it == modelslist.currentModel) {
-      setCurrentModel(index);
+      // setCurrentModel(index);
       found = true;
       break;
     }
   }
   if (!found) {
-    setCurrentModel(0);
+    // setCurrentModel(0);
   }
 }
 
+#if 0
 bool menuModelSelect(event_t event)
 {
-  return true;
-
   if (warningResult) {
     warningResult = 0;
     if (deleteMode == MODE_DELETE_CATEGORY) {
@@ -514,24 +516,118 @@ bool menuModelSelect(event_t event)
 
   return true;
 }
+#endif
+
+class ModelselectButton: public Button {
+  public:
+    ModelselectButton(Window * parent, const rect_t & rect, ModelCell * modelCell);
+
+    virtual void paint(BitmapBuffer * dc) override {
+      drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+      dc->drawBitmap(10, 2, modelCell->getBuffer());
+      if (modelCell == modelslist.currentModel) {
+        dc->drawBitmapPattern(112, 71, LBM_ACTIVE_MODEL, TITLE_BGCOLOR);
+      }
+    }
+
+  protected:
+    ModelCell * modelCell;
+};
 
 class ModelselectPage: public PageTab {
   public:
-    ModelselectPage():
+    ModelselectPage() :
       PageTab(STR_MODEL_SELECT, ICON_MODEL_SELECT)
     {
     }
 
-    virtual void build(Window * window) override;
+    static void updateModels(Window * window, int selected=-1) {
+      window->clear();
+      int index = 0;
+      for (auto it = currentCategory->begin(); it != currentCategory->end(); ++it, ++index) {
+        Button * button = new ModelselectButton(window, {10, 10 + index * 104, LCD_W - 20, 94}, *it);
+        if (selected == index) {
+          button->setFocus();
+        }
+      }
+      window->adjustInnerHeight();
+    }
+
+    virtual void build(Window * window) override
+    {
+      initModelsList();
+      Window * body = new Window(window, {0, 0, LCD_W, window->height() - 100});
+      updateModels(body);
+    }
 };
-
-void ModelselectPage::build(Window * window)
-{
-
-}
 
 ModelselectMenu::ModelselectMenu():
   TabsGroup()
 {
   addTab(new ModelselectPage());
+}
+
+ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, ModelCell * modelCell):
+  Button(parent, rect,
+         [=]() -> uint8_t {
+           setFocus();
+           Menu * menu = new Menu();
+           if (modelCell && modelCell != modelslist.currentModel) {
+             menu->addLine(STR_SELECT_MODEL, [=]() -> void {
+               menu->deleteLater();
+               // we store the latest changes if any
+               storageFlushCurrentModel();
+               storageCheck(true);
+               memcpy(g_eeGeneral.currModelFilename, modelslist.currentModel->modelFilename, LEN_MODEL_FILENAME);
+               loadModel(g_eeGeneral.currModelFilename, false);
+               storageDirty(EE_GENERAL);
+               storageCheck(true);
+               // chainMenu(menuMainView);
+               postModelLoad(true);
+               modelslist.setCurrentModel(modelCell);
+               ModelselectPage::updateModels(parent, modelslist.getModelIndex(modelCell));
+             });
+           }
+           menu->addLine(STR_CREATE_MODEL, [=]() -> void {
+             menu->deleteLater();
+             storageCheck(true);
+             modelslist.setCurrentModel(modelslist.addModel(currentCategory, createModel()));
+#if defined(LUA)
+             chainMenu(menuModelWizard);
+#endif
+             ModelselectPage::updateModels(parent, currentCategory->size() - 1);
+           });
+           if (modelCell) {
+             menu->addLine(STR_DUPLICATE_MODEL, [=]() -> void {
+               menu->deleteLater();
+               char duplicatedFilename[LEN_MODEL_FILENAME + 1];
+               memcpy(duplicatedFilename, modelCell->modelFilename, sizeof(duplicatedFilename));
+               if (findNextFileIndex(duplicatedFilename, LEN_MODEL_FILENAME, MODELS_PATH)) {
+                 sdCopyFile(modelCell->modelFilename, MODELS_PATH, duplicatedFilename, MODELS_PATH);
+                 modelslist.addModel(currentCategory, duplicatedFilename);
+                 ModelselectPage::updateModels(parent, currentCategory->size() - 1);
+               }
+               else {
+                 POPUP_WARNING("Invalid File");
+               }
+             });
+
+           }
+           // menu->addLine(STR_MOVE_MODEL);
+           if (modelCell && modelCell != modelslist.currentModel) {
+             menu->addLine(STR_DELETE_MODEL, [=]() -> void {
+               menu->deleteLater();
+               // POPUP_CONFIRMATION(STR_DELETEMODEL);
+               // SET_WARNING_INFO(modelCell->modelName, LEN_MODEL_NAME, 0);
+               unsigned int index = modelslist.getModelIndex(modelCell);
+               if (index > 0)
+                 --index;
+               modelslist.removeModel(currentCategory, modelCell);
+               ModelselectPage::updateModels(parent, index);
+             });
+           }
+           return 1;
+         }),
+  modelCell(modelCell)
+{
 }

@@ -27,9 +27,9 @@ MainWindow mainWindow;
 
 Window::Window(Window * parent, const rect_t & rect):
   parent(parent),
-  rect(rect),
   innerWidth(rect.w),
-  innerHeight(rect.h)
+  innerHeight(rect.h),
+  rect(rect)
 {
   if (parent) {
     parent->addChild(this);
@@ -42,14 +42,6 @@ Window::~Window()
   if (focusWindow == this) {
     focusWindow = nullptr;
   }
-}
-
-void Window::deleteChildren()
-{
-  for (auto window: children) {
-    delete window;
-  }
-  children.clear();
 }
 
 void Window::detach()
@@ -79,6 +71,32 @@ void Window::clear()
   }
   children.clear();
   invalidate();
+}
+
+void Window::clearFocus()
+{
+  if (focusWindow) {
+    focusWindow->onFocusLost();
+  }
+  focusWindow = nullptr;
+}
+
+void Window::setFocus()
+{
+  clearFocus();
+  focusWindow = this;
+  parent->scrollTo(this);
+  invalidate();
+}
+
+void Window::scrollTo(Window * child)
+{
+  /*if (child->top() < scrollPositionY) {
+    scrollPositionY = child->top();
+  }*/
+  if (child->bottom() > height() - scrollPositionY) {
+    scrollPositionY = height() - child->bottom();
+  }
 }
 
 void Window::fullPaint(BitmapBuffer * dc)

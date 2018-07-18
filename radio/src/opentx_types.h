@@ -41,7 +41,7 @@ typedef int16_t gvar_t;
   typedef uint8_t bar_threshold_t;
 #endif
 
-#if defined(CPUARM) && defined(ROTARY_ENCODER_NAVIGATION)
+#if defined(CPUARM)
 typedef uint16_t event_t;
 #else
 typedef uint8_t event_t;

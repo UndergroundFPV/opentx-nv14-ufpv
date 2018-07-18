@@ -49,9 +49,9 @@ class TextEdit : public Window {
       return value;
     }
 
-    void paint(BitmapBuffer * dc);
+    virtual void paint(BitmapBuffer * dc) override;
 
-    bool onTouchEnd(coord_t x, coord_t y);
+    virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
     void onFocusLost()
     {

@@ -545,21 +545,20 @@ void ModelSetupPage::updateExternalModuleWindow()
                      });
 
       externalModuleRange = new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
-                     [=]() -> uint8_t {
-                       if(moduleFlag[EXTERNAL_MODULE] == MODULE_BIND) {
-                         moduleFlag[EXTERNAL_MODULE] = MODULE_RANGECHECK;
-                         externalModuleBind->setState(0);
-                         return 1;
-                       }
-                       if (moduleFlag[EXTERNAL_MODULE] == MODULE_NORMAL_MODE) {
-                         moduleFlag[EXTERNAL_MODULE] = MODULE_RANGECHECK;
-                         return 1;
-                       }
-                       else {
-                         moduleFlag[EXTERNAL_MODULE] = MODULE_NORMAL_MODE;
-                         return 0;
-                       }
-                     });
+                                           [=]() -> uint8_t {
+                                             if (moduleFlag[EXTERNAL_MODULE] == MODULE_BIND) {
+                                               moduleFlag[EXTERNAL_MODULE] = MODULE_RANGECHECK;
+                                               externalModuleBind->setState(0);
+                                               return 1;
+                                             }
+                                             if (moduleFlag[EXTERNAL_MODULE] == MODULE_NORMAL_MODE) {
+                                               moduleFlag[EXTERNAL_MODULE] = MODULE_RANGECHECK;
+                                               return 1;
+                                             } else {
+                                               moduleFlag[EXTERNAL_MODULE] = MODULE_NORMAL_MODE;
+                                               return 0;
+                                             }
+                                           });
     }
     grid.nextLine();
 
@@ -567,15 +566,14 @@ void ModelSetupPage::updateExternalModuleWindow()
     if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_R9M(EXTERNAL_MODULE)) {
       new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_FAILSAFE);
       failSafeChoice = new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-                 GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode),
-                 [=](int32_t newValue) -> void {
-                     g_model.moduleData[EXTERNAL_MODULE].failsafeMode = newValue;
-                     SET_DIRTY();
-                     updateExternalModuleWindow();
-                     failSafeChoice->setFocus();
-                 });
-      if(g_model.moduleData[EXTERNAL_MODULE].failsafeMode == FAILSAFE_CUSTOM)
-      {
+                                  GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode),
+                                  [=](int32_t newValue) -> void {
+                                    g_model.moduleData[EXTERNAL_MODULE].failsafeMode = newValue;
+                                    SET_DIRTY();
+                                    updateExternalModuleWindow();
+                                    failSafeChoice->setFocus();
+                                  });
+      if (g_model.moduleData[EXTERNAL_MODULE].failsafeMode == FAILSAFE_CUSTOM) {
         new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_SET,
                        [=]() -> uint8_t {
                          // TODO launch the failsafe window

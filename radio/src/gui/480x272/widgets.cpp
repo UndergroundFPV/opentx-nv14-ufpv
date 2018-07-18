@@ -72,24 +72,6 @@ void drawIconButton(coord_t x, coord_t y, uint8_t index, LcdFlags flags)
   theme->drawIcon(x+(68-36)/2, y+(68-36)/2, index, TEXT_BGCOLOR);
 }
 
-// TODO move to touch.cpp
-uint8_t touchPressed(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
-{
-  if (touchState.Event == TE_UP) {
-    if (touchState.startX >= x && touchState.startX <= x + w && touchState.startY >= y && touchState.startY <= y+h) {
-      touchState.Event = TE_NONE;
-      return 1;
-    }
-  }
-  return 0;
-}
-
-bool handleIconButton(coord_t x, coord_t y, uint8_t index, LcdFlags flags)
-{
-  drawIconButton(x, y, index, flags);
-  return touchPressed(x, y, 68, 68);
-}
-
 void drawCheckBox(coord_t x, coord_t y, uint8_t value, LcdFlags attr)
 {
   if (attr) {

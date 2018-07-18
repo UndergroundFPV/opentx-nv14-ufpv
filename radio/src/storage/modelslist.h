@@ -24,8 +24,8 @@
 #include <list>
 #include "sdcard.h"
 
-#define MODELCELL_WIDTH                172
-#define MODELCELL_HEIGHT               59
+#define MODELCELL_WIDTH                (LCD_W - 40)
+#define MODELCELL_HEIGHT               86
 
 class ModelCell
 {
@@ -70,7 +70,7 @@ class ModelCell
 
       if (error) {
         // TODO drawText(buffer, 5, 2, "(Invalid Model)", TEXT_COLOR);
-        buffer->drawBitmapPattern(5, 23, LBM_LIBRARY_SLOT, TEXT_COLOR);
+        buffer->drawBitmapPattern(0, 23, LBM_LIBRARY_SLOT, TEXT_COLOR);
       }
       else {
         zchar2str(modelName, header.name, LEN_MODEL_NAME);
@@ -81,24 +81,24 @@ class ModelCell
           if (tmp != NULL)
             *tmp = 0;
         }
-        char timer[LEN_TIMER_STRING];
-        buffer->drawSizedText(5, 2, modelName, LEN_MODEL_NAME, SMLSIZE|TEXT_COLOR);
-        getTimerString(timer, 0);
+        // char timer[LEN_TIMER_STRING];
+        buffer->drawSizedText(0, 2, modelName, LEN_MODEL_NAME, TEXT_COLOR);
+        // getTimerString(timer, 0);
         // drawText(buffer, 101, 40, timer, TEXT_COLOR);
         for (int i=0; i<4; i++) {
-          buffer->drawBitmapPattern(104+i*11, 25, LBM_SCORE0, TITLE_BGCOLOR);
+          buffer->drawBitmapPattern(MODELCELL_WIDTH-4*11+i*11, 25, LBM_SCORE0, TITLE_BGCOLOR);
         }
         GET_FILENAME(filename, BITMAPS_PATH, header.bitmap, "");
         const BitmapBuffer * bitmap = BitmapBuffer::load(filename);
         if (bitmap) {
-          buffer->drawScaledBitmap(bitmap, 5, 24, 56, 32);
+          buffer->drawScaledBitmap(bitmap, 0, 28, 56, 32);
           delete bitmap;
         }
         else {
-          buffer->drawBitmapPattern(5, 23, LBM_LIBRARY_SLOT, TEXT_COLOR);
+          buffer->drawBitmapPattern(0, 28, LBM_LIBRARY_SLOT, TEXT_COLOR);
         }
       }
-      buffer->drawSolidHorizontalLine(5, 19, 143, LINE_COLOR);
+      buffer->drawSolidHorizontalLine(0, 22, MODELCELL_WIDTH, LINE_COLOR);
     }
 
     char modelFilename[LEN_MODEL_FILENAME+1];
@@ -239,6 +239,17 @@ class ModelsList
       }
 
       return true;
+    }
+
+    unsigned int getModelIndex(ModelCell * model)
+    {
+      auto it = std::find(currentCategory->begin(), currentCategory->end(), model);
+      return std::distance(currentCategory->begin(), it);
+    }
+
+    void setCurrentModel(ModelCell * model)
+    {
+      currentModel = model;
     }
 
     void save()
