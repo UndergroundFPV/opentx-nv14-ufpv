@@ -48,18 +48,22 @@ bool menuChannelsMonitor(event_t event)
 }
 
 class ChannelsMonitorBody: public Window {
-  using Window::Window;
   public:
+    ChannelsMonitorBody(Window * parent, const rect_t & rect):
+      Window(parent, rect)
+    {
+      setInnerHeight(ROW_HEIGHT * MAX_OUTPUT_CHANNELS + BAR_HEIGHT);
+    }
+
     void checkEvents()
     {
       // will always force a full monitor window refresh
       invalidate();
     }
 
-    void paint(BitmapBuffer * dc) {
-      // TODO here the bars ...
-
-      for(uint8_t i=0; i < 8; i++) {
+    void paint(BitmapBuffer * dc)
+    {
+      for (uint8_t i=0; i < MAX_OUTPUT_CHANNELS; i++) {
         drawComboOutputBar(Y_OUTBAR, i * ROW_HEIGHT + BAR_HEIGHT, LCD_W - 2 * Y_OUTBAR, BAR_HEIGHT, i);
         drawSingleMixerBar(Y_OUTBAR, i * ROW_HEIGHT + 3 * BAR_HEIGHT + 2, LCD_W - 2 * Y_OUTBAR, BAR_HEIGHT, i);
       }
@@ -76,9 +80,8 @@ class ChannelsMonitorFooter: public Window {
 
 class ChannelsMonitorPage: public PageTab {
   public:
-    ChannelsMonitorPage(uint8_t index) :
-      PageTab(STR_MONITOR_CHANNELS[index], ICON_MONITOR_CHANNELS1 + index),
-      pageIndex(index)
+    ChannelsMonitorPage() :
+      PageTab(STR_MONITOR_CHANNELS[0], ICON_MONITOR_CHANNELS1)
     {
     }
 
@@ -87,9 +90,6 @@ class ChannelsMonitorPage: public PageTab {
       new ChannelsMonitorBody(window, {0, 0, LCD_W, window->height() - 30});
       new ChannelsMonitorFooter(window, {0, window->height() - 30, LCD_W, 30});
     }
-
-  protected:
-    uint8_t pageIndex;
 };
 
 class LogicalSwitchesMonitorPage: public PageTab {
@@ -110,9 +110,7 @@ class LogicalSwitchesMonitorPage: public PageTab {
 ChannelsMonitorMenu::ChannelsMonitorMenu():
   TabsGroup()
 {
-  for (uint8_t i=0; i<4; i++) {
-    addTab(new ChannelsMonitorPage(i));
-  }
+  addTab(new ChannelsMonitorPage());
   addTab(new LogicalSwitchesMonitorPage());
 }
 
