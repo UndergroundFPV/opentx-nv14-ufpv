@@ -578,7 +578,7 @@ ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, Model
                // we store the latest changes if any
                storageFlushCurrentModel();
                storageCheck(true);
-               memcpy(g_eeGeneral.currModelFilename, modelslist.currentModel->modelFilename, LEN_MODEL_FILENAME);
+               memcpy(g_eeGeneral.currModelFilename, modelCell->modelFilename, LEN_MODEL_FILENAME);
                loadModel(g_eeGeneral.currModelFilename, false);
                storageDirty(EE_GENERAL);
                storageCheck(true);

@@ -888,7 +888,8 @@
 #define TR_MODULE_NO_INPUT             TR("No input", "No serial input")
 #define TR_MODULE_NO_TELEMETRY         TR3("No telemetry", "No MULTI_TELEMETRY", "No MULTI_TELEMETRY detected")
 #define TR_MODULE_WAITFORBIND          "Bind to load protocol"
-#define TR_MODULE_BINDING              TR("Bind...","Binding")
+#define TR_MODULE_BINDING              TR("Bind...", "Binding")
+#define TR_RXBINDING                   TR("Rx Bind...", "Rx Binding")
 #define TR_BINDING_CH1_8_TELEM_ON      "Ch1-8 Telem ON"
 #define TR_BINDING_CH1_8_TELEM_OFF     "Ch1-8 Telem OFF"
 #define TR_BINDING_CH9_16_TELEM_ON     "Ch9-16 Telem ON"
