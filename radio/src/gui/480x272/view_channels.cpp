@@ -74,15 +74,14 @@ class ChannelsMonitorFooter: public Window {
   using Window::Window;
   public:
     void paint(BitmapBuffer * dc) {
-      coord_t x = 1;
-      dc->drawSolidFilledRect(x, 1, rect.w, rect.h, TITLE_BGCOLOR);
-      dc->drawSolidFilledRect(x + 4, 2, rect.h - 4, rect.h - 4, BARGRAPH_BGCOLOR);
-      dc->drawSolidFilledRect(x + 6, 4, rect.h - 8, rect.h - 8, BARGRAPH1_COLOR);
+      coord_t x = 5;
+      dc->clear(TITLE_BGCOLOR);
+      dc->drawSolidFilledRect(x, 2, rect.h - 4, rect.h - 4, BARGRAPH_BGCOLOR);
+      dc->drawSolidFilledRect(x + 2, 4, rect.h - 8, rect.h - 8, BARGRAPH1_COLOR);
       dc->drawText(x + rect.h + 5, rect.h - 25, STR_MONITOR_OUTPUT_DESC, TEXT_INVERTED_COLOR);
-      x = rect.h + 5 + getTextWidth(STR_MONITOR_OUTPUT_DESC) + 10;
-      dc->drawSolidFilledRect(x, 1, rect.w, rect.h, TITLE_BGCOLOR);
-      dc->drawSolidFilledRect(x + 4, 2, rect.h - 4, rect.h - 4, BARGRAPH_BGCOLOR);
-      dc->drawSolidFilledRect(x + 6, 4, rect.h - 8, rect.h - 8, BARGRAPH2_COLOR);
+      x = rect.h + getTextWidth(STR_MONITOR_OUTPUT_DESC) + 20;
+      dc->drawSolidFilledRect(x, 2, rect.h - 4, rect.h - 4, BARGRAPH_BGCOLOR);
+      dc->drawSolidFilledRect(x + 2, 4, rect.h - 8, rect.h - 8, BARGRAPH2_COLOR);
       dc->drawText(x + rect.h + 5, rect.h - 25, STR_MONITOR_MIXER_DESC, TEXT_INVERTED_COLOR);
     }
 };
