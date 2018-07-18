@@ -71,8 +71,12 @@ class ChannelsMonitorBody: public Window {
 };
 
 class ChannelsMonitorFooter: public Window {
-  using Window::Window;
   public:
+    ChannelsMonitorFooter(Window * parent, const rect_t & rect):
+      Window(parent, rect)
+    {
+    }
+
     void paint(BitmapBuffer * dc) {
       coord_t x = 5;
       dc->clear(TITLE_BGCOLOR);
