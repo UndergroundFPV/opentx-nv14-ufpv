@@ -520,7 +520,7 @@ bool menuModelSelect(event_t event)
 
 class ModelselectButton: public Button {
   public:
-    ModelselectButton(Window * parent, const rect_t & rect, ModelCell * modelCell);
+    ModelselectButton(Window * parent, const rect_t & rect, ModelCell * modelCell, Window * footer);
 
     virtual void paint(BitmapBuffer * dc) override {
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
@@ -530,8 +530,34 @@ class ModelselectButton: public Button {
       }
     }
 
+    const char * modelFilename() {
+      return modelCell->modelFilename;
+    }
+
   protected:
     ModelCell * modelCell;
+};
+
+class ModelselectFooter: public Window {
+  public:
+    ModelselectFooter(Window * parent, const rect_t & rect):
+      Window(parent, rect)
+    {
+    }
+
+    virtual void paint(BitmapBuffer * dc) override {
+      dc->drawSolidFilledRect(0, 5, rect.w, 2, CURVE_AXIS_COLOR);
+      dc->drawBitmap(7, 12, modelselSdFreeBitmap);
+      uint32_t size = sdGetSize() / 100;
+      drawNumber(dc, 24, 11, size, PREC1|SMLSIZE, 0, NULL, "GB");
+      dc->drawBitmap(77, 12, modelselModelQtyBitmap);
+      drawNumber(dc, 99, 11, modelslist.modelsCount, SMLSIZE);
+      ModelselectButton * selectedModel = dynamic_cast<ModelselectButton *>(focusWindow);
+      if (selectedModel) {
+        dc->drawBitmap(7, 37, modelselModelNameBitmap);
+        dc->drawText(24, 32, selectedModel->modelFilename(), SMLSIZE | TEXT_COLOR);
+      }
+    }
 };
 
 class ModelselectPage: public PageTab {
@@ -541,11 +567,11 @@ class ModelselectPage: public PageTab {
     {
     }
 
-    static void updateModels(Window * window, int selected=-1) {
+    static void updateModels(Window * window, Window * footer, int selected=-1) {
       window->clear();
       int index = 0;
       for (auto it = currentCategory->begin(); it != currentCategory->end(); ++it, ++index) {
-        Button * button = new ModelselectButton(window, {10, 10 + index * 104, LCD_W - 20, 94}, *it);
+        Button * button = new ModelselectButton(window, {10, 10 + index * 104, LCD_W - 20, 94}, *it, footer);
         if (selected == index) {
           button->setFocus();
         }
@@ -556,10 +582,12 @@ class ModelselectPage: public PageTab {
     virtual void build(Window * window) override
     {
       initModelsList();
-      Window * body = new Window(window, {0, 0, LCD_W, window->height() - 100});
-      updateModels(body);
+      Window * body = new Window(window, {0, 0, LCD_W, window->height() - 55});
+      Window * footer = new ModelselectFooter(window, {0, window->height() - 55, LCD_W, 55});
+      updateModels(body, footer);
     }
 };
+
 
 ModelselectMenu::ModelselectMenu():
   TabsGroup()
@@ -567,64 +595,68 @@ ModelselectMenu::ModelselectMenu():
   addTab(new ModelselectPage());
 }
 
-ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, ModelCell * modelCell):
+ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, ModelCell * modelCell, Window * footer):
   Button(parent, rect,
          [=]() -> uint8_t {
-           setFocus();
-           Menu * menu = new Menu();
-           if (modelCell && modelCell != modelslist.currentModel) {
-             menu->addLine(STR_SELECT_MODEL, [=]() -> void {
+           if (hasFocus()) {
+             Menu * menu = new Menu();
+             if (modelCell && modelCell != modelslist.currentModel) {
+               menu->addLine(STR_SELECT_MODEL, [=]() -> void {
+                 menu->deleteLater();
+                 // we store the latest changes if any
+                 storageFlushCurrentModel();
+                 storageCheck(true);
+                 memcpy(g_eeGeneral.currModelFilename, modelCell->modelFilename, LEN_MODEL_FILENAME);
+                 loadModel(g_eeGeneral.currModelFilename, false);
+                 storageDirty(EE_GENERAL);
+                 storageCheck(true);
+                 // chainMenu(menuMainView);
+                 postModelLoad(true);
+                 modelslist.setCurrentModel(modelCell);
+                 ModelselectPage::updateModels(parent, footer, modelslist.getModelIndex(modelCell));
+               });
+             }
+             menu->addLine(STR_CREATE_MODEL, [=]() -> void {
                menu->deleteLater();
-               // we store the latest changes if any
-               storageFlushCurrentModel();
                storageCheck(true);
-               memcpy(g_eeGeneral.currModelFilename, modelCell->modelFilename, LEN_MODEL_FILENAME);
-               loadModel(g_eeGeneral.currModelFilename, false);
-               storageDirty(EE_GENERAL);
-               storageCheck(true);
-               // chainMenu(menuMainView);
-               postModelLoad(true);
-               modelslist.setCurrentModel(modelCell);
-               ModelselectPage::updateModels(parent, modelslist.getModelIndex(modelCell));
-             });
-           }
-           menu->addLine(STR_CREATE_MODEL, [=]() -> void {
-             menu->deleteLater();
-             storageCheck(true);
-             modelslist.setCurrentModel(modelslist.addModel(currentCategory, createModel()));
+               modelslist.setCurrentModel(modelslist.addModel(currentCategory, createModel()));
 #if defined(LUA)
-             chainMenu(menuModelWizard);
+               chainMenu(menuModelWizard);
 #endif
-             ModelselectPage::updateModels(parent, currentCategory->size() - 1);
-           });
-           if (modelCell) {
-             menu->addLine(STR_DUPLICATE_MODEL, [=]() -> void {
-               menu->deleteLater();
-               char duplicatedFilename[LEN_MODEL_FILENAME + 1];
-               memcpy(duplicatedFilename, modelCell->modelFilename, sizeof(duplicatedFilename));
-               if (findNextFileIndex(duplicatedFilename, LEN_MODEL_FILENAME, MODELS_PATH)) {
-                 sdCopyFile(modelCell->modelFilename, MODELS_PATH, duplicatedFilename, MODELS_PATH);
-                 modelslist.addModel(currentCategory, duplicatedFilename);
-                 ModelselectPage::updateModels(parent, currentCategory->size() - 1);
-               }
-               else {
-                 POPUP_WARNING("Invalid File");
-               }
+               ModelselectPage::updateModels(parent, footer, currentCategory->size() - 1);
              });
+             if (modelCell) {
+               menu->addLine(STR_DUPLICATE_MODEL, [=]() -> void {
+                 menu->deleteLater();
+                 char duplicatedFilename[LEN_MODEL_FILENAME + 1];
+                 memcpy(duplicatedFilename, modelCell->modelFilename, sizeof(duplicatedFilename));
+                 if (findNextFileIndex(duplicatedFilename, LEN_MODEL_FILENAME, MODELS_PATH)) {
+                   sdCopyFile(modelCell->modelFilename, MODELS_PATH, duplicatedFilename, MODELS_PATH);
+                   modelslist.addModel(currentCategory, duplicatedFilename);
+                   ModelselectPage::updateModels(parent, footer, currentCategory->size() - 1);
+                 } else {
+                   POPUP_WARNING("Invalid File");
+                 }
+               });
 
+             }
+             // menu->addLine(STR_MOVE_MODEL);
+             if (modelCell && modelCell != modelslist.currentModel) {
+               menu->addLine(STR_DELETE_MODEL, [=]() -> void {
+                 menu->deleteLater();
+                 // POPUP_CONFIRMATION(STR_DELETEMODEL);
+                 // SET_WARNING_INFO(modelCell->modelName, LEN_MODEL_NAME, 0);
+                 unsigned int index = modelslist.getModelIndex(modelCell);
+                 if (index > 0)
+                   --index;
+                 modelslist.removeModel(currentCategory, modelCell);
+                 ModelselectPage::updateModels(parent, footer, index);
+               });
+             }
            }
-           // menu->addLine(STR_MOVE_MODEL);
-           if (modelCell && modelCell != modelslist.currentModel) {
-             menu->addLine(STR_DELETE_MODEL, [=]() -> void {
-               menu->deleteLater();
-               // POPUP_CONFIRMATION(STR_DELETEMODEL);
-               // SET_WARNING_INFO(modelCell->modelName, LEN_MODEL_NAME, 0);
-               unsigned int index = modelslist.getModelIndex(modelCell);
-               if (index > 0)
-                 --index;
-               modelslist.removeModel(currentCategory, modelCell);
-               ModelselectPage::updateModels(parent, index);
-             });
+           else {
+             setFocus();
+             footer->invalidate();
            }
            return 1;
          }),

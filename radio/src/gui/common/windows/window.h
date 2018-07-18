@@ -132,6 +132,11 @@ class Window {
 
     coord_t innerWidth, innerHeight; // TODO protected later
 
+    void invalidate()
+    {
+      invalidate({0, 0, rect.w, rect.h});
+    }
+
   protected:
     Window * parent;
     std::list<Window *> children;
@@ -156,11 +161,6 @@ class Window {
     }
 
     virtual void invalidate(const rect_t & rect);
-
-    void invalidate()
-    {
-      invalidate({0, 0, rect.w, rect.h});
-    }
 };
 
 class MainWindow: public Window {
