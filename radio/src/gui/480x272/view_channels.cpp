@@ -23,7 +23,11 @@
 #define RECT_OFFSET                    80
 #define ROW_HEIGHT                     42
 #define BAR_HEIGHT                     13
+#if defined(PCBNV14)
+#define COLUMN_SIZE                   290
+#else
 #define COLUMN_SIZE                   200
+#endif
 #define X_OFFSET                       25
 #define Y_OFFSET                       75
 #define Y_OUTBAR                       15
