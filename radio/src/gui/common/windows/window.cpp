@@ -122,6 +122,13 @@ void Window::paintChildren(BitmapBuffer * dc)
   }
 }
 
+void Window::checkEvents()
+{
+  for (auto child: children) {
+    child->checkEvents();
+  }
+}
+
 bool Window::onTouchStart(coord_t x, coord_t y)
 {
   for (auto it = children.rbegin(); it != children.rend(); ++it) {
@@ -254,6 +261,8 @@ void MainWindow::checkEvents()
     touchState.lastX = touchState.X;
     touchState.lastY = touchState.Y;
   }
+
+  Window::checkEvents();
 
   emptyTrash();
 }

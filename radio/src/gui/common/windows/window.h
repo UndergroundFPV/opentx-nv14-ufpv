@@ -137,6 +137,8 @@ class Window {
       invalidate({0, 0, rect.w, rect.h});
     }
 
+    virtual void checkEvents();
+
   protected:
     Window * parent;
     std::list<Window *> children;
@@ -171,7 +173,7 @@ class MainWindow: public Window {
     {
     }
 
-    void checkEvents();
+    virtual void checkEvents() override;
 
     virtual void invalidate(const rect_t & rect) override;
 

@@ -46,6 +46,12 @@ bool menuChannelsMonitor(event_t event)
 class ChannelsMonitorBody: public Window {
   using Window::Window;
   public:
+    void checkEvents()
+    {
+      // will always force a full monitor window refresh
+      invalidate();
+    }
+
     void paint(BitmapBuffer * dc) {
       // TODO here the bars ...
     }
