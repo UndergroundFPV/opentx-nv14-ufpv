@@ -1934,9 +1934,6 @@ void opentxStart(OPENTX_START_ARGS)
 #endif
 
   uint8_t calibration_needed = (g_eeGeneral.chkSum != evalChkSum());
-#if IS_TOUCH_ENABLED()
-  calibration_needed |= (TouchManager::isCurrentCalibrationValid() ? 0 : 0x02);
-#endif
 
 #if defined(GUI)
   if (!calibration_needed && OPENTX_START_SPLASH_NEEDED()) {

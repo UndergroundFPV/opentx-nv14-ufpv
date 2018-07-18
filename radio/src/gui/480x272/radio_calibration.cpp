@@ -18,15 +18,56 @@
  * GNU General Public License for more details.
  */
 
-#include <touch_driver.h>
 #include "opentx.h"
+#include "radio_calibration.h"
 
-#define XPOT_DELTA                     10
-#define XPOT_DELAY                     5 /* cycles */
-#define STICKS_WIDTH                   90
-#define STICKS_Y                       60
-#define STICK_LEFT_X                   25
-#define STICK_RIGHT_X                  (LCD_W-STICK_LEFT_X-STICKS_WIDTH)
+class StickCalibrationWindow: public Window {
+  public:
+    StickCalibrationWindow(Window * parent, const rect_t & rect, int stickIndex):
+      Window(parent, rect),
+      stickIndex(stickIndex)
+    {
+    }
+
+    void checkEvents()
+    {
+      // will always force a full monitor window refresh
+      invalidate();
+    }
+
+    void paint(BitmapBuffer * dc)
+    {
+      dc->drawBitmap(0, 0, calibStickBackground);
+      uint16_t x = anaIn(stickIndex);
+      uint16_t y = anaIn(stickIndex + 1);
+      // dc->drawBitmap(width()/2 - 9 + (bitmapSize/2 * x) / RESX, height()/2 - 9 - (bitmapSize/2 * y) / RESX, calibStick);
+      drawNumber(dc, 10, 10, x);
+      drawNumber(dc, 10, 50, y);
+    }
+
+  protected:
+    static constexpr coord_t bitmapSize = 68;
+    uint8_t stickIndex;
+};
+
+
+RadioCalibrationPage::RadioCalibrationPage():
+  PageTab(STR_MENUCALIBRATION, ICON_RADIO_CALIBRATION)
+{
+}
+
+void RadioCalibrationPage::build(Window * window)
+{
+  menuCalibrationState = 0;
+
+  new StickCalibrationWindow(window, {20, 20, 90, 90}, 0);
+  new StickCalibrationWindow(window, {LCD_W-110, 20, 90, 90}, 2);
+  button = new TextButton(window, {LCD_W/2-120, window->height() - 50, 240, 30}, "START", [=]() -> uint8_t {
+    nextStep();
+    return 0;
+  });
+}
+
 
 enum CalibrationState {
   CALIB_START = 0,
@@ -36,47 +77,85 @@ enum CalibrationState {
   CALIB_FINISHED
 };
 
-#define STICK_PANEL_WIDTH              68
 
-void drawStick(coord_t x, coord_t y, const BitmapBuffer * background, int16_t xval, int16_t yval)
+void RadioCalibrationPage::nextStep()
 {
-  // lcd->drawBitmap(x, y, calibStickBackground);
-  // lcd->drawBitmap(x + 2 + STICK_PANEL_WIDTH/2 + STICK_PANEL_WIDTH/2 * xval/RESX, y + 2 + STICK_PANEL_WIDTH/2 - STICK_PANEL_WIDTH/2 * yval/RESX, calibStick);
+  menuCalibrationState++;
 
-  drawValueWithUnit(x, y, xval, 0, 0);
-  drawValueWithUnit(x, y + 30, yval, 0, 0);
-  drawValueWithUnit(x, y + 60, g_tmr10ms, 0, PREC1);
-  lcdDrawHexNumber(x, y + 90, readKeys());
-  lcdDrawHexNumber(x, y + 120, readTrims());
+  switch (menuCalibrationState) {
+    case CALIB_SET_MIDPOINT:
+      button->setText(STR_SETMIDPOINT);
+      for (uint8_t i=0; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS+NUM_MOUSE_ANALOGS; i++) {
+        reusableBuffer.calib.loVals[i] = 15000;
+        reusableBuffer.calib.hiVals[i] = -15000;
+        reusableBuffer.calib.midVals[i] = i < TX_VOLTAGE ? anaIn(i) : anaIn(i+1);
+#if NUM_XPOTS > 0
+        if (i < NUM_XPOTS) {
+          reusableBuffer.calib.xpotsCalib[i].stepsCount = 0;
+          reusableBuffer.calib.xpotsCalib[i].lastCount = 0;
+        }
+#endif
+      }
+      break;
+
+    case CALIB_MOVE_STICKS:
+      button->setText(STR_MOVESTICKSPOTS);
+      for (uint8_t i=0; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS+NUM_MOUSE_ANALOGS; i++) {
+        if (abs(reusableBuffer.calib.loVals[i]-reusableBuffer.calib.hiVals[i]) > 50) {
+          g_eeGeneral.calib[i].mid = reusableBuffer.calib.midVals[i];
+          int16_t v = reusableBuffer.calib.midVals[i] - reusableBuffer.calib.loVals[i];
+          g_eeGeneral.calib[i].spanNeg = v - v/STICK_TOLERANCE;
+          v = reusableBuffer.calib.hiVals[i] - reusableBuffer.calib.midVals[i];
+          g_eeGeneral.calib[i].spanPos = v - v/STICK_TOLERANCE;
+        }
+      }
+#if NUM_XPOTS > 0
+    for (int i=POT1; i<=POT_LAST; i++) {
+        int idx = i - POT1;
+        int count = reusableBuffer.calib.xpotsCalib[idx].stepsCount;
+        if (IS_POT_MULTIPOS(i)) {
+          if (count > 1 && count <= XPOTS_MULTIPOS_COUNT) {
+            for (int j=0; j<count; j++) {
+              for (int k=j+1; k<count; k++) {
+                if (reusableBuffer.calib.xpotsCalib[idx].steps[k] < reusableBuffer.calib.xpotsCalib[idx].steps[j]) {
+                  SWAP(reusableBuffer.calib.xpotsCalib[idx].steps[j], reusableBuffer.calib.xpotsCalib[idx].steps[k]);
+                }
+              }
+            }
+            StepsCalibData * calib = (StepsCalibData *) &g_eeGeneral.calib[i];
+            calib->count = count - 1;
+            for (int j=0; j<calib->count; j++) {
+              calib->steps[j] = (reusableBuffer.calib.xpotsCalib[idx].steps[j+1] + reusableBuffer.calib.xpotsCalib[idx].steps[j]) >> 5;
+            }
+          }
+          else {
+            // g_eeGeneral.potsConfig &= ~(0x03<<(2*idx));
+          }
+        }
+      }
+#endif
+      break;
+
+    case CALIB_STORE:
+      button->setText("START");
+      g_eeGeneral.chkSum = evalChkSum();
+      storageDirty(EE_GENERAL);
+      menuCalibrationState = CALIB_FINISHED;
+      break;
+
+    default:
+      button->setText("START");
+      menuCalibrationState = CALIB_START;
+      break;
+  }
 }
 
-void drawSticks()
-{
-  int16_t calibStickVert = calibratedAnalogs[CONVERT_MODE(1)];
-  if (g_model.throttleReversed && CONVERT_MODE(1) == THR_STICK)
-    calibStickVert = -calibStickVert;
-  drawStick(STICK_LEFT_X, STICKS_Y, calibStickBackground, anaIn(0), anaIn(1));
-
-  calibStickVert = calibratedAnalogs[CONVERT_MODE(2)];
-  if (g_model.throttleReversed && CONVERT_MODE(2) == THR_STICK)
-    calibStickVert = -calibStickVert;
-  drawStick(STICK_RIGHT_X, STICKS_Y, calibStickBackground, anaIn(2), anaIn(3));
-
-  uint32_t y = 200;
-  uint32_t x = 30;
-  lcdDrawText(10, y, "B"); lcdDrawHexNumber(x, y, GPIOB->IDR & KEYS_GPIOB_PINS); y+=20;
-  lcdDrawText(10, y, "C"); lcdDrawHexNumber(x, y, GPIOC->IDR & KEYS_GPIOC_PINS); y+=20;
-  lcdDrawText(10, y, "D"); lcdDrawHexNumber(x, y, GPIOD->IDR & KEYS_GPIOD_PINS); y+=20;
-  lcdDrawText(10, y, "F"); lcdDrawHexNumber(x, y, GPIOF->IDR & KEYS_GPIOF_PINS); y+=20;
-  lcdDrawText(10, y, "G"); lcdDrawHexNumber(x, y, GPIOG->IDR & KEYS_GPIOG_PINS); y+=20;
-  lcdDrawText(10, y, "H"); lcdDrawHexNumber(x, y, GPIOH->IDR & KEYS_GPIOH_PINS); y+=20;
-  lcdDrawText(10, y, "J"); lcdDrawHexNumber(x, y, GPIOJ->IDR & KEYS_GPIOJ_PINS); y += 20;
-
-  lcdDrawText(10, y, "Event"); lcdDrawNumber(100, y, touchState.Event); y+=20;
-  lcdDrawText(10, y, "XY"); lcdDrawNumber(100, y, touchState.X); lcdDrawNumber(200, y, touchState.Y); y += 20;
-                            lcdDrawNumber(100, y, touchState.startX); lcdDrawNumber(200, y, touchState.startY);  y += 20;
-
-}
+#define XPOT_DELTA                     10
+#define XPOT_DELAY                     5 /* cycles */
+#define STICKS_WIDTH                   90
+#define STICKS_Y                       60
+#define STICK_LEFT_X                   25
+#define STICK_RIGHT_X                  (LCD_W-STICK_LEFT_X-STICKS_WIDTH)
 
 void drawPots()
 {
@@ -90,13 +169,6 @@ void drawPots()
   drawVerticalSlider(LCD_W-125-12, 120, 120, calibratedAnalogs[CALIBRATED_SLIDER_FRONT_RIGHT], -RESX, RESX, 40, OPTION_SLIDER_TICKS | OPTION_SLIDER_BIG_TICKS | OPTION_SLIDER_SQUARE_BUTTON);
 #endif
 }
-
-#if defined(PCBX12S)
-void drawMouse()
-{
-  drawStick(STICK_LEFT_X, STICKS_Y+100, calibTrackpBackground, calibratedAnalogs[CALIBRATED_MOUSE1], calibratedAnalogs[CALIBRATED_MOUSE2]);
-}
-#endif
 
 bool menuCommonCalib(event_t event)
 {
@@ -236,17 +308,6 @@ bool menuCommonCalib(event_t event)
       break;
   }
 
-
-  if (calibHorus) {
-    // lcd->drawBitmap((LCD_W-calibHorus->getWidth())/2, LCD_H-20-calibHorus->getHeight(), calibHorus);
-  }
-
-  drawSticks();
-  // drawPots();
-
-#if defined(PCBX12S)
-  drawMouse();
-#endif
 
   return true;
 }

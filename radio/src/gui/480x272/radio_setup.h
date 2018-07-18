@@ -4,8 +4,5 @@ class RadioSetupPage: public PageTab {
   public:
     RadioSetupPage();
 
-    void build(Window * window);
-
-  protected:
-
+    void build(Window * window) override;
 };

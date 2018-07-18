@@ -85,6 +85,6 @@ void Alert::paint(BitmapBuffer * dc)
   }
 
   if (action) {
-    dc->drawText(ALERT_FRAME_PADDING+5, ALERT_ACTION_TOP, action);
+   // TODO remove action? dc->drawText(ALERT_FRAME_PADDING+5, ALERT_ACTION_TOP, action);
   }
 }

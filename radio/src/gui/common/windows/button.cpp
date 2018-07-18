@@ -31,7 +31,7 @@ bool Button::onTouchEnd(coord_t x, coord_t y)
 
 void TextButton::paint(BitmapBuffer * dc)
 {
-  dc->drawText(rect.w / 2, 2, text, CENTERED | (enabled ? 0 : TEXT_DISABLE_COLOR));
+  dc->drawText(rect.w / 2, rect.h / 2 - 12, text, CENTERED | (enabled ? 0 : TEXT_DISABLE_COLOR));
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, state ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
 }
 

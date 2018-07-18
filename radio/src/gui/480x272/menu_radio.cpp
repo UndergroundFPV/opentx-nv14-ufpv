@@ -20,11 +20,13 @@
 
 #include "opentx.h"
 #include "radio_setup.h"
+#include "radio_calibration.h"
 
 RadioMenu::RadioMenu():
   TabsGroup()
 {
   addTab(new RadioSetupPage());
+  addTab(new RadioCalibrationPage());
 }
 
 const MenuHandlerFunc menuTabGeneral[] = {
