@@ -550,8 +550,8 @@ bool isFirmwareUpdateState()
 
 void onFlySkyBindReceiver(uint8_t port)
 {
-    resetPulsesFlySky(INTERNAL_MODULE);
-    moduleFlag[INTERNAL_MODULE] = MODULE_BIND;
+    resetPulsesFlySky(port);
+    moduleFlag[port] = MODULE_BIND;
 }
 
 void onFlySkyReceiverPulse_PPM(uint8_t port)

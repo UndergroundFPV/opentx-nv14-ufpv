@@ -368,6 +368,25 @@ void ModelSetupPage::updateInternalModuleWindow()
                                       updateInternalModuleWindow();
                                       internalModuleChoice->setFocus();
                                     });
+  if (value != RF_PROTO_OFF) {
+    internalModuleBind = new TextButton(internalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_BIND,
+                 [=]() -> uint8_t {
+                     if (moduleFlag[INTERNAL_MODULE] == MODULE_NORMAL_MODE) {
+                       onFlySkyBindReceiver(INTERNAL_MODULE);
+                       moduleFlag[INTERNAL_MODULE] = MODULE_BIND;
+                       return 1;
+                     }
+                     else {
+                       moduleFlag[INTERNAL_MODULE] = MODULE_NORMAL_MODE;
+                       return 0;
+                     }
+                 });
+
+    if (moduleFlag[INTERNAL_MODULE] == MODULE_BIND) {
+        grid.nextLine();
+        new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_RXBINDING);
+    }
+  }
   grid.nextLine();
 
   if (value != RF_PROTO_OFF) {
