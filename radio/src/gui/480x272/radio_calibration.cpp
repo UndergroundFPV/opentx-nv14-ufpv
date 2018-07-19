@@ -29,7 +29,7 @@ class StickCalibrationWindow: public Window {
     {
     }
 
-    void checkEvents()
+    virtual void checkEvents() override
     {
       // will always force a full monitor window refresh
       invalidate();

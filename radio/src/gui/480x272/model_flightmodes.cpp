@@ -51,27 +51,74 @@ bool isTrimModeAvailable(int mode)
 void ModelFlightModesPage::build(Window * window)
 {
   GridLayout grid(*window);
-  grid.setLabelWidth(50);
   grid.spacer();
 
-  // TODO
-  /* if (menuVerticalPosition<MAX_FLIGHT_MODES && menuHorizontalPosition>=0) {
-    drawColumnHeader(STR_PHASES_HEADERS, NULL, menuHorizontalPosition);
-  }*/
-
   for (int i = 0; i < MAX_FLIGHT_MODES; i++) {
+    // Flight mode index
     char label[16];
     getFlightModeString(label, i+1);
-    new StaticText(window, grid.getLabelSlot(), label); // TODO (getFlightMode()==k ? BOLD : 0)
-    new TextEdit(window, grid.getFieldSlot(3, 0), g_model.flightModeData[i].name, LEN_FLIGHT_MODE_NAME);
-    new SwitchChoice(window, grid.getFieldSlot(3, 1), MixesContext, GET_SET_DEFAULT(g_model.flightModeData[i].swtch));
-    // TODOif (k == 0)
-    //      lcdDrawText(FLIGHT_MODES_SWITCH_COLUMN, y, "N/A");
+    new Subtitle(window, grid.getLabelSlot(), label); // TODO (getFlightMode()==k ? BOLD : 0)
+    grid.nextLine();
+
+    // Flight mode name
+    new StaticText(window, grid.getLabelSlot(true), STR_NAME);
+    new TextEdit(window, grid.getFieldSlot(), g_model.flightModeData[i].name, LEN_FLIGHT_MODE_NAME);
+    grid.nextLine();
+
+    // Flight mode switch
+    if (i > 0) {
+      new StaticText(window, grid.getLabelSlot(true), STR_SWITCH);
+      new SwitchChoice(window, grid.getFieldSlot(), MixesContext, GET_SET_DEFAULT(g_model.flightModeData[i].swtch));
+      grid.nextLine();
+    }
+
+    // Flight mode trims
+    new StaticText(window, grid.getLabelSlot(true), STR_TRIMS);
+
+    const char * STR_VTRIMS_MODES = "\002"
+      "--"
+      "=0"
+      "+0"
+      "=1"
+      "+1"
+      "=2"
+      "+2"
+      "=3"
+      "+3"
+      "=4"
+      "+4"
+      "=5"
+      "+5"
+      "=6"
+      "+6"
+      "=7"
+      "+7"
+      "=8"
+      "+8";
+    for (int t=0; t<NUM_TRIMS; t++) {
+      // TODO isTrimModeAvailable to avoid +{{CURRENT}}
+      new Choice(window, grid.getFieldSlot(NUM_TRIMS, t), STR_VTRIMS_MODES, -1, 2*MAX_FLIGHT_MODES-1,
+                     GET_DEFAULT(g_model.flightModeData[i].trim[t].mode==TRIM_MODE_NONE ? -1 : g_model.flightModeData[i].trim[t].mode),
+                     SET_DEFAULT(g_model.flightModeData[i].trim[t].mode),
+                     STDSIZE);
+    }
+    grid.nextLine();
+
+    // Flight mode fade in / out
+    new StaticText(window, grid.getLabelSlot(true), "Fade in/out");
+    new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+                   GET_DEFAULT(g_model.flightModeData[i].fadeIn * (10 / DELAY_STEP)),
+                   SET_VALUE(g_model.flightModeData[i].fadeIn, newValue / (10 / DELAY_STEP)),
+                   PREC1);
+    new NumberEdit(window, grid.getFieldSlot(2, 1), 0, DELAY_MAX, 10 / DELAY_STEP,
+                   GET_DEFAULT(g_model.flightModeData[i].fadeOut * (10 / DELAY_STEP)),
+                   SET_VALUE(g_model.flightModeData[i].fadeOut, newValue / (10 / DELAY_STEP)),
+                   PREC1);
     grid.nextLine();
   }
 
   char label[32];
-  sprintf(label, "Check FM%d Trims", mixerCurrentFlightMode);
+  sprintf(label, "Check %d Trims", mixerCurrentFlightMode);
   new TextButton(window, { 60, grid.getWindowHeight() + 5, LCD_W - 120, 30 }, label,
                  [&]() -> uint8_t {
                    if (trimsCheckTimer)
@@ -83,55 +130,3 @@ void ModelFlightModesPage::build(Window * window)
 
   window->setInnerHeight(grid.getWindowHeight());
 }
-
-#if 0
-bool menuModelFlightModesAll(event_t event)
-{
-  if (menuVerticalPosition==0 && menuHorizontalPosition==ITEM_FLIGHT_MODES_SWITCH) {
-    menuHorizontalPosition += CURSOR_MOVED_LEFT(event) ? -1 : +1;
-  }
-
-  for (uint8_t i=0; i<NUM_BODY_LINES; i++) {
-    coord_t y = MENU_CONTENT_TOP + i*FH;
-    int k = i+menuVerticalOffset;
-
-    FlightModeData * p = flightModeAddress(k);
-
-    drawFlightMode(MENUS_MARGIN_LEFT, y, k+1, (getFlightMode()==k ? BOLD : 0) | ((menuVerticalPosition==k && menuHorizontalPosition<0) ? INVERS : 0));
-
-    for (uint8_t j=0; j<ITEM_FLIGHT_MODES_COUNT; j++) {
-
-
-        case ITEM_FLIGHT_MODES_TRIM_RUD:
-        case ITEM_FLIGHT_MODES_TRIM_ELE:
-        case ITEM_FLIGHT_MODES_TRIM_THR:
-        case ITEM_FLIGHT_MODES_TRIM_AIL:
-        case ITEM_FLIGHT_MODES_TRIM_T5:
-        case ITEM_FLIGHT_MODES_TRIM_T6:
-        {
-          uint8_t t = j-ITEM_FLIGHT_MODES_TRIM_RUD;
-          if (active) {
-            trim_t & v = p->trim[t];
-            v.mode = checkIncDec(event, v.mode==TRIM_MODE_NONE ? -1 : v.mode, -1, k==0 ? 0 : 2*MAX_FLIGHT_MODES-1, EE_MODEL, isTrimModeAvailable);
-          }
-          drawTrimMode(FLIGHT_MODES_TRIMS_COLUMN+j*FLIGHT_MODES_TRIM_WIDTH, y, k, t, attr);
-          break;
-        }
-
-        case ITEM_FLIGHT_MODES_FADE_IN:
-          if (active) p->fadeIn = checkIncDec(event, p->fadeIn, 0, DELAY_MAX, EE_MODEL|NO_INCDEC_MARKS);
-          lcdDrawNumber(FLIGHT_MODES_FADEIN_COLUMN, y, (10/DELAY_STEP)*p->fadeIn, attr|PREC1|RIGHT);
-          break;
-
-        case ITEM_FLIGHT_MODES_FADE_OUT:
-          if (active) p->fadeOut = checkIncDec(event, p->fadeOut, 0, DELAY_MAX, EE_MODEL|NO_INCDEC_MARKS);
-          lcdDrawNumber(FLIGHT_MODES_FADEOUT_COLUMN, y, (10/DELAY_STEP)*p->fadeOut, attr|PREC1|RIGHT);
-          break;
-
-      }
-    }
-  }
-
-  return true;
-}
-#endif

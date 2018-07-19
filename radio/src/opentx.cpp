@@ -1164,9 +1164,54 @@ void checkLowEEPROM()
 }
 #endif
 
+bool isThrottleWarningAlertNeeded()
+{
+  if (g_model.disableThrottleWarning) {
+    return false;
+  }
+
+  uint8_t thrchn = ((g_model.thrTraceSrc==0) || (g_model.thrTraceSrc>NUM_POTS+NUM_SLIDERS)) ? THR_STICK : g_model.thrTraceSrc+NUM_STICKS-1;
+
+  GET_ADC_IF_MIXER_NOT_RUNNING();
+
+  evalInputs(e_perout_mode_notrainer); // let do evalInputs do the job
+
+  int16_t v = calibratedAnalogs[thrchn];
+  if (v <= THRCHK_DEADBAND-1024) {
+    return false;
+  }
+
+  return true;
+}
+
+#if defined(COLORLCD)
+
+class ThrottleAlert: public Alert {
+  public:
+    ThrottleAlert():
+      Alert(WARNING_TYPE_ALERT, STR_THROTTLEWARN, STR_THROTTLENOTIDLE)
+    {
+    }
+
+  protected:
+    virtual void checkEvents() override {
+      if (!isThrottleWarningAlertNeeded()) {
+        deleteLater();
+      }
+    }
+};
+
 void checkTHR()
 {
-  uint8_t thrchn = ((g_model.thrTraceSrc==0) || (g_model.thrTraceSrc>NUM_POTS+NUM_SLIDERS)) ? THR_STICK : g_model.thrTraceSrc+NUM_STICKS-1;
+  if (isThrottleWarningAlertNeeded()) {
+    new ThrottleAlert();
+  }
+}
+
+#else
+void checkTHR()
+{
+
   // throttle channel is either the stick according stick mode (already handled in evalInputs)
   // or P1 to P3;
   // in case an output channel is choosen as throttle source (thrTraceSrc>NUM_POTS+NUM_SLIDERS) we assume the throttle stick is the input
@@ -1187,17 +1232,8 @@ void checkTHR()
     RAISE_ALERT(STR_THROTTLEWARN, STR_THROTTLENOTIDLE, STR_PRESSANYKEYTOSKIP, AU_THROTTLE_ALERT);
   }
 #else
-  if (g_model.disableThrottleWarning) {
+  if (!isThrottleWarningAlertNeeded()) {
     return;
-  }
-
-  GET_ADC_IF_MIXER_NOT_RUNNING();
-
-  evalInputs(e_perout_mode_notrainer); // let do evalInputs do the job
-
-  int16_t v = calibratedAnalogs[thrchn];
-  if (v <= THRCHK_DEADBAND-1024) {
-    return; // prevent warning if throttle input OK
   }
 
   // first - display warning; also deletes inputs if any have been before
@@ -1208,13 +1244,11 @@ void checkTHR()
   bool refresh = false;
 #endif
 
-  while (1) {
+  while (!getEvent()) {
 
-    GET_ADC_IF_MIXER_NOT_RUNNING();
-
-    evalInputs(e_perout_mode_notrainer); // let do evalInputs do the job
-
-    v = calibratedAnalogs[thrchn];
+    if (!isThrottleWarningAlertNeeded()) {
+      return;
+    }
 
 #if defined(PWR_BUTTON_PRESS)
     uint32_t pwr_check = pwrCheck();
@@ -1234,10 +1268,6 @@ void checkTHR()
     }
 #endif
 
-    if (getEvent() || v <= THRCHK_DEADBAND-1024) {
-      break;
-    }
-
     doLoopCommonActions();
 
     wdt_reset();
@@ -1252,6 +1282,7 @@ void checkTHR()
 
   LED_ERROR_END();
 }
+#endif
 
 void checkAlarm() // added by Gohst
 {

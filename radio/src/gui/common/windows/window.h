@@ -179,6 +179,14 @@ class MainWindow: public Window {
 
     bool refresh();
 
+    void run()
+    {
+      checkEvents();
+      if (refresh()) {
+        lcdRefresh();
+      }
+    }
+
   protected:
     void emptyTrash();
     rect_t invalidatedRect;

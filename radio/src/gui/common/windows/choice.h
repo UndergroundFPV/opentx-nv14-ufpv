@@ -29,16 +29,17 @@ class Choice : public Window {
            std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0
     );
 
-    void paint(BitmapBuffer * dc);
+    virtual void paint(BitmapBuffer * dc) override;
 
-    bool onTouchEnd(coord_t x, coord_t y);
+    virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
-    const char * label;
+  protected:
     const char * values;
     int16_t vmin;
     int16_t vmax;
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
+    LcdFlags flags;
 };
 
 #endif // _CHOICE_H_

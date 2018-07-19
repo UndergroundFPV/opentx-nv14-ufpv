@@ -27,7 +27,8 @@ Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_
   vmin(vmin),
   vmax(vmax),
   getValue(getValue),
-  setValue(setValue)
+  setValue(setValue),
+  flags(flags)
 {
 }
 
@@ -40,7 +41,7 @@ void Choice::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  drawTextAtIndex(dc, 3, 2, values, getValue() - vmin, textColor);
+  drawTextAtIndex(dc, 3, 2, values, getValue() - vmin, flags | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 

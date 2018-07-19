@@ -23,13 +23,14 @@
 void SourceChoice::paint(BitmapBuffer * dc)
 {
   bool hasFocus = this->hasFocus();
-  LcdFlags textColor = 0;
+  unsigned value = getValue();
+  LcdFlags textColor = (value == 0 ? CURVE_AXIS_COLOR : 0);
   LcdFlags lineColor = CURVE_AXIS_COLOR;
   if (hasFocus) {
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  drawSource(dc, 3, 2, getValue(), textColor);
+  drawSource(dc, 3, 2, value, textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 

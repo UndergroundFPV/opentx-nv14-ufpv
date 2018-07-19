@@ -47,5 +47,6 @@ bool TextEdit::onTouchEnd(coord_t x, coord_t y)
     keyboard->setField(this);
   }
   keyboard->setCursorPos(x);
+  parent->scrollTo(this);
   return true;
 }
