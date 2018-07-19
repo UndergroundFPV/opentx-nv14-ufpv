@@ -22,6 +22,7 @@
 #include "model_setup.h"
 #include "model_heli.h"
 #include "model_flightmodes.h"
+#include "model_mixes.h"
 
 ModelMenu::ModelMenu():
   TabsGroup()
@@ -32,7 +33,7 @@ ModelMenu::ModelMenu():
 #endif
   addTab(new ModelFlightModesPage());
   addTab(new ModelSetupPage());
-  addTab(new ModelSetupPage());
+  addTab(new ModelMixesPage());
   addTab(new ModelSetupPage());
   addTab(new ModelSetupPage());
   addTab(new ModelSetupPage());
