@@ -26,13 +26,14 @@ bool Button::onTouchEnd(coord_t x, coord_t y)
     state = onPress();
     invalidate();
   }
+  setFocus();
   return true;
 }
 
 void TextButton::paint(BitmapBuffer * dc)
 {
-  dc->drawText(rect.w / 2, rect.h / 2 - 12, text, CENTERED | (enabled ? 0 : TEXT_DISABLE_COLOR));
-  drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, state ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+  dc->drawText(rect.w / 2, rect.h / 2 - 12, text, flags | CENTERED | (enabled ? 0 : TEXT_DISABLE_COLOR));
+  drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, getState() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
 }
 
 #include "alpha_button_on.lbm"
@@ -40,10 +41,10 @@ void TextButton::paint(BitmapBuffer * dc)
 
 void IconButton::paint(BitmapBuffer * dc)
 {
-  dc->drawBitmap(0, 0, theme->getIconBitmap(icon, state));
+  dc->drawBitmap(0, 0, theme->getIconBitmap(icon, getState()));
 }
 
-FabIconButton::FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t state):
+FabIconButton::FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, int8_t state):
   Button(parent, { x - 34, y - 34, 68, 68 }, onPress, state),
   icon(icon)
 {
@@ -51,7 +52,7 @@ FabIconButton::FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon
 
 void FabIconButton::paint(BitmapBuffer * dc)
 {
-  dc->drawBitmap(0, 0, state ? &ALPHA_BUTTON_ON : &ALPHA_BUTTON_OFF);
+  dc->drawBitmap(0, 0, getState() ? &ALPHA_BUTTON_ON : &ALPHA_BUTTON_OFF);
   const BitmapBuffer * mask = theme->getIconMask(icon);
   dc->drawMask((68-mask->getWidth())/2, (68-mask->getHeight())/2, mask, TEXT_BGCOLOR);
 }

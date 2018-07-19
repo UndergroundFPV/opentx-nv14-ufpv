@@ -221,8 +221,8 @@ void ModelSetupPage::build(Window * window)
   // Extended trims
   new StaticText(window, grid.getLabelSlot(), STR_ETRIMS);
   new CheckBox(window, grid.getFieldSlot(2, 0), GET_SET_DEFAULT(g_model.extendedTrims));
-  new TextButton(window, grid.getFieldSlot(2, 1),STR_RESET_BTN,
-                 [&]() -> uint8_t {
+  new TextButton(window, grid.getFieldSlot(2, 1), STR_RESET_BTN,
+                 []() -> uint8_t {
                      START_NO_HIGHLIGHT();
                      for (uint8_t i=0; i<MAX_FLIGHT_MODES; i++) {
                        memclear(&g_model.flightModeData[i], TRIMS_ARRAY_SIZE);
@@ -230,7 +230,7 @@ void ModelSetupPage::build(Window * window)
                      storageDirty(EE_MODEL);
                      AUDIO_WARNING1();
                      return 0;
-                 });
+                 }, 0);
   grid.nextLine();
 
   // Display trims
@@ -380,7 +380,7 @@ void ModelSetupPage::updateInternalModuleWindow()
                        moduleFlag[INTERNAL_MODULE] = MODULE_NORMAL_MODE;
                        return 0;
                      }
-                 });
+                 }, 0);
 
     if (moduleFlag[INTERNAL_MODULE] == MODULE_BIND) {
         grid.nextLine();
@@ -542,7 +542,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                            moduleFlag[EXTERNAL_MODULE] = MODULE_NORMAL_MODE;
                            return 0;
                          }
-                     });
+                     }, 0);
 
       externalModuleRange = new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
                                            [=]() -> uint8_t {
@@ -558,7 +558,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                                                moduleFlag[EXTERNAL_MODULE] = MODULE_NORMAL_MODE;
                                                return 0;
                                              }
-                                           });
+                                           }, 0);
     }
     grid.nextLine();
 
@@ -578,7 +578,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                        [=]() -> uint8_t {
                          // TODO launch the failsafe window
                          return 1;
-                       });
+                       }, 0);
       }
       grid.nextLine();
     }

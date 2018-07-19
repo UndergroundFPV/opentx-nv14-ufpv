@@ -76,16 +76,58 @@ class SubmenuWindow: public Window {
 
 class MixEditWindow: public SubmenuWindow {
   public:
-    MixEditWindow():
-      SubmenuWindow()
+    MixEditWindow(int8_t mixIndex):
+      SubmenuWindow(),
+      mixIndex(mixIndex)
     {
       build(&body);
     }
 
   protected:
+    int8_t mixIndex;
     void build(Window * window) {
+      TRACE("Edit Mix line %d", mixIndex);
+      // TODO here all widgets to edit a mix line
+    }
+};
+
+class MixesToolbar: public Window {
+  public:
+    MixesToolbar(Window * parent, const rect_t &rect) :
+      Window(parent, rect)
+    {
+      new TextButton(this, {5, 5, 50, 30}, "<",
+                     [=]() -> uint8_t {
+                       // TODO
+                       return 1;
+                     }, 1);
+
+      new TextButton(this, {60, 5, 50, 30}, "E",
+                     [&]() -> uint8_t {
+                       new MixEditWindow(selectedMixIndex);
+                       return 1;
+                     }, 1);
+
+      new TextButton(this, {115, 5, 50, 30}, ">",
+                     [=]() -> uint8_t {
+                       // TODO
+                       return 1;
+                     }, 1);
 
     }
+
+    void selectMix(int8_t mixIndex)
+    {
+      selectedMixIndex = mixIndex;
+    }
+
+    virtual void paint(BitmapBuffer * dc) override
+    {
+      dc->clear(CURVE_AXIS_COLOR);
+    }
+
+  protected:
+    int8_t selectedMixIndex = -1;
 };
 
 ModelMixesPage::ModelMixesPage():
@@ -95,15 +137,24 @@ ModelMixesPage::ModelMixesPage():
 
 void ModelMixesPage::build(Window * window)
 {
+  body = new Window(window, {0, 0, LCD_W, window->height() - footerHeight});
+  footer = new MixesToolbar(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
+
+  buildBody(body);
+}
+
+void ModelMixesPage::buildBody(Window * window)
+{
   GridLayout grid(*window);
   grid.spacer(10);
-  char s[16];
 
-  for (int ch=1, i=0; ch<=MAX_OUTPUT_CHANNELS; ch++, i++) {
-    new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + i),
+  char s[16];
+  int mixIndex = 0;
+  for (int8_t ch=0; ch<MAX_OUTPUT_CHANNELS; ch++) {
+    new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
                    [=]() -> uint8_t {
-                     new MixEditWindow();
-                     return 0;
+                     footer->selectMix(mixIndex);
+                     return FOCUS_STATE;
                    });
     grid.nextLine();
   }

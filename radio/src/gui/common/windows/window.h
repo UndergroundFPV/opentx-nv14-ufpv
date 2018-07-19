@@ -49,7 +49,7 @@ class Window {
 
     void scrollTo(Window * child);
 
-    void clearFocus();
+    static void clearFocus();
 
     void setFocus();
 

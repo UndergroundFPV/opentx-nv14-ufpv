@@ -62,10 +62,10 @@ void RadioCalibrationPage::build(Window * window)
 
   new StickCalibrationWindow(window, {20, 20, 90, 90}, 0);
   new StickCalibrationWindow(window, {LCD_W-110, 20, 90, 90}, 2);
-  button = new TextButton(window, {LCD_W/2-120, window->height() - 50, 240, 30}, "START", [=]() -> uint8_t {
+  button = new TextButton(window, {LCD_W/2-120, window->height() - 50, 240, 30}, "START", [=]() -> int8_t {
     nextStep();
     return 0;
-  });
+  }, 0);
 }
 
 

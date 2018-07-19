@@ -24,9 +24,11 @@
 #include <functional>
 #include "window.h"
 
+constexpr uint8_t FOCUS_STATE = 0xff;
+
 class Button : public Window {
   public:
-    Button(Window * parent, const rect_t & rect, std::function<uint8_t(void)> onPress, uint8_t state=0):
+    Button(Window * parent, const rect_t & rect, std::function<uint8_t(void)> onPress, int8_t state=FOCUS_STATE):
       Window(parent, rect),
       onPress(onPress),
       state(state)
@@ -43,24 +45,29 @@ class Button : public Window {
       enable(false);
     }
 
-    void setState(uint8_t state)
+    void setState(int8_t state)
     {
       this->state = state;
+    }
+
+    bool getState() {
+      return (state >= 0 ? state : hasFocus());
     }
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     std::function<uint8_t(void)> onPress;
-    uint8_t state;
+    int8_t state;
     uint8_t enabled = 1;
 };
 
 class TextButton : public Button {
   public:
-    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress, uint8_t state=0):
+    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress, int8_t state=FOCUS_STATE, LcdFlags flags=0):
       Button(parent, rect, onPress, state),
-      text(strdup(text))
+      text(strdup(text)),
+      flags(flags)
     {
     }
 
@@ -79,11 +86,12 @@ class TextButton : public Button {
 
   protected:
     char * text;
+    LcdFlags flags;
 };
 
 class IconButton: public Button {
   public:
-    IconButton(Window * parent, const rect_t & rect, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t state=0):
+    IconButton(Window * parent, const rect_t & rect, uint8_t icon, std::function<uint8_t(void)> onPress, int8_t state=FOCUS_STATE):
       Button(parent, rect, onPress, state),
       icon(icon)
     {
@@ -97,7 +105,7 @@ class IconButton: public Button {
 
 class FabIconButton: public Button {
   public:
-    FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t state=0);
+    FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, int8_t state=FOCUS_STATE);
 
     virtual void paint(BitmapBuffer * dc) override;
 
