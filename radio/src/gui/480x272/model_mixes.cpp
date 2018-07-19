@@ -20,10 +20,9 @@
 
 #include "opentx.h"
 #include "model_mixes.h"
-#include <stdio.h>
 
 ModelMixesPage::ModelMixesPage():
-        PageTab(STR_MIXER, ICON_MODEL_MIXER)
+  PageTab(STR_MIXER, ICON_MODEL_MIXER)
 {
 }
 
@@ -37,6 +36,8 @@ void ModelMixesPage::build(Window * window)
     new StaticText(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1+i));
     grid.nextLine();
   }
+
+  window->setInnerHeight(grid.getWindowHeight());
 }
 
 void displayMixStatus(uint8_t channel);
