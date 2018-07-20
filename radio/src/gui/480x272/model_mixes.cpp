@@ -54,6 +54,7 @@ class SubmenuWindow: public Window {
     }
 
     virtual bool onTouchStart(coord_t x, coord_t y) {
+      Window::onTouchStart(x, y);
       return true;
     }
 
@@ -63,6 +64,7 @@ class SubmenuWindow: public Window {
     }
 
     virtual bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY) {
+      Window::onTouchSlide(x, y, startX, startY, slideX, slideY);
       return true;
     }
 
@@ -174,6 +176,7 @@ class MixEditWindow: public SubmenuWindow {
       grid.nextLine();
 
       window->setInnerHeight(grid.getWindowHeight());
+
     }
 };
 
