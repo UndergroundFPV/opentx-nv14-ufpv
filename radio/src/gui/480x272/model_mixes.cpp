@@ -82,6 +82,20 @@ class MixEditWindow: public Page {
 
       // Flight modes
       new StaticText(window, grid.getLabelSlot(true), STR_FLMODE);
+      for (int i=0; i<MAX_FLIGHT_MODES; i++) {
+        char fm[2];
+        fm[0] = '0' + i;
+        fm[1] = '\0';
+        if (i > 0 && (i % 4) == 0)
+          grid.nextLine();
+        new TextButton(window, grid.getFieldSlot(4, i % 4), fm,
+                                       [=]() -> uint8_t {
+                                           BF_BIT_FLIP(md2->flightModes, BF_BIT(i));
+                                           SET_DIRTY();
+                                           return BF_SINGLE_BIT_GET(md2->flightModes, i);
+                                       },
+                                       (BF_SINGLE_BIT_GET(md2->flightModes, i) == 0 ? 0 : 1));
+      }
       grid.nextLine();
 
       // Switch
