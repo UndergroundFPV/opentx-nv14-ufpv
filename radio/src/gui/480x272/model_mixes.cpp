@@ -39,9 +39,9 @@ class MixEditWindow: public Page {
     uint8_t mixIndex;
 
     void buildHeader(Window * window) {
-      new StaticText(window, { 100, 5, 100, 30 }, STR_MIXER, HEADER_COLOR);
+      new StaticText(window, { 70, 5, 100, 20 }, STR_MIXER, MENU_TITLE_COLOR);
       char s[16];
-      new StaticText(window, { 100, 40, 100, 30 }, getSourceString(s, MIXSRC_CH1 + channel));
+      new StaticText(window, { 70, 29, 100, 20 }, getSourceString(s, MIXSRC_CH1 + channel), MENU_TITLE_COLOR);
     }
 
     void buildBody(Window * window) {
