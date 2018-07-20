@@ -42,6 +42,8 @@ class Window {
 
     void clear();
 
+    void deleteChildren();
+
     bool hasFocus() const
     {
       return focusWindow == this;

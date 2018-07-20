@@ -145,6 +145,11 @@ MainView::MainView():
                     });
 }
 
+MainView::~MainView()
+{
+  deleteChildren();
+}
+
 bool MainView::onTouchEnd(coord_t x, coord_t y)
 {
   if (Window::onTouchEnd(x, y))

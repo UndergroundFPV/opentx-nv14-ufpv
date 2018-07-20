@@ -87,6 +87,7 @@ class ModelselectMenu: public TabsGroup {
 class MainView: public Window {
   public:
     MainView();
+    virtual ~MainView();
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
     virtual void paint(BitmapBuffer * dc) override;
 };

@@ -71,7 +71,7 @@ class TextButton : public Button {
     {
     }
 
-    ~TextButton()
+    virtual ~TextButton()
     {
       free(text);
     }

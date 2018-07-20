@@ -66,19 +66,24 @@ void Window::clear()
   scrollPositionY = 0;
   innerWidth = rect.w;
   innerHeight = rect.h;
+  deleteChildren();
+  invalidate();
+}
+
+void Window::deleteChildren()
+{
   for (auto window: children) {
     window->deleteLater(false);
   }
   children.clear();
-  invalidate();
 }
 
 void Window::clearFocus()
 {
   if (focusWindow) {
     focusWindow->onFocusLost();
+    focusWindow = nullptr;
   }
-  focusWindow = nullptr;
 }
 
 void Window::setFocus()
