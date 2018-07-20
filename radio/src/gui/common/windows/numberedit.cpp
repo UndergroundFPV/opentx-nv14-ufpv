@@ -45,10 +45,11 @@ void NumberEdit::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  if( getValue() == 0 && zeroText != nullptr)
-    dc->drawText(2, 3, zeroText, textColor | flags);
+  int32_t value = getValue();
+  if (value == 0 && zeroText)
+    dc->drawText(3, 2, zeroText, textColor | flags);
   else
-    drawNumber(dc, 3, 2, getValue(), textColor | flags, 0, prefix, suffix);
+    drawNumber(dc, 3, 2, value, textColor | flags, 0, prefix, suffix);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
