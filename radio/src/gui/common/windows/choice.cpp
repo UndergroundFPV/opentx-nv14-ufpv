@@ -33,14 +33,43 @@ Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_
 {
 }
 
+
+void Choice::paint(BitmapBuffer * dc)
+{
+  bool hasFocus = this->hasFocus();
+  LcdFlags textColor = 0;
+  LcdFlags lineColor = CURVE_AXIS_COLOR;
+  if (hasFocus) {
+    textColor = TEXT_INVERTED_BGCOLOR;
+    lineColor = TEXT_INVERTED_BGCOLOR;
+  }
+  drawTextAtIndex(dc, 3, 2, values, getValue() - vmin, flags | textColor);
+  drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
+}
+
+bool Choice::onTouchEnd(coord_t x, coord_t y)
+{
+  if (hasFocus()) {
+    int16_t value = getValue() + 1;
+    if (value > vmax)
+      value = vmin;
+    setValue(value);
+  }
+  else {
+    setFocus();
+  }
+  invalidate();
+  return true;
+}
+
 CustomCurveChoice::CustomCurveChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax,
-  std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
-  Window(parent, rect),
-  vmin(vmin),
-  vmax(vmax),
-  getValue(getValue),
-  setValue(setValue),
-  flags(flags)
+                                     std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
+        Window(parent, rect),
+        vmin(vmin),
+        vmax(vmax),
+        getValue(getValue),
+        setValue(setValue),
+        flags(flags)
 {
 }
 
@@ -60,34 +89,6 @@ void CustomCurveChoice::paint(BitmapBuffer * dc)
 }
 
 bool CustomCurveChoice::onTouchEnd(coord_t x, coord_t y)
-{
-  if (hasFocus()) {
-    int16_t value = getValue() + 1;
-    if (value > vmax)
-      value = vmin;
-    setValue(value);
-  }
-  else {
-    setFocus();
-  }
-  invalidate();
-  return true;
-}
-
-void Choice::paint(BitmapBuffer * dc)
-{
-  bool hasFocus = this->hasFocus();
-  LcdFlags textColor = 0;
-  LcdFlags lineColor = CURVE_AXIS_COLOR;
-  if (hasFocus) {
-    textColor = TEXT_INVERTED_BGCOLOR;
-    lineColor = TEXT_INVERTED_BGCOLOR;
-  }
-  drawTextAtIndex(dc, 3, 2, values, getValue() - vmin, flags | textColor);
-  drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
-}
-
-bool Choice::onTouchEnd(coord_t x, coord_t y)
 {
   if (hasFocus()) {
     int16_t value = getValue() + 1;
