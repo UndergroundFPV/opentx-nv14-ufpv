@@ -23,65 +23,10 @@
 
 #define SET_DIRTY()     storageDirty(EE_MODEL)
 
-class SubmenuHeader: public Window {
-  public:
-    SubmenuHeader(Window * parent):
-      Window(parent, { 0, 0, LCD_W, MENU_BODY_TOP }),
-      back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
-           [=]() -> uint8_t {
-             parent->deleteLater();
-             return 0;
-           }, 1)
-    {
-    }
-
-    virtual void paint(BitmapBuffer * dc) override
-    {
-      dc->drawSolidFilledRect(TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH, HEADER_BGCOLOR);
-    }
-
-  protected:
-    IconButton back;
-};
-
-class SubmenuWindow: public Window {
-  public:
-    SubmenuWindow():
-      Window(&mainWindow, {0, 0, LCD_W, LCD_H}),
-      header(this),
-      body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
-    {
-    }
-
-    virtual bool onTouchStart(coord_t x, coord_t y) {
-      Window::onTouchStart(x, y);
-      return true;
-    }
-
-    virtual bool onTouchEnd(coord_t x, coord_t y) {
-      Window::onTouchEnd(x, y);
-      return true;
-    }
-
-    virtual bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY) {
-      Window::onTouchSlide(x, y, startX, startY, slideX, slideY);
-      return true;
-    }
-
-    virtual void paint(BitmapBuffer * dc) override
-    {
-      dc->clear(TEXT_BGCOLOR);
-    }
-
-  protected:
-    SubmenuHeader header;
-    Window body;
-};
-
-class MixEditWindow: public SubmenuWindow {
+class MixEditWindow: public Page {
   public:
     MixEditWindow(int8_t mixIndex):
-      SubmenuWindow(),
+      Page(),
       mixIndex(mixIndex)
     {
       build(&body);

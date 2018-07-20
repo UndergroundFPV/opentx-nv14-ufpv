@@ -18,26 +18,14 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#include "opentx.h"
 
-#include "window.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "slider.h"
-#include "keyboard.h"
-#include "tabsgroup.h"
-#include "page.h"
-#include "menu.h"
-#include "alert.h"
-#include "gridlayout.h"
-#include "helpers.h"
-
-#endif // _WINDOWS_H_
+PageHeader::PageHeader(Page * parent):
+  Window(parent, { 0, 0, LCD_W, MENU_BODY_TOP }),
+  back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
+       [=]() -> uint8_t {
+         parent->deleteLater();
+         return 0;
+       }, 1)
+{
+}
