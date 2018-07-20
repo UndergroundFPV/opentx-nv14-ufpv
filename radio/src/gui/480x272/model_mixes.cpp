@@ -48,7 +48,6 @@ class MixEditWindow: public Page {
       GridLayout grid(*window);
       grid.spacer(10);
 
-      // TODO here all widgets to edit a mix line
       MixData * md2 = mixAddress(mixIndex) ;
 
       // Mix name
@@ -92,6 +91,7 @@ class MixEditWindow: public Page {
 
       // Warning
       new StaticText(window, grid.getLabelSlot(true), STR_MIXWARNING);
+      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, 3, 1, GET_SET_DEFAULT(md2->mixWarn), 0, NULL, NULL, "OFF");
       grid.nextLine();
 
       // Multiplex

@@ -22,7 +22,7 @@
 
 NumberEdit::NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, int32_t step,
   std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags,
-  const char * prefix, const char * suffix) :
+  const char * prefix, const char * suffix, const char * zeroText) :
   Window(parent, rect),
   vmin(vmin),
   vmax(vmax),
@@ -31,7 +31,8 @@ NumberEdit::NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32
   setValue(setValue),
   flags(flags),
   prefix(prefix),
-  suffix(suffix)
+  suffix(suffix),
+  zeroText(zeroText)
 {
 }
 
@@ -44,7 +45,10 @@ void NumberEdit::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  drawNumber(dc, 3, 2, getValue(), textColor | flags, 0, prefix, suffix);
+  if( getValue() == 0 && zeroText != nullptr)
+    dc->drawText(2, 3, zeroText, textColor | flags);
+  else
+    drawNumber(dc, 3, 2, getValue(), textColor | flags, 0, prefix, suffix);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
