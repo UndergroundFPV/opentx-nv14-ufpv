@@ -37,11 +37,45 @@ class MixEditWindow: public Page {
   protected:
     uint8_t channel;
     uint8_t mixIndex;
+    Window * updateCurvesWindow = nullptr;
+    Choice * curveTypeChoice = nullptr;
 
     void buildHeader(Window * window) {
       new StaticText(window, { 70, 4, 100, 20 }, STR_MIXER, MENU_TITLE_COLOR);
       char s[16];
       new StaticText(window, { 70, 28, 100, 20 }, getSourceString(s, MIXSRC_CH1 + channel), MENU_TITLE_COLOR);
+    }
+
+
+    void updateCurves() {
+      GridLayout grid(*updateCurvesWindow);
+      updateCurvesWindow->clear();
+
+      MixData * md2 = mixAddress(mixIndex) ;
+
+      new StaticText(updateCurvesWindow, grid.getLabelSlot(true), STR_CURVE);
+      curveTypeChoice = new Choice(updateCurvesWindow, grid.getFieldSlot(2,0), "\004DiffExpoFuncCstm", 0, CURVE_REF_CUSTOM,
+                 GET_DEFAULT(md2->curve.type),
+                 [=](int32_t newValue) -> void { md2->curve.type = newValue;
+                     SET_DIRTY();
+                     updateCurves();
+                     curveTypeChoice->setFocus();
+                 });
+
+      switch (md2->curve.type) {
+        case CURVE_REF_DIFF:
+        case CURVE_REF_EXPO:
+          // TODO GVAR
+          new NumberEdit(updateCurvesWindow, grid.getFieldSlot(2,1), -100, 100, 1, GET_SET_DEFAULT(md2->curve.value),0,NULL,"%");
+          break;
+        case CURVE_REF_FUNC:
+          new Choice(updateCurvesWindow, grid.getFieldSlot(2,1), STR_VCURVEFUNC, 0, CURVE_BASE-1, GET_SET_DEFAULT(md2->curve.value));
+          break;
+        case CURVE_REF_CUSTOM:
+          new CustomCurveChoice(updateCurvesWindow, grid.getFieldSlot(2,1), -MAX_CURVES, MAX_CURVES, GET_SET_DEFAULT(md2->curve.value));
+          break;
+      }
+
     }
 
     void buildBody(Window * window) {
@@ -77,8 +111,9 @@ class MixEditWindow: public Page {
       grid.nextLine();
 
       // Curve
-      new StaticText(window, grid.getLabelSlot(true), STR_CURVE);
-      grid.nextLine();
+      updateCurvesWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
+      updateCurves();
+      grid.addWindow(updateCurvesWindow);
 
       // Flight modes
       new StaticText(window, grid.getLabelSlot(true), STR_FLMODE);
@@ -110,6 +145,7 @@ class MixEditWindow: public Page {
 
       // Multiplex
       new StaticText(window, grid.getLabelSlot(true), STR_MULTPX);
+      new Choice(window, grid.getFieldSlot(), STR_VMLTPX, 0, 2, GET_SET_DEFAULT(md2->mltpx));
       grid.nextLine();
 
       // Delay up
@@ -117,7 +153,7 @@ class MixEditWindow: public Page {
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->delayUp),
                      SET_VALUE(md2->delayUp, newValue),
-                     PREC1);
+                     PREC1, NULL, "s");
       grid.nextLine();
 
       // Delay down
@@ -125,7 +161,7 @@ class MixEditWindow: public Page {
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->delayDown),
                      SET_VALUE(md2->delayDown, newValue),
-                     PREC1);
+                     PREC1, NULL, "s");
       grid.nextLine();
 
       //Slow up
@@ -133,7 +169,7 @@ class MixEditWindow: public Page {
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->speedUp),
                      SET_VALUE(md2->speedUp, newValue),
-                     PREC1);
+                     PREC1, NULL, "s");
       grid.nextLine();
 
       //Slow down
@@ -141,7 +177,7 @@ class MixEditWindow: public Page {
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->speedDown),
                      SET_VALUE(md2->speedDown, newValue),
-                     PREC1);
+                     PREC1, NULL, "s");
       grid.nextLine();
 
       window->setInnerHeight(grid.getWindowHeight());
