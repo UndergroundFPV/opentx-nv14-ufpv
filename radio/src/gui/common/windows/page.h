@@ -40,12 +40,7 @@ class PageHeader: public Window {
 
 class Page: public Window {
   public:
-    Page():
-      Window(&mainWindow, {0, 0, LCD_W, LCD_H}),
-      header(this),
-      body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
-    {
-    }
+    Page();
 
     virtual bool onTouchStart(coord_t x, coord_t y) {
       Window::onTouchStart(x, y);
