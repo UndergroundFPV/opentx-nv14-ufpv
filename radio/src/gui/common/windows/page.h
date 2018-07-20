@@ -27,12 +27,9 @@ class Page;
 
 class PageHeader: public Window {
   public:
-    PageHeader(Page * parent);
+    PageHeader(Page * parent, const rect_t & rect);
 
-    virtual void paint(BitmapBuffer * dc) override
-    {
-      dc->drawSolidFilledRect(TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH, HEADER_BGCOLOR);
-    }
+    virtual void paint(BitmapBuffer * dc) override;
 
   protected:
     IconButton back;
@@ -57,14 +54,12 @@ class Page: public Window {
       return true;
     }
 
-    virtual void paint(BitmapBuffer * dc) override
-    {
-      dc->clear(TEXT_BGCOLOR);
-    }
+    virtual void paint(BitmapBuffer * dc) override;
 
   protected:
     PageHeader header;
     Window body;
+    static constexpr coord_t headerHeight = 60;
 };
 
 #endif // _PAGE_H_

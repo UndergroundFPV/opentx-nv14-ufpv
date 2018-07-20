@@ -25,16 +25,26 @@
 
 class MixEditWindow: public Page {
   public:
-    MixEditWindow(int8_t mixIndex):
+    MixEditWindow(int8_t channel, uint8_t mixIndex):
       Page(),
+      channel(channel),
       mixIndex(mixIndex)
     {
-      build(&body);
+      buildBody(&body);
+      buildHeader(&header);
     }
 
   protected:
-    int8_t mixIndex;
-    void build(Window * window) {
+    uint8_t channel;
+    uint8_t mixIndex;
+
+    void buildHeader(Window * window) {
+      new StaticText(window, { 100, 5, 100, 30 }, STR_MIXER, HEADER_COLOR);
+      char s[16];
+      new StaticText(window, { 100, 40, 100, 30 }, getSourceString(s, MIXSRC_CH1 + channel));
+    }
+
+    void buildBody(Window * window) {
       GridLayout grid(*window);
       grid.spacer(10);
 
@@ -46,49 +56,49 @@ class MixEditWindow: public Page {
       new TextEdit(window, grid.getFieldSlot(), md2->name, sizeof(md2->name));
       grid.nextLine();
 
-      //Source
+      // Source
       new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
       new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST, GET_SET_DEFAULT(md2->srcRaw));
       grid.nextLine();
 
-      //Weight
+      // Weight
       new StaticText(window, grid.getLabelSlot(true), STR_WEIGHT);
       // TODO GVAR ?
       new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(md2->weight),0,NULL,"%");
       grid.nextLine();
 
-      //Offset
+      // Offset
       new StaticText(window, grid.getLabelSlot(true), STR_OFFSET);
       new NumberEdit(window, grid.getFieldSlot(), GV_RANGELARGE_OFFSET_NEG, GV_RANGELARGE_OFFSET, 1, GET_SET_DEFAULT(md2->offset),0,NULL,"%");
       grid.nextLine();
 
-      //Trim
+      // Trim
       new StaticText(window, grid.getLabelSlot(true), STR_TRIM);
       new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(md2->carryTrim));
       grid.nextLine();
 
-      //Curve
+      // Curve
       new StaticText(window, grid.getLabelSlot(true), STR_CURVE);
       grid.nextLine();
 
-      //Flight modes
+      // Flight modes
       new StaticText(window, grid.getLabelSlot(true), STR_FLMODE);
       grid.nextLine();
 
-      //Switch
+      // Switch
       new StaticText(window, grid.getLabelSlot(true), STR_SWITCH);
       new SwitchChoice(window, grid.getFieldSlot(), MixesContext, GET_SET_DEFAULT(md2->swtch));
       grid.nextLine();
 
-      //Warning
+      // Warning
       new StaticText(window, grid.getLabelSlot(true), STR_MIXWARNING);
       grid.nextLine();
 
-      //Multiplex
+      // Multiplex
       new StaticText(window, grid.getLabelSlot(true), STR_MULTPX);
       grid.nextLine();
 
-      //Delay up
+      // Delay up
       new StaticText(window, grid.getLabelSlot(true), STR_DELAYUP);
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->delayUp),
@@ -96,7 +106,7 @@ class MixEditWindow: public Page {
                      PREC1);
       grid.nextLine();
 
-      //Delay down
+      // Delay down
       new StaticText(window, grid.getLabelSlot(true), STR_DELAYDOWN);
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->delayDown),
@@ -138,7 +148,7 @@ class MixesToolbar: public Window {
 
       new TextButton(this, {60, 5, 50, 30}, "E",
                      [&]() -> uint8_t {
-                       new MixEditWindow(selectedMixIndex);
+                       new MixEditWindow(selectedChannel, selectedMixIndex);
                        return 1;
                      }, 1);
 
@@ -150,8 +160,9 @@ class MixesToolbar: public Window {
 
     }
 
-    void selectMix(int8_t mixIndex)
+    void selectMix(int8_t channel, int8_t mixIndex)
     {
+      selectedChannel = channel;
       selectedMixIndex = mixIndex;
     }
 
@@ -161,6 +172,7 @@ class MixesToolbar: public Window {
     }
 
   protected:
+    int8_t selectedChannel = -1;
     int8_t selectedMixIndex = -1;
 };
 
@@ -188,7 +200,7 @@ void ModelMixesPage::buildBody(Window * window)
   for (int8_t ch=0; ch<MAX_OUTPUT_CHANNELS; ch++) {
     new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
                    [=]() -> uint8_t {
-                     footer->selectMix(mixIndex);
+                     footer->selectMix(ch, mixIndex);
                      return FOCUS_STATE;
                    });
     grid.nextLine();

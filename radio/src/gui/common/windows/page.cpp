@@ -20,12 +20,31 @@
 
 #include "opentx.h"
 
-PageHeader::PageHeader(Page * parent):
-  Window(parent, { 0, 0, LCD_W, MENU_BODY_TOP }),
+PageHeader::PageHeader(Page * parent, const rect_t & rect):
+  Window(parent, rect),
   back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
        [=]() -> uint8_t {
          parent->deleteLater();
          return 0;
        }, 1)
 {
+}
+
+void PageHeader::paint(BitmapBuffer * dc)
+{
+  dc->drawSolidFilledRect(TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH, HEADER_BGCOLOR);
+}
+
+Page::Page():
+  Window(&mainWindow, {0, 0, LCD_W, LCD_H}),
+  header(this, {0, 0, LCD_W, headerHeight}),
+  body(this, {0, headerHeight, LCD_W, LCD_H - headerHeight})
+{
+  // TODO this is really dirty but it works!
+  keyboard = new Keyboard(&mainWindow);
+}
+
+void Page::paint(BitmapBuffer * dc)
+{
+  dc->clear(TEXT_BGCOLOR);
 }
