@@ -21,6 +21,8 @@
 #include "opentx.h"
 #include "model_mixes.h"
 
+#define SET_DIRTY()     storageDirty(EE_MODEL)
+
 class SubmenuHeader: public Window {
   public:
     SubmenuHeader(Window * parent):
@@ -86,8 +88,92 @@ class MixEditWindow: public SubmenuWindow {
   protected:
     int8_t mixIndex;
     void build(Window * window) {
-      TRACE("Edit Mix line %d", mixIndex);
+      GridLayout grid(*window);
+      grid.spacer(10);
+
       // TODO here all widgets to edit a mix line
+      MixData * md2 = mixAddress(mixIndex) ;
+
+      // Mix name
+      new StaticText(window, grid.getLabelSlot(true), STR_MIXNAME);
+      new TextEdit(window, grid.getFieldSlot(), md2->name, sizeof(md2->name));
+      grid.nextLine();
+
+      //Source
+      new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
+      new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST, GET_SET_DEFAULT(md2->srcRaw));
+      grid.nextLine();
+
+      //Weight
+      new StaticText(window, grid.getLabelSlot(true), STR_WEIGHT);
+      // TODO GVAR ?
+      new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(md2->weight),0,NULL,"%");
+      grid.nextLine();
+
+      //Offset
+      new StaticText(window, grid.getLabelSlot(true), STR_OFFSET);
+      new NumberEdit(window, grid.getFieldSlot(), GV_RANGELARGE_OFFSET_NEG, GV_RANGELARGE_OFFSET, 1, GET_SET_DEFAULT(md2->offset),0,NULL,"%");
+      grid.nextLine();
+
+      //Trim
+      new StaticText(window, grid.getLabelSlot(true), STR_TRIM);
+      new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(md2->carryTrim));
+      grid.nextLine();
+
+      //Curve
+      new StaticText(window, grid.getLabelSlot(true), STR_CURVE);
+      grid.nextLine();
+
+      //Flight modes
+      new StaticText(window, grid.getLabelSlot(true), STR_FLMODE);
+      grid.nextLine();
+
+      //Switch
+      new StaticText(window, grid.getLabelSlot(true), STR_SWITCH);
+      new SwitchChoice(window, grid.getFieldSlot(), MixesContext, GET_SET_DEFAULT(md2->swtch));
+      grid.nextLine();
+
+      //Warning
+      new StaticText(window, grid.getLabelSlot(true), STR_MIXWARNING);
+      grid.nextLine();
+
+      //Multiplex
+      new StaticText(window, grid.getLabelSlot(true), STR_MULTPX);
+      grid.nextLine();
+
+      //Delay up
+      new StaticText(window, grid.getLabelSlot(true), STR_DELAYUP);
+      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+                     GET_DEFAULT(md2->delayUp),
+                     SET_VALUE(md2->delayUp, newValue),
+                     PREC1);
+      grid.nextLine();
+
+      //Delay down
+      new StaticText(window, grid.getLabelSlot(true), STR_DELAYDOWN);
+      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+                     GET_DEFAULT(md2->delayDown),
+                     SET_VALUE(md2->delayDown, newValue),
+                     PREC1);
+      grid.nextLine();
+
+      //Slow up
+      new StaticText(window, grid.getLabelSlot(true), STR_SLOWUP);
+      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+                     GET_DEFAULT(md2->speedUp),
+                     SET_VALUE(md2->speedUp, newValue),
+                     PREC1);
+      grid.nextLine();
+
+      //Slow down
+      new StaticText(window, grid.getLabelSlot(true), STR_SLOWDOWN);
+      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+                     GET_DEFAULT(md2->speedDown),
+                     SET_VALUE(md2->speedDown, newValue),
+                     PREC1);
+      grid.nextLine();
+
+      window->setInnerHeight(grid.getWindowHeight());
     }
 };
 
@@ -147,6 +233,7 @@ void ModelMixesPage::buildBody(Window * window)
 {
   GridLayout grid(*window);
   grid.spacer(10);
+  grid.setLabelWidth(70);
 
   char s[16];
   int mixIndex = 0;
