@@ -22,7 +22,6 @@
 #include "translations.h"
 
 #define ISTR(x) LEN_##x TR_##x
-
 // The non-0-terminated-strings
 const pm_char STR_OPEN9X[] PROGMEM =
     ISTR(OFFON)

@@ -436,9 +436,10 @@ void ModelSetupPage::updateExternalModuleWindow()
 
   if (g_model.moduleData[EXTERNAL_MODULE].type != MODULE_TYPE_NONE && !IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
     if (IS_MODULE_XJT(EXTERNAL_MODULE)) {
-      new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, 1 + RF_PROTO_X16, 1 + RF_PROTO_LAST,
+
+      new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, RF_PROTO_X16, RF_PROTO_LAST,
                  GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
-                 SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].rfProtocol, newValue - 1));
+                 SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].rfProtocol, newValue));
     }
     else if (IS_MODULE_DSM2(EXTERNAL_MODULE)) {
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_DSM_PROTOCOLS, DSM2_PROTO_LP45, DSM2_PROTO_DSMX,

@@ -90,7 +90,7 @@ int16_t getHallADValue(uint8_t chan)
     return 0;
   }
 
-  return Channel.channel[chan];
+  return (HallChVal[chan] - 1000) * 4;
 }
 
 int16_t hallValue(uint8_t chan)

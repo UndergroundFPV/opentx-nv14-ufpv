@@ -27,7 +27,7 @@ void extmoduleStop()
 {
 #if 0
   EXTERNAL_MODULE_OFF();
-  
+
   NVIC_DisableIRQ(EXTMODULE_DMA_IRQn);
   NVIC_DisableIRQ(EXTMODULE_TIMER_IRQn);
 
@@ -140,7 +140,7 @@ void extmodulePxxStart()
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
   EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
   EXTMODULE_TIMER->ARR = 18000;
-  
+
 #if defined(PCBX10) || PCBREV >= 13
   EXTMODULE_TIMER->CCER = TIM_CCER_CC3E | TIM_CCER_CC3NE;
   EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE; // Enable outputs
@@ -150,7 +150,7 @@ void extmodulePxxStart()
   EXTMODULE_TIMER->DIER |= TIM_DIER_UDE; // Enable DMA on update
   EXTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2;
   EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
-#elif defined(PCBNV14)
+#elif 1//defined(PCBNV14)
 {
     EXTMODULE_TIMER->CCER = TIM_CCER_CC1E | TIM_CCER_CC1NE;
     EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE; // Enable outputs
@@ -199,7 +199,7 @@ void extmoduleDsm2Start()
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
   EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
   EXTMODULE_TIMER->ARR = 44000; // 22mS
-  
+
 #if defined(PCBX10) || PCBREV >= 13
   EXTMODULE_TIMER->CCER = TIM_CCER_CC3E | TIM_CCER_CC3P;
   EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE; // Enable outputs
@@ -326,14 +326,14 @@ extern "C" void EXTMODULE_DMA_IRQHandler()
 
   DMA_ClearITPendingBit(EXTMODULE_DMA_STREAM, EXTMODULE_DMA_FLAG_TC);
 
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC1IF; // Clear flag
-  EXTMODULE_TIMER->DIER |= TIM_DIER_CC1IE; // Enable this interrupt
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF; // Clear flag
+  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE; // Enable this interrupt
 }
 
 extern "C" void EXTMODULE_TIMER_IRQHandler()
 {
-  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC1IE; // Stop this interrupt
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC1IF;
+  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE; // Stop this interrupt
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;
   setupPulses(EXTERNAL_MODULE);
   extmoduleSendNextFrame();
 }
