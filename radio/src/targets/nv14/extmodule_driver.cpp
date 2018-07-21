@@ -25,7 +25,6 @@ void extmoduleSendNextFrame();
 
 void extmoduleStop()
 {
-#if 0
   EXTERNAL_MODULE_OFF();
 
   NVIC_DisableIRQ(EXTMODULE_DMA_IRQn);
@@ -34,12 +33,10 @@ void extmoduleStop()
   EXTMODULE_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
   EXTMODULE_TIMER->DIER &= ~(TIM_DIER_CC2IE | TIM_DIER_UDE);
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
-#endif
 }
 
 void extmoduleNoneStart()
 {
-#if 0
   EXTERNAL_MODULE_OFF();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, 0);
@@ -64,12 +61,10 @@ void extmoduleNoneStart()
 
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
-#endif
 }
 
 void extmodulePpmStart()
 {
-#if 0
   EXTERNAL_MODULE_ON();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, EXTMODULE_TX_GPIO_AF);
@@ -119,7 +114,6 @@ void extmodulePpmStart()
   NVIC_SetPriority(EXTMODULE_DMA_IRQn, 7);
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
-#endif
 }
 
 void extmodulePxxStart()
@@ -183,7 +177,6 @@ void extmodulePxxStart()
 #if defined(DSM2)
 void extmoduleDsm2Start()
 {
-#if 0
   EXTERNAL_MODULE_ON();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, EXTMODULE_TX_GPIO_AF);
@@ -226,13 +219,11 @@ void extmoduleDsm2Start()
   NVIC_SetPriority(EXTMODULE_DMA_IRQn, 7);
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
-#endif
 }
 #endif
 
 void extmoduleCrossfireStart()
 {
-#if 0
   EXTERNAL_MODULE_ON();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, 0);
@@ -257,7 +248,6 @@ void extmoduleCrossfireStart()
 
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
-#endif
 }
 
 void extmoduleSendNextFrame()
@@ -326,14 +316,14 @@ extern "C" void EXTMODULE_DMA_IRQHandler()
 
   DMA_ClearITPendingBit(EXTMODULE_DMA_STREAM, EXTMODULE_DMA_FLAG_TC);
 
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF; // Clear flag
-  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE; // Enable this interrupt
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC1IF; // Clear flag
+  EXTMODULE_TIMER->DIER |= TIM_DIER_CC1IE; // Enable this interrupt
 }
 
 extern "C" void EXTMODULE_TIMER_IRQHandler()
 {
-  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC2IE; // Stop this interrupt
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;
+  EXTMODULE_TIMER->DIER &= ~TIM_DIER_CC1IE; // Stop this interrupt
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC1IF;
   setupPulses(EXTERNAL_MODULE);
   extmoduleSendNextFrame();
 }
