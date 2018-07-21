@@ -23,6 +23,8 @@
 #include "model_heli.h"
 #include "model_flightmodes.h"
 #include "model_mixes.h"
+#include "model_inputs.h"
+#include "model_logical_switches.h"
 
 ModelMenu::ModelMenu():
   TabsGroup()
@@ -32,11 +34,12 @@ ModelMenu::ModelMenu():
   addTab(new ModelHeliPage());
 #endif
   addTab(new ModelFlightModesPage());
-  addTab(new ModelSetupPage());
+  addTab(new ModelInputsPage());
   addTab(new ModelMixesPage());
-  addTab(new ModelSetupPage());
-  addTab(new ModelSetupPage());
-  addTab(new ModelSetupPage());
+  addTab(new ModelSetupPage()); // outputs
+  addTab(new ModelSetupPage()); // curves
+  addTab(new ModelSetupPage()); // GVARS
+  addTab(new ModelLogicalSwitchesPage());
 }
 
 const MenuHandlerFunc menuTabModel[] = {

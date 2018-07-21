@@ -20,6 +20,18 @@
 
 #include <stdio.h>
 #include "opentx.h"
+#include "model_logical_switches.h"
+
+ModelLogicalSwitchesPage::ModelLogicalSwitchesPage():
+        PageTab(STR_MENULOGICALSWITCHES, ICON_MODEL_LOGICAL_SWITCHES)
+{
+}
+
+void ModelLogicalSwitchesPage::build(Window * window)
+{
+  GridLayout grid(*window);
+  grid.spacer(10);
+}
 
 enum LogicalSwitchFields {
   LS_FIELD_FUNCTION,

@@ -20,8 +20,20 @@
 
 #include <stdio.h>
 #include "opentx.h"
+#include "model_inputs.h"
 
 #define EXPO_ONE_2ND_COLUMN 115
+
+ModelInputsPage::ModelInputsPage():
+        PageTab(STR_MENUINPUTS, ICON_MODEL_INPUTS)
+{
+}
+
+void ModelInputsPage::build(Window * window)
+{
+  GridLayout grid(*window);
+  grid.spacer(10);
+}
 
 int expoFn(int x)
 {
