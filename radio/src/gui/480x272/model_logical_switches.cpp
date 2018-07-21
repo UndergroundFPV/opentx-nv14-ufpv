@@ -22,6 +22,8 @@
 #include "opentx.h"
 #include "model_logical_switches.h"
 
+#define SET_DIRTY()     storageDirty(EE_MODEL)
+
 ModelLogicalSwitchesPage::ModelLogicalSwitchesPage():
         PageTab(STR_MENULOGICALSWITCHES, ICON_MODEL_LOGICAL_SWITCHES)
 {
@@ -31,6 +33,24 @@ void ModelLogicalSwitchesPage::build(Window * window)
 {
   GridLayout grid(*window);
   grid.spacer(10);
+  grid.setLabelWidth(70);
+  char s[8];
+
+  for (uint8_t i=0; i<MAX_LOGICAL_SWITCHES; ++i) {
+    LogicalSwitchData * cs = lswAddress(i);
+
+    // CSW name
+    unsigned int sw = SWSRC_SW1+i;
+    new TextButton(window, grid.getLabelSlot(), getSwitchString(s, sw),
+                   [=]() -> uint8_t {
+                       return FOCUS_STATE;
+                   }, (getSwitch(sw) ? BOLD : 0));
+
+    new Choice(window, grid.getFieldSlot(3,0), STR_VCSWFUNC, 0, LS_FUNC_MAX, GET_SET_DEFAULT(cs->func));
+
+    grid.nextLine();
+  }
+  window->setInnerHeight(grid.getWindowHeight());
 }
 
 enum LogicalSwitchFields {

@@ -22,6 +22,8 @@
 #include "opentx.h"
 #include "model_inputs.h"
 
+#define SET_DIRTY()     storageDirty(EE_MODEL)
+
 #define EXPO_ONE_2ND_COLUMN 115
 
 ModelInputsPage::ModelInputsPage():
