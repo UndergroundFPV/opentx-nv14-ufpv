@@ -66,7 +66,7 @@ class MixEditWindow: public Page {
         case CURVE_REF_DIFF:
         case CURVE_REF_EXPO:
           // TODO GVAR
-          new NumberEdit(updateCurvesWindow, grid.getFieldSlot(2,1), -100, 100, 1, GET_SET_DEFAULT(md2->curve.value),0,NULL,"%");
+          new NumberEdit(updateCurvesWindow, grid.getFieldSlot(2,1), -100, 100, 1, GET_SET_DEFAULT(md2->curve.value),0,nullptr,"%");
           break;
         case CURVE_REF_FUNC:
           new Choice(updateCurvesWindow, grid.getFieldSlot(2,1), STR_VCURVEFUNC, 0, CURVE_BASE-1, GET_SET_DEFAULT(md2->curve.value));
@@ -97,12 +97,12 @@ class MixEditWindow: public Page {
       // Weight
       new StaticText(window, grid.getLabelSlot(true), STR_WEIGHT);
       // TODO GVAR ?
-      new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(md2->weight),0,NULL,"%");
+      new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(md2->weight),0,nullptr,"%");
       grid.nextLine();
 
       // Offset
       new StaticText(window, grid.getLabelSlot(true), STR_OFFSET);
-      new NumberEdit(window, grid.getFieldSlot(), GV_RANGELARGE_OFFSET_NEG, GV_RANGELARGE_OFFSET, 1, GET_SET_DEFAULT(md2->offset),0,NULL,"%");
+      new NumberEdit(window, grid.getFieldSlot(), GV_RANGELARGE_OFFSET_NEG, GV_RANGELARGE_OFFSET, 1, GET_SET_DEFAULT(md2->offset),0,nullptr,"%");
       grid.nextLine();
 
       // Trim
@@ -140,7 +140,7 @@ class MixEditWindow: public Page {
 
       // Warning
       new StaticText(window, grid.getLabelSlot(true), STR_MIXWARNING);
-      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, 3, 1, GET_SET_DEFAULT(md2->mixWarn), 0, NULL, NULL, "OFF");
+      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, 3, 1, GET_SET_DEFAULT(md2->mixWarn), 0, nullptr, nullptr, "OFF");
       grid.nextLine();
 
       // Multiplex
@@ -153,7 +153,7 @@ class MixEditWindow: public Page {
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->delayUp),
                      SET_VALUE(md2->delayUp, newValue),
-                     PREC1, NULL, "s");
+                     PREC1, nullptr, "s");
       grid.nextLine();
 
       // Delay down
@@ -161,7 +161,7 @@ class MixEditWindow: public Page {
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->delayDown),
                      SET_VALUE(md2->delayDown, newValue),
-                     PREC1, NULL, "s");
+                     PREC1, nullptr, "s");
       grid.nextLine();
 
       //Slow up
@@ -169,7 +169,7 @@ class MixEditWindow: public Page {
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->speedUp),
                      SET_VALUE(md2->speedUp, newValue),
-                     PREC1, NULL, "s");
+                     PREC1, nullptr, "s");
       grid.nextLine();
 
       //Slow down
@@ -177,7 +177,7 @@ class MixEditWindow: public Page {
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
                      GET_DEFAULT(md2->speedDown),
                      SET_VALUE(md2->speedDown, newValue),
-                     PREC1, NULL, "s");
+                     PREC1, nullptr, "s");
       grid.nextLine();
 
       window->setInnerHeight(grid.getWindowHeight());
