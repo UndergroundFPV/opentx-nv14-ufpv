@@ -32,6 +32,7 @@ class ModelMixesPage: public PageTab {
 
   protected:
     void rebuild(Window * window);
+    void editMix(Window * window, uint8_t channel, uint8_t mixIndex);
 };
 
 #endif // _MODEL_MIXES_H_

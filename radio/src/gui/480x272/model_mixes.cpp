@@ -23,6 +23,31 @@
 
 #define SET_DIRTY()     storageDirty(EE_MODEL)
 
+
+uint8_t getMixesCount()
+{
+  uint8_t count = 0;
+  uint8_t ch ;
+
+  for (int i=MAX_MIXERS-1; i>=0; i--) {
+    ch = mixAddress(i)->srcRaw;
+    if (ch != 0) {
+      count++;
+    }
+  }
+  return count;
+}
+
+bool reachMixesLimit()
+{
+  if (getMixesCount() >= MAX_MIXERS) {
+    POPUP_WARNING(STR_NOFREEMIXER);
+    return true;
+  }
+  return false;
+}
+
+
 class MixEditWindow: public Page {
   public:
     MixEditWindow(int8_t channel, uint8_t mixIndex):
@@ -306,6 +331,14 @@ void ModelMixesPage::rebuild(Window * window)
   window->setScrollPositionY(scrollPosition);
 }
 
+void ModelMixesPage::editMix(Window * window, uint8_t channel, uint8_t mixIndex)
+{
+  Window * mixWindow = new MixEditWindow(channel, mixIndex);
+  mixWindow->setCloseHandler([=]() -> void {
+    rebuild(window);
+  });
+}
+
 void ModelMixesPage::build(Window * window)
 {
   GridLayout grid(*window);
@@ -333,11 +366,22 @@ void ModelMixesPage::build(Window * window)
                             Menu * menu = new Menu();
                             menu->addLine(STR_EDIT, [=]() -> void {
                               menu->deleteLater();
-                              Window * mixWindow = new MixEditWindow(ch, mixIndex);
-                              mixWindow->setCloseHandler([=]() -> void {
-                                rebuild(window);
-                              });
+                              editMix(window, ch, mixIndex);
                             });
+                            if (!reachMixesLimit()) {
+                              menu->addLine(STR_INSERT_BEFORE, [=]() -> void {
+                                menu->deleteLater();
+                                insertMix(mixIndex, ch);
+                                editMix(window, ch, mixIndex);
+                              });
+                              menu->addLine(STR_INSERT_AFTER, [=]() -> void {
+                                menu->deleteLater();
+                                insertMix(mixIndex+1, ch);
+                                editMix(window, ch, mixIndex);
+                              });
+                              // TODO STR_COPY
+                            }
+                            // TODO STR_MOVE
                             menu->addLine(STR_DELETE, [=]() -> void {
                               menu->deleteLater();
                               deleteMix(mixIndex);
@@ -355,10 +399,7 @@ void ModelMixesPage::build(Window * window)
       new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
                      [=]() -> uint8_t {
                        insertMix(mixIndex, ch);
-                       Window * mixWindow = new MixEditWindow(ch, mixIndex);
-                       mixWindow->setCloseHandler([=]() -> void {
-                         rebuild(window);
-                       });
+                       editMix(window, ch, mixIndex);
                        return FOCUS_STATE;
                      }, 0);
       grid.nextLine();
@@ -387,29 +428,6 @@ int getMixesLinesCount()
     }
   }
   return count;
-}
-
-uint8_t getMixesCount()
-{
-  uint8_t count = 0;
-  uint8_t ch ;
-
-  for (int i=MAX_MIXERS-1; i>=0; i--) {
-    ch = mixAddress(i)->srcRaw;
-    if (ch != 0) {
-      count++;
-    }
-  }
-  return count;
-}
-
-bool reachMixesLimit()
-{
-  if (getMixesCount() >= MAX_MIXERS) {
-    POPUP_WARNING(STR_NOFREEMIXER);
-    return true;
-  }
-  return false;
 }
 
 void deleteMix(uint8_t idx)
