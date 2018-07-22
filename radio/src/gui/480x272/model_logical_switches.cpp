@@ -24,31 +24,103 @@
 
 #define SET_DIRTY()     storageDirty(EE_MODEL)
 
+class LogicalSwitchButton : public Button {
+  public:
+    LogicalSwitchButton(Window * parent, const rect_t & rect, int ls, std::function<uint8_t(void)> onPress):
+    Button(parent, rect, onPress),
+    ls(ls)
+    {
+    }
+
+    void paintLogicalSwitch(BitmapBuffer * dc) {
+
+    }
+
+    virtual void paint(BitmapBuffer * dc) override {
+      paintLogicalSwitch(dc);
+      drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+    }
+
+protected:
+    uint8_t ls;
+    bool first;
+};
+
+class LogicalSwitchEditWindow: public Page {
+  public:
+    LogicalSwitchEditWindow(uint8_t ls):
+    Page(),
+    ls(ls)
+    {
+      buildBody(&body);
+      buildHeader(&header);
+    }
+
+  protected:
+  uint8_t ls;
+
+  void buildHeader(Window * window) {
+    new StaticText(window, { 70, 4, 100, 20 }, STR_MENU_LOGICAL_SWITCHES, MENU_TITLE_COLOR);
+    //new StaticText(window, { 70, 28, 100, 20 }, getSourceString(s, MIXSRC_CH1 + channel), MENU_TITLE_COLOR);
+  }
+
+  void buildBody(Window * window) {
+    GridLayout grid(*window);
+    grid.spacer(10);
+  }
+};
+
 ModelLogicalSwitchesPage::ModelLogicalSwitchesPage():
-        PageTab(STR_MENULOGICALSWITCHES, ICON_MODEL_LOGICAL_SWITCHES)
+  PageTab(STR_MENULOGICALSWITCHES, ICON_MODEL_LOGICAL_SWITCHES)
 {
 }
 
-void ModelLogicalSwitchesPage::build(Window * window)
+void ModelLogicalSwitchesPage::rebuild(Window * window)
 {
+  coord_t scrollPosition = window->getScrollPositionY();
+  window->clear();
+  build(window);
+  window->setScrollPositionY(scrollPosition);
+}
+
+void ModelLogicalSwitchesPage::editLogicalSwitch(Window * window, uint8_t lsIndex)
+{
+  Window * lsWindow = new LogicalSwitchEditWindow(lsIndex);
+  lsWindow->setCloseHandler([=]() -> void {
+      rebuild(window);
+  });
+}
+
+void ModelLogicalSwitchesPage::build(Window * window) {
   GridLayout grid(*window);
   grid.spacer(10);
   grid.setLabelWidth(70);
-  char s[8];
+  grid.setLabelPaddingRight(10);
 
-  for (uint8_t i=0; i<MAX_LOGICAL_SWITCHES; ++i) {
-    LogicalSwitchData * cs = lswAddress(i);
+  window->clear();
 
-    // CSW name
-    unsigned int sw = SWSRC_SW1+i;
-    new TextButton(window, grid.getLabelSlot(), getSwitchString(s, sw),
-                   [=]() -> uint8_t {
-                       return FOCUS_STATE;
-                   }, (getSwitch(sw) ? BOLD : 0));
+  char s[16];
 
-    new Choice(window, grid.getFieldSlot(3,0), STR_VCSWFUNC, 0, LS_FUNC_MAX, GET_SET_DEFAULT(cs->func));
+  for (int8_t i=0; i<MAX_OUTPUT_CHANNELS; i++) {
+    new TextButton(window, grid.getLabelSlot(), getSwitchString(s, SWSRC_SW1+i),
+                     [=]() -> uint8_t {
+                         return 0;
+                     }, 0);
 
+    rect_t rect = grid.getFieldSlot();
+    rect.h += 20;
+
+    new LogicalSwitchButton(window, rect, i,
+                            [=]() -> uint8_t {
+                                Menu * menu = new Menu();
+                                menu->addLine(STR_EDIT, [=]() -> void {
+                                    menu->deleteLater();
+                                    editLogicalSwitch(window, i);
+                                });
+                                return FOCUS_STATE;
+                            });
     grid.nextLine();
+    grid.spacer(20);
   }
   window->setInnerHeight(grid.getWindowHeight());
 }

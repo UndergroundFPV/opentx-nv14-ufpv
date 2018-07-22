@@ -17,6 +17,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
 #ifndef _MODEL_LOGICAL_SWITCHES_H
 #define _MODEL_LOGICAL_SWITCHES_H
 
@@ -30,9 +31,8 @@ public:
     virtual void build(Window * window) override;
 
 protected:
-    Window * body;
-    static constexpr coord_t footerHeight = 40;
-    void buildBody(Window * window);
+    void rebuild(Window * window);
+    void editLogicalSwitch(Window * window, uint8_t lsIndex);
 };
 
 #endif //_MODEL_LOGICAL_SWITCHES_H
