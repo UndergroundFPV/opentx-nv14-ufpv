@@ -115,8 +115,8 @@
 #define LEN_XJT_PROTOCOLS              "\004"
 #define TR_XJT_PROTOCOLS               "Off\0""D16\0""D8\0 ""LR12"
 
-#define LEN_FLYSKY_PROTOCOLS           "\010"
-#define TR_FLYSKY_PROTOCOLS            "PWMiBUS\0""PWMsBUS\0""PPMiBUS\0""PPMsBUS"
+#define LEN_FLYSKY_PROTOCOLS           "\007"
+#define TR_FLYSKY_PROTOCOLS            "PWMiBUS""PWMsBUS""PPMiBUS""PPMsBUS"
 
 #define LEN_FLYSKY_PMODE               "\004"
 #define TR_FLYSKY_PMODE                "PWM\0""PWM"
