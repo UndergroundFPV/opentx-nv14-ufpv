@@ -20,5 +20,6 @@ class ModelSetupPage: public PageTab {
     Button * internalModuleBind = nullptr;
     Button * externalModuleBind = nullptr;
     TextButton * switchWarn[NUM_SWITCHES] = {nullptr};
+    Button * internalModuleRange = nullptr;
     Button * externalModuleRange = nullptr;
 };

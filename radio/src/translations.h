@@ -234,7 +234,8 @@ extern const pm_char STR_OPEN9X[];
   #define OFS_R9M_LBT_POWER_VALUES     (OFS_R9M_FCC_POWER_VALUES + sizeof(TR_R9M_FCC_POWER_VALUES))
   #define OFS_TELEMETRY_PROTOCOLS      (OFS_R9M_LBT_POWER_VALUES + sizeof(TR_R9M_LBT_POWER_VALUES))
   #define OFS_XJT_PROTOCOLS            (OFS_TELEMETRY_PROTOCOLS + sizeof(TR_TELEMETRY_PROTOCOLS))
-  #define OFS_DSM_PROTOCOLS            (OFS_XJT_PROTOCOLS + sizeof(TR_XJT_PROTOCOLS))
+  #define OFS_FLYSKY_PROTOCOLS  (OFS_XJT_PROTOCOLS + sizeof(TR_XJT_PROTOCOLS))
+  #define OFS_DSM_PROTOCOLS     (OFS_FLYSKY_PROTOCOLS + sizeof(TR_FLYSKY_PROTOCOLS))
 #if defined(MULTIMODULE)
   #define OFS_MULTI_PROTOCOLS   (OFS_DSM_PROTOCOLS + sizeof(TR_DSM_PROTOCOLS))
   #define OFS_VOLTSRC           (OFS_MULTI_PROTOCOLS + sizeof(TR_MULTI_PROTOCOLS))
@@ -366,6 +367,7 @@ extern const pm_char STR_OPEN9X[];
   #define STR_R9M_LBT_POWER_VALUES     (STR_OPEN9X + OFS_R9M_LBT_POWER_VALUES)
   #define STR_TELEMETRY_PROTOCOLS      (STR_OPEN9X + OFS_TELEMETRY_PROTOCOLS)
   #define STR_XJT_PROTOCOLS     (STR_OPEN9X + OFS_XJT_PROTOCOLS)
+  #define STR_FLYSKY_PROTOCOLS  (STR_OPEN9X + OFS_FLYSKY_PROTOCOLS)
   #define STR_DSM_PROTOCOLS     (STR_OPEN9X + OFS_DSM_PROTOCOLS)
 #if defined(MULTIMODULE)
   #define STR_MULTI_PROTOCOLS   (STR_OPEN9X + OFS_MULTI_PROTOCOLS)
@@ -621,6 +623,7 @@ extern const pm_char STR_GF[];
 extern const pm_char STR_FAS_OFFSET[];
 #endif
 
+extern const pm_char STR_MODULE_BINDING[];
 #if defined(MULTIMODULE)
 extern const pm_char STR_MULTI_CUSTOM[];
 extern const pm_char STR_MULTI_OPTION[];
@@ -634,7 +637,6 @@ extern const pm_char STR_MODULE_NO_SERIAL_MODE[];
 extern const pm_char STR_MODULE_NO_INPUT[];
 extern const pm_char STR_MODULE_WAITFORBIND[];
 extern const pm_char STR_MODULE_NO_TELEMETRY[];
-extern const pm_char STR_MODULE_BINDING[];
 extern const pm_char STR_PROTOCOL_INVALID[];
 extern const pm_char STR_MODULE_STATUS[];
 extern const pm_char STR_MODULE_SYNC[];
@@ -880,7 +882,6 @@ extern const pm_char STR_BLCOLOR[];
 #if defined(CPUARM)
   extern const pm_char STR_TRAINER[];
   extern const pm_char STR_MODULE_BIND[];
-  extern const pm_char STR_RXBINDING[];
   extern const pm_char STR_BINDING_1_8_TELEM_ON[];
   extern const pm_char STR_BINDING_1_8_TELEM_OFF[];
   extern const pm_char STR_BINDING_9_16_TELEM_ON[];

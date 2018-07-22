@@ -368,24 +368,29 @@ void ModelSetupPage::updateInternalModuleWindow()
                                       updateInternalModuleWindow();
                                       internalModuleChoice->setFocus();
                                     });
-  if (value != RF_PROTO_OFF) {
-    internalModuleBind = new TextButton(internalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_BIND,
-                 [=]() -> uint8_t {
-                     if (moduleFlag[INTERNAL_MODULE] == MODULE_NORMAL_MODE) {
-                       onFlySkyBindReceiver(INTERNAL_MODULE);
-                       moduleFlag[INTERNAL_MODULE] = MODULE_BIND;
-                       return 1;
-                     }
-                     else {
-                       moduleFlag[INTERNAL_MODULE] = MODULE_NORMAL_MODE;
-                       return 0;
-                     }
-                 }, 0);
-
-    if (moduleFlag[INTERNAL_MODULE] == MODULE_BIND) {
-        grid.nextLine();
-        new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_RXBINDING);
-    }
+  if (value+1 == MODULE_TYPE_FLYSKY) {
+#if 1
+    new Choice(internalModuleWindow, grid.getFieldSlot(2, 1), STR_FLYSKY_PROTOCOLS, 0, 3,
+               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].flyskyMode),
+               [=](int32_t newValue) -> void {
+                   SET_VALUE(g_model.moduleData[INTERNAL_MODULE].flyskyMode, newValue);
+                  });
+#else
+    grid.nextLine();
+    new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_FLYSKYRXMODE);
+    new Choice(internalModuleWindow, grid.getFieldSlot(2, 0), STR_FLYSKY_PMODE, 0, 1,
+               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].flyskyPulseMode),
+               [=](int32_t newValue) -> void {
+          g_model.moduleData[INTERNAL_MODULE].flyskyPulseMode = newValue;
+          //
+        });
+    new Choice(internalModuleWindow, grid.getFieldSlot(2, 1), STR_FLYSKY_PPORT, 0, 1,
+               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].flyskyPulsePort),
+               [=](int32_t newValue) -> void {
+          g_model.moduleData[INTERNAL_MODULE].flyskyPulsePort = newValue;
+          //
+        });
+#endif
   }
   grid.nextLine();
 
@@ -409,6 +414,59 @@ void ModelSetupPage::updateInternalModuleWindow()
     new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_ANTENNASELECTION);
     new Choice(internalModuleWindow, grid.getFieldSlot(), STR_VANTENNATYPES, 0, 1,
                GET_SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].pxx.external_antenna));
+    grid.nextLine();
+
+    // Bind and Range buttons
+    // TODO use greyed button when available
+    internalModuleBind = new TextButton(internalModuleWindow, grid.getFieldSlot(2, 0), STR_MODULE_BIND,
+                   [=]() -> uint8_t {
+                       uint8_t returnValue;
+                       if(moduleFlag[INTERNAL_MODULE] == MODULE_RANGECHECK) {
+                         // onFlySkyRangeCheck(INTERNAL_MODULE);;
+                         internalModuleRange->setState(0);
+                         returnValue = 1;
+                       }
+                       if (moduleFlag[INTERNAL_MODULE] == MODULE_NORMAL_MODE) {
+                         onFlySkyBindReceiver(INTERNAL_MODULE);
+                         returnValue = 1;
+                       }
+                       else {
+                         moduleFlag[INTERNAL_MODULE] = MODULE_NORMAL_MODE;
+                         resetPulsesFlySky(INTERNAL_MODULE);
+                         returnValue = 0;
+                       }
+                       SET_DIRTY();
+                       updateInternalModuleWindow();
+                       internalModuleBind->setFocus();
+                       return returnValue;
+                   }, 0);
+
+    internalModuleRange = new TextButton(internalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
+                                         [=]() -> uint8_t {
+                                           uint8_t returnValue;
+                                           if (moduleFlag[INTERNAL_MODULE] == MODULE_BIND) {
+                                             moduleFlag[INTERNAL_MODULE] = MODULE_RANGECHECK;
+                                             internalModuleBind->setState(0);
+                                             returnValue = 1;
+                                           }
+                                           if (moduleFlag[INTERNAL_MODULE] == MODULE_NORMAL_MODE) {
+                                             moduleFlag[INTERNAL_MODULE] = MODULE_RANGECHECK;
+                                             returnValue = 1;
+                                           } else {
+                                             moduleFlag[INTERNAL_MODULE] = MODULE_NORMAL_MODE;
+                                             returnValue = 0;
+                                           }
+                                           SET_DIRTY();
+                                           updateInternalModuleWindow();
+                                           internalModuleRange->setFocus();
+                                           return returnValue;
+                                         }, 0);
+
+    if (moduleFlag[INTERNAL_MODULE] == MODULE_BIND) {
+        internalModuleBind->getState() == 0 ? internalModuleBind->setState(1) : internalModuleRange->setState(1);
+        new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_MODULE_BINDING);
+    }
+    grid.nextLine();
   }
 
   coord_t delta = internalModuleWindow->adjustHeight();
