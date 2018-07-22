@@ -22,6 +22,7 @@
 #define _WINDOW_H_
 
 #include <list>
+#include <functional>
 #include <touch_driver.h>
 #include "bitmapbuffer.h"
 #include "debug.h"
@@ -36,6 +37,10 @@ class Window {
 
     Window * getParent() const {
       return parent;
+    }
+
+    void setCloseHandler(std::function<void()> handler) {
+      onClose = handler;
     }
 
     void deleteLater(bool detach=true);
@@ -103,6 +108,16 @@ class Window {
       innerHeight = h;
     }
 
+    coord_t getScrollPositionY()
+    {
+      return scrollPositionY;
+    }
+
+    void setScrollPositionY(coord_t y)
+    {
+      scrollPositionY = y;
+    }
+
     virtual void paint(BitmapBuffer * dc)
     {
     }
@@ -150,6 +165,8 @@ class Window {
     coord_t scrollPositionY = 0;
     static Window * focusWindow;
     static std::list<Window *> trash;
+    std::function<void()> onClose = nullptr;
+
     void detach();
 
 

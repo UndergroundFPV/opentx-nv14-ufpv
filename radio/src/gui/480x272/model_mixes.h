@@ -29,7 +29,9 @@ class ModelMixesPage: public PageTab {
     ModelMixesPage();
 
     virtual void build(Window * window) override;
-};
 
+  protected:
+    void rebuild(Window * window);
+};
 
 #endif // _MODEL_MIXES_H_

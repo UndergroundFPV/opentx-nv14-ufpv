@@ -57,6 +57,9 @@ void Window::deleteLater(bool detach)
   if (detach) {
     this->detach();
   }
+  if (onClose) {
+    onClose();
+  }
   trash.push_back(this);
 }
 
@@ -100,7 +103,7 @@ void Window::scrollTo(Window * child)
     scrollPositionY = child->top();
   }*/
   if (child->bottom() > height() - scrollPositionY) {
-    scrollPositionY = height() - child->bottom();
+    setScrollPositionY(height() - child->bottom());
   }
 }
 

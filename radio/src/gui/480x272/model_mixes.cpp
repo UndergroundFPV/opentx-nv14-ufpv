@@ -46,7 +46,6 @@ class MixEditWindow: public Page {
       new StaticText(window, { 70, 28, 100, 20 }, getSourceString(s, MIXSRC_CH1 + channel), MENU_TITLE_COLOR);
     }
 
-
     void updateCurves() {
       GridLayout grid(*updateCurvesWindow);
       updateCurvesWindow->clear();
@@ -181,52 +180,8 @@ class MixEditWindow: public Page {
       grid.nextLine();
 
       window->setInnerHeight(grid.getWindowHeight());
-
     }
 };
-
-#if 0
-class MixesToolbar: public Window {
-  public:
-    MixesToolbar(Window * parent, const rect_t &rect) :
-      Window(parent, rect)
-    {
-      new TextButton(this, {5, 5, 50, 30}, "<",
-                     [=]() -> uint8_t {
-                       // TODO
-                       return 1;
-                     }, 1);
-
-      new TextButton(this, {60, 5, 50, 30}, "E",
-                     [&]() -> uint8_t {
-                       new MixEditWindow(selectedChannel, selectedMixIndex);
-                       return 1;
-                     }, 1);
-
-      new TextButton(this, {115, 5, 50, 30}, ">",
-                     [=]() -> uint8_t {
-                       // TODO
-                       return 1;
-                     }, 1);
-
-    }
-
-    void selectMix(int8_t channel, int8_t mixIndex)
-    {
-      selectedChannel = channel;
-      selectedMixIndex = mixIndex;
-    }
-
-    virtual void paint(BitmapBuffer * dc) override
-    {
-      dc->clear(CURVE_AXIS_COLOR);
-    }
-
-  protected:
-    int8_t selectedChannel = -1;
-    int8_t selectedMixIndex = -1;
-};
-#endif
 
 ModelMixesPage::ModelMixesPage():
   PageTab(STR_MIXER, ICON_MODEL_MIXER)
@@ -323,6 +278,34 @@ class MixLineButton : public Button {
     bool first;
 };
 
+
+void insertMix(uint8_t idx, uint8_t channel)
+{
+  pauseMixerCalculations();
+  MixData * mix = mixAddress(idx);
+  memmove(mix+1, mix, (MAX_MIXERS-(idx+1))*sizeof(MixData));
+  memclear(mix, sizeof(MixData));
+  mix->destCh = channel;
+  mix->srcRaw = channel+1;
+  if (!isSourceAvailable(mix->srcRaw)) {
+    mix->srcRaw = (channel > 3 ? MIXSRC_Rud - 1 + channel : MIXSRC_Rud - 1 + channel_order(channel));
+    while (!isSourceAvailable(mix->srcRaw)) {
+      mix->srcRaw += 1;
+    }
+  }
+  mix->weight = 100;
+  resumeMixerCalculations();
+  storageDirty(EE_MODEL);
+}
+
+void ModelMixesPage::rebuild(Window * window)
+{
+  coord_t scrollPosition = window->getScrollPositionY();
+  window->clear();
+  build(window);
+  window->setScrollPositionY(scrollPosition);
+}
+
 void ModelMixesPage::build(Window * window)
 {
   GridLayout grid(*window);
@@ -330,17 +313,19 @@ void ModelMixesPage::build(Window * window)
   grid.setLabelWidth(70);
   grid.setLabelPaddingRight(10);
 
+  window->clear();
+
   char s[16];
   int mixIndex = 0;
   MixData * mix = g_model.mixData;
   for (int8_t ch=0; ch<MAX_OUTPUT_CHANNELS; ch++) {
-    if (mix->destCh == ch) {
+    if (mix->srcRaw > 0 && mix->destCh == ch) {
       new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
                      [=]() -> uint8_t {
                        return 0;
                      }, 0);
       uint8_t count = 0;
-      while (mix->destCh == ch) {
+      while (mix->srcRaw > 0 && mix->destCh == ch) {
         rect_t rect = grid.getFieldSlot();
         rect.h += 20;
         new MixLineButton(window, rect, mix, count == 0,
@@ -348,7 +333,15 @@ void ModelMixesPage::build(Window * window)
                             Menu * menu = new Menu();
                             menu->addLine(STR_EDIT, [=]() -> void {
                               menu->deleteLater();
-                              new MixEditWindow(ch, mixIndex);
+                              Window * mixWindow = new MixEditWindow(ch, mixIndex);
+                              mixWindow->setCloseHandler([=]() -> void {
+                                rebuild(window);
+                              });
+                            });
+                            menu->addLine(STR_DELETE, [=]() -> void {
+                              menu->deleteLater();
+                              deleteMix(mixIndex);
+                              rebuild(window);
                             });
                             return FOCUS_STATE;
                           });
@@ -361,8 +354,11 @@ void ModelMixesPage::build(Window * window)
     else {
       new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
                      [=]() -> uint8_t {
-                       insertMix(mixIndex);
-                       new MixEditWindow(ch, mixIndex);
+                       insertMix(mixIndex, ch);
+                       Window * mixWindow = new MixEditWindow(ch, mixIndex);
+                       mixWindow->setCloseHandler([=]() -> void {
+                         rebuild(window);
+                       });
                        return FOCUS_STATE;
                      }, 0);
       grid.nextLine();
@@ -428,21 +424,7 @@ void deleteMix(uint8_t idx)
 
 void insertMix(uint8_t idx)
 {
-  pauseMixerCalculations();
-  MixData * mix = mixAddress(idx);
-  memmove(mix+1, mix, (MAX_MIXERS-(idx+1))*sizeof(MixData));
-  memclear(mix, sizeof(MixData));
-  mix->destCh = s_currCh-1;
-  mix->srcRaw = s_currCh;
-  if (!isSourceAvailable(mix->srcRaw)) {
-    mix->srcRaw = (s_currCh > 4 ? MIXSRC_Rud - 1 + s_currCh : MIXSRC_Rud - 1 + channel_order(s_currCh));
-    while (!isSourceAvailable(mix->srcRaw)) {
-      mix->srcRaw += 1;
-    }
-  }
-  mix->weight = 100;
-  resumeMixerCalculations();
-  storageDirty(EE_MODEL);
+  insertMix(idx, s_currCh+1);
 }
 
 void copyMix(uint8_t idx)
