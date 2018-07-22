@@ -231,10 +231,9 @@ const BitmapBuffer * mpx_mode[] = {
 
 class MixLineButton : public Button {
   public:
-    MixLineButton(Window * parent, const rect_t & rect, MixData * mix, bool first, std::function<uint8_t(void)> onPress):
+    MixLineButton(Window * parent, const rect_t & rect, uint8_t mixIndex, std::function<uint8_t(void)> onPress):
       Button(parent, rect, onPress),
-      mix(mix),
-      first(first)
+      mixIndex(mixIndex)
     {
     }
 
@@ -250,59 +249,74 @@ class MixLineButton : public Button {
       }
     }
 
-    void paintMixLine(BitmapBuffer * dc) {
-      if (!first)
-        dc->drawBitmap(10, 0, mpx_mode[mix->mltpx]);
-      drawSource(dc, MIX_LINE_SRC_POS, 0, mix->srcRaw);
+    bool isActive() {
+      return isMixActive(mixIndex);
+    }
 
-      if (first && mix->mltpx == 1) // TODO use an enum
+    virtual void checkEvents() override
+    {
+      if (active != isActive()) {
+        invalidate();
+        active = !active;
+      }
+    }
+
+    void paintMixLine(BitmapBuffer * dc) {
+      const MixData & mix = g_model.mixData[mixIndex];
+      bool first = (mixIndex == 0 || mix.destCh != g_model.mixData[mixIndex-1].destCh);
+      if (!first)
+        dc->drawBitmap(10, 0, mpx_mode[mix.mltpx]);
+      drawSource(dc, MIX_LINE_SRC_POS, 0, mix.srcRaw);
+
+      if (first && mix.mltpx == 1) // TODO use an enum
         dc->drawText(MIX_LINE_WEIGHT_POS, 0, "MULT!", 0);
       else
-        drawNumber(dc, 3, 2, mix->weight, 0);
+        drawNumber(dc, 3, 2, mix.weight, 0);
         // TODO gvarWeightItem(MIX_LINE_WEIGHT_POS, y, md, RIGHT | attr | (isMixActive(i) ? BOLD : 0), event);
 
-      if (mix->name[0] && mix->flightModes) {
+      if (mix.name[0] && mix.flightModes) {
         if (SLOW_BLINK_ON_PHASE) {
           dc->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupFlightmodeBitmap);
-          paintMixFlightModes(dc, mix->flightModes);
+          paintMixFlightModes(dc, mix.flightModes);
         }
         else {
           dc->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupLabelBitmap);
-          dc->drawSizedText(MIX_LINE_NAME_FM_POS, 0, mix->name, sizeof(mix->name), ZCHAR);
+          dc->drawSizedText(MIX_LINE_NAME_FM_POS, 0, mix.name, sizeof(mix.name), ZCHAR);
         }
       }
-      else if (mix->name[0]) {
+      else if (mix.name[0]) {
         dc->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupLabelBitmap);
-        dc->drawSizedText(MIX_LINE_NAME_FM_POS, 0, mix->name, sizeof(mix->name), ZCHAR);
+        dc->drawSizedText(MIX_LINE_NAME_FM_POS, 0, mix.name, sizeof(mix.name), ZCHAR);
       }
-      else if (mix->flightModes) {
+      else if (mix.flightModes) {
         lcd->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupFlightmodeBitmap);
-        paintMixFlightModes(dc, mix->flightModes);
+        paintMixFlightModes(dc, mix.flightModes);
       }
 
-      if (mix->curve.value != 0 ) {
+      if (mix.curve.value != 0 ) {
         dc->drawBitmap(MIX_LINE_CURVE_ICON, 2, mixerSetupCurveBitmap);
       }
-      drawCurveRef(MIX_LINE_CURVE_POS, 0, mix->curve);
+      drawCurveRef(MIX_LINE_CURVE_POS, 0, mix.curve);
 
-      if (mix->swtch) {
+      if (mix.swtch) {
         dc->drawBitmap(MIX_LINE_SWITCH_ICON, 2, mixerSetupSwitchBitmap);
-        drawSwitch(MIX_LINE_SWITCH_POS, 0, mix->swtch);
+        drawSwitch(MIX_LINE_SWITCH_POS, 0, mix.swtch);
       }
 
       dc->drawText(5, 20, "2nd line if needed");
     }
 
     virtual void paint(BitmapBuffer * dc) override {
+      if (active)
+        dc->drawSolidFilledRect(1, 1, rect.w-2, rect.h-2, CURVE_AXIS_COLOR);
       paintMixLine(dc);
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
     }
 
   protected:
-    MixData * mix;
-    bool first;
+    uint8_t mixIndex;
+    bool active = false;
 };
-
 
 void insertMix(uint8_t idx, uint8_t channel)
 {
@@ -357,11 +371,10 @@ void ModelMixesPage::build(Window * window)
                      [=]() -> uint8_t {
                        return 0;
                      }, 0);
-      uint8_t count = 0;
       while (mix->srcRaw > 0 && mix->destCh == ch) {
         rect_t rect = grid.getFieldSlot();
         rect.h += 20;
-        new MixLineButton(window, rect, mix, count == 0,
+        new MixLineButton(window, rect, mixIndex,
                           [=]() -> uint8_t {
                             Menu * menu = new Menu();
                             menu->addLine(STR_EDIT, [=]() -> void {
