@@ -655,9 +655,6 @@ PACK(struct ModuleData {
   int8_t  rfProtocol:4;
   uint8_t channelsStart;
   int8_t  channelsCount; // 0=8 channels
-  uint8_t flyskyMode;
-  uint8_t flyskyPulseMode:4;
-  uint8_t flyskyPulsePort:4;
   uint8_t failsafeMode:4;  // only 3 bits used
   uint8_t subType:3;
   uint8_t invertedSerial:1; // telemetry serial inverted from standard
@@ -677,6 +674,11 @@ PACK(struct ModuleData {
       uint8_t lowPowerMode:1;
       int8_t optionValue;
     } multi);
+    NOBACKUP(struct {
+      uint8_t mode;
+      uint8_t pulseMode:4;
+      uint8_t pulsePort:4;
+    } flysky);
     NOBACKUP(struct {
       uint8_t power:2;                  // 0=10 mW, 1=100 mW, 2=500 mW, 3=1W
       uint8_t spare1:2;

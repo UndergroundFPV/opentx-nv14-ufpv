@@ -369,28 +369,8 @@ void ModelSetupPage::updateInternalModuleWindow()
                                       internalModuleChoice->setFocus();
                                     });
   if (value+1 == MODULE_TYPE_FLYSKY) {
-#if 1
     new Choice(internalModuleWindow, grid.getFieldSlot(2, 1), STR_FLYSKY_PROTOCOLS, 0, 3,
-               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].flyskyMode),
-               [=](int32_t newValue) -> void {
-                   SET_VALUE(g_model.moduleData[INTERNAL_MODULE].flyskyMode, newValue);
-                  });
-#else
-    grid.nextLine();
-    new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_FLYSKYRXMODE);
-    new Choice(internalModuleWindow, grid.getFieldSlot(2, 0), STR_FLYSKY_PMODE, 0, 1,
-               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].flyskyPulseMode),
-               [=](int32_t newValue) -> void {
-          g_model.moduleData[INTERNAL_MODULE].flyskyPulseMode = newValue;
-          //
-        });
-    new Choice(internalModuleWindow, grid.getFieldSlot(2, 1), STR_FLYSKY_PPORT, 0, 1,
-               GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].flyskyPulsePort),
-               [=](int32_t newValue) -> void {
-          g_model.moduleData[INTERNAL_MODULE].flyskyPulsePort = newValue;
-          //
-        });
-#endif
+               GET_SET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].flysky.mode));
   }
   grid.nextLine();
 
@@ -398,7 +378,9 @@ void ModelSetupPage::updateInternalModuleWindow()
     new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_CHANNELRANGE);
     new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS(0), 1,
                    GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
-                   [=](int8_t newValue) -> void { g_model.moduleData[INTERNAL_MODULE].channelsStart = newValue - 1; }, 0, STR_CH);
+                   [=](int8_t newValue) -> void {
+                     g_model.moduleData[INTERNAL_MODULE].channelsStart = newValue - 1;
+                   }, 0, STR_CH);
     new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 1), 1 + g_model.moduleData[INTERNAL_MODULE].channelsStart,
                    min<int8_t>(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart + MAX_CHANNELS(0) + 8, 1 + 32), 1,
                    GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].channelsCount + 8 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
