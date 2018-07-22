@@ -24,19 +24,11 @@
 
 #include "gui/common/windows/windows.h"
 
-class MixesToolbar;
-
 class ModelMixesPage: public PageTab {
   public:
     ModelMixesPage();
 
     virtual void build(Window * window) override;
-
-  protected:
-    Window * body;
-    MixesToolbar * footer;
-    static constexpr coord_t footerHeight = 40;
-    void buildBody(Window * window);
 };
 
 

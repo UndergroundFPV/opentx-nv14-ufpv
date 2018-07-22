@@ -55,13 +55,13 @@ class ChannelsMonitorBody: public Window {
       setInnerHeight(ROW_HEIGHT * MAX_OUTPUT_CHANNELS + BAR_HEIGHT);
     }
 
-    void checkEvents()
+    virtual void checkEvents() override
     {
       // will always force a full monitor window refresh
       invalidate();
     }
 
-    void paint(BitmapBuffer * dc)
+    virtual void paint(BitmapBuffer * dc) override
     {
       for (uint8_t i=0; i < MAX_OUTPUT_CHANNELS; i++) {
         drawComboOutputBar(Y_OUTBAR, i * ROW_HEIGHT + BAR_HEIGHT, LCD_W - 2 * Y_OUTBAR, BAR_HEIGHT, i);
@@ -77,7 +77,7 @@ class ChannelsMonitorFooter: public Window {
     {
     }
 
-    void paint(BitmapBuffer * dc) {
+    virtual void paint(BitmapBuffer * dc) override {
       coord_t x = 5;
       dc->clear(TITLE_BGCOLOR);
       dc->drawSolidFilledRect(x, 2, rect.h - 4, rect.h - 4, BARGRAPH_BGCOLOR);

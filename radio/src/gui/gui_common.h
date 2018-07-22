@@ -103,7 +103,7 @@ swsrc_t checkIncDecMovedSwitch(swsrc_t val);
 #if defined(CPUARM)
 #include "telemetry/telemetry_sensors.h"
 void drawValueWithUnit(coord_t x, coord_t y, int32_t val, uint8_t unit, LcdFlags flags);
-void drawCurveRef(coord_t x, coord_t y, CurveRef & curve, LcdFlags flags=0);
+void drawCurveRef(coord_t x, coord_t y, const CurveRef & curve, LcdFlags flags=0);
 void drawDate(coord_t x, coord_t y, TelemetryItem & telemetryItem, LcdFlags flags=0);
 void drawTelemScreenDate(coord_t x, coord_t y, source_t sensor, LcdFlags flags=0);
 void drawGPSPosition(coord_t x, coord_t y, int32_t longitude, int32_t latitude, LcdFlags flags=0);

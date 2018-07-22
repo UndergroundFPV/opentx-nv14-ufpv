@@ -51,28 +51,28 @@ class MixEditWindow: public Page {
       GridLayout grid(*updateCurvesWindow);
       updateCurvesWindow->clear();
 
-      MixData * md2 = mixAddress(mixIndex) ;
+      MixData * mix = mixAddress(mixIndex) ;
 
       new StaticText(updateCurvesWindow, grid.getLabelSlot(true), STR_CURVE);
       curveTypeChoice = new Choice(updateCurvesWindow, grid.getFieldSlot(2,0), "\004DiffExpoFuncCstm", 0, CURVE_REF_CUSTOM,
-                 GET_DEFAULT(md2->curve.type),
-                 [=](int32_t newValue) -> void { md2->curve.type = newValue;
+                 GET_DEFAULT(mix->curve.type),
+                 [=](int32_t newValue) -> void { mix->curve.type = newValue;
                      SET_DIRTY();
                      updateCurves();
                      curveTypeChoice->setFocus();
                  });
 
-      switch (md2->curve.type) {
+      switch (mix->curve.type) {
         case CURVE_REF_DIFF:
         case CURVE_REF_EXPO:
           // TODO GVAR
-          new NumberEdit(updateCurvesWindow, grid.getFieldSlot(2,1), -100, 100, 1, GET_SET_DEFAULT(md2->curve.value),0,nullptr,"%");
+          new NumberEdit(updateCurvesWindow, grid.getFieldSlot(2,1), -100, 100, 1, GET_SET_DEFAULT(mix->curve.value), 0, nullptr, "%");
           break;
         case CURVE_REF_FUNC:
-          new Choice(updateCurvesWindow, grid.getFieldSlot(2,1), STR_VCURVEFUNC, 0, CURVE_BASE-1, GET_SET_DEFAULT(md2->curve.value));
+          new Choice(updateCurvesWindow, grid.getFieldSlot(2,1), STR_VCURVEFUNC, 0, CURVE_BASE-1, GET_SET_DEFAULT(mix->curve.value));
           break;
         case CURVE_REF_CUSTOM:
-          new CustomCurveChoice(updateCurvesWindow, grid.getFieldSlot(2,1), -MAX_CURVES, MAX_CURVES, GET_SET_DEFAULT(md2->curve.value));
+          new CustomCurveChoice(updateCurvesWindow, grid.getFieldSlot(2,1), -MAX_CURVES, MAX_CURVES, GET_SET_DEFAULT(mix->curve.value));
           break;
       }
 
@@ -82,32 +82,32 @@ class MixEditWindow: public Page {
       GridLayout grid(*window);
       grid.spacer(10);
 
-      MixData * md2 = mixAddress(mixIndex) ;
+      MixData * mix = mixAddress(mixIndex) ;
 
       // Mix name
       new StaticText(window, grid.getLabelSlot(true), STR_MIXNAME);
-      new TextEdit(window, grid.getFieldSlot(), md2->name, sizeof(md2->name));
+      new TextEdit(window, grid.getFieldSlot(), mix->name, sizeof(mix->name));
       grid.nextLine();
 
       // Source
       new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
-      new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST, GET_SET_DEFAULT(md2->srcRaw));
+      new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST, GET_SET_DEFAULT(mix->srcRaw));
       grid.nextLine();
 
       // Weight
       new StaticText(window, grid.getLabelSlot(true), STR_WEIGHT);
       // TODO GVAR ?
-      new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(md2->weight),0,nullptr,"%");
+      new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(mix->weight), 0, nullptr, "%");
       grid.nextLine();
 
       // Offset
       new StaticText(window, grid.getLabelSlot(true), STR_OFFSET);
-      new NumberEdit(window, grid.getFieldSlot(), GV_RANGELARGE_OFFSET_NEG, GV_RANGELARGE_OFFSET, 1, GET_SET_DEFAULT(md2->offset),0,nullptr,"%");
+      new NumberEdit(window, grid.getFieldSlot(), GV_RANGELARGE_OFFSET_NEG, GV_RANGELARGE_OFFSET, 1, GET_SET_DEFAULT(mix->offset), 0, nullptr, "%");
       grid.nextLine();
 
       // Trim
       new StaticText(window, grid.getLabelSlot(true), STR_TRIM);
-      new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(md2->carryTrim));
+      new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(mix->carryTrim));
       grid.nextLine();
 
       // Curve
@@ -125,58 +125,58 @@ class MixEditWindow: public Page {
           grid.nextLine();
         new TextButton(window, grid.getFieldSlot(4, i % 4), fm,
                                        [=]() -> uint8_t {
-                                           BF_BIT_FLIP(md2->flightModes, BF_BIT(i));
+                                           BF_BIT_FLIP(mix->flightModes, BF_BIT(i));
                                            SET_DIRTY();
-                                           return BF_SINGLE_BIT_GET(md2->flightModes, i);
+                                           return BF_SINGLE_BIT_GET(mix->flightModes, i);
                                        },
-                                       (BF_SINGLE_BIT_GET(md2->flightModes, i) == 0 ? 0 : 1));
+                                       (BF_SINGLE_BIT_GET(mix->flightModes, i) == 0 ? 0 : 1));
       }
       grid.nextLine();
 
       // Switch
       new StaticText(window, grid.getLabelSlot(true), STR_SWITCH);
-      new SwitchChoice(window, grid.getFieldSlot(), MixesContext, GET_SET_DEFAULT(md2->swtch));
+      new SwitchChoice(window, grid.getFieldSlot(), MixesContext, GET_SET_DEFAULT(mix->swtch));
       grid.nextLine();
 
       // Warning
       new StaticText(window, grid.getLabelSlot(true), STR_MIXWARNING);
-      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, 3, 1, GET_SET_DEFAULT(md2->mixWarn), 0, nullptr, nullptr, "OFF");
+      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, 3, 1, GET_SET_DEFAULT(mix->mixWarn), 0, nullptr, nullptr, STR_OFF);
       grid.nextLine();
 
       // Multiplex
       new StaticText(window, grid.getLabelSlot(true), STR_MULTPX);
-      new Choice(window, grid.getFieldSlot(), STR_VMLTPX, 0, 2, GET_SET_DEFAULT(md2->mltpx));
+      new Choice(window, grid.getFieldSlot(), STR_VMLTPX, 0, 2, GET_SET_DEFAULT(mix->mltpx));
       grid.nextLine();
 
       // Delay up
       new StaticText(window, grid.getLabelSlot(true), STR_DELAYUP);
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
-                     GET_DEFAULT(md2->delayUp),
-                     SET_VALUE(md2->delayUp, newValue),
+                     GET_DEFAULT(mix->delayUp),
+                     SET_VALUE(mix->delayUp, newValue),
                      PREC1, nullptr, "s");
       grid.nextLine();
 
       // Delay down
       new StaticText(window, grid.getLabelSlot(true), STR_DELAYDOWN);
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
-                     GET_DEFAULT(md2->delayDown),
-                     SET_VALUE(md2->delayDown, newValue),
+                     GET_DEFAULT(mix->delayDown),
+                     SET_VALUE(mix->delayDown, newValue),
                      PREC1, nullptr, "s");
       grid.nextLine();
 
-      //Slow up
+      // Slow up
       new StaticText(window, grid.getLabelSlot(true), STR_SLOWUP);
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
-                     GET_DEFAULT(md2->speedUp),
-                     SET_VALUE(md2->speedUp, newValue),
+                     GET_DEFAULT(mix->speedUp),
+                     SET_VALUE(mix->speedUp, newValue),
                      PREC1, nullptr, "s");
       grid.nextLine();
 
-      //Slow down
+      // Slow down
       new StaticText(window, grid.getLabelSlot(true), STR_SLOWDOWN);
       new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
-                     GET_DEFAULT(md2->speedDown),
-                     SET_VALUE(md2->speedDown, newValue),
+                     GET_DEFAULT(mix->speedDown),
+                     SET_VALUE(mix->speedDown, newValue),
                      PREC1, nullptr, "s");
       grid.nextLine();
 
@@ -185,6 +185,7 @@ class MixEditWindow: public Page {
     }
 };
 
+#if 0
 class MixesToolbar: public Window {
   public:
     MixesToolbar(Window * parent, const rect_t &rect) :
@@ -225,35 +226,147 @@ class MixesToolbar: public Window {
     int8_t selectedChannel = -1;
     int8_t selectedMixIndex = -1;
 };
+#endif
 
 ModelMixesPage::ModelMixesPage():
   PageTab(STR_MIXER, ICON_MODEL_MIXER)
 {
 }
 
+#define MIX_LINE_WEIGHT_POS     5
+#define MIX_LINE_SRC_POS        30
+#define MIX_LINE_CURVE_ICON     55
+#define MIX_LINE_CURVE_POS      75
+#define MIX_LINE_SWITCH_ICON    80
+#define MIX_LINE_SWITCH_POS     100
+#define MIX_LINE_DELAY_SLOW_POS 120
+#define MIX_LINE_NAME_FM_ICON   140
+#define MIX_LINE_NAME_FM_POS    150
+
+const BitmapBuffer * mpx_mode[] = {
+  mixerSetupAddBitmap,
+  mixerSetupMultiBitmap,
+  mixerSetupReplaceBitmap
+};
+
+class MixLineButton : public Button {
+  public:
+    MixLineButton(Window * parent, const rect_t & rect, MixData * mix, bool first, std::function<uint8_t(void)> onPress):
+      Button(parent, rect, onPress),
+      mix(mix),
+      first(first)
+    {
+    }
+
+    void paintMixFlightModes(BitmapBuffer * dc, FlightModesType value) {
+      coord_t x = MIX_LINE_NAME_FM_POS;
+      for (int i=0; i<MAX_FLIGHT_MODES; i++) {
+        char s[] = " ";
+        s[0] = '0' + i;
+        if (value & (1<<i))
+          dc->drawFilledRect(x, 4, 8, 12 , SOLID, CURVE_AXIS_COLOR);
+        dc->drawText(x, 2, s, SMLSIZE);
+        x += 8;
+      }
+    }
+
+    void paintMixLine(BitmapBuffer * dc) {
+      if (!first)
+        dc->drawBitmap(10, 0, mpx_mode[mix->mltpx]);
+      drawSource(dc, MIX_LINE_SRC_POS, 0, mix->srcRaw);
+
+      if (first && mix->mltpx == 1) // TODO use an enum
+        dc->drawText(MIX_LINE_WEIGHT_POS, 0, "MULT!", 0);
+      else
+        drawNumber(dc, 3, 2, mix->weight, 0);
+        // TODO gvarWeightItem(MIX_LINE_WEIGHT_POS, y, md, RIGHT | attr | (isMixActive(i) ? BOLD : 0), event);
+
+      if (mix->name[0] && mix->flightModes) {
+        if (SLOW_BLINK_ON_PHASE) {
+          dc->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupFlightmodeBitmap);
+          paintMixFlightModes(dc, mix->flightModes);
+        }
+        else {
+          dc->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupLabelBitmap);
+          dc->drawSizedText(MIX_LINE_NAME_FM_POS, 0, mix->name, sizeof(mix->name), ZCHAR);
+        }
+      }
+      else if (mix->name[0]) {
+        dc->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupLabelBitmap);
+        dc->drawSizedText(MIX_LINE_NAME_FM_POS, 0, mix->name, sizeof(mix->name), ZCHAR);
+      }
+      else if (mix->flightModes) {
+        lcd->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupFlightmodeBitmap);
+        paintMixFlightModes(dc, mix->flightModes);
+      }
+
+      if (mix->curve.value != 0 ) {
+        dc->drawBitmap(MIX_LINE_CURVE_ICON, 2, mixerSetupCurveBitmap);
+      }
+      drawCurveRef(MIX_LINE_CURVE_POS, 0, mix->curve);
+
+      if (mix->swtch) {
+        dc->drawBitmap(MIX_LINE_SWITCH_ICON, 2, mixerSetupSwitchBitmap);
+        drawSwitch(MIX_LINE_SWITCH_POS, 0, mix->swtch);
+      }
+
+      dc->drawText(5, 20, "2nd line if needed");
+    }
+
+    virtual void paint(BitmapBuffer * dc) override {
+      paintMixLine(dc);
+      drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+    }
+
+  protected:
+    MixData * mix;
+    bool first;
+};
+
 void ModelMixesPage::build(Window * window)
-{
-  body = new Window(window, {0, 0, LCD_W, window->height() - footerHeight});
-  footer = new MixesToolbar(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
-
-  buildBody(body);
-}
-
-void ModelMixesPage::buildBody(Window * window)
 {
   GridLayout grid(*window);
   grid.spacer(10);
   grid.setLabelWidth(70);
+  grid.setLabelPaddingRight(10);
 
   char s[16];
   int mixIndex = 0;
+  MixData * mix = g_model.mixData;
   for (int8_t ch=0; ch<MAX_OUTPUT_CHANNELS; ch++) {
-    new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
-                   [=]() -> uint8_t {
-                     footer->selectMix(ch, mixIndex);
-                     return FOCUS_STATE;
-                   });
-    grid.nextLine();
+    if (mix->destCh == ch) {
+      new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
+                     [=]() -> uint8_t {
+                       return 0;
+                     }, 0);
+      uint8_t count = 0;
+      while (mix->destCh == ch) {
+        rect_t rect = grid.getFieldSlot();
+        rect.h += 20;
+        new MixLineButton(window, rect, mix, count == 0,
+                          [=]() -> uint8_t {
+                            Menu * menu = new Menu();
+                            menu->addLine(STR_EDIT, [=]() -> void {
+                              menu->deleteLater();
+                              new MixEditWindow(ch, mixIndex);
+                            });
+                            return FOCUS_STATE;
+                          });
+        grid.nextLine();
+        grid.spacer(20);
+        ++mixIndex;
+        ++mix;
+      }
+    }
+    else {
+      new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
+                     [=]() -> uint8_t {
+                       insertMix(mixIndex);
+                       new MixEditWindow(ch, mixIndex);
+                       return FOCUS_STATE;
+                     }, 0);
+      grid.nextLine();
+    }
   }
 
   window->setInnerHeight(grid.getWindowHeight());

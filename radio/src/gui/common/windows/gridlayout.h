@@ -33,6 +33,11 @@ class GridLayout {
       labelWidth = width;
     }
 
+    void setLabelPaddingRight(coord_t width)
+    {
+      labelPaddingRight = width;
+    }
+
     rect_t getLineSlot()
     {
       return { lineMarginLeft, currentY, LCD_W - lineMarginRight - lineMarginLeft, lineHeight };
@@ -41,7 +46,7 @@ class GridLayout {
     rect_t getLabelSlot(bool indent = false)
     {
       coord_t left = indent ? lineMarginLeft + indentWidth : lineMarginLeft;
-      return { left, currentY, labelWidth - left, lineHeight };
+      return { left, currentY, labelWidth - labelPaddingRight - left, lineHeight };
     }
 
     rect_t getFieldSlot(uint8_t count = 1, uint8_t index = 0)
@@ -76,6 +81,7 @@ class GridLayout {
     Window &window;
     coord_t currentY = 0;
     coord_t labelWidth = 140;
+    coord_t labelPaddingRight = 0;
     static constexpr uint8_t lineMargin = 7;
     static constexpr uint8_t lineMarginLeft = 6;
     static constexpr uint8_t lineMarginRight = 12;

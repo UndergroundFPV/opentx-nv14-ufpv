@@ -20,7 +20,7 @@
 
 #include "opentx.h"
 
-void drawCurveRef(coord_t x, coord_t y, CurveRef & curve, LcdFlags att)
+void drawCurveRef(coord_t x, coord_t y, const CurveRef & curve, LcdFlags att)
 {
   if (curve.value != 0) {
     switch (curve.type) {
