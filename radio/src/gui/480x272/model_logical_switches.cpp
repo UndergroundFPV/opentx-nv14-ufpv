@@ -36,9 +36,68 @@ class LogicalSwitchButton : public Button {
 
     }
 
+    static constexpr coord_t col1 = 25;
+    static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
+    static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1;
+    static constexpr coord_t line1 = 0;
+    static constexpr coord_t line2 = 20;
+
+    // LS box content
     virtual void paint(BitmapBuffer * dc) override {
+      LogicalSwitchData * cs = lswAddress(menuVerticalPosition);
+      uint8_t cstate = lswFamily(cs->func);
+      int v1_val = cs->v1;
+
       paintLogicalSwitch(dc);
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+
+      // CSW func
+      lcdDrawTextAtIndex(col1, line1, STR_VCSWFUNC, cs->func);
+
+      // CSW params
+      cstate = lswFamily(cs->func);
+
+      if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY) {
+        drawSwitch(col2, line1, cs->v1);
+        drawSwitch(col3, line1, cs->v2);
+      }
+      else if (cstate == LS_FAMILY_EDGE) {
+        drawSwitch(col2, line1, cs->v1);
+        putsEdgeDelayParam(col3, 0, cs, 0,  0);
+      }
+      else if (cstate == LS_FAMILY_COMP) {
+        v1_val = cs->v1;
+        drawSource(col2, line1, v1_val, 0);
+        drawSource(col3, line1, cs->v2, 0);
+      }
+      else if (cstate == LS_FAMILY_TIMER) {
+        lcdDrawNumber(col2, line1, lswTimerValue(cs->v1), LEFT|PREC1);
+        lcdDrawNumber(col3, line1, lswTimerValue(cs->v2), LEFT|PREC1);
+      }
+      else {
+        v1_val = cs->v1;
+        drawSource(col2, line1, v1_val, 0);
+      }
+
+      // CSW AND switch
+      drawSwitch(col1, line2, cs->andsw, 0);
+
+      // CSW duration
+      if (cs->duration > 0)
+        lcdDrawNumber(col2, line2, cs->duration, PREC1|LEFT);
+      else
+        lcdDrawMMM(col2, line2, 0);
+
+      // CSW delay
+      if (cstate == LS_FAMILY_EDGE) {
+        lcdDrawText(col3, line2, STR_NA);
+      }
+      else if (cs->delay > 0) {
+        lcdDrawNumber(col3, line2, cs->delay, PREC1|LEFT);
+      }
+      else {
+        lcdDrawMMM(col3, line2, 0);
+      }
     }
 
 protected:
@@ -58,10 +117,11 @@ class LogicalSwitchEditWindow: public Page {
 
   protected:
   uint8_t ls;
+  char s[8];
 
   void buildHeader(Window * window) {
-    new StaticText(window, { 70, 4, 100, 20 }, STR_MENU_LOGICAL_SWITCHES, MENU_TITLE_COLOR);
-    //new StaticText(window, { 70, 28, 100, 20 }, getSourceString(s, MIXSRC_CH1 + channel), MENU_TITLE_COLOR);
+    new StaticText(window, { 70, 4, LCD_W - 100, 20 }, STR_MENULOGICALSWITCHES, MENU_TITLE_COLOR);
+    new StaticText(window, { 70, 28, LCD_W - 100, 20 }, getSwitchString(s, SWSRC_SW1+ls), MENU_TITLE_COLOR);
   }
 
   void buildBody(Window * window) {
@@ -109,7 +169,7 @@ void ModelLogicalSwitchesPage::build(Window * window) {
 
     rect_t rect = grid.getFieldSlot();
     rect.h += 20;
-
+    // POPUP MENU
     new LogicalSwitchButton(window, rect, i,
                             [=]() -> uint8_t {
                                 Menu * menu = new Menu();
