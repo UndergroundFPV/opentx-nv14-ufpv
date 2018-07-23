@@ -362,7 +362,7 @@ void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t l
   int width = getTextWidth(s, len, flags);
   int height = getFontHeight(flags);
 
-  if (y < ymin || y + height >= ymax) {
+  if (y + height <= ymin || y >= ymax) {
     RESTORE_OFFSET();
     return;
   }
