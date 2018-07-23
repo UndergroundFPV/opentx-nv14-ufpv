@@ -54,7 +54,7 @@ class MenuWindow: public Window {
 
   protected:
     std::vector<MenuLine> lines;
-    static constexpr uint8_t lineHeight = 30;
+    static constexpr uint8_t lineHeight = 40;
     void updatePosition();
 };
 
