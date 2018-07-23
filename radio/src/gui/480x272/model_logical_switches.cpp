@@ -44,7 +44,7 @@ class LogicalSwitchButton : public Button {
 
     // LS box content
     virtual void paint(BitmapBuffer * dc) override {
-      LogicalSwitchData * cs = lswAddress(menuVerticalPosition);
+      LogicalSwitchData * cs = lswAddress(ls);
       uint8_t cstate = lswFamily(cs->func);
       int v1_val = cs->v1;
 
@@ -124,9 +124,52 @@ class LogicalSwitchEditWindow: public Page {
     new StaticText(window, { 70, 28, LCD_W - 100, 20 }, getSwitchString(s, SWSRC_SW1+ls), MENU_TITLE_COLOR);
   }
 
+  // MixerOne
   void buildBody(Window * window) {
+    LogicalSwitchData * cs = lswAddress(ls);
+
+    uint8_t sw = SWSRC_SW1+s_currIdx;
+    uint8_t cstate = lswFamily(cs->func);
+
     GridLayout grid(*window);
     grid.spacer(10);
+
+    // LS Func
+    new StaticText(window, grid.getLabelSlot(true), STR_FUNC);
+    new Choice(window, grid.getFieldSlot(2, 0), STR_VCSWFUNC, 0, LS_FUNC_MAX, GET_SET_DEFAULT(cs->func), 0, isLogicalSwitchFunctionAvailable);
+    uint8_t new_cstate = lswFamily(cs->func);
+    if (cstate != new_cstate) {
+      if (new_cstate == LS_FAMILY_TIMER) {
+        cs->v1 = cs->v2 = 0;
+      }
+      else if (new_cstate == LS_FAMILY_EDGE) {
+        cs->v1 = 0; cs->v2 = -129; cs->v3 = 0;
+      }
+      else {
+        cs->v1 = cs->v2 = 0;
+      }
+    }
+    grid.nextLine();
+
+    // V1
+    new StaticText(window, grid.getLabelSlot(true), STR_V1);
+    grid.nextLine();
+
+    // V2
+    new StaticText(window, grid.getLabelSlot(true), STR_V2);
+    grid.nextLine();
+
+    // AND switch
+    new StaticText(window, grid.getLabelSlot(true), STR_AND_SWITCH);
+    grid.nextLine();
+
+    // Duration
+    new StaticText(window, grid.getLabelSlot(true), STR_DURATION);
+    grid.nextLine();
+
+    // Delay
+    new StaticText(window, grid.getLabelSlot(true), STR_DELAY);
+    grid.nextLine();
   }
 };
 
@@ -169,6 +212,7 @@ void ModelLogicalSwitchesPage::build(Window * window) {
 
     rect_t rect = grid.getFieldSlot();
     rect.h += 20;
+
     // POPUP MENU
     new LogicalSwitchButton(window, rect, i,
                             [=]() -> uint8_t {

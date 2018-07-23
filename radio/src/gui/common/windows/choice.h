@@ -43,7 +43,7 @@ protected:
 class Choice : public Window {
   public:
     Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
-           std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0
+           std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0, std::function<bool(int16_t)> chkValue = nullptr
     );
 
     virtual void paint(BitmapBuffer * dc) override;
@@ -55,6 +55,7 @@ class Choice : public Window {
     int16_t vmin;
     int16_t vmax;
     std::function<int16_t()> getValue;
+    std::function<bool(int16_t)> chkValue;
     std::function<void(int16_t)> setValue;
     LcdFlags flags;
 };
