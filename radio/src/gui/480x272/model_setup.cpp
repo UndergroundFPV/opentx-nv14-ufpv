@@ -151,7 +151,7 @@ void resetModuleSettings(uint8_t module)
 void ModelSetupPage::build(Window * window)
 {
   GridLayout grid(*window);
-  grid.spacer(10);
+  grid.spacer(8);
 
   // Model name
   new StaticText(window, grid.getLabelSlot(), STR_MODELNAME);
@@ -434,7 +434,8 @@ void ModelSetupPage::updateInternalModuleWindow()
                                            if (moduleFlag[INTERNAL_MODULE] == MODULE_NORMAL_MODE) {
                                              moduleFlag[INTERNAL_MODULE] = MODULE_RANGECHECK;
                                              returnValue = 1;
-                                           } else {
+                                           }
+                                           else {
                                              moduleFlag[INTERNAL_MODULE] = MODULE_NORMAL_MODE;
                                              returnValue = 0;
                                            }
@@ -476,7 +477,6 @@ void ModelSetupPage::updateExternalModuleWindow()
 
   if (g_model.moduleData[EXTERNAL_MODULE].type != MODULE_TYPE_NONE && !IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
     if (IS_MODULE_XJT(EXTERNAL_MODULE)) {
-
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, RF_PROTO_OFF, RF_PROTO_LAST,
                  GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol),
                  SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].rfProtocol, newValue));

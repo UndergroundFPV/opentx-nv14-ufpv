@@ -82,11 +82,11 @@ class GridLayout {
     coord_t currentY = 0;
     coord_t labelWidth = 140;
     coord_t labelPaddingRight = 0;
-    static constexpr uint8_t lineMargin = 7;
+    static constexpr uint8_t lineMargin = 6;
     static constexpr uint8_t lineMarginLeft = 6;
-    static constexpr uint8_t lineMarginRight = 12;
-    static constexpr uint8_t lineHeight = 25;
-    static constexpr uint8_t indentWidth = 12;
+    static constexpr uint8_t lineMarginRight = 10;
+    static constexpr uint8_t lineHeight = 26;
+    static constexpr uint8_t indentWidth = 10;
 };
 
 #endif

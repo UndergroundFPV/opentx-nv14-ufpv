@@ -23,7 +23,6 @@
 
 #define SET_DIRTY()     storageDirty(EE_MODEL)
 
-
 uint8_t getMixesCount()
 {
   uint8_t count = 0;
@@ -99,12 +98,11 @@ class MixEditWindow: public Page {
           new CustomCurveChoice(updateCurvesWindow, grid.getFieldSlot(2,1), -MAX_CURVES, MAX_CURVES, GET_SET_DEFAULT(mix->curve.value));
           break;
       }
-
     }
 
     void buildBody(Window * window) {
       GridLayout grid(*window);
-      grid.spacer(10);
+      grid.spacer(8);
 
       MixData * mix = mixAddress(mixIndex) ;
 
@@ -141,19 +139,17 @@ class MixEditWindow: public Page {
 
       // Flight modes
       new StaticText(window, grid.getLabelSlot(true), STR_FLMODE);
-      for (int i=0; i<MAX_FLIGHT_MODES; i++) {
-        char fm[2];
-        fm[0] = '0' + i;
-        fm[1] = '\0';
+      for (uint8_t i=0; i<MAX_FLIGHT_MODES; i++) {
+        char fm[2] = { char('0' + i), '\0' };
         if (i > 0 && (i % 4) == 0)
           grid.nextLine();
         new TextButton(window, grid.getFieldSlot(4, i % 4), fm,
                                        [=]() -> uint8_t {
                                            BF_BIT_FLIP(mix->flightModes, BF_BIT(i));
                                            SET_DIRTY();
-                                           return BF_SINGLE_BIT_GET(mix->flightModes, i);
+                                           return bool(BF_SINGLE_BIT_GET(mix->flightModes, i));
                                        },
-                                       (BF_SINGLE_BIT_GET(mix->flightModes, i) == 0 ? 0 : 1));
+                                       bool(BF_SINGLE_BIT_GET(mix->flightModes, i)));
       }
       grid.nextLine();
 
@@ -213,39 +209,15 @@ ModelMixesPage::ModelMixesPage():
 {
 }
 
-#define MIX_LINE_WEIGHT_POS     5
-#define MIX_LINE_SRC_POS        30
-#define MIX_LINE_CURVE_ICON     55
-#define MIX_LINE_CURVE_POS      75
-#define MIX_LINE_SWITCH_ICON    80
-#define MIX_LINE_SWITCH_POS     100
-#define MIX_LINE_DELAY_SLOW_POS 120
-#define MIX_LINE_NAME_FM_ICON   140
-#define MIX_LINE_NAME_FM_POS    150
-
-const BitmapBuffer * mpx_mode[] = {
-  mixerSetupAddBitmap,
-  mixerSetupMultiBitmap,
-  mixerSetupReplaceBitmap
-};
-
 class MixLineButton : public Button {
   public:
     MixLineButton(Window * parent, const rect_t & rect, uint8_t mixIndex, std::function<uint8_t(void)> onPress):
       Button(parent, rect, onPress),
       mixIndex(mixIndex)
     {
-    }
-
-    void paintMixFlightModes(BitmapBuffer * dc, FlightModesType value) {
-      coord_t x = MIX_LINE_NAME_FM_POS;
-      for (int i=0; i<MAX_FLIGHT_MODES; i++) {
-        char s[] = " ";
-        s[0] = '0' + i;
-        if (value & (1<<i))
-          dc->drawFilledRect(x, 4, 8, 12 , SOLID, CURVE_AXIS_COLOR);
-        dc->drawText(x, 2, s, SMLSIZE);
-        x += 8;
+      const MixData & mix = g_model.mixData[mixIndex];
+      if (mix.swtch || mix.curve.value != 0 || mix.flightModes) {
+        setHeight(45);
       }
     }
 
@@ -261,49 +233,51 @@ class MixLineButton : public Button {
       }
     }
 
-    void paintMixLine(BitmapBuffer * dc) {
-      const MixData & mix = g_model.mixData[mixIndex];
-      bool first = (mixIndex == 0 || mix.destCh != g_model.mixData[mixIndex-1].destCh);
-      if (!first)
-        dc->drawBitmap(10, 0, mpx_mode[mix.mltpx]);
-      drawSource(dc, MIX_LINE_SRC_POS, 0, mix.srcRaw);
-
-      if (first && mix.mltpx == 1) // TODO use an enum
-        dc->drawText(MIX_LINE_WEIGHT_POS, 0, "MULT!", 0);
-      else
-        drawNumber(dc, 3, 2, mix.weight, 0);
-        // TODO gvarWeightItem(MIX_LINE_WEIGHT_POS, y, md, RIGHT | attr | (isMixActive(i) ? BOLD : 0), event);
-
-      if (mix.name[0] && mix.flightModes) {
-        if (SLOW_BLINK_ON_PHASE) {
-          dc->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupFlightmodeBitmap);
-          paintMixFlightModes(dc, mix.flightModes);
+    void paintMixFlightModes(BitmapBuffer * dc, FlightModesType value) {
+      dc->drawBitmap(146, 24, mixerSetupFlightmodeBitmap);
+      coord_t x = 166;
+      for (int i=0; i<MAX_FLIGHT_MODES; i++) {
+        char s[] = " ";
+        s[0] = '0' + i;
+        if (value & (1 << i)) {
+          dc->drawSolidFilledRect(x, 40, 8, 3, SCROLLBOX_COLOR);
+          dc->drawText(x, 23, s, SMLSIZE);
         }
         else {
-          dc->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupLabelBitmap);
-          dc->drawSizedText(MIX_LINE_NAME_FM_POS, 0, mix.name, sizeof(mix.name), ZCHAR);
+          dc->drawText(x, 23, s, SMLSIZE | TEXT_DISABLE_COLOR);
         }
+        x += 8;
       }
-      else if (mix.name[0]) {
-        dc->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupLabelBitmap);
-        dc->drawSizedText(MIX_LINE_NAME_FM_POS, 0, mix.name, sizeof(mix.name), ZCHAR);
+    }
+
+    void paintMixLine(BitmapBuffer * dc) {
+      const MixData & mix = g_model.mixData[mixIndex];
+
+      // first line ...
+      drawNumber(dc, 3, 2, mix.weight, 0, 0, nullptr, "%");
+      // TODO gvarWeightItem(MIX_LINE_WEIGHT_POS, y, md, RIGHT | attr | (isMixActive(i) ? BOLD : 0), event);
+
+      drawSource(dc, 60, 2, mix.srcRaw);
+
+      if (mix.name[0]) {
+        dc->drawBitmap(146, 4, mixerSetupLabelBitmap);
+        dc->drawSizedText(166, 2, mix.name, sizeof(mix.name), ZCHAR);
       }
-      else if (mix.flightModes) {
-        lcd->drawBitmap(MIX_LINE_NAME_FM_ICON, 2, mixerSetupFlightmodeBitmap);
-        paintMixFlightModes(dc, mix.flightModes);
+
+      // second line ...
+      if (mix.swtch) {
+        dc->drawBitmap(3, 24, mixerSetupSwitchBitmap);
+        drawSwitch(21, 22, mix.swtch);
       }
 
       if (mix.curve.value != 0 ) {
-        dc->drawBitmap(MIX_LINE_CURVE_ICON, 2, mixerSetupCurveBitmap);
-      }
-      drawCurveRef(MIX_LINE_CURVE_POS, 0, mix.curve);
-
-      if (mix.swtch) {
-        dc->drawBitmap(MIX_LINE_SWITCH_ICON, 2, mixerSetupSwitchBitmap);
-        drawSwitch(MIX_LINE_SWITCH_POS, 0, mix.swtch);
+        dc->drawBitmap(60, 24, mixerSetupCurveBitmap);
+        drawCurveRef(dc, 80, 22, mix.curve);
       }
 
-      dc->drawText(5, 20, "2nd line if needed");
+      if (mix.flightModes) {
+        paintMixFlightModes(dc, mix.flightModes);
+      }
     }
 
     virtual void paint(BitmapBuffer * dc) override {
@@ -356,11 +330,17 @@ void ModelMixesPage::editMix(Window * window, uint8_t channel, uint8_t mixIndex)
 void ModelMixesPage::build(Window * window)
 {
   GridLayout grid(*window);
-  grid.spacer(10);
-  grid.setLabelWidth(70);
-  grid.setLabelPaddingRight(10);
+  grid.spacer(8);
+  grid.setLabelWidth(66);
+  grid.setLabelPaddingRight(6);
 
   window->clear();
+
+  const BitmapBuffer * const mixerMultiplexBitmap[] = {
+    mixerSetupAddBitmap,
+    mixerSetupMultiBitmap,
+    mixerSetupReplaceBitmap
+  };
 
   char s[16];
   int mixIndex = 0;
@@ -371,10 +351,9 @@ void ModelMixesPage::build(Window * window)
                      [=]() -> uint8_t {
                        return 0;
                      }, 0);
+      uint8_t count = 0;
       while (mix->srcRaw > 0 && mix->destCh == ch) {
-        rect_t rect = grid.getFieldSlot();
-        rect.h += 20;
-        new MixLineButton(window, rect, mixIndex,
+        Button * button = new MixLineButton(window, grid.getFieldSlot(), mixIndex,
                           [=]() -> uint8_t {
                             Menu * menu = new Menu();
                             menu->addLine(STR_EDIT, [=]() -> void {
@@ -402,8 +381,12 @@ void ModelMixesPage::build(Window * window)
                             });
                             return FOCUS_STATE;
                           });
-        grid.nextLine();
-        grid.spacer(20);
+
+        if (count++ > 0) {
+          new StaticBitmap(window, {35, button->top() + (button->height() - 17) / 2, 25, 17}, mixerMultiplexBitmap[mix->mltpx]);
+        }
+
+        grid.spacer(button->height() + 5);
         ++mixIndex;
         ++mix;
       }
@@ -688,51 +671,6 @@ void onMixesMenu(const char * result)
   }
 }
 
-void displayMixInfos(coord_t y, MixData *md)
-{
-  if (md->curve.value != 0 ) lcd->drawBitmap(MIX_LINE_CURVE_ICON, y + 2, mixerSetupCurveBitmap);
-  drawCurveRef(MIX_LINE_CURVE_POS, y, md->curve);
-
-  if (md->swtch) {
-    lcd->drawBitmap(MIX_LINE_SWITCH_ICON, y + 2, mixerSetupSwitchBitmap);
-    drawSwitch(MIX_LINE_SWITCH_POS, y, md->swtch);
-  }
-}
-
-void displayMixSmallFlightModes(coord_t x, coord_t y, FlightModesType value)
-{
-  for (int i=0; i<MAX_FLIGHT_MODES; i++) {
-    char s[] = " ";
-    s[0] = '0' + i;
-    if (value & (1<<i)) lcd->drawFilledRect(x, y+2, 8, 12 , SOLID, CURVE_AXIS_COLOR);
-    lcdDrawText(x, y, s, SMLSIZE);
-    x += 8;
-  }
-}
-
-void displayMixLine(coord_t y, MixData *md)
-{
-  if (md->name[0] && md->flightModes) {
-    if (SLOW_BLINK_ON_PHASE) {
-      lcd->drawBitmap(MIX_LINE_NAME_FM_ICON, y + 2, mixerSetupFlightmodeBitmap);
-      displayMixSmallFlightModes(MIX_LINE_NAME_FM_POS, y + 2, md->flightModes);
-    }
-    else {
-      lcd->drawBitmap(MIX_LINE_NAME_FM_ICON, y + 2, mixerSetupLabelBitmap);
-      lcdDrawSizedText(MIX_LINE_NAME_FM_POS, y, md->name, sizeof(md->name), ZCHAR);
-    }
-  }
-  else if (md->name[0]) {
-    lcd->drawBitmap(MIX_LINE_NAME_FM_ICON, y + 2, mixerSetupLabelBitmap);
-    lcdDrawSizedText(MIX_LINE_NAME_FM_POS, y, md->name, sizeof(md->name), ZCHAR);
-  }
-  else if (md->flightModes) {
-    lcd->drawBitmap(MIX_LINE_NAME_FM_ICON, y + 2, mixerSetupFlightmodeBitmap);
-    displayMixSmallFlightModes(MIX_LINE_NAME_FM_POS, y + 2, md->flightModes);
-  }
-  displayMixInfos(y, md);
-}
-
 void displayMixStatus(uint8_t channel)
 {
   lcdDrawNumber(MENUS_MARGIN_LEFT, MENU_FOOTER_TOP, channel + 1, MENU_TITLE_COLOR, 0, "CH", NULL);
@@ -924,7 +862,7 @@ bool menuModelMixAll(event_t event)
           else
             gvarWeightItem(MIX_LINE_WEIGHT_POS, y, md, RIGHT | attr | (isMixActive(i) ? BOLD : 0), event);
 
-          displayMixLine(y, md);
+          // displayMixLine(y, md);
 
           BitmapBuffer *delayslowbmp[] = {mixerSetupSlowBitmap, mixerSetupDelayBitmap, mixerSetupDelaySlowBitmap};
           uint8_t delayslow = 0;

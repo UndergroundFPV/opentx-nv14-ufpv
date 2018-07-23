@@ -20,26 +20,26 @@
 
 #include "opentx.h"
 
-void drawCurveRef(coord_t x, coord_t y, const CurveRef & curve, LcdFlags att)
+void drawCurveRef(BitmapBuffer * dc, coord_t x, coord_t y, const CurveRef & curve, LcdFlags att)
 {
   if (curve.value != 0) {
     switch (curve.type) {
       case CURVE_REF_DIFF:
-        lcdDrawText(x, y, "D", att);
-        GVAR_MENU_ITEM(lcdNextPos, y, curve.value, -100, 100, LEFT|att, 0, 0);
+        dc->drawText(x, y, "D", att);
+        GVAR_MENU_ITEM(x + 13, y, curve.value, -100, 100, LEFT|att, 0, 0);
         break;
 
       case CURVE_REF_EXPO:
-        lcdDrawText(x, y, "E", att);
-        GVAR_MENU_ITEM(lcdNextPos, y, curve.value, -100, 100, LEFT|att, 0, 0);
+        dc->drawText(x, y, "E", att);
+        GVAR_MENU_ITEM(x + 13, y, curve.value, -100, 100, LEFT|att, 0, 0);
         break;
 
       case CURVE_REF_FUNC:
-        lcdDrawTextAtIndex(x, y, STR_VCURVEFUNC, curve.value, att);
+        drawTextAtIndex(dc, x, y, STR_VCURVEFUNC, curve.value, att);
         break;
 
       case CURVE_REF_CUSTOM:
-        drawCurveName(x, y, curve.value, att);
+        drawCurveName(dc, x, y, curve.value, att);
         break;
     }
   }

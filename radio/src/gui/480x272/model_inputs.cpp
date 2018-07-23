@@ -34,7 +34,7 @@ ModelInputsPage::ModelInputsPage():
 void ModelInputsPage::build(Window * window)
 {
   GridLayout grid(*window);
-  grid.spacer(10);
+  grid.spacer(8);
 }
 
 int expoFn(int x)
@@ -365,13 +365,13 @@ void onExposMenu(const char * result)
 
 void displayExpoInfos(coord_t y, ExpoData * ed)
 {
-  drawCurveRef(EXPO_LINE_CURVE_POS, y, ed->curve);
+  /*drawCurveRef(EXPO_LINE_CURVE_POS, y, ed->curve);
   if (ed->swtch) {
     drawSwitch(EXPO_LINE_SWITCH_POS, y, ed->swtch);
   }
   if (ed->mode != 3) {
     lcd->drawText(EXPO_LINE_SIDE_POS, y, ed->mode == 2 ? "\176" : "\177");
-  }
+  }*/
 }
 
 void displayExpoLine(coord_t y, ExpoData * ed)

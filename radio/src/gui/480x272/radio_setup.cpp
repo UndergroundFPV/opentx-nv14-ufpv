@@ -33,7 +33,7 @@ RadioSetupPage::RadioSetupPage():
 void RadioSetupPage::build(Window * window)
 {
   GridLayout grid(*window);
-  grid.spacer(10);
+  grid.spacer(8);
 
   // Date
   new StaticText(window, grid.getLabelSlot(), STR_DATE);

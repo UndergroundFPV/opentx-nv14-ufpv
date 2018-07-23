@@ -31,7 +31,7 @@ ModelHeliPage::ModelHeliPage():
 void ModelHeliPage::build(Window * window)
 {
   GridLayout grid(*window);
-  grid.spacer(10);
+  grid.spacer(8);
 
   // Swash type
   new StaticText(window, grid.getLabelSlot(), STR_SWASHTYPE);

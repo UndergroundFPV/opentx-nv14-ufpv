@@ -32,8 +32,14 @@ bool Button::onTouchEnd(coord_t x, coord_t y)
 
 void TextButton::paint(BitmapBuffer * dc)
 {
-  dc->drawText(rect.w / 2, rect.h / 2 - 12, text, flags | CENTERED | (enabled ? 0 : TEXT_DISABLE_COLOR));
-  drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, getState() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+  if (getState()) {
+    dc->drawSolidFilledRect(1, 1, rect.w-2, rect.h-2, CURVE_AXIS_COLOR);
+    drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, SCROLLBOX_COLOR);
+  }
+  else {
+    dc->drawSolidFilledRect(0, 0, rect.w, rect.h, CURVE_AXIS_COLOR);
+  }
+  dc->drawText(rect.w / 2, (rect.h - getFontHeight(flags)) / 2, text, flags | CENTERED | (enabled ? 0 : TEXT_DISABLE_COLOR));
 }
 
 #include "alpha_button_on.lbm"

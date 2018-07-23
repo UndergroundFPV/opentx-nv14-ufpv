@@ -274,7 +274,7 @@ void editCurveRef(coord_t x, coord_t y, CurveRef & curve, event_t event, LcdFlag
       if (attr && menuHorizontalPosition==1) CHECK_INCDEC_MODELVAR_ZERO(event, curve.value, CURVE_BASE-1);
       break;
     case CURVE_REF_CUSTOM:
-      drawCurveName(lcdNextPos+10, y, curve.value, (menuHorizontalPosition==1 ? attr : 0));
+      // drawCurveName(lcdNextPos+10, y, curve.value, (menuHorizontalPosition==1 ? attr : 0));
       if (attr && menuHorizontalPosition==1) {
         if (event==EVT_KEY_LONG(KEY_ENTER) && curve.value!=0) {
           s_curveChan = (curve.value<0 ? -curve.value-1 : curve.value-1);

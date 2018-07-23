@@ -334,7 +334,6 @@ class BitmapBuffer: public BitmapBufferBase<uint16_t>
       if (srcy + h > srch)
         h = srch - srcy;
 
-
       if (x < xmin) {
         w += x-xmin;
         srcx -= x-xmin;

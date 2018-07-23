@@ -96,7 +96,7 @@ uint8_t getStringInfo(const char *s)
 
 uint8_t getFontHeight(LcdFlags flags)
 {
-  static const uint8_t heightTable[16] = { 9, 13, 16, 24, 32, 64, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12 };
+  static const uint8_t heightTable[16] = { 22, 13, 16, 24, 32, 64, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12 };
   return heightTable[FONTINDEX(flags)];
 }
 
@@ -272,11 +272,11 @@ void drawSwitch(coord_t x, coord_t y, swsrc_t idx, LcdFlags flags)
   lcdDrawText(x, y, s, flags);
 }
 
-void drawCurveName(coord_t x, coord_t y, int8_t idx, LcdFlags flags)
+void drawCurveName(BitmapBuffer * dc, coord_t x, coord_t y, int8_t idx, LcdFlags flags)
 {
   char s[8];
   getCurveString(s, idx);
-  lcdDrawText(x, y, s, flags);
+  dc->drawText(x, y, s, flags);
 }
 
 void drawTimerMode(coord_t x, coord_t y, int32_t mode, LcdFlags att)
