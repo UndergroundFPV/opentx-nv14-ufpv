@@ -25,7 +25,6 @@ void extmoduleSendNextFrame();
 
 void extmoduleStop()
 {
-#if 0
   EXTERNAL_MODULE_OFF();
 
   NVIC_DisableIRQ(EXTMODULE_DMA_IRQn);
@@ -34,12 +33,10 @@ void extmoduleStop()
   EXTMODULE_DMA_STREAM->CR &= ~DMA_SxCR_EN; // Disable DMA
   EXTMODULE_TIMER->DIER &= ~(TIM_DIER_CC2IE | TIM_DIER_UDE);
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
-#endif
 }
 
 void extmoduleNoneStart()
 {
-#if 0
   EXTERNAL_MODULE_OFF();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, 0);
@@ -56,20 +53,18 @@ void extmoduleNoneStart()
   EXTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
   EXTMODULE_TIMER->PSC = EXTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
   EXTMODULE_TIMER->ARR = 36000; // 18mS
-  EXTMODULE_TIMER->CCR1 = 32000; // Update time
+  EXTMODULE_TIMER->CCR2 = 32000; // Update time
   EXTMODULE_TIMER->EGR = 1; // Restart
-  EXTMODULE_TIMER->SR &= ~TIM_SR_CC1IF;
-  EXTMODULE_TIMER->DIER |= TIM_DIER_CC1IE; // Enable this interrupt
+  EXTMODULE_TIMER->SR &= ~TIM_SR_CC2IF;
+  EXTMODULE_TIMER->DIER |= TIM_DIER_CC2IE; // Enable this interrupt
   EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
 
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
-#endif
 }
 
 void extmodulePpmStart()
 {
-#if 0
   EXTERNAL_MODULE_ON();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, EXTMODULE_TX_GPIO_AF);
@@ -125,7 +120,6 @@ void extmodulePpmStart()
   NVIC_SetPriority(EXTMODULE_DMA_IRQn, 7);
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
-#endif
 }
 
 void extmodulePxxStart()
@@ -156,7 +150,7 @@ void extmodulePxxStart()
   EXTMODULE_TIMER->DIER |= TIM_DIER_UDE; // Enable DMA on update
   EXTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2;
   EXTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
-#elif 1//defined(PCBNV14)
+#elif defined(PCBNV14)
 {
     EXTMODULE_TIMER->CCER = TIM_CCER_CC1E | TIM_CCER_CC1NE;
     EXTMODULE_TIMER->BDTR = TIM_BDTR_MOE; // Enable outputs
@@ -189,7 +183,6 @@ void extmodulePxxStart()
 #if defined(DSM2)
 void extmoduleDsm2Start()
 {
-#if 0
   EXTERNAL_MODULE_ON();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, EXTMODULE_TX_GPIO_AF);
@@ -232,13 +225,11 @@ void extmoduleDsm2Start()
   NVIC_SetPriority(EXTMODULE_DMA_IRQn, 7);
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
-#endif
 }
 #endif
 
 void extmoduleCrossfireStart()
 {
-#if 0
   EXTERNAL_MODULE_ON();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, 0);
@@ -263,7 +254,6 @@ void extmoduleCrossfireStart()
 
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
-#endif
 }
 
 void extmoduleSendNextFrame()
