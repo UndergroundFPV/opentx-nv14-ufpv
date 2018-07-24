@@ -33,7 +33,7 @@ Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_
 {
 }
 
-bool Choice::setAvailableHandler(std::function<bool(int)> handler)
+void Choice::setAvailableHandler(std::function<bool(int)> handler)
 {
   isValueAvailable = handler;
 }

@@ -50,7 +50,7 @@ class Choice : public Window {
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
-    virtual bool setAvailableHandler(std::function<bool(int)> handler = nullptr);
+    virtual void setAvailableHandler(std::function<bool(int)> handler = nullptr);
 
   protected:
     const char * values;
