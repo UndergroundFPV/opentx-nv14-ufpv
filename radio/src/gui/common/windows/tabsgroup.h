@@ -38,6 +38,8 @@ class PageTab {
 
     virtual void build(Window * window) = 0;
 
+    virtual void checkEvents() { }
+
     const char * title;
     unsigned icon;
 };
@@ -93,6 +95,8 @@ class TabsGroup: public Window {
         setCurrentTab(tabs[index]);
       }
     }
+
+    virtual void checkEvents() override;
 
   protected:
     TabsGroupHeader header;

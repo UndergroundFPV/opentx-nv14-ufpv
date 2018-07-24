@@ -128,7 +128,7 @@ typedef  struct
     unsigned char msg_OK;
   //unsigned char RxBuffer[HALLSTICK_BUFF_SIZE];
     //UNION_HALLDATA Payload;
-}STRUCT_HALL;
+} STRUCT_HALL;
 
 enum
 {

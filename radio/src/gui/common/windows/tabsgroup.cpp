@@ -104,3 +104,9 @@ void TabsGroup::setCurrentTab(PageTab * tab)
   }
 }
 
+void TabsGroup::checkEvents()
+{
+  Window::checkEvents();
+  if (currentTab)
+    currentTab->checkEvents();
+}

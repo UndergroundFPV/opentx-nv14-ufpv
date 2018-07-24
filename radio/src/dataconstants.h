@@ -530,7 +530,7 @@ enum SwitchSources {
 
   SWSRC_FIRST_SWITCH,
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBTARANIS) || defined(PCBHORUS) || defined(PCBNV14)
   SWSRC_SA0 = SWSRC_FIRST_SWITCH,
   SWSRC_SA1,
   SWSRC_SA2,
@@ -742,7 +742,7 @@ enum MixSources {
   MIXSRC_SLIDER3,                       LUA_EXPORT("lcs", "Left center slider (X9E only)")
   MIXSRC_SLIDER4,                       LUA_EXPORT("rcs", "Right center slider (X9E only)")
   MIXSRC_LAST_POT = MIXSRC_SLIDER4,
-#elif defined(PCBX7) || defined(PCBXLITE)
+#elif defined(PCBX7) || defined(PCBXLITE) || defined(PCBNV14)
   MIXSRC_POT1 = MIXSRC_FIRST_POT,       LUA_EXPORT("s1", "Potentiometer 1")
   MIXSRC_POT2,                          LUA_EXPORT("s2", "Potentiometer 2")
   MIXSRC_LAST_POT = MIXSRC_POT2,
@@ -757,8 +757,8 @@ enum MixSources {
 #else
   MIXSRC_P1 = MIXSRC_FIRST_POT,
   MIXSRC_P2,
-    MIXSRC_P3,
-    MIXSRC_LAST_POT = MIXSRC_P3,
+  MIXSRC_P3,
+  MIXSRC_LAST_POT = MIXSRC_P3,
 #endif
 
 #if defined(PCBHORUS)
@@ -803,7 +803,17 @@ enum MixSources {
 
   MIXSRC_FIRST_SWITCH,
 
-#if defined(PCBXLITE)
+#if defined(PCBNV14)
+  MIXSRC_SA = MIXSRC_FIRST_SWITCH,  LUA_EXPORT("sa", "Switch A")
+  MIXSRC_SB,                        LUA_EXPORT("sb", "Switch B")
+  MIXSRC_SC,                        LUA_EXPORT("sc", "Switch C")
+  MIXSRC_SD,                        LUA_EXPORT("sd", "Switch D")
+  MIXSRC_SE,                        LUA_EXPORT("se", "Switch E")
+  MIXSRC_SF,                        LUA_EXPORT("sf", "Switch F")
+  MIXSRC_SG,                        LUA_EXPORT("sg", "Switch G")
+  MIXSRC_SH,                        LUA_EXPORT("sh", "Switch H")
+  MIXSRC_LAST_SWITCH = MIXSRC_SH,
+#elif defined(PCBXLITE)
   MIXSRC_SA = MIXSRC_FIRST_SWITCH,  LUA_EXPORT("sa", "Switch A")
   MIXSRC_SB,                        LUA_EXPORT("sb", "Switch B")
   MIXSRC_SC,                        LUA_EXPORT("sc", "Switch C")

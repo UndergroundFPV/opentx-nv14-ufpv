@@ -256,6 +256,8 @@ void generalDefault()
   #endif
   g_eeGeneral.slidersConfig = 0x0f; // 4 sliders
   g_eeGeneral.blOffBright = 20;
+#elif defined(PCBNV14)
+  g_eeGeneral.potsConfig = (POT_WITHOUT_DETENT << 0) + (POT_WITHOUT_DETENT << 2); // 2 pots without detent
 #elif defined(PCBX7) ||  defined(PCBXLITE)
   g_eeGeneral.potsConfig = (POT_WITHOUT_DETENT << 0) + (POT_WITH_DETENT << 2); // S1 = pot without detent, S2 = pot with detent
 #elif defined(PCBTARANIS)
@@ -270,6 +272,8 @@ void generalDefault()
 #elif defined(PCBX7) || defined(PCBI8)
   g_eeGeneral.switchConfig = 0x000006ff; // 4x3POS, 1x2POS, 1xTOGGLE
 #elif defined(PCBTARANIS) || defined(PCBHORUS)
+  g_eeGeneral.switchConfig = 0x00007bff; // 6x3POS, 1x2POS, 1xTOGGLE
+#elif defined(PCBNV14)
   g_eeGeneral.switchConfig = 0x00007bff; // 6x3POS, 1x2POS, 1xTOGGLE
 #endif
 

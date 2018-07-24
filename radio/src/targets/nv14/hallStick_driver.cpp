@@ -23,15 +23,9 @@
 DMAFifo<HALLSTICK_BUFF_SIZE> hallDMAFifo __DMA (HALL_DMA_Stream_RX);
 unsigned char HallCmd[64] __DMA;
 
-STRUCT_HALL HallProtocol = {
-  0,
-  GET_START,
-};
-
+STRUCT_HALL HallProtocol = { 0 };
 STRUCT_HALL_CHANNEL Channel;
-STRUCT_STICK_CALIBRATION StickCallbration[4] = {
-  {0, 0, 0}
-};
+STRUCT_STICK_CALIBRATION StickCallbration[4] = { {0, 0, 0} };
 signed short HallChVal[4];
 
 /* crc16 implementation according to CCITT standards */
@@ -85,12 +79,14 @@ unsigned short  calc_crc16(void *pBuffer,unsigned char BufferSize)
 
 int16_t getHallADValue(uint8_t chan)
 {
-  if (chan > FLYSKY_HALL_CHANNEL_COUNT - 1)
-  {
+  if (chan >= FLYSKY_HALL_CHANNEL_COUNT) {
     return 0;
   }
 
-  return (HallChVal[chan] - 1000) * 4;
+  if (chan < 2)
+    return -(HallChVal[chan] - 1000) * 4;
+  else
+    return (HallChVal[chan] - 1000) * 4;
 }
 
 int16_t hallValue(uint8_t chan)

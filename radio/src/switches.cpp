@@ -635,6 +635,8 @@ swsrc_t getMovedSwitch()
 #if defined(GUI)
 void checkSwitches()
 {
+  return; // TODO later ...
+
 #if defined(MODULE_ALWAYS_SEND_PULSES)
   static swarnstate_t last_bad_switches = 0xff;
 #else
