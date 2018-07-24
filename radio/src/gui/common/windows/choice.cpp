@@ -22,15 +22,15 @@
 
 
 Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
-               std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags,  std::function<bool(int16_t)> chkValue) :
+               std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags,  IsValueAvailable isValueAvailable) :
   Window(parent, rect),
   values(values),
   vmin(vmin),
   vmax(vmax),
   getValue(getValue),
   setValue(setValue),
-  chkValue(chkValue),
-  flags(flags)
+  flags(flags),
+  isValueAvailable(isValueAvailable)
 {
 }
 
@@ -52,7 +52,7 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
 {
   if (hasFocus()) {
     int16_t value = getValue();
-    if(chkValue == nullptr)
+    if(isValueAvailable == nullptr)
     {
       value++;
       if (value > vmax)
@@ -64,7 +64,7 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
         value++;
         if (value > vmax)
           value = vmin;
-      } while (!chkValue(value));
+      } while (!isValueAvailable(value));
     }
 
     setValue(value);
