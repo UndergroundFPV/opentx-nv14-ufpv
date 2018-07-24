@@ -136,7 +136,7 @@ class LogicalSwitchEditWindow: public Page {
 
     // LS Func
     new StaticText(window, grid.getLabelSlot(true), STR_FUNC);
-    new Choice(window, grid.getFieldSlot(2, 0), STR_VCSWFUNC, 0, LS_FUNC_MAX, GET_SET_DEFAULT(cs->func), 0, isLogicalSwitchFunctionAvailable);
+    new Choice(window, grid.getFieldSlot(2, 0), STR_VCSWFUNC, 0, LS_FUNC_MAX, GET_SET_DEFAULT(cs->func), 0);
     uint8_t new_cstate = lswFamily(cs->func);
     if (cstate != new_cstate) {
       if (new_cstate == LS_FAMILY_TIMER) {

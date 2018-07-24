@@ -22,18 +22,21 @@
 
 
 Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
-               std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags,  IsValueAvailable isValueAvailable) :
+               std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
   Window(parent, rect),
   values(values),
   vmin(vmin),
   vmax(vmax),
   getValue(getValue),
   setValue(setValue),
-  flags(flags),
-  isValueAvailable(isValueAvailable)
+  flags(flags)
 {
 }
 
+bool Choice::setAvailableHandler(std::function<bool(int)> handler)
+{
+  isValueAvailable = handler;
+}
 
 void Choice::paint(BitmapBuffer * dc)
 {
@@ -52,21 +55,11 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
 {
   if (hasFocus()) {
     int16_t value = getValue();
-    if(isValueAvailable == nullptr)
-    {
+    do {
       value++;
       if (value > vmax)
         value = vmin;
-    }
-    else
-    {
-      do {
-        value++;
-        if (value > vmax)
-          value = vmin;
-      } while (!isValueAvailable(value));
-    }
-
+    } while (isValueAvailable  && !isValueAvailable (value));
     setValue(value);
   }
   else {
@@ -75,6 +68,7 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
   invalidate();
   return true;
 }
+
 
 CustomCurveChoice::CustomCurveChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax,
                                      std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :

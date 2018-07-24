@@ -43,12 +43,14 @@ protected:
 class Choice : public Window {
   public:
     Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
-           std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0, IsValueAvailable isValueAvailable= nullptr
+           std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0
     );
 
     virtual void paint(BitmapBuffer * dc) override;
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
+
+    virtual bool setAvailableHandler(std::function<bool(int)> handler = nullptr);
 
   protected:
     const char * values;
@@ -56,8 +58,8 @@ class Choice : public Window {
     int16_t vmax;
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
+    std::function<bool(int)> isValueAvailable = nullptr;
     LcdFlags flags;
-    IsValueAvailable isValueAvailable;
 };
 
 #endif // _CHOICE_H_
