@@ -142,7 +142,7 @@ void Keyboard::paint(BitmapBuffer * dc)
     keyboardBitmap = BitmapBuffer::load(getThemePath("keyboard.png"));
   dc->drawBitmap(0, 0, keyboardBitmap);
 
-#if 1
+#if 0
   dc->drawSolidFilledRect(0, 0, LCD_W, 30, CURVE_AXIS_COLOR);
   for (int i=0; i<10; i++) {
     coord_t w = (320 - 2 * 6 - 9 * 2) / 10;
