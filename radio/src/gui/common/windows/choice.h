@@ -24,7 +24,7 @@
 #include "window.h"
 
 class CustomCurveChoice : public Window {
-public:
+  public:
     CustomCurveChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax,
         std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0
     );
@@ -32,7 +32,7 @@ public:
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
-protected:
+  protected:
     int16_t vmin;
     int16_t vmax;
     std::function<int16_t()> getValue;
@@ -50,7 +50,7 @@ class Choice : public Window {
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
-    virtual void setAvailableHandler(std::function<bool(int)> handler = nullptr);
+    virtual void setAvailableHandler(std::function<bool(int)> handler);
 
   protected:
     const char * values;
@@ -58,7 +58,7 @@ class Choice : public Window {
     int16_t vmax;
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
-    std::function<bool(int)> isValueAvailable = nullptr;
+    std::function<bool(int)> isValueAvailable;
     LcdFlags flags;
 };
 

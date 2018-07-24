@@ -165,7 +165,7 @@ class Window {
     coord_t scrollPositionY = 0;
     static Window * focusWindow;
     static std::list<Window *> trash;
-    std::function<void()> onClose = nullptr;
+    std::function<void()> onClose;
 
     void detach();
 

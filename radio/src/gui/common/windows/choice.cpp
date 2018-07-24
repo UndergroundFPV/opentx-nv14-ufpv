@@ -59,7 +59,7 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
       value++;
       if (value > vmax)
         value = vmin;
-    } while (isValueAvailable  && !isValueAvailable (value));
+    } while (isValueAvailable && !isValueAvailable (value));
     setValue(value);
   }
   else {
