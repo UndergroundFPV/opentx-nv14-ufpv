@@ -79,7 +79,7 @@ class MixEditWindow: public Page {
       new StaticText(updateCurvesWindow, grid.getLabelSlot(true), STR_CURVE);
       curveTypeChoice = new Choice(updateCurvesWindow, grid.getFieldSlot(2,0), "\004DiffExpoFuncCstm", 0, CURVE_REF_CUSTOM,
                  GET_DEFAULT(mix->curve.type),
-                 [=](int32_t newValue) -> void { mix->curve.type = newValue;
+                 [=](int32_t newValue) { mix->curve.type = newValue;
                      SET_DIRTY();
                      updateCurves();
                      curveTypeChoice->setFocus();
@@ -322,7 +322,7 @@ void ModelMixesPage::rebuild(Window * window)
 void ModelMixesPage::editMix(Window * window, uint8_t channel, uint8_t mixIndex)
 {
   Window * mixWindow = new MixEditWindow(channel, mixIndex);
-  mixWindow->setCloseHandler([=]() -> void {
+  mixWindow->setCloseHandler([=]() {
     rebuild(window);
   });
 }
@@ -356,17 +356,17 @@ void ModelMixesPage::build(Window * window)
         Button * button = new MixLineButton(window, grid.getFieldSlot(), mixIndex,
                           [=]() -> uint8_t {
                             Menu * menu = new Menu();
-                            menu->addLine(STR_EDIT, [=]() -> void {
+                            menu->addLine(STR_EDIT, [=]() {
                               menu->deleteLater();
                               editMix(window, ch, mixIndex);
                             });
                             if (!reachMixesLimit()) {
-                              menu->addLine(STR_INSERT_BEFORE, [=]() -> void {
+                              menu->addLine(STR_INSERT_BEFORE, [=]() {
                                 menu->deleteLater();
                                 insertMix(mixIndex, ch);
                                 editMix(window, ch, mixIndex);
                               });
-                              menu->addLine(STR_INSERT_AFTER, [=]() -> void {
+                              menu->addLine(STR_INSERT_AFTER, [=]() {
                                 menu->deleteLater();
                                 insertMix(mixIndex+1, ch);
                                 editMix(window, ch, mixIndex);
@@ -374,7 +374,7 @@ void ModelMixesPage::build(Window * window)
                               // TODO STR_COPY
                             }
                             // TODO STR_MOVE
-                            menu->addLine(STR_DELETE, [=]() -> void {
+                            menu->addLine(STR_DELETE, [=]() {
                               menu->deleteLater();
                               deleteMix(mixIndex);
                               rebuild(window);

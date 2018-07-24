@@ -467,7 +467,7 @@ void ModelSetupPage::updateExternalModuleWindow()
   new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_MODE);
   externalModuleChoice = new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS, MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
                                     GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].type),
-                                    [=](int32_t newValue) -> void {
+                                    [=](int32_t newValue) {
                                       g_model.moduleData[EXTERNAL_MODULE].type = newValue;
                                       SET_DIRTY();
                                       resetModuleSettings(EXTERNAL_MODULE);
@@ -479,7 +479,7 @@ void ModelSetupPage::updateExternalModuleWindow()
     if (IS_MODULE_XJT(EXTERNAL_MODULE)) {
       Choice * xjtChoice = new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, RF_PROTO_OFF, RF_PROTO_LAST,
                  GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
-      xjtChoice->setAvailableHandler([](int index) -> bool { return (index != RF_PROTO_OFF);});
+      xjtChoice->setAvailableHandler([](int index) { return (index != RF_PROTO_OFF); });
     }
     else if (IS_MODULE_DSM2(EXTERNAL_MODULE)) {
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_DSM_PROTOCOLS, DSM2_PROTO_LP45, DSM2_PROTO_DSMX,
@@ -489,7 +489,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_R9M_MODES, MODULE_SUBTYPE_R9M_FCC,
                  MODULE_SUBTYPE_R9M_LBT,
                  GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].subType),
-                 [=](int32_t newValue) -> void {
+                 [=](int32_t newValue) {
                    g_model.moduleData[EXTERNAL_MODULE].subType = newValue;
                    SET_DIRTY();
                    updateExternalModuleWindow();
@@ -504,7 +504,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       // From
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1, 17, 1,
                      GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
-                     [=](int32_t newValue) -> void {
+                     [=](int32_t newValue) {
                        g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
                        SET_DIRTY();
                        updateExternalModuleWindow();
@@ -521,7 +521,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1,
                      MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount, 1,
                      GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
-                     [=](int32_t newValue) -> void {
+                     [=](int32_t newValue) {
                        g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
                        SET_DIRTY();
                        updateExternalModuleWindow();
@@ -532,7 +532,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                      g_model.moduleData[EXTERNAL_MODULE].channelsStart + MAX_CHANNELS(EXTERNAL_MODULE), 1,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 8 +
                                  g_model.moduleData[EXTERNAL_MODULE].channelsCount),
-                     [=](int8_t newValue) -> void {
+                     [=](int8_t newValue) {
                        g_model.moduleData[EXTERNAL_MODULE].channelsCount = newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
                        SET_DIRTY();
                        updateExternalModuleWindow();
@@ -608,7 +608,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_FAILSAFE);
       failSafeChoice = new Choice(externalModuleWindow, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
                                   GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].failsafeMode),
-                                  [=](int32_t newValue) -> void {
+                                  [=](int32_t newValue) {
                                     g_model.moduleData[EXTERNAL_MODULE].failsafeMode = newValue;
                                     SET_DIRTY();
                                     updateExternalModuleWindow();
