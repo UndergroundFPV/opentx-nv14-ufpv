@@ -194,7 +194,8 @@ void ModelLogicalSwitchesPage::editLogicalSwitch(Window * window, uint8_t lsInde
   });
 }
 
-void ModelLogicalSwitchesPage::build(Window * window) {
+void ModelLogicalSwitchesPage::build(Window * window)
+{
   GridLayout grid(*window);
   grid.spacer(8);
   grid.setLabelWidth(70);
