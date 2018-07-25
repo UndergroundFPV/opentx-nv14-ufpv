@@ -134,20 +134,30 @@ class LogicalSwitchEditWindow: public Page {
 
     // V1
     new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V1);
-    if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY || cstate == LS_FAMILY_EDGE) { //switch
-      SwitchChoice * v1Switch = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(), SWSRC_OFF+1, SWSRC_ON-1, GET_SET_DEFAULT(cs->v1));
-      v1Switch->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
+    if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY || cstate == LS_FAMILY_EDGE) {
+      SwitchChoice * v1 = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(), SWSRC_OFF+1, SWSRC_ON-1, GET_SET_DEFAULT(cs->v1));
+      v1->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
     }
-    else if (cstate == LS_FAMILY_TIMER) {   //Number
-
+    else if (cstate == LS_FAMILY_TIMER) {
+      new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2,0), -128, 122, 1, GET_SET_DEFAULT(cs->v1), LEFT|PREC1);
     }
-    else {  //source
-
+    else {
+      SourceChoice * v1 = new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(2,0), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v1));
     }
     grid.nextLine();
 
     // V2
     new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V2);
+    if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY) {
+      SwitchChoice * v2 = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(), SWSRC_OFF+1, SWSRC_ON-1, GET_SET_DEFAULT(cs->v2));
+      v2->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
+    }
+    else if (cstate == LS_FAMILY_TIMER) {
+      new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2,0), -128, 122, 1, GET_SET_DEFAULT(cs->v2), LEFT|PREC1);
+    }
+    else if (cstate == LS_FAMILY_EDGE) {
+      //TODO how do we do edgedelay !!!!
+    }
     grid.nextLine();
 
     // AND switch
