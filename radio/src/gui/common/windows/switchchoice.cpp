@@ -45,10 +45,11 @@ bool SwitchChoice::onTouchEnd(coord_t x, coord_t y)
     int16_t value = getValue();
 
     do {
-      value++;
-      if (value > vmax)
+      if (++value > vmax) {
         value = vmin;
+      }
     } while (isValueAvailable && !isValueAvailable(value));
+
     setValue(value);
   }
   else {

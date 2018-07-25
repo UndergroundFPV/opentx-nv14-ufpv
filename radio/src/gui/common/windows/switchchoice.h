@@ -28,14 +28,12 @@ class SwitchChoice : public Window {
   public:
     SwitchChoice(Window * parent, const rect_t & rect, int vmin, int vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):
       Window(parent, rect),
-      context(context),
       vmin(vmin),
       vmax(vmax),
       getValue(getValue),
       setValue(setValue)
     {
     }
-
 
     void paint(BitmapBuffer * dc) override ;
 
@@ -47,7 +45,6 @@ class SwitchChoice : public Window {
     const char * label;
     int16_t vmin;
     int16_t vmax;
-    SwitchContext context;
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
     std::function<bool(int)> isValueAvailable;
