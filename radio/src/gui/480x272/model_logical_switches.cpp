@@ -51,7 +51,7 @@ class LogicalSwitchEditWindow: public Page {
       // V1
       new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V1);
       if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY || cstate == LS_FAMILY_EDGE) { //switch
-        SwitchChoice * choice = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(), SWSRC_OFF+1, SWSRC_ON-1, GET_SET_DEFAULT(cs->v1));
+        auto choice = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(), SWSRC_FIRST_IN_LOGICAL_SWITCHES, SWSRC_LAST_IN_LOGICAL_SWITCHES, GET_SET_DEFAULT(cs->v1));
         choice->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
       }
       else if (cstate == LS_FAMILY_TIMER) {
@@ -65,17 +65,15 @@ class LogicalSwitchEditWindow: public Page {
       // V2
       new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V2);
       if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY) {
-        auto choice = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(), SWSRC_OFF+1, SWSRC_ON-1, GET_SET_DEFAULT(cs->v2));
+        auto choice = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(), SWSRC_FIRST_IN_LOGICAL_SWITCHES, SWSRC_LAST_IN_LOGICAL_SWITCHES, GET_SET_DEFAULT(cs->v2));
         choice->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
       }
       else if (cstate == LS_FAMILY_TIMER) {
         new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), -128, 122, GET_SET_DEFAULT(cs->v2), LEFT|PREC1);
       }
       else if (cstate == LS_FAMILY_EDGE) {
-        auto choice = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), SWSRC_FIRST_IN_LOGICAL_SWITCHES, SWSRC_LAST_IN_LOGICAL_SWITCHES, GET_SET_DEFAULT(cs->v1));
-        choice->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
-        auto edit2 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(4, 3), -1, 222 - cs->v2, GET_SET_DEFAULT(cs->v3));
-        auto edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(4, 2), -129, 122,
+        auto edit2 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 1), -1, 222 - cs->v2, GET_SET_DEFAULT(cs->v3));
+        auto edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), -129, 122,
                                     GET_DEFAULT(cs->v2),
                                     [=](int32_t newValue) -> void {
                                       cs->v2 = newValue;

@@ -305,7 +305,7 @@ class BitmapBuffer: public BitmapBufferBase<uint16_t>
 
     uint8_t drawCharWithCache(coord_t x, coord_t y, const BitmapBuffer * font, const uint16_t * spec, int index, LcdFlags flags);
 
-    void drawSizedText(coord_t x, coord_t y, const char * s, uint8_t len, LcdFlags flags);
+    void drawSizedText(coord_t x, coord_t y, const char * s, uint8_t len, LcdFlags flags=0);
 
     void drawText(coord_t x, coord_t y, const char * s, LcdFlags flags=0) {
       drawSizedText(x, y, s, 255, flags);
