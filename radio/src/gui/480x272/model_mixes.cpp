@@ -354,33 +354,33 @@ void ModelMixesPage::build(Window * window)
       uint8_t count = 0;
       while (mix->srcRaw > 0 && mix->destCh == ch) {
         Button * button = new MixLineButton(window, grid.getFieldSlot(), mixIndex,
-                          [=]() -> uint8_t {
-                            Menu * menu = new Menu();
-                            menu->addLine(STR_EDIT, [=]() {
-                              menu->deleteLater();
-                              editMix(window, ch, mixIndex);
-                            });
-                            if (!reachMixesLimit()) {
-                              menu->addLine(STR_INSERT_BEFORE, [=]() {
-                                menu->deleteLater();
-                                insertMix(mixIndex, ch);
-                                editMix(window, ch, mixIndex);
-                              });
-                              menu->addLine(STR_INSERT_AFTER, [=]() {
-                                menu->deleteLater();
-                                insertMix(mixIndex+1, ch);
-                                editMix(window, ch, mixIndex);
-                              });
-                              // TODO STR_COPY
-                            }
-                            // TODO STR_MOVE
-                            menu->addLine(STR_DELETE, [=]() {
-                              menu->deleteLater();
-                              deleteMix(mixIndex);
-                              rebuild(window);
-                            });
-                            return FOCUS_STATE;
-                          });
+                                            [=]() -> uint8_t {
+                                              Menu * menu = new Menu();
+                                              menu->addLine(STR_EDIT, [=]() {
+                                                menu->deleteLater();
+                                                editMix(window, ch, mixIndex);
+                                              });
+                                              if (!reachMixesLimit()) {
+                                                menu->addLine(STR_INSERT_BEFORE, [=]() {
+                                                  menu->deleteLater();
+                                                  insertMix(mixIndex, ch);
+                                                  editMix(window, ch, mixIndex);
+                                                });
+                                                menu->addLine(STR_INSERT_AFTER, [=]() {
+                                                  menu->deleteLater();
+                                                  insertMix(mixIndex + 1, ch);
+                                                  editMix(window, ch, mixIndex);
+                                                });
+                                                // TODO STR_COPY
+                                              }
+                                              // TODO STR_MOVE
+                                              menu->addLine(STR_DELETE, [=]() {
+                                                menu->deleteLater();
+                                                deleteMix(mixIndex);
+                                                rebuild(window);
+                                              });
+                                              return FOCUS_STATE;
+                                            });
 
         if (count++ > 0) {
           new StaticBitmap(window, {35, button->top() + (button->height() - 17) / 2, 25, 17}, mixerMultiplexBitmap[mix->mltpx]);
