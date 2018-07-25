@@ -6,6 +6,14 @@ class NumberEdit : public Window {
 
     void paint(BitmapBuffer * dc);
 
+    void setMin(int32_t value) {
+      vmin = value;
+    }
+
+    void setMax(int32_t value) {
+      vmax = value;
+    }
+
     void setStep(int32_t step) {
       this->step = step;
     }
