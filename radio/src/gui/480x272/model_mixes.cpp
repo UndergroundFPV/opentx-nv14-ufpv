@@ -87,10 +87,13 @@ class MixEditWindow: public Page {
 
       switch (mix->curve.type) {
         case CURVE_REF_DIFF:
-        case CURVE_REF_EXPO:
+        case CURVE_REF_EXPO: {
           // TODO GVAR
-          new NumberEdit(updateCurvesWindow, grid.getFieldSlot(2,1), -100, 100, 1, GET_SET_DEFAULT(mix->curve.value), 0, nullptr, "%");
+          NumberEdit * edit = new NumberEdit(updateCurvesWindow, grid.getFieldSlot(2, 1), -100, 100,
+                                             GET_SET_DEFAULT(mix->curve.value));
+          edit->setSuffix("%");
           break;
+        }
         case CURVE_REF_FUNC:
           new Choice(updateCurvesWindow, grid.getFieldSlot(2,1), STR_VCURVEFUNC, 0, CURVE_BASE-1, GET_SET_DEFAULT(mix->curve.value));
           break;
@@ -119,12 +122,14 @@ class MixEditWindow: public Page {
       // Weight
       new StaticText(window, grid.getLabelSlot(true), STR_WEIGHT);
       // TODO GVAR ?
-      new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(mix->weight), 0, nullptr, "%");
+      NumberEdit * edit = new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(mix->weight));
+      edit->setSuffix("%");
       grid.nextLine();
 
       // Offset
       new StaticText(window, grid.getLabelSlot(true), STR_OFFSET);
-      new NumberEdit(window, grid.getFieldSlot(), GV_RANGELARGE_OFFSET_NEG, GV_RANGELARGE_OFFSET, 1, GET_SET_DEFAULT(mix->offset), 0, nullptr, "%");
+      edit = new NumberEdit(window, grid.getFieldSlot(), GV_RANGELARGE_OFFSET_NEG, GV_RANGELARGE_OFFSET, GET_SET_DEFAULT(mix->offset));
+      edit->setSuffix("%");
       grid.nextLine();
 
       // Trim
@@ -160,7 +165,8 @@ class MixEditWindow: public Page {
 
       // Warning
       new StaticText(window, grid.getLabelSlot(true), STR_MIXWARNING);
-      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, 3, 1, GET_SET_DEFAULT(mix->mixWarn), 0, nullptr, nullptr, STR_OFF);
+      edit = new NumberEdit(window, grid.getFieldSlot(2, 0), 0, 3, GET_SET_DEFAULT(mix->mixWarn));
+      edit->setZeroText(STR_OFF);
       grid.nextLine();
 
       // Multiplex
@@ -170,34 +176,42 @@ class MixEditWindow: public Page {
 
       // Delay up
       new StaticText(window, grid.getLabelSlot(true), STR_DELAYUP);
-      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+      edit = new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX,
                      GET_DEFAULT(mix->delayUp),
                      SET_VALUE(mix->delayUp, newValue),
-                     PREC1, nullptr, "s");
+                     PREC1);
+      edit->setStep(10 / DELAY_STEP);
+      edit->setSuffix("s");
       grid.nextLine();
 
       // Delay down
       new StaticText(window, grid.getLabelSlot(true), STR_DELAYDOWN);
-      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+      edit = new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX,
                      GET_DEFAULT(mix->delayDown),
                      SET_VALUE(mix->delayDown, newValue),
-                     PREC1, nullptr, "s");
+                     PREC1);
+      edit->setStep(10 / DELAY_STEP);
+      edit->setSuffix("s");
       grid.nextLine();
 
       // Slow up
       new StaticText(window, grid.getLabelSlot(true), STR_SLOWUP);
-      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+      edit = new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX,
                      GET_DEFAULT(mix->speedUp),
                      SET_VALUE(mix->speedUp, newValue),
-                     PREC1, nullptr, "s");
+                     PREC1);
+      edit->setStep(10 / DELAY_STEP);
+      edit->setSuffix("s");
       grid.nextLine();
 
       // Slow down
       new StaticText(window, grid.getLabelSlot(true), STR_SLOWDOWN);
-      new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+      edit = new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX,
                      GET_DEFAULT(mix->speedDown),
                      SET_VALUE(mix->speedDown, newValue),
-                     PREC1, nullptr, "s");
+                     PREC1);
+      edit->setStep(10 / DELAY_STEP);
+      edit->setSuffix("s");
       grid.nextLine();
 
       window->setInnerHeight(grid.getWindowHeight());

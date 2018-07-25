@@ -55,7 +55,7 @@ class LogicalSwitchEditWindow: public Page {
         choice->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
       }
       else if (cstate == LS_FAMILY_TIMER) {
-        new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2,0), -128, 122, 1, GET_SET_DEFAULT(cs->v1), LEFT|PREC1);
+        new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2,0), -128, 122, GET_SET_DEFAULT(cs->v1), LEFT|PREC1);
       }
       else {
         new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(2,0), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v1));
@@ -69,10 +69,14 @@ class LogicalSwitchEditWindow: public Page {
         v2->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
       }
       else if (cstate == LS_FAMILY_TIMER) {
-        new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2,0), -128, 122, 1, GET_SET_DEFAULT(cs->v2), LEFT|PREC1);
+        new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), -128, 122, GET_SET_DEFAULT(cs->v2), LEFT|PREC1);
       }
       else if (cstate == LS_FAMILY_EDGE) {
-        //TODO how do we do edgedelay !!!!
+        NumberEdit * edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), -128, 122, GET_SET_DEFAULT(cs->v2), LEFT|PREC1);
+        NumberEdit * edit2 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 1), -128, 122, GET_SET_DEFAULT(cs->v3), LEFT|PREC1);
+        edit1->setDisplayFunction([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+
+        });
       }
       grid.nextLine();
 

@@ -376,16 +376,17 @@ void ModelSetupPage::updateInternalModuleWindow()
 
   if (value != RF_PROTO_OFF) {
     new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_CHANNELRANGE);
-    new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS(0), 1,
+    NumberEdit * edit = new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS(0),
                    GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
                    [=](int8_t newValue) -> void {
                      g_model.moduleData[INTERNAL_MODULE].channelsStart = newValue - 1;
-                   }, 0, STR_CH);
-    new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 1), 1 + g_model.moduleData[INTERNAL_MODULE].channelsStart,
-                   min<int8_t>(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart + MAX_CHANNELS(0) + 8, 1 + 32), 1,
+                   });
+    edit->setPrefix(STR_CH);
+    edit = new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 1), 1 + g_model.moduleData[INTERNAL_MODULE].channelsStart,
+                   min<int8_t>(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart + MAX_CHANNELS(0) + 8, 1 + 32),
                    GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].channelsCount + 8 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
-                   SET_VALUE(g_model.moduleData[INTERNAL_MODULE].channelsCount, newValue - 8 - g_model.moduleData[INTERNAL_MODULE].channelsStart),
-                   0, STR_CH);
+                   SET_VALUE(g_model.moduleData[INTERNAL_MODULE].channelsCount, newValue - 8 - g_model.moduleData[INTERNAL_MODULE].channelsStart));
+    edit->setPrefix(STR_CH);
     grid.nextLine();
 
     new StaticText(internalModuleWindow, grid.getLabelSlot(true), STR_FAILSAFE);
@@ -460,6 +461,8 @@ void ModelSetupPage::updateInternalModuleWindow()
 
 void ModelSetupPage::updateExternalModuleWindow()
 {
+  NumberEdit * edit;
+
   GridLayout grid(*externalModuleWindow);
 
   externalModuleWindow->clear();
@@ -502,41 +505,45 @@ void ModelSetupPage::updateExternalModuleWindow()
 
     if (IS_MODULE_CROSSFIRE(EXTERNAL_MODULE)) { // CRSF has a fixed 16ch span
       // From
-      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1, 17, 1,
-                     GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
-                     [=](int32_t newValue) {
-                       g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
-                       SET_DIRTY();
-                       updateExternalModuleWindow();
-                     }, 0, STR_CH);
+      edit = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0),
+                            1, 17,
+                            GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
+                            [=](int32_t newValue) {
+                              g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
+                              SET_DIRTY();
+                              updateExternalModuleWindow();
+                            });
+      edit->setPrefix(STR_CH);
       // To
-      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
-                     0, 32, 1,
-                     GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 16),
-                     SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].channelsCount, 8),
-                     0, STR_CH);
+      edit = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
+                            0, 32,
+                            GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 16),
+                            SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].channelsCount, 8));
+      edit->setPrefix(STR_CH);
     }
     else {
       // From
-      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1,
-                     MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount, 1,
+      edit = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1,
+                     MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount,
                      GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
                      [=](int32_t newValue) {
                        g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
                        SET_DIRTY();
                        updateExternalModuleWindow();
-                     }, 0, STR_CH);
+                     });
+      edit->setPrefix(STR_CH);
       // To
-      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
+      edit = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
                      g_model.moduleData[EXTERNAL_MODULE].channelsStart + 1,
-                     g_model.moduleData[EXTERNAL_MODULE].channelsStart + MAX_CHANNELS(EXTERNAL_MODULE), 1,
+                     g_model.moduleData[EXTERNAL_MODULE].channelsStart + MAX_CHANNELS(EXTERNAL_MODULE),
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 8 +
                                  g_model.moduleData[EXTERNAL_MODULE].channelsCount),
                      [=](int8_t newValue) {
                        g_model.moduleData[EXTERNAL_MODULE].channelsCount = newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
                        SET_DIRTY();
                        updateExternalModuleWindow();
-                     }, 0, STR_CH);
+                     });
+      edit->setPrefix(STR_CH);
     }
     grid.nextLine();
 
@@ -546,24 +553,27 @@ void ModelSetupPage::updateExternalModuleWindow()
       // PPM frame
       new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_PPMFRAME);
       // PPM frame length
-      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225, 5,
+      edit = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength * 5 + 225),
                      SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength, (newValue - 225) / 5),
-                     PREC1, NULL, STR_MS);
+                     PREC1);
+      edit->setStep(5);
+      edit->setSuffix(STR_MS);
 
       // PPM frame delay
-      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1), 100, 800, 50,
+      edit = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1), 100, 800,
                      GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.delay * 50 + 300),
-                     SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].ppm.delay, (newValue - 300) / 50),
-                     0, NULL, "us");
+                     SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].ppm.delay, (newValue - 300) / 50));
+      edit->setStep(50);
+      edit->setSuffix("us");
     }
 
     if (IS_MODULE_PXX(EXTERNAL_MODULE) || IS_MODULE_DSM2(EXTERNAL_MODULE) || IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
       // Receiver
       new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_RECEIVER_NUM);
       // Receiver number
-      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 0, MAX_RX_NUM(EXTERNAL_MODULE), 1,
-                     GET_SET_DEFAULT(g_model.header.modelId[EXTERNAL_MODULE]), 0);
+      new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 0, MAX_RX_NUM(EXTERNAL_MODULE),
+                     GET_SET_DEFAULT(g_model.header.modelId[EXTERNAL_MODULE]));
       grid.nextLine();
 
       // Bind and Range buttons

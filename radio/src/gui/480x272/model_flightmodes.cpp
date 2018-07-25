@@ -50,6 +50,7 @@ bool isTrimModeAvailable(int mode)
 
 void ModelFlightModesPage::build(Window * window)
 {
+  NumberEdit * edit;
   GridLayout grid(*window);
   grid.spacer();
 
@@ -106,14 +107,16 @@ void ModelFlightModesPage::build(Window * window)
 
     // Flight mode fade in / out
     new StaticText(window, grid.getLabelSlot(true), "Fade in/out");
-    new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX, 10 / DELAY_STEP,
+    edit = new NumberEdit(window, grid.getFieldSlot(2, 0), 0, DELAY_MAX,
                    GET_DEFAULT(g_model.flightModeData[i].fadeIn * (10 / DELAY_STEP)),
                    SET_VALUE(g_model.flightModeData[i].fadeIn, newValue / (10 / DELAY_STEP)),
                    PREC1);
-    new NumberEdit(window, grid.getFieldSlot(2, 1), 0, DELAY_MAX, 10 / DELAY_STEP,
+    edit->setStep(10 / DELAY_STEP);
+    edit = new NumberEdit(window, grid.getFieldSlot(2, 1), 0, DELAY_MAX,
                    GET_DEFAULT(g_model.flightModeData[i].fadeOut * (10 / DELAY_STEP)),
                    SET_VALUE(g_model.flightModeData[i].fadeOut, newValue / (10 / DELAY_STEP)),
                    PREC1);
+    edit->setStep(10 / DELAY_STEP);
     grid.nextLine();
   }
 

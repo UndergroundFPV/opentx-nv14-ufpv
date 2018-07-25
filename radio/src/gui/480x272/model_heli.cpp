@@ -40,7 +40,7 @@ void ModelHeliPage::build(Window * window)
 
   // Swash ring
   new StaticText(window, grid.getLabelSlot(), STR_SWASHRING);
-  new NumberEdit(window, grid.getFieldSlot(), 0, 100, 1, GET_SET_DEFAULT(g_model.swashR.value));
+  new NumberEdit(window, grid.getFieldSlot(), 0, 100, GET_SET_DEFAULT(g_model.swashR.value));
   grid.nextLine();
 
   // Elevator source
@@ -50,7 +50,7 @@ void ModelHeliPage::build(Window * window)
 
   // Elevator weight
   new StaticText(window, grid.getLabelSlot(), STR_WEIGHT);
-  new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(g_model.swashR.elevatorWeight));
+  new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(g_model.swashR.elevatorWeight));
   grid.nextLine();
 
   // Aileron source
@@ -60,7 +60,7 @@ void ModelHeliPage::build(Window * window)
 
   // Aileron weight
   new StaticText(window, grid.getLabelSlot(), STR_WEIGHT);
-  new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(g_model.swashR.aileronWeight));
+  new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(g_model.swashR.aileronWeight));
   grid.nextLine();
 
   // Collective source
@@ -70,7 +70,7 @@ void ModelHeliPage::build(Window * window)
 
   // Collective weight
   new StaticText(window, grid.getLabelSlot(), STR_WEIGHT);
-  new NumberEdit(window, grid.getFieldSlot(), -100, 100, 1, GET_SET_DEFAULT(g_model.swashR.collectiveWeight));
+  new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(g_model.swashR.collectiveWeight));
   grid.nextLine();
 
   window->setInnerHeight(grid.getWindowHeight());

@@ -37,7 +37,7 @@ void RadioSetupPage::build(Window * window)
 
   // Date
   new StaticText(window, grid.getLabelSlot(), STR_DATE);
-  new NumberEdit(window, grid.getFieldSlot(3, 0), 2018, 2100, 1,
+  new NumberEdit(window, grid.getFieldSlot(3, 0), 2018, 2100,
                  [=]() -> int32_t {
                    struct gtm t;
                    gettime(&t);
@@ -49,7 +49,7 @@ void RadioSetupPage::build(Window * window)
                    t.tm_year = newValue - TM_YEAR_BASE;
                    rtcSetTime(&t);
                  });
-  new NumberEdit(window, grid.getFieldSlot(3, 1), 1, 12, 1,
+  new NumberEdit(window, grid.getFieldSlot(3, 1), 1, 12,
                  [=]() -> int32_t {
                    struct gtm t;
                    gettime(&t);
@@ -67,7 +67,7 @@ void RadioSetupPage::build(Window * window)
   static const pm_uint8_t dmon[] PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
   dlim += pgm_read_byte(&dmon[t.tm_mon]);*/
   int8_t dlim = 31;
-  new NumberEdit(window, grid.getFieldSlot(3, 2), 1, dlim, 1,
+  new NumberEdit(window, grid.getFieldSlot(3, 2), 1, dlim,
                  [=]() -> int32_t {
                    struct gtm t;
                    gettime(&t);
@@ -169,12 +169,15 @@ void RadioSetupPage::build(Window * window)
 
   // Beeps pitch
   new StaticText(window, grid.getLabelSlot(), STR_SPKRPITCH, true);
-  new NumberEdit(window, grid.getFieldSlot(3, 0), 0, 300, 15,
+  NumberEdit * edit = new NumberEdit(window, grid.getFieldSlot(3, 0), 0, 300,
                  GET_DEFAULT(15 * g_eeGeneral.speakerPitch),
                  [=](int32_t newValue) -> void {
                    g_eeGeneral.speakerPitch = newValue / 15;
                    SET_DIRTY();
-                 }, 0, "+", "Hz");
+                 });
+  edit->setStep(15);
+  edit->setPrefix("+");
+  edit->setPrefix("Hz");
   grid.nextLine();
 
 #if defined(VARIO)
@@ -187,12 +190,14 @@ void RadioSetupPage::build(Window * window)
   grid.nextLine();
 
   new StaticText(window, grid.getLabelSlot(), STR_PITCH_AT_ZERO, true);
-  new NumberEdit(window, grid.getFieldSlot(), VARIO_FREQUENCY_ZERO-400, VARIO_FREQUENCY_ZERO+400, 10,
+  new NumberEdit(window, grid.getFieldSlot(), VARIO_FREQUENCY_ZERO-400, VARIO_FREQUENCY_ZERO+400,
                  GET_DEFAULT(VARIO_FREQUENCY_ZERO+(g_eeGeneral.varioPitch*10)),
                  [=](int8_t newValue) -> void {
                    g_eeGeneral.varioPitch = (newValue - VARIO_FREQUENCY_ZERO) / 10;
                    SET_DIRTY();
-                 }, 0, nullptr, "Hz");
+                 });
+  edit->setStep(10);
+  edit->setPrefix("Hz");
   grid.nextLine();
 
 /*
@@ -236,7 +241,8 @@ void RadioSetupPage::build(Window * window)
 
     // Battery warning
     new StaticText(window, grid.getLabelSlot(), STR_BATTERYWARNING, true);
-    new NumberEdit(window, grid.getFieldSlot(), 40, 120, 1, GET_SET_DEFAULT(g_eeGeneral.vBatWarn), PREC1, nullptr, "v");
+    edit = new NumberEdit(window, grid.getFieldSlot(), 40, 120, GET_SET_DEFAULT(g_eeGeneral.vBatWarn), PREC1);
+    edit->setSuffix("v");
     grid.nextLine();
 
     // Alarms warning
@@ -251,7 +257,8 @@ void RadioSetupPage::build(Window * window)
 
     // Inactivity alarm
     new StaticText(window, grid.getLabelSlot(), STR_INACTIVITYALARM, true);
-    new NumberEdit(window, grid.getFieldSlot(), 0, 250, 1, GET_SET_DEFAULT(g_eeGeneral.inactivityTimer), 0, nullptr, "m");
+    edit = new NumberEdit(window, grid.getFieldSlot(), 0, 250, GET_SET_DEFAULT(g_eeGeneral.inactivityTimer));
+    edit->setSuffix("m");
     grid.nextLine();
   }
 
@@ -291,7 +298,7 @@ void RadioSetupPage::build(Window * window)
 
   // Timezone
   new StaticText(window, grid.getLabelSlot(), STR_TIMEZONE, true);
-  new NumberEdit(window, grid.getFieldSlot(2, 0), -12, 12, 1, GET_SET_DEFAULT(g_eeGeneral.timezone));
+  new NumberEdit(window, grid.getFieldSlot(2, 0), -12, 12, GET_SET_DEFAULT(g_eeGeneral.timezone));
   grid.nextLine();
 
   // Adjust RTC (from telemetry)

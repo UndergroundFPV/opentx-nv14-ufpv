@@ -26,9 +26,9 @@ std::list<Window *> Window::trash;
 MainWindow mainWindow;
 
 Window::Window(Window * parent, const rect_t & rect):
-  parent(parent),
   innerWidth(rect.w),
   innerHeight(rect.h),
+  parent(parent),
   rect(rect)
 {
   if (parent) {
