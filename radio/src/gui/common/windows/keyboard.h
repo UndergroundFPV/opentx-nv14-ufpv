@@ -58,7 +58,7 @@ class Keyboard : public Window {
     TextEdit * field = nullptr;
     coord_t cursorPos = 0;
     uint8_t cursorIndex = 0;
-    BitmapBuffer * keyboardBitmap = nullptr;
+    const char * const * layout;
 };
 
 extern Keyboard * keyboard; // is created in TabsGroup constructor

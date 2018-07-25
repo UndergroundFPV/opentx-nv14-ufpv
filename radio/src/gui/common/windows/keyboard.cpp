@@ -20,8 +20,68 @@
 
 #include "opentx.h"
 
+constexpr coord_t KEYBOARD_HEIGHT = 160;
+
+
+const uint8_t LBM_KEY_UPPERCASE[] = {
+#include "mask_key_uppercase.lbm"
+};
+
+const uint8_t LBM_KEY_LOWERCASE[] = {
+#include "mask_key_uppercase.lbm"
+};
+
+const uint8_t LBM_KEY_BACKSPACE[] = {
+#include "mask_key_backspace.lbm"
+};
+
+const uint8_t LBM_KEY_LETTERS[] = {
+#include "mask_key_letters.lbm"
+};
+
+const uint8_t LBM_KEY_NUMBERS[] = {
+#include "mask_key_numbers.lbm"
+};
+
+const uint8_t * const LBM_SPECIAL_KEYS[] = {
+  LBM_KEY_BACKSPACE,
+  LBM_KEY_UPPERCASE,
+  LBM_KEY_LOWERCASE,
+  LBM_KEY_LETTERS,
+  LBM_KEY_NUMBERS,
+};
+
+const char * const KEYBOARD_LOWERCASE[] = {
+  "qwertyuiop",
+  " asdfghjkl",
+  "\201zxcvbnm\200",
+  "\204\t\n"
+};
+
+const char * const KEYBOARD_UPPERCASE[] = {
+  "QWERTYUIOP",
+  " ASDFGHJKL",
+  "\202ZXCVBNM\200",
+  "\204\t\n"
+};
+
+const char * const KEYBOARD_NUMBERS[] = {
+  "1234567890",
+  "_-",
+  "                 \200",
+  "\203\t\n"
+};
+
+const char * const * const KEYBOARD_LAYOUTS[] = {
+  KEYBOARD_UPPERCASE,
+  KEYBOARD_LOWERCASE,
+  KEYBOARD_LOWERCASE,
+  KEYBOARD_NUMBERS,
+};
+
 Keyboard::Keyboard(Window * parent) :
-  Window(parent, {0, parent->height() - 270, parent->width(), 0})
+  Window(parent, {0, parent->height() - KEYBOARD_HEIGHT, parent->width(), 0}),
+  layout(KEYBOARD_LOWERCASE)
 {
   keyboard = this;
 }
@@ -29,70 +89,6 @@ Keyboard::Keyboard(Window * parent) :
 Keyboard::~Keyboard()
 {
   keyboard = nullptr;
-}
-
-bool Keyboard::onTouchEnd(coord_t x, coord_t y)
-{
-  if (!field)
-    return false;
-
-  uint8_t size = field->getMaxLength();
-  char * data = field->getData();
-
-  uint8_t row = y / 54;
-  char c = 0;
-  if (row == 0) {
-    uint8_t column = (max<uint8_t>(6, x) - 6) / 31;
-    c = *("1234567890" + column);
-  }
-  else if (row == 1) {
-    uint8_t column = (max<uint8_t>(6, x) - 6) / 31;
-    c = *("qwertyuiop" + column);
-  }
-  else if (row == 2) {
-    uint8_t column = (max<uint8_t>(20, x) - 20) / 31;
-    c = *("asdfghjkl" + column);
-  }
-  else if (row == 3) {
-    if (x > 270) {
-      if (cursorIndex > 0) {
-        // backspace
-        char c = idx2char(data[cursorIndex - 1]);
-        memmove(data + cursorIndex - 1, data + cursorIndex, size - cursorIndex);
-        data[size - 1] = '\0';
-        cursorPos -= getCharWidth(c, fontspecsTable[0]);
-        cursorIndex -= 1;
-      }
-    }
-    else {
-      uint8_t column = (max<uint8_t>(52, x) - 52) / 31;
-      c = *("zxcvbnm" + column);
-    }
-  }
-  else if (row == 4) {
-    if (x > 240) {
-      // enter
-      disable();
-      return true;
-    }
-    else if (x > 207) {
-      c = ',';
-    }
-    else if (x > 38) {
-      c = ' ';
-    }
-    else {
-      c = '.';
-    }
-  }
-  if (c && zlen(data, size) < size) {
-    memmove(data + cursorIndex + 1, data + cursorIndex, size - cursorIndex - 1);
-    data[cursorIndex++] = char2idx(c);
-    cursorPos += getCharWidth(c, fontspecsTable[0]);
-  }
-
-  field->invalidate();
-  return true;
 }
 
 void Keyboard::setCursorPos(coord_t x)
@@ -120,9 +116,9 @@ void Keyboard::setCursorPos(coord_t x)
 void Keyboard::setField(TextEdit * field)
 {
   this->field = field;
-  this->setHeight(270);
+  this->setHeight(KEYBOARD_HEIGHT);
   Window * w = field->getParent();
-  w->setHeight(LCD_H - 270 - w->top());
+  w->setHeight(LCD_H - KEYBOARD_HEIGHT - w->top());
   invalidate();
 }
 
@@ -138,16 +134,108 @@ void Keyboard::disable()
 
 void Keyboard::paint(BitmapBuffer * dc)
 {
-  if (!keyboardBitmap)
-    keyboardBitmap = BitmapBuffer::load(getThemePath("keyboard.png"));
-  dc->drawBitmap(0, 0, keyboardBitmap);
+  lcdSetColor(RGB(0xE0, 0xE0, 0xE0));
+  lcdDrawSolidFilledRect(0, 0, LCD_W, LCD_H, CUSTOM_COLOR);
+  dc->drawSolidFilledRect(0, 0, LCD_W, height(), CUSTOM_COLOR);
 
-#if 0
-  dc->drawSolidFilledRect(0, 0, LCD_W, 30, CURVE_AXIS_COLOR);
-  for (int i=0; i<10; i++) {
-    coord_t w = (320 - 2 * 6 - 9 * 2) / 10;
-    dc->drawSolidFilledRect(6 + i * (w + 2), 6, w, 30, TEXT_BGCOLOR);
-    drawSolidRect(dc, 6 + i * (w + 2), 6, w, 30, 1, TEXT_COLOR);
+  for (uint8_t i=0; i<4; i++) {
+    coord_t y = 15 + i * 40;
+    coord_t x = 15;
+    const char * c = layout[i];
+    while(*c) {
+      if (*c == ' ') {
+        x += 15;
+      }
+      else if (*c == '\t') {
+        // space
+        dc->drawSolidFilledRect(x, y, 150, 20, TEXT_DISABLE_COLOR);
+        x += 155;
+      }
+      else if (*c == '\n') {
+        // enter
+        dc->drawSolidFilledRect(x, y-2, 80, 25, TEXT_DISABLE_COLOR);
+        dc->drawText(x+40, y, "ENTER", CENTERED);
+        x += 80;
+      }
+      else if (int8_t(*c) < 0) {
+        dc->drawBitmapPattern(x, y, LBM_SPECIAL_KEYS[uint8_t(*c - 128)], TEXT_COLOR);
+        x += 45;
+      }
+      else {
+        dc->drawSizedText(x, y, c, 1);
+        x += 30;
+      }
+      c++;
+    }
   }
-#endif
+}
+
+bool Keyboard::onTouchEnd(coord_t x, coord_t y)
+{
+  if (!field)
+    return false;
+
+  uint8_t size = field->getMaxLength();
+  char * data = field->getData();
+
+  char c = 0;
+
+  uint8_t row = max<coord_t>(0, y - 5) / 40;
+  const char * key = layout[row];
+  while(*key) {
+    if (*key == ' ') {
+      x -= 15;
+    }
+    else if (*key == '\t') {
+      if (x <= 155) {
+        c = ' ';
+        break;
+      }
+      x -= 155;
+    }
+    else if (*key == '\n') {
+      if (x <= 80) {
+        // enter
+        disable();
+        return true;
+      }
+      x -= 80;
+    }
+    else if (int8_t(*key) < 0) {
+      if (x <= 45) {
+        uint8_t specialKey = *key;
+        if (specialKey == 128) {
+          // backspace
+          char c = idx2char(data[cursorIndex - 1]);
+          memmove(data + cursorIndex - 1, data + cursorIndex, size - cursorIndex);
+          data[size - 1] = '\0';
+          cursorPos -= getCharWidth(c, fontspecsTable[0]);
+          cursorIndex -= 1;
+        }
+        else {
+          layout = KEYBOARD_LAYOUTS[specialKey - 129];
+          invalidate();
+        }
+        break;
+      }
+      x -= 45;
+    }
+    else {
+      if (x <= 30) {
+        c = *key;
+        break;
+      }
+      x -= 30;
+    }
+    key++;
+  }
+
+  if (c && zlen(data, size) < size) {
+    memmove(data + cursorIndex + 1, data + cursorIndex, size - cursorIndex - 1);
+    data[cursorIndex++] = char2idx(c);
+    cursorPos += getCharWidth(c, fontspecsTable[0]);
+  }
+
+  field->invalidate();
+  return true;
 }
