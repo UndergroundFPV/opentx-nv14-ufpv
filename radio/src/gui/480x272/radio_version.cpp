@@ -19,39 +19,45 @@
  */
 
 #include "opentx.h"
+#include "radio_version.h"
 
-bool menuRadioVersion(event_t event)
+RadioVersionPage::RadioVersionPage():
+  PageTab(STR_MENUVERSION, ICON_RADIO_VERSION)
 {
-#if 0
-  if (warningResult) {
-    warningResult = 0;
-    showMessageBox(STR_STORAGE_FORMAT);
+}
+
+void RadioVersionPage::build(Window * window)
+{
+  GridLayout grid(*window);
+  grid.spacer(8);
+
+  new StaticText(window, grid.getLabelSlot(), "FW Version");
+  new StaticText(window, grid.getFieldSlot(), vers_stamp);
+  grid.nextLine();
+
+  new StaticText(window, grid.getLabelSlot(), "Data version");
+  new StaticText(window, grid.getFieldSlot(), eeprom_stamp);
+  grid.nextLine();
+
+  new StaticText(window, grid.getLabelSlot(), "Date");
+  new StaticText(window, grid.getFieldSlot(), date_stamp);
+  grid.nextLine();
+
+  new StaticText(window, grid.getLabelSlot(), "Time");
+  new StaticText(window, grid.getFieldSlot(), time_stamp);
+  grid.nextLine();
+
+
+  new StaticText(window, grid.getLabelSlot(), "UID");
+  new StaticText(window, grid.getFieldSlot(), reusableBuffer.version.id);
+  grid.nextLine();
+
+  new TextButton(window, {LCD_W/2-125, window->height() - 50, 250, 30}, STR_FACTORYRESET, [=]() -> int8_t {
+    // TODO not implemented on X12 / X10 today!
+    // POPUP_CONFIRMATION(STR_CONFIRMRESET);
+    // showMessageBox(STR_STORAGE_FORMAT);
     storageEraseAll(false);
     NVIC_SystemReset();
-  }
-#endif
-
-  if (event == EVT_ENTRY) {
-    getCPUUniqueID(reusableBuffer.version.id);
-  }
-
-  SIMPLE_MENU(STR_MENUVERSION, RADIO_ICONS, menuTabGeneral, MENU_RADIO_VERSION, 0);
-
-  lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP + FH, vers_stamp);
-  lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP + 2*FH, date_stamp);
-  lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP + 3*FH, time_stamp);
-  lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP + 4*FH, eeprom_stamp);
-  lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP + 5*FH, "UID:");
-  lcdDrawText(MENUS_MARGIN_LEFT + 64, MENU_CONTENT_TOP + 5*FH, reusableBuffer.version.id);
-
-#if 0
-  if (event == EVT_KEY_LONG(KEY_ENTER)) {
-    killEvents(event);
-    // POPUP_MENU_ADD_ITEM(STR_EEBACKUP);
-    POPUP_MENU_ADD_ITEM(STR_FACTORYRESET);
-    POPUP_MENU_START(onVersionMenu);
-  }
-#endif
-
-  return true;
+    return 0;
+  }, 0);
 }

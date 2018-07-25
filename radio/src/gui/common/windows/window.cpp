@@ -305,6 +305,7 @@ bool MainWindow::refresh()
     lcd->setClippingRect(invalidatedRect.left(), invalidatedRect.right(), invalidatedRect.top(), invalidatedRect.bottom());
     lcd->clear(TEXT_BGCOLOR);
     fullPaint(lcd);
+    lcd->clearClippingRect();
     invalidatedRect.w = 0;
     return true;
   }

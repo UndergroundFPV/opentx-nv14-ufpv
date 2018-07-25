@@ -21,12 +21,14 @@
 #include "opentx.h"
 #include "radio_setup.h"
 #include "radio_calibration.h"
+#include "radio_version.h"
 
 RadioMenu::RadioMenu():
   TabsGroup()
 {
   addTab(new RadioSetupPage());
   addTab(new RadioCalibrationPage());
+  addTab(new RadioVersionPage());
 }
 
 const MenuHandlerFunc menuTabGeneral[] = {
@@ -34,7 +36,7 @@ const MenuHandlerFunc menuTabGeneral[] = {
   menuRadioSpecialFunctions,
   menuRadioTrainer,
   menuRadioHardware,
-  menuRadioVersion,
+  // menuRadioVersion,
 };
 
 bool menuRadioSpecialFunctions(event_t event)
