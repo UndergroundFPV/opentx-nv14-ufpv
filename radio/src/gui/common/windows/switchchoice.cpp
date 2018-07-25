@@ -34,18 +34,26 @@ void SwitchChoice::paint(BitmapBuffer * dc)
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
+void SwitchChoice::setAvailableHandler(std::function<bool(int)> handler)
+{
+  isValueAvailable = handler;
+}
+
 bool SwitchChoice::onTouchEnd(coord_t x, coord_t y)
 {
-  int16_t value = getValue();
+  if (hasFocus()) {
+    int16_t value = getValue();
 
-  do {
-    value += 1;
-    if (value > SWSRC_LAST)
-      value = SWSRC_FIRST;
-  } while (!isSwitchAvailable(value, context));
-
-  setValue(value);
-  setFocus();
+    do {
+      value++;
+      if (value > vmax)
+        value = vmin;
+    } while (isValueAvailable && !isValueAvailable(value));
+    setValue(value);
+  }
+  else {
+    setFocus();
+  }
   invalidate();
   return true;
 }

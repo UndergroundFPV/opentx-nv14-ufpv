@@ -44,19 +44,23 @@ class LogicalSwitchButton : public Button {
 
     // LS box content
     virtual void paint(BitmapBuffer * dc) override {
+      bool dualline = false;
       LogicalSwitchData * cs = lswAddress(ls);
       uint8_t cstate = lswFamily(cs->func);
       int v1_val = cs->v1;
 
       paintLogicalSwitch(dc);
-      drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+      if (cs->duration == 0 && cs->delay == 0 && cs->andsw == SWSRC_NONE)
+        drawSolidRect(dc, 0, 0, rect.w, rect.h / 2, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+      else {
+        dualline = true;
+        drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+      }
 
       // CSW func
       lcdDrawTextAtIndex(col1, line1, STR_VCSWFUNC, cs->func);
 
       // CSW params
-      cstate = lswFamily(cs->func);
-
       if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY) {
         drawSwitch(col2, line1, cs->v1);
         drawSwitch(col3, line1, cs->v2);
@@ -79,24 +83,24 @@ class LogicalSwitchButton : public Button {
         drawSource(col2, line1, v1_val, 0);
       }
 
-      // CSW AND switch
-      drawSwitch(col1, line2, cs->andsw, 0);
+      if (dualline) {
+        // CSW AND switch
+        drawSwitch(col1, line2, cs->andsw, 0);
 
-      // CSW duration
-      if (cs->duration > 0)
-        lcdDrawNumber(col2, line2, cs->duration, PREC1|LEFT);
-      else
-        lcdDrawMMM(col2, line2, 0);
+        // CSW duration
+        if (cs->duration > 0)
+          lcdDrawNumber(col2, line2, cs->duration, PREC1 | LEFT);
+        else
+          lcdDrawMMM(col2, line2, 0);
 
-      // CSW delay
-      if (cstate == LS_FAMILY_EDGE) {
-        lcdDrawText(col3, line2, STR_NA);
-      }
-      else if (cs->delay > 0) {
-        lcdDrawNumber(col3, line2, cs->delay, PREC1|LEFT);
-      }
-      else {
-        lcdDrawMMM(col3, line2, 0);
+        // CSW delay
+        if (cstate == LS_FAMILY_EDGE) {
+          lcdDrawText(col3, line2, STR_NA);
+        } else if (cs->delay > 0) {
+          lcdDrawNumber(col3, line2, cs->delay, PREC1 | LEFT);
+        } else {
+          lcdDrawMMM(col3, line2, 0);
+        }
       }
     }
 
@@ -118,6 +122,46 @@ class LogicalSwitchEditWindow: public Page {
   protected:
   uint8_t ls;
   char s[8];
+  Window * logicalSwitchOneWindow = nullptr;
+
+  void updateLogicalSwitchOneWindow()
+  {
+    GridLayout grid(*logicalSwitchOneWindow);
+    logicalSwitchOneWindow->clear();
+
+    LogicalSwitchData * cs = lswAddress(ls);
+    uint8_t cstate = lswFamily(cs->func);
+
+    // V1
+    new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V1);
+    if (cstate == LS_FAMILY_BOOL || cstate == LS_FAMILY_STICKY || cstate == LS_FAMILY_EDGE) { //switch
+      SwitchChoice * v1Switch = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(), SWSRC_OFF+1, SWSRC_ON-1, GET_SET_DEFAULT(cs->v1));
+      v1Switch->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
+    }
+    else if (cstate == LS_FAMILY_TIMER) {   //Number
+
+    }
+    else {  //source
+
+    }
+    grid.nextLine();
+
+    // V2
+    new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V2);
+    grid.nextLine();
+
+    // AND switch
+    new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_AND_SWITCH);
+    grid.nextLine();
+
+    // Duration
+    new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_DURATION);
+    grid.nextLine();
+
+    // Delay
+    new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_DELAY);
+    grid.nextLine();
+  }
 
   void buildHeader(Window * window) {
     new StaticText(window, { 70, 4, LCD_W - 100, 20 }, STR_MENULOGICALSWITCHES, MENU_TITLE_COLOR);
@@ -128,48 +172,33 @@ class LogicalSwitchEditWindow: public Page {
   void buildBody(Window * window) {
     LogicalSwitchData * cs = lswAddress(ls);
 
-    uint8_t sw = SWSRC_SW1+s_currIdx;
-    uint8_t cstate = lswFamily(cs->func);
-
     GridLayout grid(*window);
     grid.spacer(10);
 
     // LS Func
     new StaticText(window, grid.getLabelSlot(true), STR_FUNC);
-    new Choice(window, grid.getFieldSlot(2, 0), STR_VCSWFUNC, 0, LS_FUNC_MAX, GET_SET_DEFAULT(cs->func), 0);
-    uint8_t new_cstate = lswFamily(cs->func);
-    if (cstate != new_cstate) {
-      if (new_cstate == LS_FAMILY_TIMER) {
-        cs->v1 = cs->v2 = 0;
-      }
-      else if (new_cstate == LS_FAMILY_EDGE) {
-        cs->v1 = 0; cs->v2 = -129; cs->v3 = 0;
-      }
-      else {
-        cs->v1 = cs->v2 = 0;
-      }
-    }
+    Choice * funcChoice = new Choice(window, grid.getFieldSlot(2, 0), STR_VCSWFUNC, 0, LS_FUNC_MAX,
+                                     GET_DEFAULT(cs->func),
+                                     [=](int32_t newValue) -> void {
+                                         cs->func = newValue;
+                                         if (lswFamily(cs->func) == LS_FAMILY_TIMER) {
+                                           cs->v1 = cs->v2 = 0;
+                                         }
+                                         else if (lswFamily(cs->func)  == LS_FAMILY_EDGE) {
+                                           cs->v1 = 0; cs->v2 = -129; cs->v3 = 0;
+                                         }
+                                         else {
+                                           cs->v1 = cs->v2 = 0;
+                                         }
+                                         SET_DIRTY();
+                                         updateLogicalSwitchOneWindow();
+                                     });
+    funcChoice->setAvailableHandler(isLogicalSwitchFunctionAvailable);
     grid.nextLine();
 
-    // V1
-    new StaticText(window, grid.getLabelSlot(true), STR_V1);
-    grid.nextLine();
-
-    // V2
-    new StaticText(window, grid.getLabelSlot(true), STR_V2);
-    grid.nextLine();
-
-    // AND switch
-    new StaticText(window, grid.getLabelSlot(true), STR_AND_SWITCH);
-    grid.nextLine();
-
-    // Duration
-    new StaticText(window, grid.getLabelSlot(true), STR_DURATION);
-    grid.nextLine();
-
-    // Delay
-    new StaticText(window, grid.getLabelSlot(true), STR_DELAY);
-    grid.nextLine();
+    logicalSwitchOneWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
+    updateLogicalSwitchOneWindow();
+    grid.addWindow(logicalSwitchOneWindow);
   }
 };
 

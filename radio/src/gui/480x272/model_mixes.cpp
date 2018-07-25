@@ -155,7 +155,7 @@ class MixEditWindow: public Page {
 
       // Switch
       new StaticText(window, grid.getLabelSlot(true), STR_SWITCH);
-      new SwitchChoice(window, grid.getFieldSlot(), MixesContext, GET_SET_DEFAULT(mix->swtch));
+      new SwitchChoice(window, grid.getFieldSlot(), SWSRC_FIRST_IN_MIXES, SWSRC_LAST_IN_MIXES, GET_SET_DEFAULT(mix->swtch));
       grid.nextLine();
 
       // Warning

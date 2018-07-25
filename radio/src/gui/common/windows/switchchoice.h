@@ -26,23 +26,31 @@
 
 class SwitchChoice : public Window {
   public:
-    SwitchChoice(Window * parent, const rect_t & rect, SwitchContext context, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):
+    SwitchChoice(Window * parent, const rect_t & rect, int vmin, int vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):
       Window(parent, rect),
       context(context),
+      vmin(vmin),
+      vmax(vmax),
       getValue(getValue),
       setValue(setValue)
     {
     }
 
+
     void paint(BitmapBuffer * dc) override ;
 
     bool onTouchEnd(coord_t x, coord_t y) override ;
 
+    virtual void setAvailableHandler(std::function<bool(int)> handler);
+
   protected:
     const char * label;
+    int16_t vmin;
+    int16_t vmax;
     SwitchContext context;
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
+    std::function<bool(int)> isValueAvailable;
 };
 
 #endif // _SWITCHCHOICE_H_
