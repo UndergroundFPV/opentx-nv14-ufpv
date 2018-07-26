@@ -4,7 +4,8 @@ set(SRC
     ${SRC}
     ${WINDOWS_DIRECTORY}/window.cpp
     ${WINDOWS_DIRECTORY}/button.cpp
-    ${WINDOWS_DIRECTORY}/keyboard.cpp
+    ${WINDOWS_DIRECTORY}/keyboard_text.cpp
+    # ${WINDOWS_DIRECTORY}/keyboard_number.cpp
     ${WINDOWS_DIRECTORY}/checkbox.cpp
     ${WINDOWS_DIRECTORY}/textedit.cpp
     ${WINDOWS_DIRECTORY}/numberedit.cpp

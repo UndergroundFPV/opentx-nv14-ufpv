@@ -18,27 +18,39 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#ifndef _KEYBOARD_NUMBER_H_
+#define _KEYBOARD_NUMBER_H_
 
 #include "window.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "slider.h"
-#include "keyboard_text.h"
-#include "keyboard_number.h"
-#include "tabsgroup.h"
-#include "page.h"
-#include "menu.h"
-#include "alert.h"
-#include "gridlayout.h"
-#include "helpers.h"
+#include "lcd_types.h"
 
-#endif // _WINDOWS_H_
+class NumberEdit;
+
+class NumberKeyboard : public Window {
+  friend class NumberEdit;
+
+  public:
+    NumberKeyboard(Window * parent);
+
+    ~NumberKeyboard();
+
+    void setField(NumberEdit * field);
+
+    void disable();
+
+    NumberEdit * getField()
+    {
+      return field;
+    }
+
+    virtual void paint(BitmapBuffer * dc) override;
+
+    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+
+  protected:
+    NumberEdit * field = nullptr;
+};
+
+extern NumberKeyboard * numberKeyboard; // is created in TabsGroup constructor
+
+#endif // _KEYBOARD_NUMBER_H_

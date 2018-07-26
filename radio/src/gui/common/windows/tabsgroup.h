@@ -26,7 +26,7 @@
 
 class TabsGroup;
 
-extern Keyboard * keyboard;
+extern TextKeyboard * keyboard;
 
 class PageTab {
   public:

@@ -18,21 +18,21 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _KEYBOARD_H_
-#define _KEYBOARD_H_
+#ifndef _KEYBOARD_TEXT_H_
+#define _KEYBOARD_TEXT_H_
 
 #include "window.h"
 #include "lcd_types.h"
 
 class TextEdit;
 
-class Keyboard : public Window {
+class TextKeyboard : public Window {
   friend class TextEdit;
 
   public:
-    Keyboard(Window * parent);
+    TextKeyboard(Window * parent);
 
-    ~Keyboard();
+    ~TextKeyboard();
 
     void setField(TextEdit * field);
 
@@ -50,9 +50,9 @@ class Keyboard : public Window {
 
     void setCursorPos(coord_t x);
 
-    void paint(BitmapBuffer * dc);
+    virtual void paint(BitmapBuffer * dc) override;
 
-    bool onTouchEnd(coord_t x, coord_t y) override;
+    virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     TextEdit * field = nullptr;
@@ -61,6 +61,6 @@ class Keyboard : public Window {
     const char * const * layout;
 };
 
-extern Keyboard * keyboard; // is created in TabsGroup constructor
+extern TextKeyboard * textKeyboard; // is created in TabsGroup constructor
 
-#endif
+#endif // _KEYBOARD_TEXT_H_

@@ -22,14 +22,14 @@
 #define _TEXTEDIT_H_
 
 #include "window.h"
-#include "keyboard.h"
+#include "keyboard_text.h"
 
 uint8_t zlen(const char *str, uint8_t size);
 
-class Keyboard;
+class TextKeyboard;
 
 class TextEdit : public Window {
-  friend class Keyboard;
+  friend class TextKeyboard;
 
   public:
     TextEdit(Window * parent, const rect_t &rect, char * value, uint8_t length, LcdFlags flags = 0) :
@@ -55,7 +55,7 @@ class TextEdit : public Window {
 
     void onFocusLost()
     {
-      keyboard->disable();
+      textKeyboard->disable();
     }
 
   protected:

@@ -22,7 +22,6 @@
 
 constexpr coord_t KEYBOARD_HEIGHT = 160;
 
-
 const uint8_t LBM_KEY_UPPERCASE[] = {
 #include "mask_key_uppercase.lbm"
 };
@@ -79,19 +78,21 @@ const char * const * const KEYBOARD_LAYOUTS[] = {
   KEYBOARD_NUMBERS,
 };
 
-Keyboard::Keyboard(Window * parent) :
+TextKeyboard * textKeyboard = nullptr;
+
+TextKeyboard::TextKeyboard(Window * parent) :
   Window(parent, {0, parent->height() - KEYBOARD_HEIGHT, parent->width(), 0}),
   layout(KEYBOARD_LOWERCASE)
 {
-  keyboard = this;
+  textKeyboard = this;
 }
 
-Keyboard::~Keyboard()
+TextKeyboard::~TextKeyboard()
 {
-  keyboard = nullptr;
+  textKeyboard = nullptr;
 }
 
-void Keyboard::setCursorPos(coord_t x)
+void TextKeyboard::setCursorPos(coord_t x)
 {
   if (!field)
     return;
@@ -113,7 +114,7 @@ void Keyboard::setCursorPos(coord_t x)
   field->invalidate();
 }
 
-void Keyboard::setField(TextEdit * field)
+void TextKeyboard::setField(TextEdit * field)
 {
   this->field = field;
   this->setHeight(KEYBOARD_HEIGHT);
@@ -122,7 +123,7 @@ void Keyboard::setField(TextEdit * field)
   invalidate();
 }
 
-void Keyboard::disable()
+void TextKeyboard::disable()
 {
   this->setHeight(0);
   if (field) {
@@ -132,7 +133,7 @@ void Keyboard::disable()
   }
 }
 
-void Keyboard::paint(BitmapBuffer * dc)
+void TextKeyboard::paint(BitmapBuffer * dc)
 {
   lcdSetColor(RGB(0xE0, 0xE0, 0xE0));
   lcdDrawSolidFilledRect(0, 0, LCD_W, LCD_H, CUSTOM_COLOR);
@@ -170,7 +171,7 @@ void Keyboard::paint(BitmapBuffer * dc)
   }
 }
 
-bool Keyboard::onTouchEnd(coord_t x, coord_t y)
+bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
 {
   if (!field)
     return false;

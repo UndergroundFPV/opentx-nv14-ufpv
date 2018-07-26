@@ -20,8 +20,6 @@
 
 #include "opentx.h"
 
-Keyboard * keyboard = nullptr;
-
 TabsGroupHeader::TabsGroupHeader(TabsGroup * menu):
   Window(menu, { 0, 0, LCD_W, MENU_BODY_TOP }),
   back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
@@ -80,7 +78,7 @@ TabsGroup::TabsGroup():
   header(this),
   body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
 {
-  keyboard = new Keyboard(&mainWindow);
+  textKeyboard = new TextKeyboard(&mainWindow);
 }
 
 void TabsGroup::addTab(PageTab * page)
@@ -96,7 +94,7 @@ void TabsGroup::setCurrentTab(PageTab * tab)
 {
   if (tab != currentTab) {
     body.clear();
-    keyboard->disable();
+    textKeyboard->disable();
     currentTab = tab;
     tab->build(&body);
     header.setTitle(tab->title);

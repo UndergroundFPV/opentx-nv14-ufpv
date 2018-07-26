@@ -41,7 +41,7 @@ Page::Page():
   body(this, {0, headerHeight, LCD_W, LCD_H - headerHeight})
 {
   // TODO this is really dirty but it works!
-  keyboard = new Keyboard(&mainWindow);
+  textKeyboard = new TextKeyboard(&mainWindow);
 }
 
 void Page::paint(BitmapBuffer * dc)
