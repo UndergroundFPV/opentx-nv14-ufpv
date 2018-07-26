@@ -90,23 +90,23 @@ class LogicalSwitchEditWindow: public Page {
       }
       else if (cstate == LS_FAMILY_COMP) {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V1);
-        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(2,0), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v1));
+        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v1));
         grid.nextLine();
 
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V2);
-        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(2,0), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v2));
+        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v2));
         grid.nextLine();
       }
       else if (cstate == LS_FAMILY_TIMER) {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V1);
-        auto timer = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), -128, 122, GET_SET_DEFAULT(cs->v1));
+        auto timer = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), -128, 122, GET_SET_DEFAULT(cs->v1));
         timer->setDisplayFunction([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
             drawNumber(dc, 2, 2, lswTimerValue(value), flags | PREC1);
         });
         grid.nextLine();
 
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V2);
-        timer = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), -128, 122, GET_SET_DEFAULT(cs->v2));
+        timer = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), -128, 122, GET_SET_DEFAULT(cs->v2));
         timer->setDisplayFunction([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
             drawNumber(dc, 2, 2, lswTimerValue(value), flags | PREC1);
         });
@@ -114,13 +114,17 @@ class LogicalSwitchEditWindow: public Page {
       }
       else {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V1);
-        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(2,0), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v1));
+        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v1));
         grid.nextLine();
 
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V2);
         int16_t v2_min = 0, v2_max = 0;
         getMixSrcRange(cs->v1, v2_min, v2_max);
         // TODO : drawSourceCustomValue(CSW_3RD_COLUMN, y, v1_val, (v1_val <= MIXSRC_LAST_CH ? calc100toRESX(cs->v2) : cs->v2), lf);
+        /*auto edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->v2));
+        edit1->setDisplayFunction([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+            drawSourceCustomValue(2, 2, cs->v1, (cs->v1 <= MIXSRC_LAST_CH ? calc100toRESX(cs->v2) : cs->v2), flags);
+        });*/
         grid.nextLine();
       }
 
@@ -139,6 +143,14 @@ class LogicalSwitchEditWindow: public Page {
 
       // Delay
       new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_DELAY);
+      if (cstate == LS_FAMILY_EDGE) {
+        new StaticText(logicalSwitchOneWindow, grid.getFieldSlot(), STR_NA);
+      }
+      else
+      {
+        auto edit = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->delay), PREC1);
+        edit->setZeroText("---");
+      }
       grid.nextLine();
     }
 
@@ -156,7 +168,7 @@ class LogicalSwitchEditWindow: public Page {
 
       // LS Func
       new StaticText(window, grid.getLabelSlot(true), STR_FUNC);
-      Choice * funcChoice = new Choice(window, grid.getFieldSlot(2, 0), STR_VCSWFUNC, 0, LS_FUNC_MAX,
+      Choice * funcChoice = new Choice(window, grid.getFieldSlot(), STR_VCSWFUNC, 0, LS_FUNC_MAX,
                                        GET_DEFAULT(cs->func),
                                        [=](int32_t newValue) -> void {
                                            cs->func = newValue;
