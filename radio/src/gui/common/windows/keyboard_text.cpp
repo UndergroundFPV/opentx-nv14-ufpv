@@ -136,7 +136,6 @@ void TextKeyboard::disable()
 void TextKeyboard::paint(BitmapBuffer * dc)
 {
   lcdSetColor(RGB(0xE0, 0xE0, 0xE0));
-  lcdDrawSolidFilledRect(0, 0, LCD_W, LCD_H, CUSTOM_COLOR);
   dc->drawSolidFilledRect(0, 0, LCD_W, height(), CUSTOM_COLOR);
 
   for (uint8_t i=0; i<4; i++) {
