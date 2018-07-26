@@ -26,8 +26,6 @@
 
 uint8_t zlen(const char *str, uint8_t size);
 
-class TextKeyboard;
-
 class TextEdit : public Window {
   friend class TextKeyboard;
 
@@ -53,7 +51,7 @@ class TextEdit : public Window {
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
-    void onFocusLost()
+    virtual void onFocusLost() override
     {
       textKeyboard->disable();
     }

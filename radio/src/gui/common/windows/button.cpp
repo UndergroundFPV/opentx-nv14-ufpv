@@ -26,7 +26,10 @@ bool Button::onTouchEnd(coord_t x, coord_t y)
     state = onPress();
     invalidate();
   }
-  setFocus();
+  if (state == FOCUS_STATE) {
+    // TODO option NO_FOCUS
+    setFocus();
+  }
   return true;
 }
 

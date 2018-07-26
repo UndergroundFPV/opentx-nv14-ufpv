@@ -42,6 +42,7 @@ Page::Page():
 {
   // TODO this is really dirty but it works!
   textKeyboard = new TextKeyboard(&mainWindow);
+  numberKeyboard = new NumberKeyboard(&mainWindow);
 }
 
 void Page::paint(BitmapBuffer * dc)

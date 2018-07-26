@@ -25,10 +25,16 @@ NumberEdit::NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32
   Window(parent, rect),
   vmin(vmin),
   vmax(vmax),
-  getValue(getValue),
-  setValue(setValue),
+  _getValue(getValue),
+  _setValue(setValue),
   flags(flags)
 {
+}
+
+void NumberEdit::setValue(int32_t value)
+{
+  _setValue(limit(vmin, value, vmax));
+  invalidate();
 }
 
 void NumberEdit::paint(BitmapBuffer * dc)
@@ -40,7 +46,7 @@ void NumberEdit::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  int32_t value = getValue();
+  int32_t value = _getValue();
   if (displayFunction) {
     displayFunction(dc, textColor, value);
   }
@@ -55,15 +61,14 @@ void NumberEdit::paint(BitmapBuffer * dc)
 
 bool NumberEdit::onTouchEnd(coord_t x, coord_t y)
 {
-  if (hasFocus()) {
-    int32_t value = getValue() + step;
-    if (value > vmax)
-      value = vmin;
-    setValue(value);
-  }
-  else {
+  if (!hasFocus()) {
     setFocus();
   }
-  invalidate();
+
+  if (numberKeyboard->getField() != this) {
+    numberKeyboard->setField(this);
+  }
+
+  parent->scrollTo(this);
   return true;
 }

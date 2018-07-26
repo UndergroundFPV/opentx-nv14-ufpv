@@ -45,10 +45,9 @@ class NumberKeyboard : public Window {
 
     virtual void paint(BitmapBuffer * dc) override;
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
-
   protected:
     NumberEdit * field = nullptr;
+    void drawButton(BitmapBuffer * dc, const char * text, rect_t & rect);
 };
 
 extern NumberKeyboard * numberKeyboard; // is created in TabsGroup constructor

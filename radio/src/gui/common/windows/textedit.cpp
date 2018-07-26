@@ -42,10 +42,14 @@ void TextEdit::paint(BitmapBuffer * dc)
 
 bool TextEdit::onTouchEnd(coord_t x, coord_t y)
 {
-  setFocus();
+  if (!hasFocus()) {
+    setFocus();
+  }
+
   if (textKeyboard->getField() != this) {
     textKeyboard->setField(this);
   }
+
   textKeyboard->setCursorPos(x);
   parent->scrollTo(this);
   return true;
