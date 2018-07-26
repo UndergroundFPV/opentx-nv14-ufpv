@@ -70,7 +70,7 @@ class LogicalSwitchEditWindow: public Page {
                                     GET_DEFAULT(cs->v2),
                                     [=](int32_t newValue) -> void {
                                       cs->v2 = newValue;
-                                      cs->v3 = MIN(cs->v3, 222 - cs->v2);
+                                      cs->v3 = min<uint8_t>(cs->v3, 222 - cs->v2);
                                       SET_DIRTY();
                                       edit2->setMax(222 - cs->v2);
                                       edit2->invalidate();
