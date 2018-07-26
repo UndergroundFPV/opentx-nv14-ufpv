@@ -320,13 +320,20 @@ void BitmapBuffer::drawBitmapPattern(coord_t x, coord_t y, const uint8_t * bmp, 
       continue;
     const uint8_t * q = bmp + 4 + row*w + offset;
     for (coord_t col=0; col<width; col++) {
-      display_t * p;
-      if (flags & VERTICAL)
-        p = getPixelPtr(x+row, y-col);
-      else
-        p = getPixelPtr(x+col, y+row);
-      if (p)
-        drawAlphaPixel(p, *q, color);
+      coord_t xpixel, ypixel;
+      if (flags & VERTICAL) {
+        xpixel = x + row;
+        ypixel = y - col;
+      }
+      else {
+        xpixel = x + col;
+        ypixel = y + row;
+      }
+      if (xpixel >= xmin && xpixel < xmax) {
+        display_t * p = getPixelPtr(xpixel, ypixel);
+        if (p)
+          drawAlphaPixel(p, *q, color);
+      }
       q++;
     }
   }
@@ -420,16 +427,16 @@ void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t l
       uint16_t fgColor = lcdColorTable[COLOR_IDX(flags)];
       uint16_t * pixel = getPixelPtr(x, y);
       if (pixel) {
-      uint16_t bgColor = *pixel;
-      if (fgColor == lcdColorTable[TEXT_COLOR_INDEX] && bgColor == lcdColorTable[TEXT_BGCOLOR_INDEX]) {
-        fontcache = fontCache[0];
-      }
-      else if (fgColor == lcdColorTable[TEXT_INVERTED_COLOR_INDEX] && bgColor == lcdColorTable[TEXT_INVERTED_BGCOLOR_INDEX]) {
-        fontcache = fontCache[1];
-      }
-      else {
-        // TRACE("No cache for \"%s\"", s);
-      }
+        uint16_t bgColor = *pixel;
+        if (fgColor == lcdColorTable[TEXT_COLOR_INDEX] && bgColor == lcdColorTable[TEXT_BGCOLOR_INDEX]) {
+          fontcache = fontCache[0];
+        }
+        else if (fgColor == lcdColorTable[TEXT_INVERTED_COLOR_INDEX] && bgColor == lcdColorTable[TEXT_INVERTED_BGCOLOR_INDEX]) {
+          fontcache = fontCache[1];
+        }
+        else {
+          // TRACE("No cache for \"%s\"", s);
+        }
       }
     }
   }
@@ -451,9 +458,9 @@ void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t l
     }
     else if (c >= 0x20) {
       uint8_t width;
-      if (fontcache)
-        width = drawCharWithCache(x-1, y, fontcache, fontspecs, getMappedChar(c), flags);
-      else
+      // if (fontcache)
+      //  width = drawCharWithCache(x-1, y, fontcache, fontspecs, getMappedChar(c), flags);
+      //else
         width = drawCharWithoutCache(x-1, y, font, fontspecs, getMappedChar(c), flags);
       INCREMENT_POS(width);
     }
