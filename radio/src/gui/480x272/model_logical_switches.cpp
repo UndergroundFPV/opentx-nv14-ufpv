@@ -37,8 +37,8 @@ class LogicalSwitchEditWindow: public Page {
 
   protected:
     uint8_t ls;
-    char s[8];
     Window * logicalSwitchOneWindow = nullptr;
+    NumberEdit * v2Edit = nullptr;
 
     void updateLogicalSwitchOneWindow()
     {
@@ -114,16 +114,20 @@ class LogicalSwitchEditWindow: public Page {
       }
       else {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V1);
-        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v1));
+        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), MIXSRC_LAST_TELEM, GET_DEFAULT(cs->v1),
+                         [=](int32_t newValue) -> void {
+                           cs->v1 = newValue;
+                           SET_DIRTY();
+                           v2Edit->invalidate();
+                         });
         grid.nextLine();
 
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V2);
         int16_t v2_min = 0, v2_max = 0;
         getMixSrcRange(cs->v1, v2_min, v2_max);
         // TODO : drawSourceCustomValue(CSW_3RD_COLUMN, y, v1_val, (v1_val <= MIXSRC_LAST_CH ? calc100toRESX(cs->v2) : cs->v2), lf);
-        auto edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->v2));
-        edit1->setDisplayFunction([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-          TRACE("v1=%d %d", cs->v1, cs->v2);
+        v2Edit = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->v2));
+        v2Edit->setDisplayFunction([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
           drawSourceCustomValue(2, 2, cs->v1, (cs->v1 <= MIXSRC_LAST_CH ? calc100toRESX(value) : value), flags);
         });
         grid.nextLine();
@@ -157,7 +161,7 @@ class LogicalSwitchEditWindow: public Page {
 
     void buildHeader(Window * window) {
       new StaticText(window, { 70, 4, LCD_W - 100, 20 }, STR_MENULOGICALSWITCHES, MENU_TITLE_COLOR);
-      new StaticText(window, { 70, 28, LCD_W - 100, 20 }, getSwitchString(s, SWSRC_SW1+ls), MENU_TITLE_COLOR);
+      new StaticText(window, { 70, 28, LCD_W - 100, 20 }, getSwitchString(SWSRC_SW1+ls), MENU_TITLE_COLOR);
     }
 
     // MixerOne
