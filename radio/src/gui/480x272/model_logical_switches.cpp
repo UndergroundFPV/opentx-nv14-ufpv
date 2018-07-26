@@ -121,10 +121,11 @@ class LogicalSwitchEditWindow: public Page {
         int16_t v2_min = 0, v2_max = 0;
         getMixSrcRange(cs->v1, v2_min, v2_max);
         // TODO : drawSourceCustomValue(CSW_3RD_COLUMN, y, v1_val, (v1_val <= MIXSRC_LAST_CH ? calc100toRESX(cs->v2) : cs->v2), lf);
-        /*auto edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->v2));
-        edit1->setDisplayFunction([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-            drawSourceCustomValue(2, 2, cs->v1, (cs->v1 <= MIXSRC_LAST_CH ? calc100toRESX(cs->v2) : cs->v2), flags);
-        });*/
+        auto edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->v2));
+        edit1->setDisplayFunction([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+          TRACE("v1=%d %d", cs->v1, cs->v2);
+          drawSourceCustomValue(2, 2, cs->v1, (cs->v1 <= MIXSRC_LAST_CH ? calc100toRESX(value) : value), flags);
+        });
         grid.nextLine();
       }
 
