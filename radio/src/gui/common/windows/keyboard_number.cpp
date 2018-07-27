@@ -24,8 +24,8 @@ constexpr coord_t KEYBOARD_HEIGHT = 90;
 
 NumberKeyboard * NumberKeyboard::numberKeyboard = nullptr;
 
-NumberKeyboard::NumberKeyboard(Window * parent) :
-  Window(parent, {0, parent->height() - KEYBOARD_HEIGHT, parent->width(), 0})
+NumberKeyboard::NumberKeyboard():
+  Keyboard<NumberEdit>(KEYBOARD_HEIGHT)
 {
   new TextButton(this, { LCD_W/2 - 115, 10, 50, 30 }, "<<",
                  [=]() -> uint8_t {
@@ -87,42 +87,6 @@ NumberKeyboard::NumberKeyboard(Window * parent) :
 NumberKeyboard::~NumberKeyboard()
 {
   numberKeyboard = nullptr;
-}
-
-// TODO parent class
-Window * NumberKeyboard::getPageBody()
-{
-  Window * parent = field;
-  while (1) {
-    Window * tmp = parent->getParent();
-    if (dynamic_cast<Page *>(tmp) || dynamic_cast<TabsGroup *>(tmp)) {
-      return parent;
-    }
-    parent = tmp;
-  }
-}
-
-// TODO parent class
-void NumberKeyboard::setField(NumberEdit * field)
-{
-  this->field = field;
-  attach(&mainWindow);
-  setHeight(KEYBOARD_HEIGHT);
-  Window * w = getPageBody();
-  w->setHeight(LCD_H - KEYBOARD_HEIGHT - w->top());
-  w->scrollTo(field);
-  invalidate();
-}
-
-// TODO parent class
-void NumberKeyboard::disable()
-{
-  detach();
-  if (field) {
-    Window * w = getPageBody();
-    w->setHeight(LCD_H - 0 - w->top());
-    field = nullptr;
-  }
 }
 
 void NumberKeyboard::paint(BitmapBuffer * dc)

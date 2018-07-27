@@ -53,7 +53,7 @@ class TextEdit : public Window {
 
     virtual void onFocusLost() override
     {
-      textKeyboard->disable();
+      TextKeyboard::instance()->disable();
     }
 
   protected:

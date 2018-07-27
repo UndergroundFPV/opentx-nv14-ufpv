@@ -21,41 +21,29 @@
 #ifndef _KEYBOARD_NUMBER_H_
 #define _KEYBOARD_NUMBER_H_
 
-#include "window.h"
-#include "lcd_types.h"
+#include "keyboard_base.h"
 
 class NumberEdit;
 
-class NumberKeyboard : public Window {
+class NumberKeyboard : public Keyboard<NumberEdit> {
   friend class NumberEdit;
 
   public:
-    NumberKeyboard(Window * parent);
+    NumberKeyboard();
 
     ~NumberKeyboard();
 
     static NumberKeyboard * instance() {
       if (!numberKeyboard)
-        numberKeyboard = new NumberKeyboard(&mainWindow);
+        numberKeyboard = new NumberKeyboard();
       return numberKeyboard;
-    }
-
-    void setField(NumberEdit * field);
-
-    void disable();
-
-    NumberEdit * getField()
-    {
-      return field;
     }
 
     virtual void paint(BitmapBuffer * dc) override;
 
   protected:
-    NumberEdit * field = nullptr;
-    void drawButton(BitmapBuffer * dc, const char * text, rect_t & rect);
     static NumberKeyboard * numberKeyboard;
-    Window * getPageBody();
+    void drawButton(BitmapBuffer * dc, const char * text, rect_t & rect);
 };
 
 #endif // _KEYBOARD_NUMBER_H_

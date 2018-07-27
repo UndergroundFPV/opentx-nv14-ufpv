@@ -78,7 +78,6 @@ TabsGroup::TabsGroup():
   header(this),
   body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
 {
-  textKeyboard = new TextKeyboard(&mainWindow);
 }
 
 void TabsGroup::addTab(PageTab * page)
@@ -94,7 +93,7 @@ void TabsGroup::setCurrentTab(PageTab * tab)
 {
   if (tab != currentTab) {
     body.clear();
-    textKeyboard->disable();
+    TextKeyboard::instance()->disable();
     NumberKeyboard::instance()->disable();
     currentTab = tab;
     tab->build(&body);

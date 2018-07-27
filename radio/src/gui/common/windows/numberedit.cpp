@@ -65,9 +65,9 @@ bool NumberEdit::onTouchEnd(coord_t x, coord_t y)
     setFocus();
   }
 
-  NumberKeyboard * numberKeyboard = NumberKeyboard::instance();
-  if (numberKeyboard->getField() != this) {
-    numberKeyboard->setField(this);
+  NumberKeyboard * keyboard = NumberKeyboard::instance();
+  if (keyboard->getField() != this) {
+    keyboard->setField(this);
   }
 
   return true;

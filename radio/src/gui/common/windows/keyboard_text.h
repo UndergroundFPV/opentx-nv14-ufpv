@@ -21,29 +21,25 @@
 #ifndef _KEYBOARD_TEXT_H_
 #define _KEYBOARD_TEXT_H_
 
-#include "window.h"
-#include "lcd_types.h"
+#include "keyboard_base.h"
 
 class TextEdit;
 
-class TextKeyboard : public Window {
+class TextKeyboard : public Keyboard<TextEdit> {
   friend class TextEdit;
 
   public:
-    TextKeyboard(Window * parent);
+    TextKeyboard();
 
     ~TextKeyboard();
 
-    void setField(TextEdit * field);
-
-    void disable();
-
-    TextEdit * getField()
-    {
-      return field;
+    static TextKeyboard * instance() {
+      if (!textKeyboard)
+        textKeyboard = new TextKeyboard();
+      return textKeyboard;
     }
 
-    coord_t getCursorPos()
+    coord_t getCursorPos() const
     {
       return cursorPos;
     }
@@ -55,12 +51,10 @@ class TextKeyboard : public Window {
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
-    TextEdit * field = nullptr;
+    static TextKeyboard * textKeyboard;
     coord_t cursorPos = 0;
     uint8_t cursorIndex = 0;
     const char * const * layout;
 };
-
-extern TextKeyboard * textKeyboard; // is created in TabsGroup constructor
 
 #endif // _KEYBOARD_TEXT_H_

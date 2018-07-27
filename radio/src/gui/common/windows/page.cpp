@@ -40,13 +40,11 @@ Page::Page():
   header(this, {0, 0, LCD_W, headerHeight}),
   body(this, {0, headerHeight, LCD_W, LCD_H - headerHeight})
 {
-  // TODO this is really dirty but it works!
-  textKeyboard = new TextKeyboard(&mainWindow);
 }
 
 Page::~Page()
 {
-  textKeyboard->disable();
+  TextKeyboard::instance()->disable();
   NumberKeyboard::instance()->disable();
 }
 

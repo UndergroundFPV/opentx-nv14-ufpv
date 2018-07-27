@@ -22,6 +22,8 @@
 
 constexpr coord_t KEYBOARD_HEIGHT = 160;
 
+TextKeyboard * TextKeyboard::textKeyboard = nullptr;
+
 const uint8_t LBM_KEY_UPPERCASE[] = {
 #include "mask_key_uppercase.lbm"
 };
@@ -80,11 +82,10 @@ const char * const * const KEYBOARD_LAYOUTS[] = {
 
 TextKeyboard * textKeyboard = nullptr;
 
-TextKeyboard::TextKeyboard(Window * parent) :
-  Window(parent, {0, parent->height() - KEYBOARD_HEIGHT, parent->width(), 0}),
+TextKeyboard::TextKeyboard():
+  Keyboard<TextEdit>(KEYBOARD_HEIGHT),
   layout(KEYBOARD_LOWERCASE)
 {
-  textKeyboard = this;
 }
 
 TextKeyboard::~TextKeyboard()
@@ -112,25 +113,6 @@ void TextKeyboard::setCursorPos(coord_t x)
   }
   cursorPos = x - rest;
   field->invalidate();
-}
-
-void TextKeyboard::setField(TextEdit * field)
-{
-  this->field = field;
-  this->setHeight(KEYBOARD_HEIGHT);
-  Window * w = field->getParent();
-  w->setHeight(LCD_H - KEYBOARD_HEIGHT - w->top());
-  invalidate();
-}
-
-void TextKeyboard::disable()
-{
-  this->setHeight(0);
-  if (field) {
-    Window * w = field->getParent();
-    w->setHeight(LCD_H - 0 - w->top());
-    field = nullptr;
-  }
 }
 
 void TextKeyboard::paint(BitmapBuffer * dc)
@@ -206,11 +188,13 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
         uint8_t specialKey = *key;
         if (specialKey == 128) {
           // backspace
-          char c = idx2char(data[cursorIndex - 1]);
-          memmove(data + cursorIndex - 1, data + cursorIndex, size - cursorIndex);
-          data[size - 1] = '\0';
-          cursorPos -= getCharWidth(c, fontspecsTable[0]);
-          cursorIndex -= 1;
+          if (cursorIndex > 0) {
+            char c = idx2char(data[cursorIndex - 1]);
+            memmove(data + cursorIndex - 1, data + cursorIndex, size - cursorIndex);
+            data[size - 1] = '\0';
+            cursorPos -= getCharWidth(c, fontspecsTable[0]);
+            --cursorIndex;
+          }
         }
         else {
           layout = KEYBOARD_LAYOUTS[specialKey - 129];
