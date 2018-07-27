@@ -35,6 +35,12 @@ class StaticText : public Window {
       free(text);
     }
 
+    void setFlags(LcdFlags flags)
+    {
+      this->flags = flags;
+      invalidate();
+    }
+
     void paint(BitmapBuffer * dc)
     {
       dc->drawText(0, 3, text, flags);
