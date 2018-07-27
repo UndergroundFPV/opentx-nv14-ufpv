@@ -35,8 +35,21 @@ class LogicalSwitchEditWindow: public Page {
       buildHeader(&header);
     }
 
+    bool isActive() {
+      return getSwitch(SWSRC_FIRST_LOGICAL_SWITCH+ls);
+    }
+
+    virtual void checkEvents() override
+    {
+      if (active != isActive()) {
+        invalidate();
+        active = !active;
+      }
+    }
+
   protected:
     uint8_t ls;
+    bool active = false;
     Window * logicalSwitchOneWindow = nullptr;
     NumberEdit * v2Edit = nullptr;
 
@@ -211,7 +224,7 @@ class LogicalSwitchButton : public Button {
     }
 
     bool isActive() {
-      return getSwitch(lsIndex);
+      return getSwitch(SWSRC_FIRST_LOGICAL_SWITCH+lsIndex );
     }
 
     virtual void checkEvents() override
@@ -265,16 +278,16 @@ class LogicalSwitchButton : public Button {
       }
 
       // AND switch
-      drawSwitch(col1, (lsFamily == LS_FAMILY_EDGE) ? line3 :line2, ls->andsw, 0);
+      drawSwitch(col1, (lsFamily == LS_FAMILY_EDGE) ? line3 : line2, ls->andsw, 0);
 
       // CSW duration
       if (ls->duration > 0) {
-        drawNumber(dc, col2, (lsFamily == LS_FAMILY_EDGE) ? line3 :line2, ls->duration, PREC1 | LEFT);
+        drawNumber(dc, col2, (lsFamily == LS_FAMILY_EDGE) ? line3 : line2, ls->duration, PREC1 | LEFT);
       }
 
       // CSW delay
       if (lsFamily != LS_FAMILY_EDGE && ls->delay > 0) {
-        drawNumber(dc, col3, (lsFamily == LS_FAMILY_EDGE) ? line3 :line2, ls->delay, PREC1 | LEFT);
+        drawNumber(dc, col3, (lsFamily == LS_FAMILY_EDGE) ? line3 : line2, ls->delay, PREC1 | LEFT);
       }
     }
 
