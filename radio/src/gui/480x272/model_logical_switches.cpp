@@ -242,10 +242,6 @@ class LogicalSwitchButton : public Button {
       }
     }
 
-    void paintLogicalSwitch(BitmapBuffer * dc) {
-
-    }
-
     // LS box content
     virtual void paint(BitmapBuffer * dc) override {
       LogicalSwitchData * ls = lswAddress(lsIndex);
@@ -253,8 +249,6 @@ class LogicalSwitchButton : public Button {
 
       if (active)
         dc->drawSolidFilledRect(1, 1, rect.w-2, rect.h-2, CURVE_AXIS_COLOR);
-
-      paintLogicalSwitch(dc);
 
       // The bounding rect
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
