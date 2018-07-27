@@ -42,7 +42,7 @@ class LogicalSwitchEditWindow: public Page {
     virtual void checkEvents() override
     {
       if (active != isActive()) {
-        invalidate();
+        headerSwitchName->setFlags(isActive() ? BOLD|WARNING_COLOR : MENU_TITLE_COLOR);
         active = !active;
       }
     }
@@ -51,6 +51,7 @@ class LogicalSwitchEditWindow: public Page {
     uint8_t ls;
     bool active = false;
     Window * logicalSwitchOneWindow = nullptr;
+    StaticText * headerSwitchName = nullptr;
     NumberEdit * v2Edit = nullptr;
 
     void updateLogicalSwitchOneWindow()
@@ -173,7 +174,7 @@ class LogicalSwitchEditWindow: public Page {
 
     void buildHeader(Window * window) {
       new StaticText(window, { 70, 4, LCD_W - 100, 20 }, STR_MENULOGICALSWITCHES, MENU_TITLE_COLOR);
-      new StaticText(window, { 70, 28, LCD_W - 100, 20 }, getSwitchString(SWSRC_SW1+ls), MENU_TITLE_COLOR);
+      headerSwitchName = new StaticText(window, { 70, 28, LCD_W - 100, 20 }, getSwitchString(SWSRC_SW1+ls), MENU_TITLE_COLOR);
     }
 
     // MixerOne
