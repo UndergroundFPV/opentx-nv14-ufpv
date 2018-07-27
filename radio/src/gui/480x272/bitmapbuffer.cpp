@@ -482,7 +482,7 @@ void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t l
     }
     s++;
   }
-  lcdNextPos = pos;
+  lcdNextPos = pos - offsetX;
 
   RESTORE_OFFSET();
 }
