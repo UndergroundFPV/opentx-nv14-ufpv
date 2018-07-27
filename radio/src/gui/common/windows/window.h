@@ -72,6 +72,11 @@ class Window {
       invalidate();
     }
 
+    coord_t getHeight()
+    {
+      return rect.h;
+    }
+
     void setTop(coord_t y)
     {
       rect.y = y;

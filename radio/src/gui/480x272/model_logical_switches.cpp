@@ -125,7 +125,6 @@ class LogicalSwitchEditWindow: public Page {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V2);
         int16_t v2_min = 0, v2_max = 0;
         getMixSrcRange(cs->v1, v2_min, v2_max);
-        // TODO : drawSourceCustomValue(CSW_3RD_COLUMN, y, v1_val, (v1_val <= MIXSRC_LAST_CH ? calc100toRESX(cs->v2) : cs->v2), lf);
         v2Edit = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->v2));
         v2Edit->setDisplayFunction([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
           drawSourceCustomValue(2, 2, cs->v1, (cs->v1 <= MIXSRC_LAST_CH ? calc100toRESX(value) : value), flags);
@@ -205,8 +204,21 @@ class LogicalSwitchButton : public Button {
       lsIndex(lsIndex)
     {
       LogicalSwitchData * ls = lswAddress(lsIndex);
-      if (ls->duration != 0 || ls->delay != 0 || ls->andsw != SWSRC_NONE) {
-        setHeight(45);
+      if (ls->duration != 0 || ls->delay != 0 || ls->andsw != SWSRC_NONE)
+        setHeight(getHeight() + 20);
+      if(lswFamily(ls->func) == LS_FAMILY_EDGE)
+        setHeight(getHeight() + 20);
+    }
+
+    bool isActive() {
+      return getSwitch(lsIndex);
+    }
+
+    virtual void checkEvents() override
+    {
+      if (active != isActive()) {
+        invalidate();
+        active = !active;
       }
     }
 
@@ -218,6 +230,9 @@ class LogicalSwitchButton : public Button {
     virtual void paint(BitmapBuffer * dc) override {
       LogicalSwitchData * ls = lswAddress(lsIndex);
       uint8_t lsFamily = lswFamily(ls->func);
+
+      if (active)
+        dc->drawSolidFilledRect(1, 1, rect.w-2, rect.h-2, CURVE_AXIS_COLOR);
 
       paintLogicalSwitch(dc);
 
@@ -233,8 +248,8 @@ class LogicalSwitchButton : public Button {
         drawSwitch(col3, line1, ls->v2);
       }
       else if (lsFamily == LS_FAMILY_EDGE) {
-        drawSwitch(col2, line1, ls->v1);
-        putsEdgeDelayParam(col3, 0, ls, 0,  0);
+        drawSwitch(col1, line2, ls->v1);
+        putsEdgeDelayParam(col2, line2, ls, 0,  0);
       }
       else if (lsFamily == LS_FAMILY_COMP) {
         drawSource(col2, line1, ls->v1, 0);
@@ -246,30 +261,32 @@ class LogicalSwitchButton : public Button {
       }
       else {
         drawSource(col2, line1, ls->v1, 0);
+        drawSourceCustomValue(col3, line1, ls->v1, (ls->v1 <= MIXSRC_LAST_CH ? calc100toRESX(ls->v2) : ls->v2), 0);
       }
 
-      if (ls->andsw) {
-        drawSwitch(col1, line2, ls->andsw, 0);
-      }
+      // AND switch
+      drawSwitch(col1, (lsFamily == LS_FAMILY_EDGE) ? line3 :line2, ls->andsw, 0);
 
       // CSW duration
       if (ls->duration > 0) {
-        drawNumber(dc, col2, line2, ls->duration, PREC1 | LEFT);
+        drawNumber(dc, col2, (lsFamily == LS_FAMILY_EDGE) ? line3 :line2, ls->duration, PREC1 | LEFT);
       }
 
       // CSW delay
       if (lsFamily != LS_FAMILY_EDGE && ls->delay > 0) {
-        drawNumber(dc, col3, line2, ls->delay, PREC1 | LEFT);
+        drawNumber(dc, col3, (lsFamily == LS_FAMILY_EDGE) ? line3 :line2, ls->delay, PREC1 | LEFT);
       }
     }
 
   protected:
     uint8_t lsIndex;
+    bool active = false;
     static constexpr coord_t col1 = 25;
     static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
     static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1;
     static constexpr coord_t line1 = 0;
     static constexpr coord_t line2 = 20;
+    static constexpr coord_t line3 = 40;
 };
 
 ModelLogicalSwitchesPage::ModelLogicalSwitchesPage():
