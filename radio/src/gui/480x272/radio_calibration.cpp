@@ -93,7 +93,7 @@ void RadioCalibrationPage::build(Window * window)
   button = new TextButton(window, {LCD_W/2-125, window->height() - 50, 250, 30}, "START", [=]() -> int8_t {
     nextStep();
     return 0;
-  }, 0);
+  });
 }
 
 

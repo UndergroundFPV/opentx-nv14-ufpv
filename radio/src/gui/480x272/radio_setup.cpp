@@ -177,7 +177,7 @@ void RadioSetupPage::build(Window * window)
                  });
   edit->setStep(15);
   edit->setPrefix("+");
-  edit->setPrefix("Hz");
+  edit->setSuffix("Hz");
   grid.nextLine();
 
 #if defined(VARIO)
@@ -258,7 +258,7 @@ void RadioSetupPage::build(Window * window)
     // Inactivity alarm
     new StaticText(window, grid.getLabelSlot(), STR_INACTIVITYALARM, true);
     edit = new NumberEdit(window, grid.getFieldSlot(), 0, 250, GET_SET_DEFAULT(g_eeGeneral.inactivityTimer));
-    edit->setSuffix("m");
+    edit->setSuffix("minutes");
     grid.nextLine();
   }
 

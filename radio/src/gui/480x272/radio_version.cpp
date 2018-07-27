@@ -59,5 +59,5 @@ void RadioVersionPage::build(Window * window)
     storageEraseAll(false);
     NVIC_SystemReset();
     return 0;
-  }, 0);
+  });
 }

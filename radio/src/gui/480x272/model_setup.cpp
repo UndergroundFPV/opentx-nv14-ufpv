@@ -230,7 +230,7 @@ void ModelSetupPage::build(Window * window)
                    storageDirty(EE_MODEL);
                    AUDIO_WARNING1();
                    return 0;
-                 }, 0);
+                 });
   grid.nextLine();
 
   // Display trims
@@ -582,7 +582,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                                               moduleFlag[EXTERNAL_MODULE] = MODULE_BIND;
                                               return 1;
                                             }
-                                          }, 0);
+                                          });
 
       externalModuleRange = new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
                                            [=]() -> uint8_t {
@@ -617,7 +617,7 @@ void ModelSetupPage::updateExternalModuleWindow()
                        [=]() -> uint8_t {
                          // TODO launch the failsafe window
                          return 1;
-                       }, 0);
+                       });
       }
       grid.nextLine();
     }

@@ -364,7 +364,7 @@ void ModelMixesPage::build(Window * window)
       new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
                      [=]() -> uint8_t {
                        return 0;
-                     }, 0);
+                     });
       uint8_t count = 0;
       while (mix->srcRaw > 0 && mix->destCh == ch) {
         Button * button = new MixLineButton(window, grid.getFieldSlot(), mixIndex,
@@ -411,7 +411,7 @@ void ModelMixesPage::build(Window * window)
                        insertMix(mixIndex, ch);
                        editMix(window, ch, mixIndex);
                        return 0;
-                     }, 0);
+                     });
       grid.nextLine();
     }
   }

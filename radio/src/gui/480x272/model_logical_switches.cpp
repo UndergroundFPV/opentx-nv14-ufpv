@@ -209,6 +209,14 @@ class LogicalSwitchEditWindow: public Page {
     }
 };
 
+static constexpr coord_t col1 = 25;
+static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
+static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1;
+static constexpr coord_t line1 = 0;
+static constexpr coord_t line2 = 20;
+static constexpr coord_t line3 = 40;
+
+
 class LogicalSwitchButton : public Button {
   public:
     LogicalSwitchButton(Window * parent, const rect_t & rect, int lsIndex, std::function<uint8_t(void)> onPress):
@@ -293,12 +301,6 @@ class LogicalSwitchButton : public Button {
   protected:
     uint8_t lsIndex;
     bool active = false;
-    static constexpr coord_t col1 = 25;
-    static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
-    static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1;
-    static constexpr coord_t line1 = 0;
-    static constexpr coord_t line2 = 20;
-    static constexpr coord_t line3 = 40;
 };
 
 ModelLogicalSwitchesPage::ModelLogicalSwitchesPage():
