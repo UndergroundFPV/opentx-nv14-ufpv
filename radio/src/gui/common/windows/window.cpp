@@ -44,6 +44,14 @@ Window::~Window()
   }
 }
 
+void Window::attach(Window * window)
+{
+  if (parent)
+    detach();
+  parent = window;
+  parent->addChild(this);
+}
+
 void Window::detach()
 {
   if (parent) {
@@ -102,8 +110,15 @@ void Window::scrollTo(Window * child)
   /*if (child->top() < scrollPositionY) {
     scrollPositionY = child->top();
   }*/
-  if (child->bottom() > height() - scrollPositionY) {
-    setScrollPositionY(height() - child->bottom());
+
+  coord_t bottom = child->bottom();
+  Window * parent = child->getParent();
+  while (parent && parent != this) {
+    bottom += parent->top();
+    parent = parent->getParent();
+  }
+  if (bottom > height() - scrollPositionY) {
+    setScrollPositionY(height() - bottom);
   }
 }
 

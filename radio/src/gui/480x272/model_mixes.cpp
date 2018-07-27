@@ -154,7 +154,7 @@ class MixEditWindow: public Page {
                                            SET_DIRTY();
                                            return bool(BF_SINGLE_BIT_GET(mix->flightModes, i));
                                        },
-                                       bool(BF_SINGLE_BIT_GET(mix->flightModes, i)));
+                                       bool(BF_SINGLE_BIT_GET(mix->flightModes, i)) ? BUTTON_CHECKED : 0);
       }
       grid.nextLine();
 
@@ -393,7 +393,7 @@ void ModelMixesPage::build(Window * window)
                                                 deleteMix(mixIndex);
                                                 rebuild(window);
                                               });
-                                              return FOCUS_STATE;
+                                              return 0;
                                             });
 
         if (count++ > 0) {
@@ -410,7 +410,7 @@ void ModelMixesPage::build(Window * window)
                      [=]() -> uint8_t {
                        insertMix(mixIndex, ch);
                        editMix(window, ch, mixIndex);
-                       return FOCUS_STATE;
+                       return 0;
                      }, 0);
       grid.nextLine();
     }

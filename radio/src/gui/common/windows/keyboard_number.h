@@ -34,6 +34,12 @@ class NumberKeyboard : public Window {
 
     ~NumberKeyboard();
 
+    static NumberKeyboard * instance() {
+      if (!numberKeyboard)
+        numberKeyboard = new NumberKeyboard(&mainWindow);
+      return numberKeyboard;
+    }
+
     void setField(NumberEdit * field);
 
     void disable();
@@ -48,8 +54,8 @@ class NumberKeyboard : public Window {
   protected:
     NumberEdit * field = nullptr;
     void drawButton(BitmapBuffer * dc, const char * text, rect_t & rect);
+    static NumberKeyboard * numberKeyboard;
+    Window * getPageBody();
 };
-
-extern NumberKeyboard * numberKeyboard; // is created in TabsGroup constructor
 
 #endif // _KEYBOARD_NUMBER_H_

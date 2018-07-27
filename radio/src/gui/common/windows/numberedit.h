@@ -85,7 +85,7 @@ class NumberEdit : public Window {
 
     virtual void onFocusLost() override
     {
-      numberKeyboard->disable();
+      NumberKeyboard::instance()->disable();
     }
 
   protected:

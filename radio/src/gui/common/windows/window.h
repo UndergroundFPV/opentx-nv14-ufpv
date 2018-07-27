@@ -172,8 +172,9 @@ class Window {
     static std::list<Window *> trash;
     std::function<void()> onClose;
 
-    void detach();
+    void attach(Window * window);
 
+    void detach();
 
     void addChild(Window * window)
     {

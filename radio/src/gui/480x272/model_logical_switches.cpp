@@ -146,7 +146,6 @@ class LogicalSwitchEditWindow: public Page {
         grid.nextLine();
       }
 
-
       // AND switch
       new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_AND_SWITCH);
       auto choice = new SwitchChoice(logicalSwitchOneWindow, grid.getFieldSlot(), -MAX_LS_ANDSW, MAX_LS_ANDSW, GET_SET_DEFAULT(cs->andsw));
@@ -164,8 +163,7 @@ class LogicalSwitchEditWindow: public Page {
       if (cstate == LS_FAMILY_EDGE) {
         new StaticText(logicalSwitchOneWindow, grid.getFieldSlot(), STR_NA);
       }
-      else
-      {
+      else {
         auto edit = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->delay), PREC1);
         edit->setZeroText("---");
       }
@@ -188,7 +186,7 @@ class LogicalSwitchEditWindow: public Page {
       new StaticText(window, grid.getLabelSlot(true), STR_FUNC);
       Choice * funcChoice = new Choice(window, grid.getFieldSlot(), STR_VCSWFUNC, 0, LS_FUNC_MAX,
                                        GET_DEFAULT(cs->func),
-                                       [=](int32_t newValue) -> void {
+                                       [=](int32_t newValue) {
                                            cs->func = newValue;
                                            if (lswFamily(cs->func) == LS_FAMILY_TIMER) {
                                              cs->v1 = cs->v2 = 0;
@@ -319,7 +317,7 @@ void ModelLogicalSwitchesPage::rebuild(Window * window)
 void ModelLogicalSwitchesPage::editLogicalSwitch(Window * window, uint8_t lsIndex)
 {
   Window * lsWindow = new LogicalSwitchEditWindow(lsIndex);
-  lsWindow->setCloseHandler([=]() -> void {
+  lsWindow->setCloseHandler([=]() {
     rebuild(window);
   });
 }
@@ -337,9 +335,9 @@ void ModelLogicalSwitchesPage::build(Window * window)
 
   for (int8_t i=0; i<MAX_OUTPUT_CHANNELS; i++) {
     new TextButton(window, grid.getLabelSlot(), getSwitchString(s, SWSRC_SW1+i),
-                     [=]() -> uint8_t {
-                         return 0;
-                     }, 0);
+                   [=]() -> uint8_t {
+                     return 0;
+                   });
 
     Button * button = new LogicalSwitchButton(window, grid.getFieldSlot(), i,
                                               [=]() -> uint8_t {
@@ -348,7 +346,7 @@ void ModelLogicalSwitchesPage::build(Window * window)
                                                   menu->deleteLater();
                                                   editLogicalSwitch(window, i);
                                                 });
-                                                return FOCUS_STATE;
+                                                return 0;
                                               });
     grid.spacer(button->height() + 5);
   }

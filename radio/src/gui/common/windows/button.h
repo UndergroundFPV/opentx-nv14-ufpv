@@ -24,50 +24,65 @@
 #include <functional>
 #include "window.h"
 
-constexpr uint8_t FOCUS_STATE = 0xff;
+enum ButtonFlags {
+  BUTTON_BACKGROUND = 1,
+  BUTTON_CHECKED = 2,
+  BUTTON_NOFOCUS = 4,
+  BUTTON_CHECKED_ON_FOCUS = 8,
+  BUTTON_DISABLED = 16,
+};
+
 
 class Button : public Window {
   public:
-    Button(Window * parent, const rect_t & rect, std::function<uint8_t(void)> onPress, int8_t state=FOCUS_STATE):
+    Button(Window * parent, const rect_t & rect, std::function<uint8_t(void)> onPress, uint8_t flags=0):
       Window(parent, rect),
       onPress(onPress),
-      state(state)
+      flags(flags)
     {
     }
 
-    void enable(uint8_t enabled)
-    {
-      this->enabled = enabled;
+    void enable(bool enabled) {
+      if (enabled)
+        flags &= ~BUTTON_DISABLED;
+      else
+        flags |= BUTTON_DISABLED;
     }
 
-    void disable()
-    {
+    void disable() {
       enable(false);
     }
 
-    void setState(int8_t state)
-    {
-      this->state = state;
+    void check(bool checked) {
+      if (checked)
+        flags |= BUTTON_CHECKED;
+      else
+        flags &= ~BUTTON_CHECKED;
     }
 
-    bool getState() {
-      return (state >= 0 ? state : hasFocus());
+    bool enabled() {
+      return !(flags & BUTTON_DISABLED);
+    }
+
+    bool checked() {
+      if (flags & BUTTON_CHECKED_ON_FOCUS)
+        return hasFocus();
+      else
+        return flags & BUTTON_CHECKED;
     }
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     std::function<uint8_t(void)> onPress;
-    int8_t state;
-    uint8_t enabled = 1;
+    uint8_t flags;
 };
 
 class TextButton : public Button {
   public:
-    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress, int8_t state=FOCUS_STATE, LcdFlags flags=0):
-      Button(parent, rect, onPress, state),
-      text(strdup(text)),
-      flags(flags)
+    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress, uint8_t flags=BUTTON_BACKGROUND):
+      Button(parent, rect, onPress, flags),
+      text(strdup(text))
     {
     }
 
@@ -86,13 +101,12 @@ class TextButton : public Button {
 
   protected:
     char * text;
-    LcdFlags flags;
 };
 
 class IconButton: public Button {
   public:
-    IconButton(Window * parent, const rect_t & rect, uint8_t icon, std::function<uint8_t(void)> onPress, int8_t state=FOCUS_STATE):
-      Button(parent, rect, onPress, state),
+    IconButton(Window * parent, const rect_t & rect, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t flags=0):
+      Button(parent, rect, onPress, flags),
       icon(icon)
     {
     }
@@ -105,7 +119,7 @@ class IconButton: public Button {
 
 class FabIconButton: public Button {
   public:
-    FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, int8_t state=FOCUS_STATE);
+    FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t flags=0);
 
     virtual void paint(BitmapBuffer * dc) override;
 

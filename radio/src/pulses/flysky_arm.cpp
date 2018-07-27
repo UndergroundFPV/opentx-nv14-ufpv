@@ -1057,7 +1057,6 @@ void resetPulsesFlySky(uint8_t port)
   modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_INIT;
   modulePulsesData[port].flysky.state_index = 0;
   modulePulsesData[port].flysky.esc_state = 0;
-
   moduleFlag[port] = MODULE_NORMAL_MODE;
 }
 

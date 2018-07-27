@@ -659,7 +659,7 @@ ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, Model
              footer->invalidate();
            }
            return 1;
-         }),
+         }, BUTTON_CHECKED_ON_FOCUS),
   modelCell(modelCell)
 {
 }

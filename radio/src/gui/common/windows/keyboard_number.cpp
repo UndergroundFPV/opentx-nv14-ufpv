@@ -22,20 +22,18 @@
 
 constexpr coord_t KEYBOARD_HEIGHT = 90;
 
-NumberKeyboard * numberKeyboard = nullptr;
+NumberKeyboard * NumberKeyboard::numberKeyboard = nullptr;
 
 NumberKeyboard::NumberKeyboard(Window * parent) :
   Window(parent, {0, parent->height() - KEYBOARD_HEIGHT, parent->width(), 0})
 {
-  numberKeyboard = this;
-
   new TextButton(this, { LCD_W/2 - 115, 10, 50, 30 }, "<<",
                  [=]() -> uint8_t {
                    if (field) {
                      field->setValue(field->getValue() - 10);
                    }
                    return 0;
-                 }, 0);
+                 }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   new TextButton(this, { LCD_W/2 - 55, 10, 50, 30 }, "-",
                  [=]() -> uint8_t {
@@ -43,7 +41,7 @@ NumberKeyboard::NumberKeyboard(Window * parent) :
                      field->setValue(field->getValue() - 1);
                    }
                    return 0;
-                 }, 0);
+                 }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   new TextButton(this, { LCD_W/2 + 5, 10, 50, 30 }, "+",
                  [=]() -> uint8_t {
@@ -51,7 +49,7 @@ NumberKeyboard::NumberKeyboard(Window * parent) :
                      field->setValue(field->getValue() + 1);
                    }
                    return 0;
-                 }, 0);
+                 }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   new TextButton(this, { LCD_W/2 + 65, 10, 50, 30 }, ">>",
                  [=]() -> uint8_t {
@@ -59,7 +57,7 @@ NumberKeyboard::NumberKeyboard(Window * parent) :
                      field->setValue(field->getValue() + 10);
                    }
                    return 0;
-                 }, 0);
+                 }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   new TextButton(this, { LCD_W/2 - 115, 50, 50, 30 }, "MIN",
                  [=]() -> uint8_t {
@@ -67,7 +65,7 @@ NumberKeyboard::NumberKeyboard(Window * parent) :
                      field->setValue(field->getMin());
                    }
                    return 0;
-                 }, 0);
+                 }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   new TextButton(this, { LCD_W/2 + 65, 50, 50, 30 }, "MAX",
                  [=]() -> uint8_t {
@@ -75,7 +73,7 @@ NumberKeyboard::NumberKeyboard(Window * parent) :
                      field->setValue(field->getMax());
                    }
                    return 0;
-                 }, 0);
+                 }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   new TextButton(this, { LCD_W/2 - 55, 50, 110, 30 }, "DEFAULT",
                  [=]() -> uint8_t {
@@ -83,7 +81,7 @@ NumberKeyboard::NumberKeyboard(Window * parent) :
                      field->setValue(field->getDefault());
                    }
                    return 0;
-                 }, 0);
+                 }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 }
 
 NumberKeyboard::~NumberKeyboard()
@@ -92,21 +90,36 @@ NumberKeyboard::~NumberKeyboard()
 }
 
 // TODO parent class
+Window * NumberKeyboard::getPageBody()
+{
+  Window * parent = field;
+  while (1) {
+    Window * tmp = parent->getParent();
+    if (dynamic_cast<Page *>(tmp) || dynamic_cast<TabsGroup *>(tmp)) {
+      return parent;
+    }
+    parent = tmp;
+  }
+}
+
+// TODO parent class
 void NumberKeyboard::setField(NumberEdit * field)
 {
   this->field = field;
-  this->setHeight(KEYBOARD_HEIGHT);
-  Window * w = field->getParent();
+  attach(&mainWindow);
+  setHeight(KEYBOARD_HEIGHT);
+  Window * w = getPageBody();
   w->setHeight(LCD_H - KEYBOARD_HEIGHT - w->top());
+  w->scrollTo(field);
   invalidate();
 }
 
 // TODO parent class
 void NumberKeyboard::disable()
 {
-  this->setHeight(0);
+  detach();
   if (field) {
-    Window * w = field->getParent();
+    Window * w = getPageBody();
     w->setHeight(LCD_H - 0 - w->top());
     field = nullptr;
   }

@@ -39,6 +39,8 @@ class Page: public Window {
   public:
     Page();
 
+    virtual ~Page();
+
     virtual bool onTouchStart(coord_t x, coord_t y) {
       Window::onTouchStart(x, y);
       return true;
