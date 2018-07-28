@@ -344,10 +344,29 @@ void ModelLogicalSwitchesPage::build(Window * window)
     Button * button = new LogicalSwitchButton(window, grid.getFieldSlot(), i,
                                               [=]() -> uint8_t {
                                                 Menu * menu = new Menu();
+                                                LogicalSwitchData * cs = lswAddress(i);
                                                 menu->addLine(STR_EDIT, [=]() {
                                                   menu->deleteLater();
                                                   editLogicalSwitch(window, i);
                                                 });
+                                                if (cs->func)
+                                                  menu->addLine(STR_COPY, [=]() {
+                                                      menu->deleteLater();
+                                                      clipboard.type = CLIPBOARD_TYPE_CUSTOM_SWITCH;
+                                                      clipboard.data.csw = *cs;
+                                                  });
+                                                if (clipboard.type == CLIPBOARD_TYPE_CUSTOM_SWITCH)
+                                                  menu->addLine(STR_PASTE, [=]() {
+                                                      menu->deleteLater();
+                                                      *cs = clipboard.data.csw;
+                                                      storageDirty(EE_MODEL);
+                                                  });
+                                                if (cs->func || cs->v1 || cs->v2 || cs->delay || cs->duration || cs->andsw)
+                                                  menu->addLine(STR_CLEAR, [=]() {
+                                                      menu->deleteLater();
+                                                      memset(cs, 0, sizeof(LogicalSwitchData));
+                                                      storageDirty(EE_MODEL);
+                                                  });
                                                 return 0;
                                               });
     grid.spacer(button->height() + 5);
