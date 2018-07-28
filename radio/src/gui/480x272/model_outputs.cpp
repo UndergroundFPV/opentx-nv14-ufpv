@@ -208,6 +208,7 @@ void ModelOutputsPage::build(Window * window, int8_t focusChannel)
         storageDirty(EE_MODEL);
         button->invalidate();
       });
+      return 0;
     });
 
     if (focusChannel == ch) {

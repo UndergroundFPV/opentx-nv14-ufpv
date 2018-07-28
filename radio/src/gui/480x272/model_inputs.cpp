@@ -199,7 +199,7 @@ class InputEditWindow: public Page {
 
     void buildHeader(Window * window) {
       new StaticText(window, { 70, 4, 100, 20 }, STR_MENUINPUTS, MENU_TITLE_COLOR);
-      new StaticText(window, { 70, 28, 100, 20 }, getSourceString(input), MENU_TITLE_COLOR);
+      new StaticText(window, { 70, 28, 100, 20 }, getSourceString(MIXSRC_FIRST_INPUT + input), MENU_TITLE_COLOR);
     }
 
     void updateCurves() {
@@ -351,8 +351,8 @@ class InputEditWindow: public Page {
 
 class InputLineButton : public Button {
   public:
-    InputLineButton(Window * parent, const rect_t & rect, uint8_t index, std::function<uint8_t(void)> onPress):
-      Button(parent, rect, onPress),
+    InputLineButton(Window * parent, const rect_t & rect, uint8_t index):
+      Button(parent, rect),
       index(index)
     {
       const ExpoData & line = g_model.expoData[index];
@@ -422,7 +422,7 @@ class InputLineButton : public Button {
 
     virtual void paint(BitmapBuffer * dc) override {
       if (active)
-        dc->drawSolidFilledRect(1, 1, rect.w-2, rect.h-2, CURVE_AXIS_COLOR);
+        dc->drawSolidFilledRect(2, 2, rect.w - 4, rect.h - 4, WARNING_COLOR);
       paintInputLine(dc);
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
     }
@@ -437,11 +437,11 @@ ModelInputsPage::ModelInputsPage():
 {
 }
 
-void ModelInputsPage::rebuild(Window * window)
+void ModelInputsPage::rebuild(Window * window, int8_t focusIndex)
 {
   coord_t scrollPosition = window->getScrollPositionY();
   window->clear();
-  build(window);
+  build(window, focusIndex);
   window->setScrollPositionY(scrollPosition);
 }
 
@@ -449,62 +449,65 @@ void ModelInputsPage::editInput(Window * window, uint8_t input, uint8_t index)
 {
   Window * editWindow = new InputEditWindow(input, index);
   editWindow->setCloseHandler([=]() {
-    rebuild(window);
+    rebuild(window, index);
   });
 }
 
-void ModelInputsPage::build(Window * window)
+void ModelInputsPage::build(Window * window, int8_t focusIndex)
 {
   GridLayout grid(*window);
   grid.spacer(8);
   grid.setLabelWidth(66);
-  grid.setLabelPaddingRight(6);
+
+  Window::clearFocus();
 
   int index = 0;
   ExpoData * line = g_model.expoData;
-  for (uint8_t input=1; input<=NUM_INPUTS; input++) {
-    if (index < MAX_EXPOS && line->chn + 1 == input && EXPO_VALID(line)) {
-      new TextButton(window, grid.getLabelSlot(), getSourceString(input),
-                     [=]() -> uint8_t {
-                       return 0;
-                     });
-      while (index < MAX_EXPOS && line->chn + 1 == input && EXPO_VALID(line)) {
-        Button * button = new InputLineButton(window, grid.getFieldSlot(), index,
-                                            [=]() -> uint8_t {
-                                              Menu * menu = new Menu();
-                                              menu->addLine(STR_EDIT, [=]() {
-                                                menu->deleteLater();
-                                                editInput(window, input, index);
-                                              });
-                                              if (!reachExposLimit()) {
-                                                menu->addLine(STR_INSERT_BEFORE, [=]() {
-                                                  menu->deleteLater();
-                                                  insertExpo(index, input);
-                                                  editInput(window, input, index);
-                                                });
-                                                menu->addLine(STR_INSERT_AFTER, [=]() {
-                                                  menu->deleteLater();
-                                                  insertExpo(index + 1, input);
-                                                  editInput(window, input, index);
-                                                });
-                                                // TODO STR_COPY
-                                              }
-                                              // TODO STR_MOVE
-                                              menu->addLine(STR_DELETE, [=]() {
-                                                menu->deleteLater();
-                                                deleteExpo(index);
-                                                rebuild(window);
-                                              });
-                                              return 0;
-                                            });
+  for (uint8_t input=0; input<NUM_INPUTS; input++) {
+    if (index < MAX_EXPOS && line->chn == input && EXPO_VALID(line)) {
+      new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_FIRST_INPUT + input));
+      while (index < MAX_EXPOS && line->chn == input && EXPO_VALID(line)) {
+        Button * button = new InputLineButton(window, grid.getFieldSlot(), index);
+        if (focusIndex == index)
+          button->setFocus();
+        button->setPressHandler([=]() -> uint8_t {
+          button->bringToTop();
+          Menu * menu = new Menu();
+          menu->addLine(STR_EDIT, [=]() {
+            menu->deleteLater();
+            editInput(window, input, index);
+          });
+          if (!reachExposLimit()) {
+            menu->addLine(STR_INSERT_BEFORE, [=]() {
+              menu->deleteLater();
+              insertExpo(index, input);
+              editInput(window, input, index);
+            });
+            menu->addLine(STR_INSERT_AFTER, [=]() {
+              menu->deleteLater();
+              insertExpo(index + 1, input);
+              editInput(window, input, index + 1);
+            });
+            // TODO STR_COPY
+          }
+          // TODO STR_MOVE
+          menu->addLine(STR_DELETE, [=]() {
+            menu->deleteLater();
+            deleteExpo(index);
+            rebuild(window, -1);
+          });
+          return 0;
+        });
 
-        grid.spacer(button->height() + 5);
+        grid.spacer(button->height() - 2);
         ++index;
         ++line;
       }
+
+      grid.spacer(7);
     }
     else {
-      new TextButton(window, grid.getLabelSlot(), getSourceString(input),
+      new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_FIRST_INPUT + input),
                      [=]() -> uint8_t {
                        insertExpo(index, input);
                        editInput(window, input, index);
@@ -512,6 +515,11 @@ void ModelInputsPage::build(Window * window)
                      });
       grid.nextLine();
     }
+  }
+
+  Window * focus = Window::getFocus();
+  if (focus) {
+    focus->bringToTop();
   }
 
   window->setInnerHeight(grid.getWindowHeight());

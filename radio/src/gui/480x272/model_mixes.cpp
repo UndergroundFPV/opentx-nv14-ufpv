@@ -302,7 +302,7 @@ class MixLineButton : public Button {
     virtual void paint(BitmapBuffer * dc) override
     {
       if (active)
-        dc->drawSolidFilledRect(1, 1, rect.w - 2, rect.h - 2, WARNING_COLOR);
+        dc->drawSolidFilledRect(2, 2, rect.w - 4, rect.h - 4, WARNING_COLOR);
       paintMixLine(dc);
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
     }
@@ -414,15 +414,15 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
         ++mix;
       }
 
-      grid.spacer(5);
+      grid.spacer(7);
     }
     else {
-      auto button = new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch));
-      button->setPressHandler([=]() -> uint8_t {
-        insertMix(mixIndex, ch);
-        editMix(window, ch, mixIndex);
-        return 0;
-      });
+      new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch),
+                     [=]() -> uint8_t {
+                       insertMix(mixIndex, ch);
+                       editMix(window, ch, mixIndex);
+                       return 0;
+                     });
       grid.nextLine();
     }
   }
