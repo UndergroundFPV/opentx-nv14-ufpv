@@ -382,4 +382,3 @@ void ModelLogicalSwitchesPage::build(Window * window, int8_t focusIndex)
 
   window->setInnerHeight(grid.getWindowHeight());
 }
-²²
