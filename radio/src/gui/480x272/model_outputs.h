@@ -19,23 +19,23 @@
  */
 
 
-#ifndef _MODEL_MIXES_H_
-#define _MODEL_MIXES_H_
+#ifndef _MODEL_OUTPUTS_H_
+#define _MODEL_OUTPUTS_H_
 
 #include "gui/common/windows/windows.h"
 
-class ModelMixesPage: public PageTab {
+class ModelOutputsPage: public PageTab {
   public:
-    ModelMixesPage();
+    ModelOutputsPage();
 
     virtual void build(Window * window) override {
       build(window, -1);
     }
 
   protected:
-    void build(Window * window, int8_t focusMixIndex);
-    void rebuild(Window * window, int8_t focusMixIndex);
-    void editMix(Window * window, uint8_t channel, uint8_t mixIndex);
+    void build(Window * window, int8_t focusChannel);
+    void rebuild(Window * window, int8_t focusChannel);
+    void editOutput(Window * window, uint8_t channel);
 };
 
-#endif // _MODEL_MIXES_H_
+#endif // _MODEL_OUTPUTS_H_

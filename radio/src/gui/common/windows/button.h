@@ -35,14 +35,14 @@ enum ButtonFlags {
 
 class Button : public Window {
   public:
-    Button(Window * parent, const rect_t & rect, std::function<uint8_t(void)> onPress, uint8_t flags=0):
+    Button(Window * parent, const rect_t & rect, std::function<uint8_t(void)> onPress=nullptr, uint8_t flags=0):
       Window(parent, rect),
       onPress(onPress),
       flags(flags)
     {
     }
 
-    void enable(bool enabled) {
+    void enable(bool enabled=true) {
       if (enabled)
         flags &= ~BUTTON_DISABLED;
       else
@@ -53,7 +53,7 @@ class Button : public Window {
       enable(false);
     }
 
-    void check(bool checked) {
+    void check(bool checked=true) {
       if (checked)
         flags |= BUTTON_CHECKED;
       else
@@ -71,6 +71,11 @@ class Button : public Window {
         return flags & BUTTON_CHECKED;
     }
 
+    void setPressHandler(std::function<uint8_t(void)> handler)
+    {
+      onPress = handler;
+    }
+
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
@@ -80,7 +85,7 @@ class Button : public Window {
 
 class TextButton : public Button {
   public:
-    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress, uint8_t flags=BUTTON_BACKGROUND):
+    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress=nullptr, uint8_t flags=BUTTON_BACKGROUND):
       Button(parent, rect, onPress, flags),
       text(strdup(text))
     {

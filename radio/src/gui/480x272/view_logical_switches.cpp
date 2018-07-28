@@ -36,8 +36,6 @@
 #define CSW_6TH_COLUMN                 390
 #define MAX_LOGICAL_SWITCHES             64
 
-extern void putsEdgeDelayParam(coord_t, coord_t, LogicalSwitchData *, LcdFlags, LcdFlags);
-
 void displayLogicalSwitchedDetails(coord_t x, coord_t y, uint8_t idx)
 {
   LogicalSwitchData * cs = lswAddress(idx);

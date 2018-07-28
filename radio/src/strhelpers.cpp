@@ -352,18 +352,6 @@ char * getSwitchString(char * dest, swsrc_t idx)
   return dest;
 }
 
-static char tmpHelpersString[32];
-
-char * getSwitchString(swsrc_t idx)
-{
-  return getSwitchString(tmpHelpersString, idx);
-}
-
-char * getSourceString(mixsrc_t idx)
-{
-  return getSourceString(tmpHelpersString, idx);
-}
-
 char * getSourceString(char * dest, mixsrc_t idx)
 {
   if (idx == MIXSRC_NONE) {
@@ -563,3 +551,20 @@ char * strAppendDate(char * str, bool time)
 }
 #endif
 #endif
+
+static char tmpHelpersString[32];
+
+char * getSwitchString(swsrc_t idx)
+{
+  return getSwitchString(tmpHelpersString, idx);
+}
+
+char * getSourceString(mixsrc_t idx)
+{
+  return getSourceString(tmpHelpersString, idx);
+}
+
+char * getCurveString(int idx)
+{
+  return getCurveString(tmpHelpersString, idx);
+}

@@ -26,7 +26,7 @@ PageHeader::PageHeader(Page * parent, const rect_t & rect):
        [=]() -> uint8_t {
          parent->deleteLater();
          return 0;
-       }, 1)
+       }, BUTTON_NOFOCUS)
 {
 }
 

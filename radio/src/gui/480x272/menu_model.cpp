@@ -24,6 +24,7 @@
 #include "model_flightmodes.h"
 #include "model_mixes.h"
 #include "model_inputs.h"
+#include "model_outputs.h"
 #include "model_logical_switches.h"
 
 ModelMenu::ModelMenu():
@@ -36,9 +37,8 @@ ModelMenu::ModelMenu():
   addTab(new ModelFlightModesPage());
   addTab(new ModelInputsPage());
   addTab(new ModelMixesPage());
-  addTab(new ModelSetupPage()); // outputs
+  addTab(new ModelOutputsPage());
   addTab(new ModelSetupPage()); // curves
-  addTab(new ModelSetupPage()); // GVARS
   addTab(new ModelLogicalSwitchesPage());
 }
 
@@ -46,9 +46,9 @@ const MenuHandlerFunc menuTabModel[] = {
   // menuModelSetup,
   // CASE_HELI(menuModelHeli)
   // CASE_FLIGHT_MODES(menuModelFlightModesAll)
-  menuModelExposAll,
-  menuModelMixAll,
-  menuModelLimits,
+  // menuModelExposAll,
+  // menuModelMixAll,
+  // menuModelLimits,
   CASE_CURVES(menuModelCurvesAll)
 #if defined(GVARS) && defined(FLIGHT_MODES)
   CASE_GVARS(menuModelGVars)

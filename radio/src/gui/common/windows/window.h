@@ -54,6 +54,11 @@ class Window {
       return focusWindow == this;
     }
 
+    static Window * getFocus()
+    {
+      return focusWindow;
+    }
+
     void scrollTo(Window * child);
 
     static void clearFocus();
@@ -138,7 +143,10 @@ class Window {
       return (x >= rect.x && x < rect.x + rect.w && y >= rect.y && y < rect.y + rect.h);
     }
 
-    virtual void onFocusLost() { invalidate(); };
+    virtual void onFocusLost()
+    {
+      invalidate();
+    };
 
     virtual bool onTouchStart(coord_t x, coord_t y);
 
@@ -157,6 +165,11 @@ class Window {
     void invalidate()
     {
       invalidate({0, 0, rect.w, rect.h});
+    }
+
+    void bringToTop()
+    {
+      attach(parent); // does a detach + attach
     }
 
     virtual void checkEvents();

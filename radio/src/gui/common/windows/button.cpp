@@ -23,7 +23,7 @@
 bool Button::onTouchEnd(coord_t x, coord_t y)
 {
   if (enabled()) {
-    uint8_t check = onPress();
+    uint8_t check = (onPress && onPress());
     if (check)
       flags |= BUTTON_CHECKED;
     else

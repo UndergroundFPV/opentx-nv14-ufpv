@@ -39,7 +39,7 @@ void drawCurveRef(BitmapBuffer * dc, coord_t x, coord_t y, const CurveRef & curv
         break;
 
       case CURVE_REF_CUSTOM:
-        drawCurveName(dc, x, y, curve.value, att);
+        dc->drawText(x, y, getCurveString(curve.value), att);
         break;
     }
   }

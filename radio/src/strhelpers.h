@@ -43,5 +43,6 @@ char * getSourceString(char * dest, mixsrc_t idx);
 
 char * getSourceString(mixsrc_t idx);
 char * getSwitchString(swsrc_t idx);
+char * getCurveString(int idx);
 
 #endif // _STRHELPERS_H_
