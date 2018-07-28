@@ -371,6 +371,7 @@ void ModelLogicalSwitchesPage::build(Window * window)
                                                     menu->deleteLater();
                                                     memset(cs, 0, sizeof(LogicalSwitchData));
                                                     storageDirty(EE_MODEL);
+                                                    rebuild(window);
                                                   });
                                                 return 0;
                                               });
