@@ -53,7 +53,7 @@ const MenuHandlerFunc menuTabModel[] = {
 #if defined(GVARS) && defined(FLIGHT_MODES)
   CASE_GVARS(menuModelGVars)
 #endif
-  menuModelLogicalSwitches,
+  //menuModelLogicalSwitches,
   menuModelSpecialFunctions,
 #if defined(LUA_MODEL_SCRIPTS)
   menuModelCustomScripts,
