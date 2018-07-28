@@ -92,20 +92,19 @@ class LogicalSwitchEditWindow: public Page {
         choice->setAvailableHandler(isSwitchAvailableInLogicalSwitches);
         grid.nextLine();
 
+        auto edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), -129, 122, GET_DEFAULT(cs->v2));
         auto edit2 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 1), -1, 222 - cs->v2, GET_SET_DEFAULT(cs->v3));
-        auto edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), -129, 122,
-                                    GET_DEFAULT(cs->v2),
-                                    [=](int32_t newValue) -> void {
-                                      cs->v2 = newValue;
-                                      cs->v3 = min<uint8_t>(cs->v3, 222 - cs->v2);
-                                      SET_DIRTY();
-                                      edit2->setMax(222 - cs->v2);
-                                      edit2->invalidate();
-                                    });
-        edit1->setDisplayFunction([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+        edit1->setSetValueHandler([=](int32_t newValue) -> void {
+          cs->v2 = newValue;
+          cs->v3 = min<uint8_t>(cs->v3, 222 - cs->v2);
+          SET_DIRTY();
+          edit2->setMax(222 - cs->v2);
+          edit2->invalidate();
+        });
+        edit1->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
           drawNumber(dc, 2, 2, lswTimerValue(value), flags | PREC1);
         });
-        edit2->setDisplayFunction([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+        edit2->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
           if (value < 0)
             dc->drawText(2, 2, "<<", flags);
           else if (value == 0)
@@ -127,15 +126,15 @@ class LogicalSwitchEditWindow: public Page {
       else if (cstate == LS_FAMILY_TIMER) {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(), STR_V1);
         auto timer = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), -128, 122, GET_SET_DEFAULT(cs->v1));
-        timer->setDisplayFunction([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-            drawNumber(dc, 2, 2, lswTimerValue(value), flags | PREC1);
+        timer->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+          drawNumber(dc, 2, 2, lswTimerValue(value), flags | PREC1);
         });
         grid.nextLine();
 
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(), STR_V2);
         timer = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), -128, 122, GET_SET_DEFAULT(cs->v2));
-        timer->setDisplayFunction([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-            drawNumber(dc, 2, 2, lswTimerValue(value), flags | PREC1);
+        timer->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+          drawNumber(dc, 2, 2, lswTimerValue(value), flags | PREC1);
         });
         grid.nextLine();
       }
@@ -153,7 +152,7 @@ class LogicalSwitchEditWindow: public Page {
         int16_t v2_min = 0, v2_max = 0;
         getMixSrcRange(cs->v1, v2_min, v2_max);
         v2Edit = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->v2));
-        v2Edit->setDisplayFunction([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+        v2Edit->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
           drawSourceCustomValue(2, 2, cs->v1, (cs->v1 <= MIXSRC_LAST_CH ? calc100toRESX(value) : value), flags);
         });
         grid.nextLine();
@@ -233,7 +232,8 @@ class LogicalSwitchButton : public Button {
   public:
     LogicalSwitchButton(Window * parent, const rect_t & rect, int lsIndex, std::function<uint8_t(void)> onPress):
       Button(parent, rect, onPress),
-      lsIndex(lsIndex)
+      lsIndex(lsIndex),
+      active(isActive())
     {
       LogicalSwitchData * ls = lswAddress(lsIndex);
       if (ls->andsw != SWSRC_NONE || ls->duration != 0 || ls->delay != 0)
@@ -242,25 +242,28 @@ class LogicalSwitchButton : public Button {
         setHeight(getHeight() + 20);
     }
 
-    bool isActive() {
-      return getSwitch(SWSRC_FIRST_LOGICAL_SWITCH+lsIndex );
+    bool isActive()
+    {
+      return getSwitch(SWSRC_FIRST_LOGICAL_SWITCH + lsIndex);
     }
 
     virtual void checkEvents() override
     {
       if (active != isActive()) {
+        TRACE("checkEvents invalidate");
         invalidate();
         active = !active;
       }
     }
 
     // LS box content
-    virtual void paint(BitmapBuffer * dc) override {
+    virtual void paint(BitmapBuffer * dc) override
+    {
       LogicalSwitchData * ls = lswAddress(lsIndex);
       uint8_t lsFamily = lswFamily(ls->func);
 
       if (active)
-        dc->drawSolidFilledRect(1, 1, rect.w-2, rect.h-2, CURVE_AXIS_COLOR);
+        dc->drawSolidFilledRect(2, 2, rect.w-4, rect.h-4, WARNING_COLOR);
 
       // The bounding rect
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
@@ -306,7 +309,7 @@ class LogicalSwitchButton : public Button {
 
   protected:
     uint8_t lsIndex;
-    bool active = false;
+    bool active;
 };
 
 ModelLogicalSwitchesPage::ModelLogicalSwitchesPage():
@@ -314,11 +317,11 @@ ModelLogicalSwitchesPage::ModelLogicalSwitchesPage():
 {
 }
 
-void ModelLogicalSwitchesPage::rebuild(Window * window)
+void ModelLogicalSwitchesPage::rebuild(Window * window, int8_t focusIndex)
 {
   coord_t scrollPosition = window->getScrollPositionY();
   window->clear();
-  build(window);
+  build(window, focusIndex);
   window->setScrollPositionY(scrollPosition);
 }
 
@@ -326,20 +329,17 @@ void ModelLogicalSwitchesPage::editLogicalSwitch(Window * window, uint8_t lsInde
 {
   Window * lsWindow = new LogicalSwitchEditWindow(lsIndex);
   lsWindow->setCloseHandler([=]() {
-    rebuild(window);
+    rebuild(window, lsIndex);
   });
 }
 
-void ModelLogicalSwitchesPage::build(Window * window)
+void ModelLogicalSwitchesPage::build(Window * window, int8_t focusIndex)
 {
   GridLayout grid(*window);
   grid.spacer(8);
   grid.setLabelWidth(70);
-  grid.setLabelPaddingRight(10);
 
-  window->clear();
-
-  for (int8_t i=0; i<MAX_OUTPUT_CHANNELS; i++) {
+  for (uint8_t i=0; i<MAX_OUTPUT_CHANNELS; i++) {
     new TextButton(window, grid.getLabelSlot(), getSwitchString(SWSRC_SW1+i),
                    [=]() -> uint8_t {
                      return 0;
@@ -348,33 +348,37 @@ void ModelLogicalSwitchesPage::build(Window * window)
     Button * button = new LogicalSwitchButton(window, grid.getFieldSlot(), i,
                                               [=]() -> uint8_t {
                                                 Menu * menu = new Menu();
-                                                LogicalSwitchData * cs = lswAddress(i);
+                                                LogicalSwitchData * ls = lswAddress(i);
                                                 menu->addLine(STR_EDIT, [=]() {
                                                   menu->deleteLater();
                                                   editLogicalSwitch(window, i);
                                                 });
-                                                if (cs->func)
+                                                if (ls->func)
                                                   menu->addLine(STR_COPY, [=]() {
                                                     menu->deleteLater();
                                                     clipboard.type = CLIPBOARD_TYPE_CUSTOM_SWITCH;
-                                                    clipboard.data.csw = *cs;
+                                                    clipboard.data.csw = *ls;
                                                   });
                                                 if (clipboard.type == CLIPBOARD_TYPE_CUSTOM_SWITCH)
                                                   menu->addLine(STR_PASTE, [=]() {
                                                     menu->deleteLater();
-                                                    *cs = clipboard.data.csw;
+                                                    *ls = clipboard.data.csw;
                                                     storageDirty(EE_MODEL);
-                                                    rebuild(window);
+                                                    rebuild(window, i);
                                                   });
-                                                if (cs->func || cs->v1 || cs->v2 || cs->delay || cs->duration || cs->andsw)
+                                                if (ls->func || ls->v1 || ls->v2 || ls->delay || ls->duration || ls->andsw)
                                                   menu->addLine(STR_CLEAR, [=]() {
                                                     menu->deleteLater();
-                                                    memset(cs, 0, sizeof(LogicalSwitchData));
+                                                    memset(ls, 0, sizeof(LogicalSwitchData));
                                                     storageDirty(EE_MODEL);
-                                                    rebuild(window);
+                                                    rebuild(window, i);
                                                   });
                                                 return 0;
                                               });
+    if (focusIndex == i) {
+      button->setFocus();
+    }
+
     grid.spacer(button->height() + 5);
   }
 

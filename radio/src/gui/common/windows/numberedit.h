@@ -27,57 +27,74 @@
 class NumberEdit : public Window {
   public:
     NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax,
-               std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags = 0);
+               std::function<int32_t()> getValue, std::function<void(int32_t)> setValue = nullptr, LcdFlags flags = 0);
 
     virtual void paint(BitmapBuffer * dc) override;
 
-    void setMin(int32_t value) {
+    void setMin(int32_t value)
+    {
       vmin = value;
     }
 
-    void setMax(int32_t value) {
+    void setMax(int32_t value)
+    {
       vmax = value;
     }
 
-    void setDefault(int32_t value) {
+    void setDefault(int32_t value)
+    {
       vdefault = value;
     }
 
-    int32_t getMin() const {
+    int32_t getMin() const
+    {
       return vmin;
     }
 
-    int32_t getMax() const {
+    int32_t getMax() const
+    {
       return vmax;
     }
 
-    int32_t getDefault() const {
+    int32_t getDefault() const
+    {
       return vdefault;
     }
 
-    void setStep(int32_t step) {
+    void setStep(int32_t step)
+    {
       this->step = step;
     }
 
-    void setPrefix(const char * prefix) {
+    void setPrefix(const char * prefix)
+    {
       this->prefix = prefix;
     }
 
-    void setSuffix(const char * suffix) {
+    void setSuffix(const char * suffix)
+    {
       this->suffix = suffix;
     }
 
-    void setZeroText(const char * text) {
+    void setZeroText(const char * text)
+    {
       zeroText = text;
     }
 
     void setValue(int32_t value);
 
-    int32_t getValue() const {
+    int32_t getValue() const
+    {
       return _getValue();
     }
 
-    virtual void setDisplayFunction(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function) {
+    void setSetValueHandler(std::function<void(int32_t)> handler)
+    {
+      _setValue = handler;
+    }
+
+    void setDisplayHandler(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function)
+    {
       displayFunction = function;
     }
 

@@ -85,7 +85,7 @@ class OutputEditWindow : public Page {
       // Curve
       new StaticText(window, grid.getLabelSlot(), TR_CURVE);
       auto edit = new NumberEdit(window, grid.getFieldSlot(), -MAX_CURVES, +MAX_CURVES, GET_SET_DEFAULT(output->curve));
-      edit->setDisplayFunction([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+      edit->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
         dc->drawText(2, 2, getCurveString(value));
       });
       grid.nextLine();

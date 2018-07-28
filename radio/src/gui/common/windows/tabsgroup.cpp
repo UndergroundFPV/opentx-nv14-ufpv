@@ -27,7 +27,7 @@ TabsGroupHeader::TabsGroupHeader(TabsGroup * menu):
          mainWindow.clear();
          new MainView();
          return 1;
-       }, 1),
+       }, BUTTON_NOFOCUS),
   carousel(this, menu)
 {
 }
