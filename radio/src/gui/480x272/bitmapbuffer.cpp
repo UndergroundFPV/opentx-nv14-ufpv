@@ -38,8 +38,14 @@ void BitmapBuffer::drawAlphaPixel(display_t * p, uint8_t opacity, uint16_t color
 
 void BitmapBuffer::drawHorizontalLine(coord_t x, coord_t y, coord_t w, uint8_t pat, LcdFlags att)
 {
-  if (y >= height || y >= ymax || y < ymin) return;
-  if (x+w > width) { w = width - x; }
+  APPLY_OFFSET();
+
+  if (y >= height || y >= ymax || y < ymin)
+    return;
+
+  if (x+w > width) {
+    w = width - x;
+  }
 
   display_t * p = getPixelPtr(x, y);
   display_t color = lcdColorTable[COLOR_IDX(att)];
@@ -67,6 +73,8 @@ void BitmapBuffer::drawHorizontalLine(coord_t x, coord_t y, coord_t w, uint8_t p
 
 void BitmapBuffer::drawVerticalLine(coord_t x, coord_t y, coord_t h, uint8_t pat, LcdFlags att)
 {
+  APPLY_OFFSET();
+
   coord_t hmax = min(height, ymax);
 
   if (x >= width) return;

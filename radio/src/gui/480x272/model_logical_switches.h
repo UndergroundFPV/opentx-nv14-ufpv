@@ -23,7 +23,7 @@
 
 #include "gui/common/windows/windows.h"
 
-void putsEdgeDelayParam(coord_t x, coord_t y, LogicalSwitchData *cs, uint8_t lattr, uint8_t rattr);
+void putsEdgeDelayParam(coord_t x, coord_t y, LogicalSwitchData *cs, LcdFlags lattr, LcdFlags rattr);
 
 class ModelLogicalSwitchesPage: public PageTab {
 public:

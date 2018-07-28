@@ -59,7 +59,7 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
       value++;
       if (value > vmax)
         value = vmin;
-    } while (isValueAvailable && !isValueAvailable (value));
+    } while (isValueAvailable && !isValueAvailable(value));
     setValue(value);
   }
   else {
@@ -72,12 +72,12 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
 
 CustomCurveChoice::CustomCurveChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax,
                                      std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
-        Window(parent, rect),
-        vmin(vmin),
-        vmax(vmax),
-        getValue(getValue),
-        setValue(setValue),
-        flags(flags)
+  Window(parent, rect),
+  vmin(vmin),
+  vmax(vmax),
+  getValue(getValue),
+  setValue(setValue),
+  flags(flags)
 {
 }
 

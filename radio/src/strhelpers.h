@@ -41,6 +41,7 @@ char * getFlightModeString(char * dest, int8_t idx);
 char * getSourceString(char * dest, mixsrc_t idx);
 #endif
 
+char * getSourceString(mixsrc_t idx);
 char * getSwitchString(swsrc_t idx);
 
 #endif // _STRHELPERS_H_

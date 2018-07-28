@@ -28,14 +28,19 @@ class GridLayout {
     {
     }
 
-    void setLabelWidth(coord_t width)
+    void setLabelWidth(coord_t value)
     {
-      labelWidth = width;
+      labelWidth = value;
     }
 
-    void setLabelPaddingRight(coord_t width)
+    void setLabelPaddingRight(coord_t value)
     {
-      labelPaddingRight = width;
+      labelPaddingRight = value;
+    }
+
+    void setMarginRight(coord_t value)
+    {
+      lineMarginRight = value;
     }
 
     rect_t getLineSlot()
@@ -82,9 +87,9 @@ class GridLayout {
     coord_t currentY = 0;
     coord_t labelWidth = 140;
     coord_t labelPaddingRight = 0;
+    coord_t lineMarginRight = 10;
     static constexpr uint8_t lineMargin = 6;
     static constexpr uint8_t lineMarginLeft = 6;
-    static constexpr uint8_t lineMarginRight = 10;
     static constexpr uint8_t lineHeight = 26;
     static constexpr uint8_t indentWidth = 10;
 };

@@ -26,43 +26,6 @@
 
 #define EXPO_ONE_2ND_COLUMN 115
 
-ModelInputsPage::ModelInputsPage():
-        PageTab(STR_MENUINPUTS, ICON_MODEL_INPUTS)
-{
-}
-
-void ModelInputsPage::build(Window * window)
-{
-  GridLayout grid(*window);
-  grid.spacer(8);
-}
-
-int expoFn(int x)
-{
-  ExpoData * ed = expoAddress(s_currIdx);
-  int16_t anas[NUM_INPUTS] = {0};
-  applyExpos(anas, e_perout_mode_inactive_flight_mode, ed->srcRaw, x);
-  return anas[ed->chn];
-}
-
-int getExposLinesCount()
-{
-  int lastch = -1;
-  uint8_t count = MAX_INPUTS;
-  for (int i=0; i<MAX_EXPOS; i++) {
-    bool valid = EXPO_VALID(expoAddress(i));
-    if (!valid)
-      break;
-    int ch = expoAddress(i)->chn;
-    if (ch == lastch) {
-      count++;
-    }
-    else {
-      lastch = ch;
-    }
-  }
-  return count;
-}
 
 uint8_t getExposCount()
 {
@@ -87,6 +50,481 @@ bool reachExposLimit()
   return false;
 }
 
+class CurveWindow: public Window {
+  public:
+    CurveWindow(Window * parent, const rect_t & rect, std::function<int(int)> function, std::function<int()> position=nullptr):
+      Window(parent, rect),
+      function(function),
+      position(position)
+    {
+    }
+
+    virtual void checkEvents() override
+    {
+      // will always force a full window refresh
+      invalidate();
+    }
+
+    virtual void paint(BitmapBuffer * dc) override;
+
+  protected:
+    std::function<int(int)> function;
+    std::function<int()> position;
+    void drawBackground(BitmapBuffer * dc);
+    void drawCurve(BitmapBuffer * dc);
+    void drawPosition(BitmapBuffer * dc);
+    coord_t getPointX(int x);
+    coord_t getPointY(int y);
+};
+
+void CurveWindow::drawBackground(BitmapBuffer * dc)
+{
+  lcdSetColor(RGB(0xE0, 0xE0, 0xE0));
+  dc->clear(CUSTOM_COLOR);
+
+  // Axis
+  dc->drawSolidHorizontalLine(0, height()/2, width(), CURVE_AXIS_COLOR);
+  dc->drawSolidVerticalLine(width()/2, 0, height(), CURVE_AXIS_COLOR);
+
+  // Extra lines
+  dc->drawVerticalLine(width()/4, 0, height(), STASHED, CURVE_AXIS_COLOR);
+  dc->drawVerticalLine(width()*3/4, 0, height(), STASHED, CURVE_AXIS_COLOR);
+  dc->drawHorizontalLine(0, height()/4, width(), STASHED, CURVE_AXIS_COLOR);
+  dc->drawHorizontalLine(0, height()*3/4, width(), STASHED, CURVE_AXIS_COLOR);
+
+  // Outside border
+  // drawSolidRect(dc, 0, 0, width(), height(), 1, TEXT_COLOR);
+}
+
+coord_t CurveWindow::getPointX(int x)
+{
+  return limit(0,
+               width() / 2 + divRoundClosest(x * width() / 2, RESX),
+               width() - 1);
+}
+
+coord_t CurveWindow::getPointY(int y)
+{
+  return limit(0,
+               height() / 2 - divRoundClosest(y * height() / 2, RESX),
+               height() - 1);
+}
+
+void CurveWindow::drawCurve(BitmapBuffer * dc)
+{
+  coord_t prev = (coord_t) -1;
+
+  for (int x = 0; x < width(); x++) {
+    coord_t y = getPointY(function(divRoundClosest((x - width() / 2) * RESX, width() / 2)));
+    if (prev >= 0) {
+      if (prev < y) {
+        for (int tmp = prev; tmp <= y; tmp++) {
+          dc->drawBitmapPattern(x - 2, tmp - 2, LBM_POINT, TEXT_COLOR);
+        }
+      }
+      else {
+        for (int tmp = y; tmp <= prev; tmp++) {
+          dc->drawBitmapPattern(x - 2, tmp - 2, LBM_POINT, TEXT_COLOR);
+        }
+      }
+    }
+    prev = y;
+  }
+}
+
+void CurveWindow::drawPosition(BitmapBuffer * dc)
+{
+  int valueX = position();
+  int valueY = function(valueX);
+
+  coord_t x = getPointX(valueX);
+  coord_t y = getPointY(valueY);
+
+  dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT, CURVE_CURSOR_COLOR);
+  dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT_CENTER, TEXT_BGCOLOR);
+
+  char coords[16];
+  strAppendSigned(strAppend(strAppendSigned(coords, calcRESXto100(valueX)), ","), calcRESXto100(valueY));
+  dc->drawSolidFilledRect(10, 11, 1 + getTextWidth(coords, 0, SMLSIZE), 17, CURVE_CURSOR_COLOR);
+  dc->drawText(11, 10, coords, SMLSIZE|TEXT_BGCOLOR);
+}
+
+void CurveWindow::paint(BitmapBuffer * dc)
+{
+  drawBackground(dc);
+  drawCurve(dc);
+  if (position)
+    drawPosition(dc);
+}
+
+class InputEditWindow: public Page {
+  public:
+    InputEditWindow(int8_t input, uint8_t index):
+      Page(),
+      input(input),
+      index(index),
+      preview(this, {LCD_W - 158, 0, 158, 158},
+              [=](int x) -> int {
+                ExpoData * line = expoAddress(index);
+                int16_t anas[NUM_INPUTS] = {0};
+                applyExpos(anas, e_perout_mode_inactive_flight_mode, line->srcRaw, x);
+                return anas[line->chn];
+              },
+              [=]() -> int {
+                return getValue(expoAddress(index)->srcRaw);
+              })
+    {
+      buildBody(&body);
+      buildHeader(&header);
+    }
+
+  protected:
+    uint8_t input;
+    uint8_t index;
+    CurveWindow preview;
+    Choice * trimChoice = nullptr;
+    Window * updateCurvesWindow = nullptr;
+    Choice * curveTypeChoice = nullptr;
+
+    void buildHeader(Window * window) {
+      new StaticText(window, { 70, 4, 100, 20 }, STR_MENUINPUTS, MENU_TITLE_COLOR);
+      new StaticText(window, { 70, 28, 100, 20 }, getSourceString(input), MENU_TITLE_COLOR);
+    }
+
+    void updateCurves() {
+      GridLayout grid(*updateCurvesWindow);
+      grid.setLabelWidth(80);
+
+      updateCurvesWindow->clear();
+
+      ExpoData * line = expoAddress(index) ;
+
+      new StaticText(updateCurvesWindow, grid.getLabelSlot(), STR_CURVE);
+      curveTypeChoice = new Choice(updateCurvesWindow, grid.getFieldSlot(2, 0), "\004DiffExpoFuncCstm", 0, CURVE_REF_CUSTOM,
+                                   GET_DEFAULT(line->curve.type),
+                                   [=](int32_t newValue) {
+                                     line->curve.type = newValue;
+                                     line->curve.value = 0;
+                                     SET_DIRTY();
+                                     updateCurves();
+                                     curveTypeChoice->setFocus();
+                                   });
+
+      switch (line->curve.type) {
+        case CURVE_REF_DIFF:
+        case CURVE_REF_EXPO: {
+          // TODO GVAR
+          NumberEdit * edit = new NumberEdit(updateCurvesWindow, grid.getFieldSlot(2, 1), -100, 100,
+                                             GET_SET_DEFAULT(line->curve.value));
+          edit->setSuffix("%");
+          break;
+        }
+        case CURVE_REF_FUNC:
+          new Choice(updateCurvesWindow, grid.getFieldSlot(2, 1), STR_VCURVEFUNC, 0, CURVE_BASE-1, GET_SET_DEFAULT(line->curve.value));
+          break;
+        case CURVE_REF_CUSTOM:
+          new CustomCurveChoice(updateCurvesWindow, grid.getFieldSlot(2, 1), -MAX_CURVES, MAX_CURVES, GET_SET_DEFAULT(line->curve.value));
+          break;
+      }
+    }
+
+    void buildBody(Window * window) {
+      NumberEdit * edit;
+
+      GridLayout grid(*window);
+      grid.setLabelWidth(80);
+      grid.spacer(8);
+
+      ExpoData * line = expoAddress(index) ;
+
+      grid.setMarginRight(163);
+
+      // Input Name
+      new StaticText(window, grid.getLabelSlot(), STR_INPUTNAME);
+      new TextEdit(window, grid.getFieldSlot(), g_model.inputNames[line->chn], sizeof(g_model.inputNames[line->chn]));
+      grid.nextLine();
+
+      // Switch
+      new StaticText(window, grid.getLabelSlot(), STR_SWITCH);
+      new SwitchChoice(window, grid.getFieldSlot(), SWSRC_FIRST_IN_MIXES, SWSRC_LAST_IN_MIXES, GET_SET_DEFAULT(line->swtch));
+      grid.nextLine();
+
+      // Side
+      new StaticText(window, grid.getLabelSlot(), STR_SIDE);
+      new Choice(window, grid.getFieldSlot(), STR_VSIDE, 1, 3,
+                 [=]() -> int16_t {
+                   return 4 - line->mode;
+                 },
+                 [=](int16_t newValue) -> void {
+                   line->mode = 4 - newValue;
+                   SET_DIRTY();
+                 });
+      grid.nextLine();
+
+      grid.setMarginRight(10);
+
+      // Name
+      new StaticText(window, grid.getLabelSlot(), STR_EXPONAME);
+      new TextEdit(window, grid.getFieldSlot(), line->name, sizeof(line->name));
+      grid.nextLine();
+
+      // Source
+      new StaticText(window, grid.getLabelSlot(), STR_SOURCE);
+      new SourceChoice(window, grid.getFieldSlot(), INPUTSRC_FIRST, INPUTSRC_LAST,
+                       GET_DEFAULT(line->srcRaw),
+                       [=](int32_t newValue) -> void {
+                         line->srcRaw = newValue;
+                         if (line->srcRaw > MIXSRC_Ail && line->carryTrim == TRIM_ON) {
+                           line->carryTrim = TRIM_OFF;
+                           trimChoice->invalidate();
+                         }
+                         SET_DIRTY();
+                       }
+      );
+      /* TODO telemetry current value
+      if (ed->srcRaw >= MIXSRC_FIRST_TELEM) {
+        drawSensorCustomValue(EXPO_ONE_2ND_COLUMN+75, y, (ed->srcRaw - MIXSRC_FIRST_TELEM)/3, convertTelemValue(ed->srcRaw - MIXSRC_FIRST_TELEM + 1, ed->scale), LEFT|(menuHorizontalPosition==1?attr:0));
+      } */
+      grid.nextLine();
+
+      // Scale
+      // TODO only displayed when source is telemetry + unfinished
+      new StaticText(window, grid.getLabelSlot(), STR_SCALE);
+      new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(line->scale));
+      grid.nextLine();
+
+      // Weight
+      new StaticText(window, grid.getLabelSlot(), STR_WEIGHT);
+      // TODO GVAR ?
+      edit = new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(line->weight));
+      edit->setSuffix("%");
+      grid.nextLine();
+
+      // Offset
+      new StaticText(window, grid.getLabelSlot(), STR_OFFSET);
+      edit = new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(line->offset));
+      edit->setSuffix("%");
+      grid.nextLine();
+
+      // Trim
+      new StaticText(window, grid.getLabelSlot(), STR_TRIM);
+      trimChoice = new Choice(window, grid.getFieldSlot(), STR_VMIXTRIMS, -TRIM_OFF, -TRIM_LAST,
+                               GET_VALUE(-line->carryTrim),
+                               SET_VALUE(line->carryTrim, -newValue));
+      trimChoice->setAvailableHandler([=](int value) {
+        return value != TRIM_ON || line->srcRaw <= MIXSRC_Ail;
+      });
+      grid.nextLine();
+
+      // Curve
+      updateCurvesWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
+      updateCurves();
+      grid.addWindow(updateCurvesWindow);
+
+      // Flight modes
+      new StaticText(window, grid.getLabelSlot(), STR_FLMODE);
+      for (uint8_t i=0; i<MAX_FLIGHT_MODES; i++) {
+        char fm[2] = { char('0' + i), '\0' };
+        if (i > 0 && (i % 4) == 0)
+          grid.nextLine();
+        new TextButton(window, grid.getFieldSlot(4, i % 4), fm,
+                       [=]() -> uint8_t {
+                         BF_BIT_FLIP(line->flightModes, BF_BIT(i));
+                         SET_DIRTY();
+                         return !(BF_SINGLE_BIT_GET(line->flightModes, i));
+                       },
+                       BF_SINGLE_BIT_GET(line->flightModes, i) ? 0 : BUTTON_CHECKED);
+      }
+    }
+};
+
+ModelInputsPage::ModelInputsPage():
+  PageTab(STR_MENUINPUTS, ICON_MODEL_INPUTS)
+{
+}
+
+class InputLineButton : public Button {
+  public:
+    InputLineButton(Window * parent, const rect_t & rect, uint8_t index, std::function<uint8_t(void)> onPress):
+      Button(parent, rect, onPress),
+      index(index)
+    {
+      const ExpoData & line = g_model.expoData[index];
+      if (line.swtch || line.curve.value != 0 || line.flightModes) {
+        setHeight(getHeight() + 20);
+      }
+    }
+
+    bool isActive() {
+      return isExpoActive(index);
+    }
+
+    virtual void checkEvents() override
+    {
+      if (active != isActive()) {
+        invalidate();
+        active = !active;
+      }
+    }
+
+    void paintFlightModes(BitmapBuffer * dc, FlightModesType value) {
+      dc->drawBitmap(146, 24, mixerSetupFlightmodeBitmap);
+      coord_t x = 166;
+      for (int i=0; i<MAX_FLIGHT_MODES; i++) {
+        char s[] = " ";
+        s[0] = '0' + i;
+        if (value & (1 << i)) {
+          dc->drawText(x, 23, s, SMLSIZE | TEXT_DISABLE_COLOR);
+        }
+        else {
+          dc->drawSolidFilledRect(x, 40, 8, 3, SCROLLBOX_COLOR);
+          dc->drawText(x, 23, s, SMLSIZE);
+        }
+        x += 8;
+      }
+    }
+
+    void paintInputLine(BitmapBuffer * dc) {
+      const ExpoData & line = g_model.expoData[index];
+
+      // first line ...
+      drawNumber(dc, 3, 2, line.weight, 0, 0, nullptr, "%");
+      // TODO gvarWeightItem(MIX_LINE_WEIGHT_POS, y, md, RIGHT | attr | (isMixActive(i) ? BOLD : 0), event);
+
+      drawSource(dc, 60, 2, line.srcRaw);
+
+      if (line.name[0]) {
+        dc->drawBitmap(146, 4, mixerSetupLabelBitmap);
+        dc->drawSizedText(166, 2, line.name, sizeof(line.name), ZCHAR);
+      }
+
+      // second line ...
+      if (line.swtch) {
+        dc->drawBitmap(3, 24, mixerSetupSwitchBitmap);
+        drawSwitch(21, 22, line.swtch);
+      }
+
+      if (line.curve.value != 0 ) {
+        dc->drawBitmap(60, 24, mixerSetupCurveBitmap);
+        drawCurveRef(dc, 80, 22, line.curve);
+      }
+
+      if (line.flightModes) {
+        paintFlightModes(dc, line.flightModes);
+      }
+    }
+
+    virtual void paint(BitmapBuffer * dc) override {
+      if (active)
+        dc->drawSolidFilledRect(1, 1, rect.w-2, rect.h-2, CURVE_AXIS_COLOR);
+      paintInputLine(dc);
+      drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+    }
+
+  protected:
+    uint8_t index;
+    bool active = false;
+};
+
+void ModelInputsPage::rebuild(Window * window)
+{
+  coord_t scrollPosition = window->getScrollPositionY();
+  window->clear();
+  build(window);
+  window->setScrollPositionY(scrollPosition);
+}
+
+void ModelInputsPage::editInput(Window * window, uint8_t input, uint8_t index)
+{
+  Window * editWindow = new InputEditWindow(input, index);
+  editWindow->setCloseHandler([=]() {
+    rebuild(window);
+  });
+}
+
+void ModelInputsPage::build(Window * window)
+{
+  GridLayout grid(*window);
+  grid.spacer(8);
+  grid.setLabelWidth(66);
+  grid.setLabelPaddingRight(6);
+
+  int index = 0;
+  ExpoData * line = g_model.expoData;
+  for (uint8_t input=1; input<=NUM_INPUTS; input++) {
+    if (index < MAX_EXPOS && line->chn + 1 == input && EXPO_VALID(line)) {
+      new TextButton(window, grid.getLabelSlot(), getSourceString(input),
+                     [=]() -> uint8_t {
+                       return 0;
+                     });
+      while (index < MAX_EXPOS && line->chn + 1 == input && EXPO_VALID(line)) {
+        Button * button = new InputLineButton(window, grid.getFieldSlot(), index,
+                                            [=]() -> uint8_t {
+                                              Menu * menu = new Menu();
+                                              menu->addLine(STR_EDIT, [=]() {
+                                                menu->deleteLater();
+                                                editInput(window, input, index);
+                                              });
+                                              if (!reachExposLimit()) {
+                                                menu->addLine(STR_INSERT_BEFORE, [=]() {
+                                                  menu->deleteLater();
+                                                  insertExpo(index, input);
+                                                  editInput(window, input, index);
+                                                });
+                                                menu->addLine(STR_INSERT_AFTER, [=]() {
+                                                  menu->deleteLater();
+                                                  insertExpo(index + 1, input);
+                                                  editInput(window, input, index);
+                                                });
+                                                // TODO STR_COPY
+                                              }
+                                              // TODO STR_MOVE
+                                              menu->addLine(STR_DELETE, [=]() {
+                                                menu->deleteLater();
+                                                deleteExpo(index);
+                                                rebuild(window);
+                                              });
+                                              return 0;
+                                            });
+
+        grid.spacer(button->height() + 5);
+        ++index;
+        ++line;
+      }
+    }
+    else {
+      new TextButton(window, grid.getLabelSlot(), getSourceString(input),
+                     [=]() -> uint8_t {
+                       insertExpo(index, input);
+                       editInput(window, input, index);
+                       return 0;
+                     });
+      grid.nextLine();
+    }
+  }
+
+  window->setInnerHeight(grid.getWindowHeight());
+}
+
+int getExposLinesCount()
+{
+  int lastch = -1;
+  uint8_t count = MAX_INPUTS;
+  for (int i=0; i<MAX_EXPOS; i++) {
+    bool valid = EXPO_VALID(expoAddress(i));
+    if (!valid)
+      break;
+    int ch = expoAddress(i)->chn;
+    if (ch == lastch) {
+      count++;
+    }
+    else {
+      lastch = ch;
+    }
+  }
+  return count;
+}
+
 void deleteExpo(uint8_t idx)
 {
   pauseMixerCalculations();
@@ -101,18 +539,18 @@ void deleteExpo(uint8_t idx)
   storageDirty(EE_MODEL);
 }
 
-// TODO avoid this global s_currCh on ARM boards ...
+// TODO port: avoid global s_currCh on ARM boards (as done here)...
 int8_t s_currCh;
-void insertExpo(uint8_t idx)
+void insertExpo(uint8_t idx, uint8_t input)
 {
   pauseMixerCalculations();
   ExpoData * expo = expoAddress(idx);
   memmove(expo+1, expo, (MAX_EXPOS-(idx+1))*sizeof(ExpoData));
   memclear(expo, sizeof(ExpoData));
-  expo->srcRaw = (s_currCh > 4 ? MIXSRC_Rud - 1 + s_currCh : MIXSRC_Rud - 1 + channel_order(s_currCh));
+  expo->srcRaw = (input >= 4 ? MIXSRC_Rud + input : MIXSRC_Rud + channel_order(input + 1) - 1);
   expo->curve.type = CURVE_REF_EXPO;
   expo->mode = 3; // pos+neg
-  expo->chn = s_currCh - 1;
+  expo->chn = input;
   expo->weight = 100;
   resumeMixerCalculations();
   storageDirty(EE_MODEL);
@@ -198,7 +636,7 @@ bool menuModelExpoOne(event_t event)
 
   coord_t y = MENU_CONTENT_TOP-FH-2;
 
-  drawFunction(expoFn, CURVE_CENTER_X, CURVE_CENTER_Y, CURVE_SIDE_WIDTH);
+//  drawFunction(expoFn, CURVE_CENTER_X, CURVE_CENTER_Y, CURVE_SIDE_WIDTH);
   drawCurveHorizontalScale();
   drawCurveVerticalScale(CURVE_CENTER_X-CURVE_SIDE_WIDTH-15);
 
@@ -216,11 +654,11 @@ bool menuModelExpoOne(event_t event)
     }
 
     x = limit(-1024, x, 1024);
-    int y = limit<int>(-1024, expoFn(x), 1024);
-    strAppendSigned(texty, calcRESXto100(y));
+   // int y = limit<int>(-1024, expoFn(x), 1024);
+    // strAppendSigned(texty, calcRESXto100(y));
 
     x = divRoundClosest(x*CURVE_SIDE_WIDTH, RESX);
-    y = CURVE_CENTER_Y + getCurveYCoord(expoFn, x, CURVE_SIDE_WIDTH);
+ //   y = CURVE_CENTER_Y + getCurveYCoord(expoFn, x, CURVE_SIDE_WIDTH);
 
     lcdDrawSolidFilledRect(CURVE_CENTER_X+x, CURVE_CENTER_Y-CURVE_SIDE_WIDTH, 2, 2*CURVE_SIDE_WIDTH+2, CURVE_CURSOR_COLOR);
     lcdDrawSolidFilledRect(CURVE_CENTER_X-CURVE_SIDE_WIDTH-2, y-1, 2*CURVE_SIDE_WIDTH+2, 2, CURVE_CURSOR_COLOR);
@@ -255,10 +693,12 @@ bool menuModelExpoOne(event_t event)
       case EXPO_FIELD_SOURCE:
         lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_SOURCE));
         drawSource(EXPO_ONE_2ND_COLUMN, y, ed->srcRaw, menuHorizontalPosition==0 ? attr : 0);
-        if (attr && menuHorizontalPosition==0) ed->srcRaw = checkIncDec(event, ed->srcRaw, INPUTSRC_FIRST, INPUTSRC_LAST, EE_MODEL|INCDEC_SOURCE|NO_INCDEC_MARKS, isInputSourceAvailable);
+        if (attr && menuHorizontalPosition==0)
+          ed->srcRaw = checkIncDec(event, ed->srcRaw, INPUTSRC_FIRST, INPUTSRC_LAST, EE_MODEL|INCDEC_SOURCE|NO_INCDEC_MARKS, isInputSourceAvailable);
         if (ed->srcRaw >= MIXSRC_FIRST_TELEM) {
           drawSensorCustomValue(EXPO_ONE_2ND_COLUMN+75, y, (ed->srcRaw - MIXSRC_FIRST_TELEM)/3, convertTelemValue(ed->srcRaw - MIXSRC_FIRST_TELEM + 1, ed->scale), LEFT|(menuHorizontalPosition==1?attr:0));
-          if (attr && menuHorizontalPosition == 1) ed->scale = checkIncDec(event, ed->scale, 0, maxTelemValue(ed->srcRaw - MIXSRC_FIRST_TELEM + 1), EE_MODEL);
+          if (attr && menuHorizontalPosition == 1)
+            ed->scale = checkIncDec(event, ed->scale, 0, maxTelemValue(ed->srcRaw - MIXSRC_FIRST_TELEM + 1), EE_MODEL);
         }
         else if (attr) {
           menuHorizontalPosition = 0;
@@ -335,32 +775,6 @@ bool menuModelExpoOne(event_t event)
 void lineExpoSurround(coord_t y, LcdFlags flags=CURVE_AXIS_COLOR)
 {
   lcdDrawRect(EXPO_LINE_SELECT_POS, y-INVERT_VERT_MARGIN+1, EXPO_LINE_SELECT_WIDTH, INVERT_LINE_HEIGHT, 1, s_copyMode == COPY_MODE ? SOLID : DOTTED, flags);
-}
-
-void onExposMenu(const char * result)
-{
-  uint8_t chn = expoAddress(s_currIdx)->chn + 1;
-
-  if (result == STR_EDIT) {
-    pushMenu(menuModelExpoOne);
-  }
-  else if (result == STR_INSERT_BEFORE || result == STR_INSERT_AFTER) {
-    if (!reachExposLimit()) {
-      s_currCh = chn;
-      if (result == STR_INSERT_AFTER) { s_currIdx++; menuVerticalPosition++; }
-      insertExpo(s_currIdx);
-      pushMenu(menuModelExpoOne);
-    }
-  }
-  else if (result == STR_COPY || result == STR_MOVE) {
-    s_copyMode = (result == STR_COPY ? COPY_MODE : MOVE_MODE);
-    s_copySrcIdx = s_currIdx;
-    s_copySrcCh = chn;
-    s_copySrcRow = menuVerticalPosition;
-  }
-  else if (result == STR_DELETE) {
-    deleteExpo(s_currIdx);
-  }
 }
 
 void displayExpoInfos(coord_t y, ExpoData * ed)
@@ -459,7 +873,7 @@ bool menuModelExposAll(event_t event)
           if (s_copyMode) s_currCh = 0;
           if (s_currCh) {
             if (reachExposLimit()) break;
-            insertExpo(s_currIdx);
+            // insertExpo(s_currIdx);
             pushMenu(menuModelExpoOne);
             s_copyMode = 0;
           }
@@ -472,7 +886,7 @@ bool menuModelExposAll(event_t event)
             POPUP_MENU_ADD_ITEM(STR_COPY);
             POPUP_MENU_ADD_ITEM(STR_MOVE);
             POPUP_MENU_ADD_ITEM(STR_DELETE);
-            POPUP_MENU_START(onExposMenu);
+            // POPUP_MENU_START(onExposMenu);
           }
         }
       }
@@ -484,7 +898,7 @@ bool menuModelExposAll(event_t event)
         uint8_t next_ofs = ((event==EVT_ROTARY_LEFT) ? s_copyTgtOfs - 1 : s_copyTgtOfs + 1);
 
         if (s_copyTgtOfs==0 && s_copyMode==COPY_MODE) {
-          // insert a mix on the same channel (just above / just below)
+          // insert a mix on the same input (just above / just below)
           if (reachExposLimit()) break;
           copyExpo(s_currIdx);
           if (event==EVT_ROTARY_RIGHT) s_currIdx++;

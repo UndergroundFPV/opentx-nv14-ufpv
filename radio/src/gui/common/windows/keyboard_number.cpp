@@ -92,5 +92,5 @@ NumberKeyboard::~NumberKeyboard()
 void NumberKeyboard::paint(BitmapBuffer * dc)
 {
   lcdSetColor(RGB(0xE0, 0xE0, 0xE0));
-  dc->drawSolidFilledRect(0, 0, LCD_W, height(), CUSTOM_COLOR);
+  dc->clear(CUSTOM_COLOR);
 }

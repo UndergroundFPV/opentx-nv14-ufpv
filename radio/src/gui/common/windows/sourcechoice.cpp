@@ -41,7 +41,7 @@ bool SourceChoice::onTouchEnd(coord_t x, coord_t y)
     do {
       value += 1;
       if (value > vmax)
-        value = 0;
+        value = vmin;
     } while (!isSourceAvailable(value));
     setValue(value);
   }

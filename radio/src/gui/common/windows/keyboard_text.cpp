@@ -118,7 +118,7 @@ void TextKeyboard::setCursorPos(coord_t x)
 void TextKeyboard::paint(BitmapBuffer * dc)
 {
   lcdSetColor(RGB(0xE0, 0xE0, 0xE0));
-  dc->drawSolidFilledRect(0, 0, LCD_W, height(), CUSTOM_COLOR);
+  dc->clear(CUSTOM_COLOR);
 
   for (uint8_t i=0; i<4; i++) {
     coord_t y = 15 + i * 40;

@@ -280,7 +280,7 @@ extern int8_t s_currCh;
 
 uint8_t getExposCount();
 void deleteExpo(uint8_t idx);
-void insertExpo(uint8_t idx);
+void insertExpo(uint8_t idx, uint8_t input);
 
 uint8_t getMixesCount();
 void deleteMix(uint8_t idx);

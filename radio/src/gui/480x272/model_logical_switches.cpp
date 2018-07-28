@@ -24,6 +24,19 @@
 
 #define SET_DIRTY()     storageDirty(EE_MODEL)
 
+void putsEdgeDelayParam(coord_t x, coord_t y, LogicalSwitchData * ls)
+{
+  lcdDrawChar(x, y, '[');
+  lcdDrawNumber(lcdNextPos+2, y, lswTimerValue(ls->v2), LEFT|PREC1);
+  lcdDrawChar(lcdNextPos, y, ':');
+  if (ls->v3 < 0)
+    lcdDrawText(lcdNextPos+3, y, "<<");
+  else if (ls->v3 == 0)
+    lcdDrawText(lcdNextPos+3, y, "--");
+  else
+    lcdDrawNumber(lcdNextPos+3, y, lswTimerValue(ls->v2+ls->v3), LEFT|PREC1);
+  lcdDrawChar(lcdNextPos, y, ']');
+}
 
 class LogicalSwitchEditWindow: public Page {
   public:
@@ -104,11 +117,11 @@ class LogicalSwitchEditWindow: public Page {
       }
       else if (cstate == LS_FAMILY_COMP) {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V1);
-        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v1));
+        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v1));
         grid.nextLine();
 
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V2);
-        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v2));
+        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_TELEM, GET_SET_DEFAULT(cs->v2));
         grid.nextLine();
       }
       else if (cstate == LS_FAMILY_TIMER) {
@@ -128,7 +141,7 @@ class LogicalSwitchEditWindow: public Page {
       }
       else {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(true), STR_V1);
-        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), MIXSRC_LAST_TELEM, GET_DEFAULT(cs->v1),
+        new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_TELEM, GET_DEFAULT(cs->v1),
                          [=](int32_t newValue) -> void {
                            cs->v1 = newValue;
                            SET_DIRTY();
@@ -209,13 +222,12 @@ class LogicalSwitchEditWindow: public Page {
     }
 };
 
-static constexpr coord_t col1 = 25;
+static constexpr coord_t line1 = 2;
+static constexpr coord_t line2 = 22;
+static constexpr coord_t line3 = 42;
+static constexpr coord_t col1 = 20;
 static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
 static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1;
-static constexpr coord_t line1 = 0;
-static constexpr coord_t line2 = 20;
-static constexpr coord_t line3 = 40;
-
 
 class LogicalSwitchButton : public Button {
   public:
@@ -224,9 +236,9 @@ class LogicalSwitchButton : public Button {
       lsIndex(lsIndex)
     {
       LogicalSwitchData * ls = lswAddress(lsIndex);
-      if (ls->duration != 0 || ls->delay != 0 || ls->andsw != SWSRC_NONE)
+      if (ls->andsw != SWSRC_NONE || ls->duration != 0 || ls->delay != 0)
         setHeight(getHeight() + 20);
-      if(lswFamily(ls->func) == LS_FAMILY_EDGE)
+      if (lswFamily(ls->func) == LS_FAMILY_EDGE)
         setHeight(getHeight() + 20);
     }
 
@@ -263,7 +275,7 @@ class LogicalSwitchButton : public Button {
       }
       else if (lsFamily == LS_FAMILY_EDGE) {
         drawSwitch(col1, line2, ls->v1);
-        putsEdgeDelayParam(col2, line2, ls, 0,  0);
+        putsEdgeDelayParam(col2, line2, ls);
       }
       else if (lsFamily == LS_FAMILY_COMP) {
         drawSource(col2, line1, ls->v1, 0);
@@ -327,10 +339,8 @@ void ModelLogicalSwitchesPage::build(Window * window)
 
   window->clear();
 
-  char s[16];
-
   for (int8_t i=0; i<MAX_OUTPUT_CHANNELS; i++) {
-    new TextButton(window, grid.getLabelSlot(), getSwitchString(s, SWSRC_SW1+i),
+    new TextButton(window, grid.getLabelSlot(), getSwitchString(SWSRC_SW1+i),
                    [=]() -> uint8_t {
                      return 0;
                    });
@@ -345,21 +355,22 @@ void ModelLogicalSwitchesPage::build(Window * window)
                                                 });
                                                 if (cs->func)
                                                   menu->addLine(STR_COPY, [=]() {
-                                                      menu->deleteLater();
-                                                      clipboard.type = CLIPBOARD_TYPE_CUSTOM_SWITCH;
-                                                      clipboard.data.csw = *cs;
+                                                    menu->deleteLater();
+                                                    clipboard.type = CLIPBOARD_TYPE_CUSTOM_SWITCH;
+                                                    clipboard.data.csw = *cs;
                                                   });
                                                 if (clipboard.type == CLIPBOARD_TYPE_CUSTOM_SWITCH)
                                                   menu->addLine(STR_PASTE, [=]() {
-                                                      menu->deleteLater();
-                                                      *cs = clipboard.data.csw;
-                                                      storageDirty(EE_MODEL);
+                                                    menu->deleteLater();
+                                                    *cs = clipboard.data.csw;
+                                                    storageDirty(EE_MODEL);
+                                                    rebuild(window);
                                                   });
                                                 if (cs->func || cs->v1 || cs->v2 || cs->delay || cs->duration || cs->andsw)
                                                   menu->addLine(STR_CLEAR, [=]() {
-                                                      menu->deleteLater();
-                                                      memset(cs, 0, sizeof(LogicalSwitchData));
-                                                      storageDirty(EE_MODEL);
+                                                    menu->deleteLater();
+                                                    memset(cs, 0, sizeof(LogicalSwitchData));
+                                                    storageDirty(EE_MODEL);
                                                   });
                                                 return 0;
                                               });
@@ -387,20 +398,6 @@ enum LogicalSwitchFields {
 #define CSW_4TH_COLUMN  315
 #define CSW_5TH_COLUMN  375
 #define CSW_6TH_COLUMN  425
-
-void putsEdgeDelayParam(coord_t x, coord_t y, LogicalSwitchData *cs, uint8_t lattr, uint8_t rattr)
-{
-  lcdDrawChar(x, y, '[');
-  lcdDrawNumber(lcdNextPos+2, y, lswTimerValue(cs->v2), LEFT|PREC1|lattr);
-  lcdDrawChar(lcdNextPos, y, ':');
-  if (cs->v3 < 0)
-    lcdDrawText(lcdNextPos+3, y, "<<", rattr);
-  else if (cs->v3 == 0)
-    lcdDrawText(lcdNextPos+3, y, "--", rattr);
-  else
-    lcdDrawNumber(lcdNextPos+3, y, lswTimerValue(cs->v2+cs->v3), LEFT|PREC1|rattr);
-  lcdDrawChar(lcdNextPos, y, ']');
-}
 
 void onLogicalSwitchesMenu(const char * result)
 {
@@ -482,7 +479,7 @@ bool menuModelLogicalSwitches(event_t event)
     }
     else if (cstate == LS_FAMILY_EDGE) {
       drawSwitch(CSW_2ND_COLUMN, y, cs->v1, attr1);
-      putsEdgeDelayParam(CSW_3RD_COLUMN, y, cs, attr2, (menuHorizontalPosition==LS_FIELD_V3 ? attr : 0));
+      // putsEdgeDelayParam(CSW_3RD_COLUMN, y, cs, attr2, (menuHorizontalPosition==LS_FIELD_V3 ? attr : 0));
       v1_min = SWSRC_FIRST_IN_LOGICAL_SWITCHES; v1_max = SWSRC_LAST_IN_LOGICAL_SWITCHES;
       v2_min=-129; v2_max = 122;
       v3_max = 222 - cs->v2;

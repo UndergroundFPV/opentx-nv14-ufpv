@@ -66,39 +66,40 @@ class MixEditWindow: public Page {
 
     void buildHeader(Window * window) {
       new StaticText(window, { 70, 4, 100, 20 }, STR_MIXER, MENU_TITLE_COLOR);
-      char s[16];
-      new StaticText(window, { 70, 28, 100, 20 }, getSourceString(s, MIXSRC_CH1 + channel), MENU_TITLE_COLOR);
+      new StaticText(window, { 70, 28, 100, 20 }, getSourceString(MIXSRC_CH1 + channel), MENU_TITLE_COLOR);
     }
 
     void updateCurves() {
       GridLayout grid(*updateCurvesWindow);
       updateCurvesWindow->clear();
 
-      MixData * mix = mixAddress(mixIndex) ;
+      MixData * line = mixAddress(mixIndex) ;
 
       new StaticText(updateCurvesWindow, grid.getLabelSlot(true), STR_CURVE);
       curveTypeChoice = new Choice(updateCurvesWindow, grid.getFieldSlot(2,0), "\004DiffExpoFuncCstm", 0, CURVE_REF_CUSTOM,
-                 GET_DEFAULT(mix->curve.type),
-                 [=](int32_t newValue) { mix->curve.type = newValue;
-                     SET_DIRTY();
-                     updateCurves();
-                     curveTypeChoice->setFocus();
+                 GET_DEFAULT(line->curve.type),
+                 [=](int32_t newValue) {
+                   line->curve.type = newValue;
+                   line->curve.value = 0;
+                   SET_DIRTY();
+                   updateCurves();
+                   curveTypeChoice->setFocus();
                  });
 
-      switch (mix->curve.type) {
+      switch (line->curve.type) {
         case CURVE_REF_DIFF:
         case CURVE_REF_EXPO: {
           // TODO GVAR
           NumberEdit * edit = new NumberEdit(updateCurvesWindow, grid.getFieldSlot(2, 1), -100, 100,
-                                             GET_SET_DEFAULT(mix->curve.value));
+                                             GET_SET_DEFAULT(line->curve.value));
           edit->setSuffix("%");
           break;
         }
         case CURVE_REF_FUNC:
-          new Choice(updateCurvesWindow, grid.getFieldSlot(2,1), STR_VCURVEFUNC, 0, CURVE_BASE-1, GET_SET_DEFAULT(mix->curve.value));
+          new Choice(updateCurvesWindow, grid.getFieldSlot(2,1), STR_VCURVEFUNC, 0, CURVE_BASE-1, GET_SET_DEFAULT(line->curve.value));
           break;
         case CURVE_REF_CUSTOM:
-          new CustomCurveChoice(updateCurvesWindow, grid.getFieldSlot(2,1), -MAX_CURVES, MAX_CURVES, GET_SET_DEFAULT(mix->curve.value));
+          new CustomCurveChoice(updateCurvesWindow, grid.getFieldSlot(2,1), -MAX_CURVES, MAX_CURVES, GET_SET_DEFAULT(line->curve.value));
           break;
       }
     }
@@ -116,7 +117,7 @@ class MixEditWindow: public Page {
 
       // Source
       new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
-      new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST, GET_SET_DEFAULT(mix->srcRaw));
+      new SourceChoice(window, grid.getFieldSlot(), 0, MIXSRC_LAST, GET_SET_DEFAULT(mix->srcRaw));
       grid.nextLine();
 
       // Weight
@@ -152,9 +153,9 @@ class MixEditWindow: public Page {
                                        [=]() -> uint8_t {
                                            BF_BIT_FLIP(mix->flightModes, BF_BIT(i));
                                            SET_DIRTY();
-                                           return bool(BF_SINGLE_BIT_GET(mix->flightModes, i));
+                                           return !(BF_SINGLE_BIT_GET(mix->flightModes, i));
                                        },
-                                       bool(BF_SINGLE_BIT_GET(mix->flightModes, i)) ? BUTTON_CHECKED : 0);
+                                       BF_SINGLE_BIT_GET(mix->flightModes, i) ? 0 : BUTTON_CHECKED);
       }
       grid.nextLine();
 
@@ -223,6 +224,12 @@ ModelMixesPage::ModelMixesPage():
 {
 }
 
+static constexpr coord_t line1 = 2;
+static constexpr coord_t line2 = 22;
+static constexpr coord_t col1 = 25;
+static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
+static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1;
+
 class MixLineButton : public Button {
   public:
     MixLineButton(Window * parent, const rect_t & rect, uint8_t mixIndex, std::function<uint8_t(void)> onPress):
@@ -231,7 +238,7 @@ class MixLineButton : public Button {
     {
       const MixData & mix = g_model.mixData[mixIndex];
       if (mix.swtch || mix.curve.value != 0 || mix.flightModes) {
-        setHeight(45);
+        setHeight(getHeight() + 20);
       }
     }
 
@@ -247,18 +254,18 @@ class MixLineButton : public Button {
       }
     }
 
-    void paintMixFlightModes(BitmapBuffer * dc, FlightModesType value) {
-      dc->drawBitmap(146, 24, mixerSetupFlightmodeBitmap);
+    void paintFlightModes(BitmapBuffer * dc, FlightModesType value) {
+      dc->drawBitmap(146, line2+2, mixerSetupFlightmodeBitmap);
       coord_t x = 166;
       for (int i=0; i<MAX_FLIGHT_MODES; i++) {
         char s[] = " ";
         s[0] = '0' + i;
         if (value & (1 << i)) {
-          dc->drawSolidFilledRect(x, 40, 8, 3, SCROLLBOX_COLOR);
-          dc->drawText(x, 23, s, SMLSIZE);
+          dc->drawText(x, line2+1, s, SMLSIZE | TEXT_DISABLE_COLOR);
         }
         else {
-          dc->drawText(x, 23, s, SMLSIZE | TEXT_DISABLE_COLOR);
+          dc->drawSolidFilledRect(x, 40, 8, 3, SCROLLBOX_COLOR);
+          dc->drawText(x, line2+1, s, SMLSIZE);
         }
         x += 8;
       }
@@ -268,29 +275,29 @@ class MixLineButton : public Button {
       const MixData & mix = g_model.mixData[mixIndex];
 
       // first line ...
-      drawNumber(dc, 3, 2, mix.weight, 0, 0, nullptr, "%");
+      drawNumber(dc, 3, line1, mix.weight, 0, 0, nullptr, "%");
       // TODO gvarWeightItem(MIX_LINE_WEIGHT_POS, y, md, RIGHT | attr | (isMixActive(i) ? BOLD : 0), event);
 
-      drawSource(dc, 60, 2, mix.srcRaw);
+      drawSource(dc, 60, line1, mix.srcRaw);
 
       if (mix.name[0]) {
-        dc->drawBitmap(146, 4, mixerSetupLabelBitmap);
-        dc->drawSizedText(166, 2, mix.name, sizeof(mix.name), ZCHAR);
+        dc->drawBitmap(146, line1+2, mixerSetupLabelBitmap);
+        dc->drawSizedText(166, line1, mix.name, sizeof(mix.name), ZCHAR);
       }
 
       // second line ...
       if (mix.swtch) {
-        dc->drawBitmap(3, 24, mixerSetupSwitchBitmap);
-        drawSwitch(21, 22, mix.swtch);
+        dc->drawBitmap(3, line2+2, mixerSetupSwitchBitmap);
+        drawSwitch(21, line2, mix.swtch);
       }
 
       if (mix.curve.value != 0 ) {
-        dc->drawBitmap(60, 24, mixerSetupCurveBitmap);
-        drawCurveRef(dc, 80, 22, mix.curve);
+        dc->drawBitmap(60, line2+2, mixerSetupCurveBitmap);
+        drawCurveRef(dc, 80, line2, mix.curve);
       }
 
       if (mix.flightModes) {
-        paintMixFlightModes(dc, mix.flightModes);
+        paintFlightModes(dc, mix.flightModes);
       }
     }
 
@@ -335,8 +342,8 @@ void ModelMixesPage::rebuild(Window * window)
 
 void ModelMixesPage::editMix(Window * window, uint8_t channel, uint8_t mixIndex)
 {
-  Window * mixWindow = new MixEditWindow(channel, mixIndex);
-  mixWindow->setCloseHandler([=]() {
+  Window * editWindow = new MixEditWindow(channel, mixIndex);
+  editWindow->setCloseHandler([=]() {
     rebuild(window);
   });
 }
@@ -348,25 +355,22 @@ void ModelMixesPage::build(Window * window)
   grid.setLabelWidth(66);
   grid.setLabelPaddingRight(6);
 
-  window->clear();
-
   const BitmapBuffer * const mixerMultiplexBitmap[] = {
     mixerSetupAddBitmap,
     mixerSetupMultiBitmap,
     mixerSetupReplaceBitmap
   };
 
-  char s[16];
   int mixIndex = 0;
   MixData * mix = g_model.mixData;
-  for (int8_t ch=0; ch<MAX_OUTPUT_CHANNELS; ch++) {
-    if (mix->srcRaw > 0 && mix->destCh == ch) {
-      new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
+  for (uint8_t ch=0; ch<MAX_OUTPUT_CHANNELS; ch++) {
+    if (mixIndex < MAX_MIXERS && mix->srcRaw > 0 && mix->destCh == ch) {
+      new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch),
                      [=]() -> uint8_t {
                        return 0;
                      });
       uint8_t count = 0;
-      while (mix->srcRaw > 0 && mix->destCh == ch) {
+      while (mixIndex < MAX_MIXERS && mix->srcRaw > 0 && mix->destCh == ch) {
         Button * button = new MixLineButton(window, grid.getFieldSlot(), mixIndex,
                                             [=]() -> uint8_t {
                                               Menu * menu = new Menu();
@@ -406,7 +410,7 @@ void ModelMixesPage::build(Window * window)
       }
     }
     else {
-      new TextButton(window, grid.getLabelSlot(), getSourceString(s, MIXSRC_CH1 + ch),
+      new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch),
                      [=]() -> uint8_t {
                        insertMix(mixIndex, ch);
                        editMix(window, ch, mixIndex);

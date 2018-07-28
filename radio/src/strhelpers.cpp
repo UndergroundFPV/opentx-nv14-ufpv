@@ -359,6 +359,11 @@ char * getSwitchString(swsrc_t idx)
   return getSwitchString(tmpHelpersString, idx);
 }
 
+char * getSourceString(mixsrc_t idx)
+{
+  return getSourceString(tmpHelpersString, idx);
+}
+
 char * getSourceString(char * dest, mixsrc_t idx)
 {
   if (idx == MIXSRC_NONE) {

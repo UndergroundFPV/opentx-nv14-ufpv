@@ -32,11 +32,11 @@ class StickCalibrationWindow: public Window {
 
     virtual void checkEvents() override
     {
-      // will always force a full monitor window refresh
+      // will always force a full window refresh
       invalidate();
     }
 
-    void paint(BitmapBuffer * dc)
+    virtual void paint(BitmapBuffer * dc) override
     {
       dc->drawBitmap(0, 0, calibStickBackground);
       int16_t x = calibratedAnalogs[stickX];

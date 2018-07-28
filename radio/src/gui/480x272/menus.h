@@ -466,11 +466,11 @@ extern uint8_t s_copySrcCh;
 
 uint8_t getExposCount();
 void deleteExpo(uint8_t idx);
-void insertExpo(uint8_t idx);
+void insertExpo(uint8_t idx, uint8_t input);
 
 uint8_t getMixesCount();
 void deleteMix(uint8_t idx);
-void insertMix(uint8_t idx);
+void insertMix(uint8_t idx, uint8_t channel);
 
 #define MENU_X                 80
 #define MENU_W                 LCD_W-(2*MENU_X)

@@ -23,7 +23,6 @@
 
 #include "gui/common/windows/windows.h"
 
-
 class ModelInputsPage: public PageTab {
 public:
     ModelInputsPage();
@@ -31,9 +30,8 @@ public:
     virtual void build(Window * window) override;
 
 protected:
-    Window * body;
-    static constexpr coord_t footerHeight = 40;
-    void buildBody(Window * window);
+    void rebuild(Window * window);
+    void editInput(Window * window, uint8_t channel, uint8_t index);
 };
 
 #endif //_MODEL_INPUTS_H

@@ -36,7 +36,7 @@
 #define CSW_6TH_COLUMN                 390
 #define MAX_LOGICAL_SWITCHES             64
 
-extern void putsEdgeDelayParam(coord_t, coord_t, LogicalSwitchData *, uint8_t, uint8_t);
+extern void putsEdgeDelayParam(coord_t, coord_t, LogicalSwitchData *, LcdFlags, LcdFlags);
 
 void displayLogicalSwitchedDetails(coord_t x, coord_t y, uint8_t idx)
 {
@@ -51,7 +51,7 @@ void displayLogicalSwitchedDetails(coord_t x, coord_t y, uint8_t idx)
   }
   else if (cstate == LS_FAMILY_EDGE) {
     drawSwitch(CSW_2ND_COLUMN, y, cs->v1, 0);
-    putsEdgeDelayParam(CSW_3RD_COLUMN, y, cs, 0, 0);
+//    putsEdgeDelayParam(CSW_3RD_COLUMN, y, cs, 0, 0);
   }
   else if (cstate == LS_FAMILY_COMP) {
     drawSource(CSW_2ND_COLUMN, y, cs->v1, 0);

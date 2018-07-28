@@ -45,7 +45,7 @@ void ModelHeliPage::build(Window * window)
 
   // Elevator source
   new StaticText(window, grid.getLabelSlot(), STR_ELEVATOR);
-  new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.swashR.elevatorSource));
+  new SourceChoice(window, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.swashR.elevatorSource));
   grid.nextLine();
 
   // Elevator weight
@@ -55,7 +55,7 @@ void ModelHeliPage::build(Window * window)
 
   // Aileron source
   new StaticText(window, grid.getLabelSlot(), STR_AILERON);
-  new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.swashR.aileronWeight));
+  new SourceChoice(window, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.swashR.aileronWeight));
   grid.nextLine();
 
   // Aileron weight
@@ -65,7 +65,7 @@ void ModelHeliPage::build(Window * window)
 
   // Collective source
   new StaticText(window, grid.getLabelSlot(), STR_COLLECTIVE);
-  new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.swashR.collectiveSource));
+  new SourceChoice(window, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.swashR.collectiveSource));
   grid.nextLine();
 
   // Collective weight

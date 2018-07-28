@@ -255,7 +255,7 @@ void ModelSetupPage::build(Window * window)
 
     // Throttle source
     new StaticText(window, grid.getLabelSlot(true), STR_TTRACE);
-    new SourceChoice(window, grid.getFieldSlot(), MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.thrTraceSrc));
+    new SourceChoice(window, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(g_model.thrTraceSrc));
     grid.nextLine();
 
     // Throttle trim
@@ -473,7 +473,9 @@ void ModelSetupPage::updateExternalModuleWindow()
       Choice * xjtChoice = new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, RF_PROTO_OFF,
                                       RF_PROTO_LAST,
                                       GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
-      xjtChoice->setAvailableHandler([](int index) { return (index != RF_PROTO_OFF); });
+      xjtChoice->setAvailableHandler([](int index) {
+        return index != RF_PROTO_OFF;
+      });
     }
     else if (IS_MODULE_DSM2(EXTERNAL_MODULE)) {
       new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_DSM_PROTOCOLS, DSM2_PROTO_LP45, DSM2_PROTO_DSMX,

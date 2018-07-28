@@ -21,6 +21,7 @@
 #ifndef _WINDOWS_HELPERS_H_
 #define _WINDOWS_HELPERS_H_
 
+#define GET_VALUE(value)        [=]() -> int32_t { return value; }
 #define GET_DEFAULT(value)      [=]() -> int32_t { return value; }
 #define GET_INVERTED(value)     [=]() -> uint8_t { return !value; }
 

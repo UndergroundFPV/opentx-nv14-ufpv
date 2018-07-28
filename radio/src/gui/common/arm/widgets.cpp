@@ -26,12 +26,12 @@ void drawCurveRef(BitmapBuffer * dc, coord_t x, coord_t y, const CurveRef & curv
     switch (curve.type) {
       case CURVE_REF_DIFF:
         dc->drawText(x, y, "D", att);
-        GVAR_MENU_ITEM(x + 13, y, curve.value, -100, 100, LEFT|att, 0, 0);
+        GVAR_MENU_ITEM(x + 13, y+2, curve.value, -100, 100, LEFT|SMLSIZE|att, 0, 0);
         break;
 
       case CURVE_REF_EXPO:
         dc->drawText(x, y, "E", att);
-        GVAR_MENU_ITEM(x + 13, y, curve.value, -100, 100, LEFT|att, 0, 0);
+        GVAR_MENU_ITEM(x + 13, y+2, curve.value, -100, 100, LEFT|SMLSIZE|att, 0, 0);
         break;
 
       case CURVE_REF_FUNC:
