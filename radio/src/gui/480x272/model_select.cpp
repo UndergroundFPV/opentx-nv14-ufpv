@@ -601,8 +601,7 @@ ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, Model
            if (hasFocus()) {
              Menu * menu = new Menu();
              if (modelCell && modelCell != modelslist.currentModel) {
-               menu->addLine(STR_SELECT_MODEL, [=]() -> void {
-                 menu->deleteLater();
+               menu->addLine(STR_SELECT_MODEL, [=]() {
                  // we store the latest changes if any
                  storageFlushCurrentModel();
                  storageCheck(true);
@@ -616,8 +615,7 @@ ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, Model
                  ModelselectPage::updateModels(parent, footer, modelslist.getModelIndex(modelCell));
                });
              }
-             menu->addLine(STR_CREATE_MODEL, [=]() -> void {
-               menu->deleteLater();
+             menu->addLine(STR_CREATE_MODEL, [=]() {
                storageCheck(true);
                modelslist.setCurrentModel(modelslist.addModel(currentCategory, createModel()));
 #if defined(LUA)
@@ -626,8 +624,7 @@ ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, Model
                ModelselectPage::updateModels(parent, footer, currentCategory->size() - 1);
              });
              if (modelCell) {
-               menu->addLine(STR_DUPLICATE_MODEL, [=]() -> void {
-                 menu->deleteLater();
+               menu->addLine(STR_DUPLICATE_MODEL, [=]() {
                  char duplicatedFilename[LEN_MODEL_FILENAME + 1];
                  memcpy(duplicatedFilename, modelCell->modelFilename, sizeof(duplicatedFilename));
                  if (findNextFileIndex(duplicatedFilename, LEN_MODEL_FILENAME, MODELS_PATH)) {
@@ -642,8 +639,7 @@ ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, Model
              }
              // menu->addLine(STR_MOVE_MODEL);
              if (modelCell && modelCell != modelslist.currentModel) {
-               menu->addLine(STR_DELETE_MODEL, [=]() -> void {
-                 menu->deleteLater();
+               menu->addLine(STR_DELETE_MODEL, [=]() {
                  // POPUP_CONFIRMATION(STR_DELETEMODEL);
                  // SET_WARNING_INFO(modelCell->modelName, LEN_MODEL_NAME, 0);
                  unsigned int index = modelslist.getModelIndex(modelCell);

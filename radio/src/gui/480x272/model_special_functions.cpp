@@ -167,7 +167,7 @@ bool menuSpecialFunctions(event_t event, CustomFunctionData * functions, CustomF
     POPUP_MENU_START(onCustomFunctionsMenu);
   }
 
-  for (uint8_t i=0; i<NUM_BODY_LINES; i++) {
+  for (uint8_t i=0; i<NUM_BODY_LINES; i+x+) {
     coord_t y = MENU_CONTENT_TOP + i*FH;
     int k = i+menuVerticalOffset;
 

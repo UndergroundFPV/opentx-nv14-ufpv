@@ -43,7 +43,7 @@ void RadioSetupPage::build(Window * window)
                    gettime(&t);
                    return TM_YEAR_BASE + t.tm_year;
                  },
-                 [=](int32_t newValue) -> void {
+                 [=](int32_t newValue) {
                    struct gtm t;
                    gettime(&t);
                    t.tm_year = newValue - TM_YEAR_BASE;
@@ -55,7 +55,7 @@ void RadioSetupPage::build(Window * window)
                    gettime(&t);
                    return 1 + t.tm_mon;
                  },
-                 [=](int32_t newValue) -> void {
+                 [=](int32_t newValue) {
                    struct gtm t;
                    gettime(&t);
                    t.tm_mon = newValue - 1;
@@ -73,7 +73,7 @@ void RadioSetupPage::build(Window * window)
                    gettime(&t);
                    return t.tm_mday;
                  },
-                 [=](int32_t newValue) -> void {
+                 [=](int32_t newValue) {
                    struct gtm t;
                    gettime(&t);
                    t.tm_mday = newValue;
@@ -171,7 +171,7 @@ void RadioSetupPage::build(Window * window)
   new StaticText(window, grid.getLabelSlot(), STR_SPKRPITCH, true);
   NumberEdit * edit = new NumberEdit(window, grid.getFieldSlot(3, 0), 0, 300,
                  GET_DEFAULT(15 * g_eeGeneral.speakerPitch),
-                 [=](int32_t newValue) -> void {
+                 [=](int32_t newValue) {
                    g_eeGeneral.speakerPitch = newValue / 15;
                    SET_DIRTY();
                  });
@@ -192,7 +192,7 @@ void RadioSetupPage::build(Window * window)
   new StaticText(window, grid.getLabelSlot(), STR_PITCH_AT_ZERO, true);
   new NumberEdit(window, grid.getFieldSlot(), VARIO_FREQUENCY_ZERO-400, VARIO_FREQUENCY_ZERO+400,
                  GET_DEFAULT(VARIO_FREQUENCY_ZERO+(g_eeGeneral.varioPitch*10)),
-                 [=](int8_t newValue) -> void {
+                 [=](int8_t newValue) {
                    g_eeGeneral.varioPitch = (newValue - VARIO_FREQUENCY_ZERO) / 10;
                    SET_DIRTY();
                  });

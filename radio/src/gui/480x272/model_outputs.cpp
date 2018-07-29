@@ -181,11 +181,9 @@ void ModelOutputsPage::build(Window * window, int8_t focusChannel)
     button->setPressHandler([=]() -> uint8_t {
       Menu * menu = new Menu();
       menu->addLine(STR_EDIT, [=]() {
-        menu->deleteLater();
         editOutput(window, ch);
       });
       menu->addLine(STR_RESET, [=]() {
-        menu->deleteLater();
         output->min = 0;
         output->max = 0;
         output->offset = 0;
@@ -197,13 +195,11 @@ void ModelOutputsPage::build(Window * window, int8_t focusChannel)
         rebuild(window, ch);
       });
       menu->addLine(STR_COPY_STICKS_TO_OFS, [=]() {
-        menu->deleteLater();
         copySticksToOffset(ch);
         storageDirty(EE_MODEL);
         button->invalidate();
       });
       menu->addLine(STR_COPY_TRIMS_TO_OFS, [=]() {
-        menu->deleteLater();
         copyTrimsToOffset(ch);
         storageDirty(EE_MODEL);
         button->invalidate();

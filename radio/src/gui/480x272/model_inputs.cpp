@@ -61,113 +61,6 @@ void deleteExpo(uint8_t idx)
   storageDirty(EE_MODEL);
 }
 
-class CurveWindow: public Window {
-  public:
-    CurveWindow(Window * parent, const rect_t & rect, std::function<int(int)> function, std::function<int()> position=nullptr):
-      Window(parent, rect),
-      function(function),
-      position(position)
-    {
-    }
-
-    virtual void checkEvents() override
-    {
-      // will always force a full window refresh
-      invalidate();
-    }
-
-    virtual void paint(BitmapBuffer * dc) override;
-
-  protected:
-    std::function<int(int)> function;
-    std::function<int()> position;
-    void drawBackground(BitmapBuffer * dc);
-    void drawCurve(BitmapBuffer * dc);
-    void drawPosition(BitmapBuffer * dc);
-    coord_t getPointX(int x);
-    coord_t getPointY(int y);
-};
-
-void CurveWindow::drawBackground(BitmapBuffer * dc)
-{
-  lcdSetColor(RGB(0xE0, 0xE0, 0xE0));
-  dc->clear(CUSTOM_COLOR);
-
-  // Axis
-  dc->drawSolidHorizontalLine(0, height()/2, width(), CURVE_AXIS_COLOR);
-  dc->drawSolidVerticalLine(width()/2, 0, height(), CURVE_AXIS_COLOR);
-
-  // Extra lines
-  dc->drawVerticalLine(width()/4, 0, height(), STASHED, CURVE_AXIS_COLOR);
-  dc->drawVerticalLine(width()*3/4, 0, height(), STASHED, CURVE_AXIS_COLOR);
-  dc->drawHorizontalLine(0, height()/4, width(), STASHED, CURVE_AXIS_COLOR);
-  dc->drawHorizontalLine(0, height()*3/4, width(), STASHED, CURVE_AXIS_COLOR);
-
-  // Outside border
-  // drawSolidRect(dc, 0, 0, width(), height(), 1, TEXT_COLOR);
-}
-
-coord_t CurveWindow::getPointX(int x)
-{
-  return limit(0,
-               width() / 2 + divRoundClosest(x * width() / 2, RESX),
-               width() - 1);
-}
-
-coord_t CurveWindow::getPointY(int y)
-{
-  return limit(0,
-               height() / 2 - divRoundClosest(y * height() / 2, RESX),
-               height() - 1);
-}
-
-void CurveWindow::drawCurve(BitmapBuffer * dc)
-{
-  coord_t prev = (coord_t) -1;
-
-  for (int x = 0; x < width(); x++) {
-    coord_t y = getPointY(function(divRoundClosest((x - width() / 2) * RESX, width() / 2)));
-    if (prev >= 0) {
-      if (prev < y) {
-        for (int tmp = prev; tmp <= y; tmp++) {
-          dc->drawBitmapPattern(x - 2, tmp - 2, LBM_POINT, TEXT_COLOR);
-        }
-      }
-      else {
-        for (int tmp = y; tmp <= prev; tmp++) {
-          dc->drawBitmapPattern(x - 2, tmp - 2, LBM_POINT, TEXT_COLOR);
-        }
-      }
-    }
-    prev = y;
-  }
-}
-
-void CurveWindow::drawPosition(BitmapBuffer * dc)
-{
-  int valueX = position();
-  int valueY = function(valueX);
-
-  coord_t x = getPointX(valueX);
-  coord_t y = getPointY(valueY);
-
-  dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT, CURVE_CURSOR_COLOR);
-  dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT_CENTER, TEXT_BGCOLOR);
-
-  char coords[16];
-  strAppendSigned(strAppend(strAppendSigned(coords, calcRESXto100(valueX)), ","), calcRESXto100(valueY));
-  dc->drawSolidFilledRect(10, 11, 1 + getTextWidth(coords, 0, SMLSIZE), 17, CURVE_CURSOR_COLOR);
-  dc->drawText(11, 10, coords, SMLSIZE|TEXT_BGCOLOR);
-}
-
-void CurveWindow::paint(BitmapBuffer * dc)
-{
-  drawBackground(dc);
-  drawCurve(dc);
-  if (position)
-    drawPosition(dc);
-}
-
 class InputEditWindow: public Page {
   public:
     InputEditWindow(int8_t input, uint8_t index):
@@ -266,7 +159,7 @@ class InputEditWindow: public Page {
                  [=]() -> int16_t {
                    return 4 - line->mode;
                  },
-                 [=](int16_t newValue) -> void {
+                 [=](int16_t newValue) {
                    line->mode = 4 - newValue;
                    SET_DIRTY();
                  });
@@ -283,7 +176,7 @@ class InputEditWindow: public Page {
       new StaticText(window, grid.getLabelSlot(), STR_SOURCE);
       new SourceChoice(window, grid.getFieldSlot(), INPUTSRC_FIRST, INPUTSRC_LAST,
                        GET_DEFAULT(line->srcRaw),
-                       [=](int32_t newValue) -> void {
+                       [=] (int32_t newValue) {
                          line->srcRaw = newValue;
                          if (line->srcRaw > MIXSRC_Ail && line->carryTrim == TRIM_ON) {
                            line->carryTrim = TRIM_OFF;
@@ -474,17 +367,14 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
           button->bringToTop();
           Menu * menu = new Menu();
           menu->addLine(STR_EDIT, [=]() {
-            menu->deleteLater();
             editInput(window, input, index);
           });
           if (!reachExposLimit()) {
             menu->addLine(STR_INSERT_BEFORE, [=]() {
-              menu->deleteLater();
               insertExpo(index, input);
               editInput(window, input, index);
             });
             menu->addLine(STR_INSERT_AFTER, [=]() {
-              menu->deleteLater();
               insertExpo(index + 1, input);
               editInput(window, input, index + 1);
             });
@@ -492,7 +382,6 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
           }
           // TODO STR_MOVE
           menu->addLine(STR_DELETE, [=]() {
-            menu->deleteLater();
             deleteExpo(index);
             rebuild(window, -1);
           });

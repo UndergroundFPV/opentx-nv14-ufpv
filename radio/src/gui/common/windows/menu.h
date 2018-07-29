@@ -28,23 +28,29 @@
 class Menu;
 
 class MenuWindow: public Window {
-  struct MenuLine {
-    const char * text;
-    std::function<void()> onPress;
+  class MenuLine {
+    friend class MenuWindow;
+
+    public:
+      MenuLine(const char * text, std::function<void()> onPress):
+        text(text),
+        onPress(onPress)
+      {
+      }
+
+    protected:
+      std::string text;
+      std::function<void()> onPress;
+
+      // TODO private copy constructor?
   };
 
   public:
     MenuWindow(Menu * parent);
 
-    void clear()
-    {
-      lines.clear();
-      updatePosition();
-    }
-
     void addLine(const char * text, std::function<void()> onPress)
     {
-      lines.push_back({text, onPress});
+      lines.emplace_back(text, onPress);
       updatePosition();
     }
 
@@ -66,29 +72,25 @@ class Menu : public Window {
     {
     }
 
-    void clear()
-    {
-      menuWindow.clear();
-    }
-
     void addLine(const char * text, std::function<void()> onPress)
     {
       menuWindow.addLine(text, onPress);
     }
 
-    virtual bool onTouchStart(coord_t x, coord_t y) override {
+    virtual bool onTouchStart(coord_t x, coord_t y) override
+    {
       return true;
     }
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
-    virtual bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY) {
+    virtual bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY)
+    {
       return true;
     }
 
   protected:
     MenuWindow menuWindow;
 };
-
 
 #endif

@@ -36,7 +36,7 @@ void MenuWindow::paint(BitmapBuffer * dc)
 {
   dc->clear(HEADER_BGCOLOR);
   for (unsigned i=0; i<lines.size(); i++) {
-    dc->drawText(10, i * lineHeight + (lineHeight - 22) / 2, lines[i].text, MENU_TITLE_COLOR);
+    dc->drawText(10, i * lineHeight + (lineHeight - 22) / 2, lines[i].text.data(), MENU_TITLE_COLOR);
     if (i > 0) {
       dc->drawSolidHorizontalLine(0, i * lineHeight, 200, CURVE_AXIS_COLOR);
     }
@@ -52,8 +52,7 @@ void MenuWindow::updatePosition()
 
 bool Menu::onTouchEnd(coord_t x, coord_t y)
 {
-  if (!Window::onTouchEnd(x, y)) {
-    deleteLater();
-  }
+  Window::onTouchEnd(x, y);
+  deleteLater();
   return true;
 }

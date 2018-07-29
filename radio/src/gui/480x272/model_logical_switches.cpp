@@ -93,7 +93,7 @@ class LogicalSwitchEditWindow: public Page {
 
         auto edit1 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 0), -129, 122, GET_DEFAULT(cs->v2));
         auto edit2 = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(2, 1), -1, 222 - cs->v2, GET_SET_DEFAULT(cs->v3));
-        edit1->setSetValueHandler([=](int32_t newValue) -> void {
+        edit1->setSetValueHandler([=](int32_t newValue) {
           cs->v2 = newValue;
           cs->v3 = min<uint8_t>(cs->v3, 222 - cs->v2);
           SET_DIRTY();
@@ -140,7 +140,7 @@ class LogicalSwitchEditWindow: public Page {
       else {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(), STR_V1);
         new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_TELEM, GET_DEFAULT(cs->v1),
-                         [=](int32_t newValue) -> void {
+                         [=](int32_t newValue) {
                            cs->v1 = newValue;
                            SET_DIRTY();
                            v2Edit->invalidate();
@@ -186,7 +186,6 @@ class LogicalSwitchEditWindow: public Page {
       headerSwitchName = new StaticText(window, { 70, 28, LCD_W - 100, 20 }, getSwitchString(SWSRC_SW1+ls), MENU_TITLE_COLOR);
     }
 
-    // MixerOne
     void buildBody(Window * window) {
       LogicalSwitchData * cs = lswAddress(ls);
 
@@ -254,7 +253,6 @@ class LogicalSwitchButton : public Button {
       }
     }
 
-    // LS box content
     virtual void paint(BitmapBuffer * dc) override
     {
       LogicalSwitchData * ls = lswAddress(lsIndex);
@@ -345,25 +343,21 @@ void ModelLogicalSwitchesPage::build(Window * window, int8_t focusIndex)
                                                 Menu * menu = new Menu();
                                                 LogicalSwitchData * ls = lswAddress(i);
                                                 menu->addLine(STR_EDIT, [=]() {
-                                                  menu->deleteLater();
                                                   editLogicalSwitch(window, i);
                                                 });
                                                 if (ls->func)
                                                   menu->addLine(STR_COPY, [=]() {
-                                                    menu->deleteLater();
                                                     clipboard.type = CLIPBOARD_TYPE_CUSTOM_SWITCH;
                                                     clipboard.data.csw = *ls;
                                                   });
                                                 if (clipboard.type == CLIPBOARD_TYPE_CUSTOM_SWITCH)
                                                   menu->addLine(STR_PASTE, [=]() {
-                                                    menu->deleteLater();
                                                     *ls = clipboard.data.csw;
                                                     storageDirty(EE_MODEL);
                                                     rebuild(window, i);
                                                   });
                                                 if (ls->func || ls->v1 || ls->v2 || ls->delay || ls->duration || ls->andsw)
                                                   menu->addLine(STR_CLEAR, [=]() {
-                                                    menu->deleteLater();
                                                     memset(ls, 0, sizeof(LogicalSwitchData));
                                                     storageDirty(EE_MODEL);
                                                     rebuild(window, i);

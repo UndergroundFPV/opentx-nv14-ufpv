@@ -157,49 +157,41 @@ bool MainView::onTouchEnd(coord_t x, coord_t y)
 
   if (x < 60 && y < 60) {
     Menu * menu = new Menu();
-    menu->addLine(STR_MODEL_SELECT, [=]() -> void {
+    menu->addLine(STR_MODEL_SELECT, [=]() {
       mainWindow.clear();
       new ModelselectMenu();
     });
     if (modelHasNotes()) {
-      menu->addLine(STR_VIEW_NOTES, [=]() -> void {
-        menu->deleteLater();
+      menu->addLine(STR_VIEW_NOTES, [=]() {
         // TODO
       });
     }
-    menu->addLine(STR_MONITOR_SCREENS, [=]() -> void {
+    menu->addLine(STR_MONITOR_SCREENS, [=]() {
       mainWindow.clear();
       new ChannelsMonitorMenu();
     });
-    menu->addLine(STR_RESET_SUBMENU, [=]() -> void {
-      menu->clear();
-      menu->addLine(STR_RESET_FLIGHT, [=]() -> void {
+    menu->addLine(STR_RESET_SUBMENU, [=]() {
+      Menu * menu = new Menu();
+      menu->addLine(STR_RESET_FLIGHT, [=]() {
         flightReset();
-        menu->deleteLater();
       });
-      menu->addLine(STR_RESET_TIMER1, [=]() -> void {
+      menu->addLine(STR_RESET_TIMER1, [=]() {
         timerReset(0);
-        menu->deleteLater();
       });
-      menu->addLine(STR_RESET_TIMER2, [=]() -> void {
+      menu->addLine(STR_RESET_TIMER2, [=]() {
         timerReset(1);
-        menu->deleteLater();
       });
-      menu->addLine(STR_RESET_TIMER3, [=]() -> void {
+      menu->addLine(STR_RESET_TIMER3, [=]() {
         timerReset(2);
-        menu->deleteLater();
       });
-      menu->addLine(STR_RESET_TELEMETRY, [=]() -> void {
+      menu->addLine(STR_RESET_TELEMETRY, [=]() {
         telemetryReset();
-        menu->deleteLater();
       });
     });
-    menu->addLine(STR_STATISTICS, [=]() -> void {
-      menu->deleteLater();
+    menu->addLine(STR_STATISTICS, [=]() {
       // TODO
     });
-    menu->addLine(STR_ABOUT_US, [=]() -> void {
-      menu->deleteLater();
+    menu->addLine(STR_ABOUT_US, [=]() {
       // TODO
     });
     return true;

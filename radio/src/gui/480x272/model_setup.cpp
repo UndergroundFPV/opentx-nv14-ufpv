@@ -363,7 +363,7 @@ void ModelSetupPage::updateInternalModuleWindow()
   internalModuleChoice = new Choice(internalModuleWindow, grid.getFieldSlot(2, 0), STR_TARANIS_PROTOCOLS,
                                     MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
                                     GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].rfProtocol),
-                                    [=](int32_t newValue) -> void {
+                                    [=](int32_t newValue) {
                                       g_model.moduleData[INTERNAL_MODULE].rfProtocol = newValue - 1;
                                       SET_DIRTY();
                                       updateInternalModuleWindow();
@@ -391,7 +391,7 @@ void ModelSetupPage::updateInternalModuleWindow()
     // Channel start
     auto channelStartEdit = new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS(0),
                                            GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
-                                           [=](int8_t newValue) -> void {
+                                           [=](int8_t newValue) {
                                              g_model.moduleData[INTERNAL_MODULE].channelsStart = newValue - 1;
                                              SET_DIRTY();
                                              channelEndEdit->invalidate();

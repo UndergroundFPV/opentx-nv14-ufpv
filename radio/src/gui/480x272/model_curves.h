@@ -18,28 +18,24 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
 
-#include "window.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "slider.h"
-#include "keyboard_text.h"
-#include "keyboard_number.h"
-#include "tabsgroup.h"
-#include "page.h"
-#include "menu.h"
-#include "alert.h"
-#include "gridlayout.h"
-#include "helpers.h"
-#include "curve.h"
+#ifndef _MODEL_CURVES_H_
+#define _MODEL_CURVES_H_
 
-#endif // _WINDOWS_H_
+#include "gui/common/windows/windows.h"
+
+class ModelCurvesPage: public PageTab {
+  public:
+    ModelCurvesPage();
+
+    virtual void build(Window * window) override {
+      build(window, -1);
+    }
+
+  protected:
+    void build(Window * window, int8_t focusIndex);
+    void rebuild(Window * window, int8_t focusIndex);
+    void editCurve(Window * window, uint8_t curve);
+};
+
+#endif // _MODEL_CURVES_H_

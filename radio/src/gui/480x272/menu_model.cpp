@@ -25,6 +25,7 @@
 #include "model_mixes.h"
 #include "model_inputs.h"
 #include "model_outputs.h"
+#include "model_curves.h"
 #include "model_logical_switches.h"
 
 ModelMenu::ModelMenu():
@@ -38,7 +39,7 @@ ModelMenu::ModelMenu():
   addTab(new ModelInputsPage());
   addTab(new ModelMixesPage());
   addTab(new ModelOutputsPage());
-  addTab(new ModelSetupPage()); // curves
+  addTab(new ModelCurvesPage());
   addTab(new ModelLogicalSwitchesPage());
 }
 
@@ -49,17 +50,17 @@ const MenuHandlerFunc menuTabModel[] = {
   // menuModelExposAll,
   // menuModelMixAll,
   // menuModelLimits,
-  CASE_CURVES(menuModelCurvesAll)
+  // CASE_CURVES(menuModelCurvesAll)
 #if defined(GVARS) && defined(FLIGHT_MODES)
-  CASE_GVARS(menuModelGVars)
+  // CASE_GVARS(menuModelGVars)
 #endif
   //menuModelLogicalSwitches,
-  menuModelSpecialFunctions,
+  // menuModelSpecialFunctions,
 #if defined(LUA_MODEL_SCRIPTS)
-  menuModelCustomScripts,
+  // menuModelCustomScripts,
 #endif
-  CASE_FRSKY(menuModelTelemetryFrsky)
-  CASE_MAVLINK(menuModelTelemetryMavlink)
+  // CASE_FRSKY(menuModelTelemetryFrsky)
+  // CASE_MAVLINK(menuModelTelemetryMavlink)
 };
 
 void editCurveRef(coord_t x, coord_t y, CurveRef & curve, event_t event, LcdFlags attr);

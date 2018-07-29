@@ -380,17 +380,14 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
           button->bringToTop();
           Menu * menu = new Menu();
           menu->addLine(STR_EDIT, [=]() {
-            menu->deleteLater();
             editMix(window, ch, mixIndex);
           });
           if (!reachMixesLimit()) {
             menu->addLine(STR_INSERT_BEFORE, [=]() {
-              menu->deleteLater();
               insertMix(mixIndex, ch);
               editMix(window, ch, mixIndex);
             });
             menu->addLine(STR_INSERT_AFTER, [=]() {
-              menu->deleteLater();
               insertMix(mixIndex + 1, ch);
               editMix(window, ch, mixIndex + 1);
             });
@@ -398,7 +395,6 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
           }
           // TODO STR_MOVE
           menu->addLine(STR_DELETE, [=]() {
-            menu->deleteLater();
             deleteMix(mixIndex);
             rebuild(window, -1);
           });
