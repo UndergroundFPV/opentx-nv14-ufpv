@@ -65,11 +65,13 @@ protected:
           new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(CFN_PARAM(ls)));
           grid.nextLine();
           break;
+
         case FUNC_TRAINER:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_TIMER);
           new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, 4, GET_SET_DEFAULT(CFN_TIMER_INDEX(ls)));
           grid.nextLine();
           break;
+
         case FUNC_RESET:
           if (CFN_PARAM(ls) < FUNC_RESET_PARAM_FIRST_TELEM) {
             new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_RESET);
@@ -87,6 +89,11 @@ protected:
           }
           break;
 
+        case FUNC_VOLUME:
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_SPEAKER_VOLUME);
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(CFN_PARAM(ls)));
+          grid.nextLine();
+          break;
       }
 
       if (HAS_ENABLE_PARAM(func)) {
@@ -193,6 +200,10 @@ public:
             TelemetrySensor * sensor = & g_model.telemetrySensors[CFN_PARAM(sf)-FUNC_RESET_PARAM_FIRST_TELEM];
             lcdDrawSizedText(col1, line2, sensor->label, TELEM_LABEL_LEN, ZCHAR);
           }
+          break;
+
+        case FUNC_VOLUME:
+          drawSource(col1, line2, CFN_PARAM(sf), 0);
           break;
       }
       if (HAS_ENABLE_PARAM(func)) {
