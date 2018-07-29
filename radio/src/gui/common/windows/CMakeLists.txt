@@ -2,6 +2,7 @@ set(WINDOWS_DIRECTORY gui/common/windows)
 
 set(SRC
     ${SRC}
+    ${WINDOWS_DIRECTORY}/mainwindow.cpp
     ${WINDOWS_DIRECTORY}/window.cpp
     ${WINDOWS_DIRECTORY}/button.cpp
     ${WINDOWS_DIRECTORY}/keyboard_text.cpp

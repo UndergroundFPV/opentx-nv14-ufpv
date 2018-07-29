@@ -29,6 +29,8 @@
   #include "lua/lua_exports_x12s.inc"   // this line must be after lua headers
 #elif defined(PCBX10)
   #include "lua/lua_exports_x10.inc"
+#elif defined(PCBNV14)
+  #include "lua/lua_exports_nv14.inc"
 #elif defined(PCBX9E)
   #include "lua/lua_exports_x9e.inc"
 #elif defined(PCBX7)
@@ -1383,7 +1385,7 @@ const luaR_value_entry opentxConstants[] = {
   { "MAINVIEW_PANES_COLOR", MAINVIEW_PANES_COLOR },
   { "MAINVIEW_GRAPHICS_COLOR", MAINVIEW_GRAPHICS_COLOR },
   { "HEADER_BGCOLOR", HEADER_BGCOLOR },
-  { "HEADER_ICON_BGCOLOR", HEADER_ICON_BGCOLOR },
+//   { "HEADER_ICON_BGCOLOR", HEADER_ICON_BGCOLOR },
   { "HEADER_CURRENT_BGCOLOR", HEADER_CURRENT_BGCOLOR },
   { "OVERLAY_COLOR", OVERLAY_COLOR },
   { "MENU_HEADER_HEIGHT", MENU_HEADER_HEIGHT },

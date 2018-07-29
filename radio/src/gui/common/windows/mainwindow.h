@@ -1,3 +1,5 @@
+#include <utility>
+
 /*
  * Copyright (C) OpenTX
  *
@@ -18,30 +20,38 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#ifndef _MAINWINDOW_H_
+#define _MAINWINDOW_H_
 
 #include "window.h"
-#include "mainwindow.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "slider.h"
-#include "keyboard_text.h"
-#include "keyboard_number.h"
-#include "keyboard_curve.h"
-#include "tabsgroup.h"
-#include "page.h"
-#include "menu.h"
-#include "alert.h"
-#include "gridlayout.h"
-#include "helpers.h"
-#include "curveedit.h"
 
-#endif // _WINDOWS_H_
+class MainWindow: public Window {
+  public:
+    MainWindow():
+      Window(nullptr, {0, 0, LCD_W, LCD_H}),
+      invalidatedRect(rect)
+    {
+    }
+
+    void checkEvents() override;
+
+    void invalidate(const rect_t & rect) override;
+
+    bool refresh();
+
+    void run()
+    {
+      checkEvents();
+      if (refresh()) {
+        lcdRefresh();
+      }
+    }
+
+  protected:
+    void emptyTrash();
+    rect_t invalidatedRect;
+};
+
+extern MainWindow mainWindow;
+
+#endif // _MAINWINDOW_H_

@@ -134,3 +134,5 @@ if(PYTHONINTERP_FOUND)
     DEPENDS ${RADIO_DIRECTORY}/src/datastructs.h ${RADIO_DIRECTORY}/util/generate_datacopy.py
   )
 endif()
+
+set(LUA_EXPORT lua_export_nv14)

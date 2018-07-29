@@ -380,8 +380,7 @@ static int luaModelInsertInput(lua_State *L)
 
   if (chn<MAX_INPUTS && getExposCount()<MAX_EXPOS && idx<=count) {
     idx = first + idx;
-    s_currCh = chn + 1;
-    insertExpo(idx);
+    insertExpo(idx, chn);
     ExpoData * expo = expoAddress(idx);
     luaL_checktype(L, -1, LUA_TTABLE);
     for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
@@ -591,9 +590,8 @@ static int luaModelInsertMix(lua_State *L)
 
   if (chn<MAX_OUTPUT_CHANNELS && getMixesCount()<MAX_MIXERS && idx<=count) {
     idx += first;
-    s_currCh = chn+1;
-    insertMix(idx);
-    MixData *mix = mixAddress(idx);
+    insertMix(idx, chn);
+    MixData * mix = mixAddress(idx);
     luaL_checktype(L, -1, LUA_TTABLE);
     for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
       luaL_checktype(L, -2, LUA_TSTRING); // key is string

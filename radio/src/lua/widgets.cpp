@@ -182,7 +182,7 @@ class LuaTheme: public Theme
       exec(drawBackgroundFunction);
     }
 
-    virtual void drawTopbarBackground(uint8_t icon) const
+    virtual bool drawTopbarBackground(uint32_t options) const
     {
       exec(drawTopbarBackgroundFunction);
     }

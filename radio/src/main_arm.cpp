@@ -181,7 +181,6 @@ void periodicTick()
 void guiMain(event_t evt)
 {
 #if defined(LUA)
-  // TODO ...
   uint32_t t0 = get_tmr10ms();
   static uint32_t lastLuaTime = 0;
   uint16_t interval = (lastLuaTime == 0 ? 0 : (t0 - lastLuaTime));
@@ -190,28 +189,7 @@ void guiMain(event_t evt)
     maxLuaInterval = interval;
   }
 
-  // run Lua scripts that don't use LCD (to use CPU time while LCD DMA is running)
-  DEBUG_TIMER_START(debugTimerLuaBg);
-  luaTask(0, RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, false);
-  DEBUG_TIMER_STOP(debugTimerLuaBg);
-  // wait for LCD DMA to finish before continuing, because code from this point
-  // is allowed to change the contents of LCD buffer
-  //
-  // WARNING: make sure no code above this line does any change to the LCD display buffer!
-  //
-  DEBUG_TIMER_START(debugTimerLcdRefreshWait);
-  lcdRefreshWait();
-  DEBUG_TIMER_STOP(debugTimerLcdRefreshWait);
-
-  // draw LCD from menus or from Lua script
-  // run Lua scripts that use LCD
-
-  DEBUG_TIMER_START(debugTimerLuaFg);
-  refreshNeeded = luaTask(evt, RUN_STNDAL_SCRIPT, true);
-  if (!refreshNeeded) {
-    refreshNeeded = luaTask(evt, RUN_TELEM_FG_SCRIPT, true);
-  }
-  DEBUG_TIMER_STOP(debugTimerLuaFg);
+  luaTask(0, RUN_STNDAL_SCRIPT | RUN_TELEM_FG_SCRIPT | RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, true);
 
   t0 = get_tmr10ms() - t0;
   if (t0 > maxLuaDuration) {

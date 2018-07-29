@@ -1,5 +1,3 @@
-#include <utility>
-
 /*
  * Copyright (C) OpenTX
  *
@@ -24,8 +22,8 @@
 #define _WINDOW_H_
 
 #include <list>
+#include <utility>
 #include <functional>
-#include <touch_driver.h>
 #include "bitmapbuffer.h"
 #include "debug.h"
 
@@ -210,33 +208,4 @@ class Window {
     virtual void invalidate(const rect_t & rect);
 };
 
-class MainWindow: public Window {
-  public:
-    MainWindow():
-      Window(nullptr, {0, 0, LCD_W, LCD_H}),
-      invalidatedRect(rect)
-    {
-    }
-
-    void checkEvents() override;
-
-    void invalidate(const rect_t & rect) override;
-
-    bool refresh();
-
-    void run()
-    {
-      checkEvents();
-      if (refresh()) {
-        lcdRefresh();
-      }
-    }
-
-  protected:
-    void emptyTrash();
-    rect_t invalidatedRect;
-};
-
-extern MainWindow mainWindow;
-
-#endif
+#endif // _WINDOW_H_
