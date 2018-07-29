@@ -407,7 +407,7 @@ int applyCurve(int x, int8_t idx)
 
 point_t getPoint(uint8_t index)
 {
-  getPoint(s_curveChan, index);
+  return getPoint(s_curveChan, index);
 }
 
 point_t getPoint(uint8_t curveIndex, uint8_t index)
