@@ -23,6 +23,7 @@
 
 #include "keyboard_base.h"
 
+class Button;
 class CurveEdit;
 
 class CurveKeyboard : public Keyboard<CurveEdit> {
@@ -33,17 +34,21 @@ class CurveKeyboard : public Keyboard<CurveEdit> {
 
     ~CurveKeyboard();
 
-    static CurveKeyboard * instance() {
+    static CurveKeyboard * instance()
+    {
       if (!_instance)
         _instance = new CurveKeyboard();
       return _instance;
     }
 
+    void setField(CurveEdit * field);
+
     virtual void paint(BitmapBuffer * dc) override;
 
   protected:
     static CurveKeyboard * _instance;
-    void drawButton(BitmapBuffer * dc, const char * text, rect_t & rect);
+    Button * left = nullptr;
+    Button * right = nullptr;
 };
 
 #endif // _KEYBOARD_CURVE_H_

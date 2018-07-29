@@ -22,7 +22,7 @@
 
 constexpr coord_t KEYBOARD_HEIGHT = 160;
 
-TextKeyboard * TextKeyboard::textKeyboard = nullptr;
+TextKeyboard * TextKeyboard::_instance = nullptr;
 
 const uint8_t LBM_KEY_UPPERCASE[] = {
 #include "mask_key_uppercase.lbm"
@@ -88,7 +88,7 @@ TextKeyboard::TextKeyboard():
 
 TextKeyboard::~TextKeyboard()
 {
-  textKeyboard = nullptr;
+  _instance = nullptr;
 }
 
 void TextKeyboard::setCursorPos(coord_t x)

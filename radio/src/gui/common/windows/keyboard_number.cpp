@@ -22,7 +22,7 @@
 
 constexpr coord_t KEYBOARD_HEIGHT = 90;
 
-NumberKeyboard * NumberKeyboard::numberKeyboard = nullptr;
+NumberKeyboard * NumberKeyboard::_instance = nullptr;
 
 NumberKeyboard::NumberKeyboard():
   Keyboard<NumberEdit>(KEYBOARD_HEIGHT)
@@ -86,7 +86,7 @@ NumberKeyboard::NumberKeyboard():
 
 NumberKeyboard::~NumberKeyboard()
 {
-  numberKeyboard = nullptr;
+  _instance = nullptr;
 }
 
 void NumberKeyboard::paint(BitmapBuffer * dc)

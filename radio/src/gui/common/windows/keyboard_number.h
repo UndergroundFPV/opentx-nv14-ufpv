@@ -34,16 +34,15 @@ class NumberKeyboard : public Keyboard<NumberEdit> {
     ~NumberKeyboard();
 
     static NumberKeyboard * instance() {
-      if (!numberKeyboard)
-        numberKeyboard = new NumberKeyboard();
-      return numberKeyboard;
+      if (!_instance)
+        _instance = new NumberKeyboard();
+      return _instance;
     }
 
     virtual void paint(BitmapBuffer * dc) override;
 
   protected:
-    static NumberKeyboard * numberKeyboard;
-    void drawButton(BitmapBuffer * dc, const char * text, rect_t & rect);
+    static NumberKeyboard * _instance;
 };
 
 #endif // _KEYBOARD_NUMBER_H_

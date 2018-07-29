@@ -53,6 +53,7 @@ class CurveEdit: public CurveWindow {
     void down();
     void right();
     void left();
+    bool isCustomCurve();
 };
 
 #endif // _CURVEEDIT_H_

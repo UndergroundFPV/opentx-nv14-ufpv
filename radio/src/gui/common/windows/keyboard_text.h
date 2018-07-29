@@ -34,9 +34,9 @@ class TextKeyboard : public Keyboard<TextEdit> {
     ~TextKeyboard();
 
     static TextKeyboard * instance() {
-      if (!textKeyboard)
-        textKeyboard = new TextKeyboard();
-      return textKeyboard;
+      if (!_instance)
+        _instance = new TextKeyboard();
+      return _instance;
     }
 
     coord_t getCursorPos() const
@@ -51,7 +51,7 @@ class TextKeyboard : public Keyboard<TextEdit> {
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
-    static TextKeyboard * textKeyboard;
+    static TextKeyboard * _instance;
     coord_t cursorPos = 0;
     uint8_t cursorIndex = 0;
     const char * const * layout;

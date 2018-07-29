@@ -131,3 +131,8 @@ void CurveEdit::left()
     invalidate();
   }
 }
+
+bool CurveEdit::isCustomCurve()
+{
+  return g_model.curves[index].type == CURVE_TYPE_CUSTOM;
+}

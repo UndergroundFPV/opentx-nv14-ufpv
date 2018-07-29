@@ -29,7 +29,7 @@ CurveKeyboard::CurveKeyboard():
   Keyboard<CurveEdit>(KEYBOARD_HEIGHT)
 {
   // up
-  new TextButton(this, { LCD_W/2 - 20, 5, 40, 40 }, "\200",
+  new TextButton(this, {LCD_W/2 - 20, 5, 40, 40}, "\200",
                  [=]() -> uint8_t {
                    if (field) {
                      field->up();
@@ -38,32 +38,32 @@ CurveKeyboard::CurveKeyboard():
                  }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   // down
-  new TextButton(this, { LCD_W/2 - 20, 65, 40, 40 }, "\201",
+  new TextButton(this, {LCD_W/2 - 20, 65, 40, 40}, "\201",
                  [=]() -> uint8_t {
                    field->down();
                    return 0;
                  }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   // left
-  new TextButton(this, { LCD_W/2 - 70, 35, 40, 40 }, "\177",
-                 [=]() -> uint8_t {
-                   if (field) {
-                     field->left();
-                   }
-                   return 0;
-                 }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
+  left = new TextButton(this, {LCD_W / 2 - 70, 35, 40, 40}, "\177",
+                        [=]() -> uint8_t {
+                          if (field) {
+                            field->left();
+                          }
+                          return 0;
+                        }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   // right
-  new TextButton(this, { LCD_W/2 + 30, 35, 40, 40 }, "\176",
-                 [=]() -> uint8_t {
-                   if (field) {
-                     field->right();
-                   }
-                   return 0;
-                 }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
+  right = new TextButton(this, {LCD_W / 2 + 30, 35, 40, 40}, "\176",
+                         [=]() -> uint8_t {
+                           if (field) {
+                             field->right();
+                           }
+                           return 0;
+                         }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   // next
-  new TextButton(this, { LCD_W/2 + 80, 35, 60, 40 }, "Next",
+  new TextButton(this, {LCD_W/2 + 80, 35, 60, 40}, "Next",
                  [=]() -> uint8_t {
                    if (field) {
                      field->next();
@@ -72,7 +72,7 @@ CurveKeyboard::CurveKeyboard():
                  }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
 
   // previous
-  new TextButton(this, { LCD_W/2 - 140, 35, 60, 40 }, "Prev",
+  new TextButton(this, {LCD_W / 2 - 140, 35, 60, 40}, "Prev",
                  [=]() -> uint8_t {
                    if (field) {
                      field->previous();
@@ -85,6 +85,14 @@ CurveKeyboard::CurveKeyboard():
 CurveKeyboard::~CurveKeyboard()
 {
   _instance = nullptr;
+}
+
+void CurveKeyboard::setField(CurveEdit * field)
+{
+  Keyboard<CurveEdit>::setField(field);
+  bool custom = field->isCustomCurve();
+  left->enable(custom);
+  right->enable(custom);
 }
 
 void CurveKeyboard::paint(BitmapBuffer * dc)
