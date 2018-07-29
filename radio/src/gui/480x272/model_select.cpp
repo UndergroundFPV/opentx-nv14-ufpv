@@ -245,11 +245,11 @@ ModelselectButton::ModelselectButton(Window * parent, const rect_t & rect, Model
                    sdCopyFile(modelCell->modelFilename, MODELS_PATH, duplicatedFilename, MODELS_PATH);
                    modelslist.addModel(currentCategory, duplicatedFilename);
                    ModelselectPage::updateModels(parent, footer, currentCategory->size() - 1);
-                 } else {
+                 }
+                 else {
                    POPUP_WARNING("Invalid File");
                  }
                });
-
              }
              // menu->addLine(STR_MOVE_MODEL);
              if (modelCell && modelCell != modelslist.currentModel) {

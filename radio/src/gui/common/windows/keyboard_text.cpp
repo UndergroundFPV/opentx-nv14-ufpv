@@ -29,7 +29,7 @@ const uint8_t LBM_KEY_UPPERCASE[] = {
 };
 
 const uint8_t LBM_KEY_LOWERCASE[] = {
-#include "mask_key_uppercase.lbm"
+#include "mask_key_lowercase.lbm"
 };
 
 const uint8_t LBM_KEY_BACKSPACE[] = {
@@ -42,6 +42,10 @@ const uint8_t LBM_KEY_LETTERS[] = {
 
 const uint8_t LBM_KEY_NUMBERS[] = {
 #include "mask_key_numbers.lbm"
+};
+
+const uint8_t LBM_KEY_SPACEBAR[] = {
+#include "mask_key_spacebar.lbm"
 };
 
 const uint8_t * const LBM_SPECIAL_KEYS[] = {
@@ -127,9 +131,9 @@ void TextKeyboard::paint(BitmapBuffer * dc)
         x += 15;
       }
       else if (*c == '\t') {
-        // space
-        dc->drawSolidFilledRect(x, y, 150, 20, TEXT_DISABLE_COLOR);
-        x += 155;
+        // spacebar
+        dc->drawBitmapPattern(x, y, LBM_KEY_SPACEBAR, TEXT_COLOR);
+        x += 135;
       }
       else if (*c == '\n') {
         // enter
@@ -167,11 +171,11 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
       x -= 15;
     }
     else if (*key == '\t') {
-      if (x <= 155) {
+      if (x <= 135) {
         c = ' ';
         break;
       }
-      x -= 155;
+      x -= 135;
     }
     else if (*key == '\n') {
       if (x <= 80) {
