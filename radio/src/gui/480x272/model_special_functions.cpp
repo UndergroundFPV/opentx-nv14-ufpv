@@ -35,6 +35,7 @@ public:
 
 protected:
     uint8_t index;
+    Window * specialFunctionOneWindow = nullptr;
 
     void buildHeader(Window * window)
     {
@@ -44,9 +45,40 @@ protected:
       new StaticText(window, {70, 28, 100, 20}, s, MENU_TITLE_COLOR);
     }
 
+    void updateSpecialFunctionOneWindow()
+    {
+      //SF.one variable part
+      GridLayout grid(*specialFunctionOneWindow);
+      specialFunctionOneWindow->clear();
+
+      CustomFunctionData * cfn = &g_model.customFn[index];
+      uint8_t func = CFN_FUNC(cfn);
+
+      // Func param
+      switch(func) {
+        case FUNC_OVERRIDE_CHANNEL:
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_CH);
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS-1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
+          grid.nextLine();
+
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
+          new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          grid.nextLine();
+      }
+
+      if (HAS_ENABLE_PARAM(func)) {
+        new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_ENABLE);
+        new CheckBox(specialFunctionOneWindow, grid.getFieldSlot(), GET_SET_DEFAULT(CFN_ACTIVE(cfn)));
+        grid.nextLine();
+      }
+      else if (HAS_REPEAT_PARAM(func)) { // !1x 1x 1s 2s 3s ...
+        // TODO
+      }
+    }
+
     void buildBody(Window * window)
     {
-      //CF.one
+      //SF.one
       GridLayout grid(*window);
       grid.spacer(8);
 
@@ -61,30 +93,18 @@ protected:
 
       // Function
       new StaticText(window, grid.getLabelSlot(), STR_FUNC);
-      auto choice = new Choice(window, grid.getFieldSlot(), STR_VFSWFUNC, 0, FUNC_MAX-1, GET_SET_DEFAULT(CFN_FUNC(cfn)));
+      auto choice = new Choice(window, grid.getFieldSlot(), STR_VFSWFUNC, 0, FUNC_MAX-1, GET_DEFAULT(CFN_FUNC(cfn)),
+                               [=](int32_t newValue) {
+                                   CFN_FUNC(cfn) = newValue;
+                                   SET_DIRTY();
+                                   updateSpecialFunctionOneWindow();
+                               });
       choice->setAvailableHandler(isAssignableFunctionAvailable);
       grid.nextLine();
 
-      // Func param
-      switch(func) {
-        case FUNC_OVERRIDE_CHANNEL:
-          new StaticText(window, grid.getLabelSlot(), STR_CH);
-          new SourceChoice(window, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS-1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
-          grid.nextLine();
-
-          new StaticText(window, grid.getLabelSlot(), STR_VALUE);
-          new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(CFN_PARAM(cfn)));
-          grid.nextLine();
-
-          new StaticText(window, grid.getLabelSlot(), STR_ENABLE);
-          new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(CFN_ACTIVE(cfn)));
-          grid.nextLine();
-          break;
-
-      }
-
-
-      window->setInnerHeight(grid.getWindowHeight());
+      specialFunctionOneWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
+      updateSpecialFunctionOneWindow();
+      grid.addWindow(specialFunctionOneWindow);
     }
 };
 
@@ -122,11 +142,23 @@ public:
 
     void paintSpecialFunctionLine(BitmapBuffer * dc)
     {
-      //CF.all
+      //SF.all
       const CustomFunctionData * sf = &g_model.customFn[sfIndex];
       uint8_t func = CFN_FUNC(sf);
 
       drawSwitch(col1, line1, CFN_SWITCH(sf), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << sfIndex)) ? BOLD : 0));
+      lcdDrawTextAtIndex(col2, line1, STR_VFSWFUNC, func, 0);
+      int16_t val_min = 0;
+      int16_t val_max = 255;
+
+      switch(func) {
+        case FUNC_OVERRIDE_CHANNEL:
+          putsChn(col1, line2, CFN_CH_INDEX(sf)+1, 0);
+          getMixSrcRange(MIXSRC_FIRST_CH, val_min, val_max);
+          lcdDrawNumber(col2, line2, CFN_PARAM(sf), 0);
+          drawCheckBox(col3, line2, CFN_ACTIVE(sf), 0);
+          break;
+      }
     }
 
     virtual void paint(BitmapBuffer * dc) override
