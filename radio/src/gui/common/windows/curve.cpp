@@ -55,7 +55,7 @@ coord_t CurveWindow::getPointY(int y)
 
 void CurveWindow::drawCurve(BitmapBuffer * dc)
 {
-  coord_t prev = (coord_t) -1;
+  auto prev = (coord_t) -1;
 
   for (int x = 0; x < width(); x++) {
     coord_t y = getPointY(function(divRoundClosest((x - width() / 2) * RESX, width() / 2)));
@@ -92,10 +92,43 @@ void CurveWindow::drawPosition(BitmapBuffer * dc)
   dc->drawText(11, 10, coords, SMLSIZE|TEXT_BGCOLOR);
 }
 
+void CurveWindow::drawPoint(BitmapBuffer * dc, const point_t & point)
+{
+  coord_t x = getPointX(point.x);
+  coord_t y = getPointY(point.y);
+
+  dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT, TEXT_COLOR);
+  dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT_CENTER, TEXT_BGCOLOR);
+}
+
 void CurveWindow::paint(BitmapBuffer * dc)
 {
   drawBackground(dc);
   drawCurve(dc);
-  if (position)
+  for (auto point: points) {
+    drawPoint(dc, point);
+  }
+  if (position) {
     drawPosition(dc);
+  }
+}
+
+void CurveWindow::addPoint(const point_t & point)
+{
+  points.push_back(point);
+  invalidate();
+}
+
+void CurveWindow::clearPoints()
+{
+  points.clear();
+  invalidate();
+}
+
+bool CurveWindow::onTouchEnd(coord_t x, coord_t y)
+{
+  if (onPress) {
+    onPress();
+  }
+  return true;
 }

@@ -28,26 +28,41 @@ class CurveWindow: public Window {
   public:
     CurveWindow(Window * parent, const rect_t & rect, std::function<int(int)> function, std::function<int()> position=nullptr):
       Window(parent, rect),
-      function(function),
-      position(position)
+      function(std::move(function)),
+      position(std::move(position))
     {
     }
 
-    virtual void checkEvents() override
+    void setOnPressHandler(std::function<void()> handler)
+    {
+      onPress = handler;
+    }
+
+    void checkEvents() override
     {
       // will always force a full window refresh
-      if (position)
+      if (position) {
         invalidate();
+      }
     }
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void addPoint(const point_t & point);
+
+    void clearPoints();
+
+    void paint(BitmapBuffer * dc) override;
+
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     std::function<int(int)> function;
     std::function<int()> position;
+    std::function<void()> onPress;
+    std::list<point_t> points;
     void drawBackground(BitmapBuffer * dc);
     void drawCurve(BitmapBuffer * dc);
     void drawPosition(BitmapBuffer * dc);
+    void drawPoint(BitmapBuffer * dc, const point_t & point);
     coord_t getPointX(int x);
     coord_t getPointY(int y);
 };

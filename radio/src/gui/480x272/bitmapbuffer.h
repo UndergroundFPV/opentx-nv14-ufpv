@@ -29,6 +29,11 @@
 #include "debug.h"
 #include "opentx_types.h"
 
+struct point_t {
+  coord_t x;
+  coord_t y;
+};
+
 struct rect_t {
   coord_t x, y, w, h;
   constexpr coord_t left() const { return x; };

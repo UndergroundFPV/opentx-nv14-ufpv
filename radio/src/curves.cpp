@@ -405,26 +405,26 @@ int applyCurve(int x, int8_t idx)
 }
 #endif
 
-point_t getPoint(uint8_t i)
+point_t getPoint(uint8_t index)
+{
+  getPoint(s_curveChan, index);
+}
+
+point_t getPoint(uint8_t curveIndex, uint8_t index)
 {
   point_t result = {0, 0};
-#if defined(CPUARM)
-  CurveInfo & crv = g_model.curves[s_curveChan];
-  int8_t * points = curveAddress(s_curveChan);
+  CurveInfo & crv = g_model.curves[curveIndex];
+  int8_t * points = curveAddress(curveIndex);
   bool custom = (crv.type == CURVE_TYPE_CUSTOM);
-  uint8_t count = 5+crv.points;
-#else
-  CurveInfo crv = curveInfo(s_curveChan);
-  int8_t * points = crv.crv;
-  bool custom = crv.custom;
-  uint8_t count = crv.points;
-#endif
-  if (i < count) {
-    result.x = CURVE_CENTER_X-1-CURVE_SIDE_WIDTH + i*CURVE_SIDE_WIDTH*2/(count-1);
-    result.y = CURVE_CENTER_Y - (points[i]) * (CURVE_SIDE_WIDTH-1) / 100;
-    if (custom && i>0 && i<count-1) {
-      result.x = CURVE_CENTER_X - 1 - CURVE_SIDE_WIDTH + (100 + (100 + points[count + i - 1]) * (2 * CURVE_SIDE_WIDTH)) / 200;
+  uint8_t count = 5 + crv.points;
+  if (index < count) {
+    if (custom && index > 0 && index < count - 1) {
+      result.x = calc100toRESX(points[count + index - 1]);
     }
+    else {
+      result.x = -RESX + calc100toRESX(200 * index / (count - 1));
+    }
+    result.y = calc100toRESX(points[index]);
   }
   return result;
 }

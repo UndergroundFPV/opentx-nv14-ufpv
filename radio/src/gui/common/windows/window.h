@@ -1,3 +1,5 @@
+#include <utility>
+
 /*
  * Copyright (C) OpenTX
  *
@@ -35,12 +37,14 @@ class Window {
 
     virtual ~Window();
 
-    Window * getParent() const {
+    Window * getParent() const
+    {
       return parent;
     }
 
-    void setCloseHandler(std::function<void()> handler) {
-      onClose = handler;
+    void setCloseHandler(std::function<void()> handler)
+    {
+      onClose = std::move(handler);
     }
 
     void deleteLater(bool detach=true);
@@ -65,15 +69,18 @@ class Window {
 
     void setFocus();
 
-    void setWidth(coord_t w)
+    void setWidth(coord_t value)
     {
-      rect.w = w;
+      rect.w = value;
       invalidate();
     }
 
-    void setHeight(coord_t h)
+    void setHeight(coord_t value)
     {
-      rect.h = h;
+      rect.h = value;
+      if (innerHeight <= value) {
+        setScrollPositionY(0);
+      }
       invalidate();
     }
 
@@ -211,9 +218,9 @@ class MainWindow: public Window {
     {
     }
 
-    virtual void checkEvents() override;
+    void checkEvents() override;
 
-    virtual void invalidate(const rect_t & rect) override;
+    void invalidate(const rect_t & rect) override;
 
     bool refresh();
 
