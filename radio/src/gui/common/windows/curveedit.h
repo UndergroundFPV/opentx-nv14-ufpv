@@ -18,49 +18,41 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _PAGE_H_
-#define _PAGE_H_
+#ifndef _CURVEEDIT_H_
+#define _CURVEEDIT_H_
 
-#include "window.h"
+#include "curve.h"
+#include "keyboard_curve.h"
 
-class Page;
+class CurveEdit: public CurveWindow {
+  friend class CurveKeyboard;
 
-class PageHeader: public Window {
   public:
-    PageHeader(Page * parent, const rect_t & rect);
+    CurveEdit(Window * parent, const rect_t & rect, uint8_t index);
 
-    virtual void paint(BitmapBuffer * dc) override;
-
-  protected:
-    IconButton back;
-};
-
-class Page: public Window {
-  public:
-    Page();
-
-    virtual ~Page();
-
-    bool onTouchStart(coord_t x, coord_t y) override
+    void checkEvents() override
     {
-      Window::onTouchStart(x, y);
-      return true;
+      // no permanent refresh
     }
+
+    void update();
 
     bool onTouchEnd(coord_t x, coord_t y) override;
 
-    bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY) override
+    virtual void onFocusLost() override
     {
-      Window::onTouchSlide(x, y, startX, startY, slideX, slideY);
-      return true;
+      CurveKeyboard::instance()->disable();
     }
 
-    virtual void paint(BitmapBuffer * dc) override;
-
   protected:
-    PageHeader header;
-    Window body;
-    static constexpr coord_t headerHeight = 60;
+    uint8_t index;
+    uint8_t current;
+    void next();
+    void previous();
+    void up();
+    void down();
+    void right();
+    void left();
 };
 
-#endif // _PAGE_H_
+#endif // _CURVEEDIT_H_

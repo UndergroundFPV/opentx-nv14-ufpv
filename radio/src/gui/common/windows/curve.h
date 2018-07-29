@@ -24,6 +24,11 @@
 
 #include "window.h"
 
+struct CurvePoint {
+  point_t coords;
+  LcdFlags flags;
+};
+
 class CurveWindow: public Window {
   public:
     CurveWindow(Window * parent, const rect_t & rect, std::function<int(int)> function, std::function<int()> position=nullptr):
@@ -31,11 +36,6 @@ class CurveWindow: public Window {
       function(std::move(function)),
       position(std::move(position))
     {
-    }
-
-    void setOnPressHandler(std::function<void()> handler)
-    {
-      onPress = handler;
     }
 
     void checkEvents() override
@@ -46,23 +46,20 @@ class CurveWindow: public Window {
       }
     }
 
-    void addPoint(const point_t & point);
+    void addPoint(const point_t & point, LcdFlags flags);
 
     void clearPoints();
 
     void paint(BitmapBuffer * dc) override;
 
-    bool onTouchEnd(coord_t x, coord_t y) override;
-
   protected:
     std::function<int(int)> function;
     std::function<int()> position;
-    std::function<void()> onPress;
-    std::list<point_t> points;
+    std::list<CurvePoint> points;
     void drawBackground(BitmapBuffer * dc);
     void drawCurve(BitmapBuffer * dc);
     void drawPosition(BitmapBuffer * dc);
-    void drawPoint(BitmapBuffer * dc, const point_t & point);
+    void drawPoint(BitmapBuffer * dc, const CurvePoint & point);
     coord_t getPointX(int x);
     coord_t getPointY(int y);
 };

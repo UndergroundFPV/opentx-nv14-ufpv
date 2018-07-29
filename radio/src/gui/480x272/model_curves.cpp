@@ -47,7 +47,7 @@ class CurveEditWindow : public Page {
 
   protected:
     uint8_t index;
-    CurveWindow * preview = nullptr;
+    CurveEdit * curveEdit = nullptr;
 
     void buildHeader(Window * window)
     {
@@ -55,15 +55,6 @@ class CurveEditWindow : public Page {
       char s[16];
       strAppendStringWithIndex(s, STR_CV, index + 1);
       new StaticText(window, {70, 28, LCD_W - 100, 20}, s, MENU_TITLE_COLOR);
-    }
-
-    void updatePreview()
-    {
-      preview->clearPoints();
-      CurveInfo & curve = g_model.curves[index];
-      for (int i=0; i<5 + curve.points; i++) {
-        preview->addPoint(getPoint(index, i));
-      }
     }
 
     void buildBody(Window * window)
@@ -78,15 +69,8 @@ class CurveEditWindow : public Page {
       int8_t * points = curveAddress(index);
 
       // Curve editor
-      preview = new CurveWindow(window, { 20, grid.getWindowHeight(), LCD_W - 40, LCD_W - 40},
-                                [=](int x) -> int {
-                                  return applyCustomCurve(x, index);
-                                });
-      preview->setOnPressHandler([=] () {
-        preview->setFocus();
-      });
-      updatePreview();
-      grid.spacer(preview->height() + 15);
+      curveEdit = new CurveEdit(window, { 20, grid.getWindowHeight(), LCD_W - 40, LCD_W - 40}, index);
+      grid.spacer(curveEdit->height() + 15);
 
       // Name
       new StaticText(window, grid.getLabelSlot(), STR_NAME);
@@ -109,7 +93,7 @@ class CurveEditWindow : public Page {
                        curve.type = newValue;
                      }
                      SET_DIRTY();
-                     updatePreview();
+                     curveEdit->update();
                    }
                  });
 
@@ -131,7 +115,7 @@ class CurveEditWindow : public Page {
                                      }
                                      curve.points = newValue;
                                      SET_DIRTY();
-                                     updatePreview();
+                                     curveEdit->update();
                                    }
                                  });
       edit->setSuffix(STR_PTS);
@@ -143,7 +127,7 @@ class CurveEditWindow : public Page {
                    [=](int32_t newValue) {
                      g_model.curves[index].smooth = newValue;
                      SET_DIRTY();
-                     updatePreview();
+                     curveEdit->update();
                    });
       grid.nextLine();
 

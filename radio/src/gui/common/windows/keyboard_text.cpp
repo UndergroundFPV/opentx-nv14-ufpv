@@ -80,8 +80,6 @@ const char * const * const KEYBOARD_LAYOUTS[] = {
   KEYBOARD_NUMBERS,
 };
 
-TextKeyboard * textKeyboard = nullptr;
-
 TextKeyboard::TextKeyboard():
   Keyboard<TextEdit>(KEYBOARD_HEIGHT),
   layout(KEYBOARD_LOWERCASE)

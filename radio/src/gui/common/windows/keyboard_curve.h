@@ -18,29 +18,32 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#ifndef _KEYBOARD_CURVE_H_
+#define _KEYBOARD_CURVE_H_
 
-#include "window.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "slider.h"
-#include "keyboard_text.h"
-#include "keyboard_number.h"
-#include "keyboard_curve.h"
-#include "tabsgroup.h"
-#include "page.h"
-#include "menu.h"
-#include "alert.h"
-#include "gridlayout.h"
-#include "helpers.h"
-#include "curveedit.h"
+#include "keyboard_base.h"
 
-#endif // _WINDOWS_H_
+class CurveEdit;
+
+class CurveKeyboard : public Keyboard<CurveEdit> {
+  friend class CurveEdit;
+
+  public:
+    CurveKeyboard();
+
+    ~CurveKeyboard();
+
+    static CurveKeyboard * instance() {
+      if (!_instance)
+        _instance = new CurveKeyboard();
+      return _instance;
+    }
+
+    virtual void paint(BitmapBuffer * dc) override;
+
+  protected:
+    static CurveKeyboard * _instance;
+    void drawButton(BitmapBuffer * dc, const char * text, rect_t & rect);
+};
+
+#endif // _KEYBOARD_CURVE_H_

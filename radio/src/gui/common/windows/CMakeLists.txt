@@ -6,6 +6,7 @@ set(SRC
     ${WINDOWS_DIRECTORY}/button.cpp
     ${WINDOWS_DIRECTORY}/keyboard_text.cpp
     ${WINDOWS_DIRECTORY}/keyboard_number.cpp
+    ${WINDOWS_DIRECTORY}/keyboard_curve.cpp
     ${WINDOWS_DIRECTORY}/checkbox.cpp
     ${WINDOWS_DIRECTORY}/textedit.cpp
     ${WINDOWS_DIRECTORY}/numberedit.cpp
@@ -18,4 +19,5 @@ set(SRC
     ${WINDOWS_DIRECTORY}/menu.cpp
     ${WINDOWS_DIRECTORY}/alert.cpp
     ${WINDOWS_DIRECTORY}/curve.cpp
+    ${WINDOWS_DIRECTORY}/curveedit.cpp
     )

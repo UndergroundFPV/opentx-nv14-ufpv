@@ -83,6 +83,11 @@ void CurveWindow::drawPosition(BitmapBuffer * dc)
   coord_t x = getPointX(valueX);
   coord_t y = getPointY(valueY);
 
+  // the 2 lines
+  dc->drawSolidHorizontalLine(0, y, width(), CURVE_CURSOR_COLOR);
+  dc->drawSolidVerticalLine(x, 0, height(), CURVE_CURSOR_COLOR);
+
+  // the point (white inside)
   dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT, CURVE_CURSOR_COLOR);
   dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT_CENTER, TEXT_BGCOLOR);
 
@@ -92,12 +97,12 @@ void CurveWindow::drawPosition(BitmapBuffer * dc)
   dc->drawText(11, 10, coords, SMLSIZE|TEXT_BGCOLOR);
 }
 
-void CurveWindow::drawPoint(BitmapBuffer * dc, const point_t & point)
+void CurveWindow::drawPoint(BitmapBuffer * dc, const CurvePoint & point)
 {
-  coord_t x = getPointX(point.x);
-  coord_t y = getPointY(point.y);
+  coord_t x = getPointX(point.coords.x);
+  coord_t y = getPointY(point.coords.y);
 
-  dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT, TEXT_COLOR);
+  dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT, point.flags);
   dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT_CENTER, TEXT_BGCOLOR);
 }
 
@@ -113,9 +118,9 @@ void CurveWindow::paint(BitmapBuffer * dc)
   }
 }
 
-void CurveWindow::addPoint(const point_t & point)
+void CurveWindow::addPoint(const point_t & point, LcdFlags flags)
 {
-  points.push_back(point);
+  points.push_back({point, flags});
   invalidate();
 }
 
@@ -123,12 +128,4 @@ void CurveWindow::clearPoints()
 {
   points.clear();
   invalidate();
-}
-
-bool CurveWindow::onTouchEnd(coord_t x, coord_t y)
-{
-  if (onPress) {
-    onPress();
-  }
-  return true;
 }

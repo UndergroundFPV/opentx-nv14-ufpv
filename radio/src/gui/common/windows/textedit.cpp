@@ -34,8 +34,10 @@ void TextEdit::paint(BitmapBuffer * dc)
   else
     dc->drawSizedText(3, 2, value, length, ZCHAR | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
-  if (hasFocus) {
-    coord_t cursorPos = TextKeyboard::instance()->getCursorPos();
+
+  auto keyboard = TextKeyboard::instance();
+  if (hasFocus && keyboard->getField() == this) {
+    coord_t cursorPos = keyboard->getCursorPos();
     dc->drawSolidFilledRect(cursorPos + 2, 2, 2, 21, 0); // TEXT_INVERTED_BGCOLOR);
   }
 }
@@ -46,7 +48,7 @@ bool TextEdit::onTouchEnd(coord_t x, coord_t y)
     setFocus();
   }
 
-  TextKeyboard * keyboard = TextKeyboard::instance();
+  auto keyboard = TextKeyboard::instance();
   if (keyboard->getField() != this) {
     keyboard->setField(this);
   }

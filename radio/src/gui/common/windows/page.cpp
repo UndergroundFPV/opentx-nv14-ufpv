@@ -46,9 +46,20 @@ Page::~Page()
 {
   TextKeyboard::instance()->disable();
   NumberKeyboard::instance()->disable();
+  CurveKeyboard::instance()->disable();
 }
 
 void Page::paint(BitmapBuffer * dc)
 {
   dc->clear(TEXT_BGCOLOR);
+}
+
+bool Page::onTouchEnd(coord_t x, coord_t y)
+{
+  if (Window::onTouchEnd(x, y))
+    return true;
+  TextKeyboard::instance()->disable();
+  NumberKeyboard::instance()->disable();
+  CurveKeyboard::instance()->disable();
+  return true;
 }
