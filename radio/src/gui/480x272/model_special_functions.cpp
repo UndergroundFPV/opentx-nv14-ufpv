@@ -51,24 +51,29 @@ protected:
       GridLayout grid(*specialFunctionOneWindow);
       specialFunctionOneWindow->clear();
 
-      CustomFunctionData * cfn = &g_model.customFn[index];
-      uint8_t func = CFN_FUNC(cfn);
+      CustomFunctionData * ls = &g_model.customFn[index];
+      uint8_t func = CFN_FUNC(ls);
 
       // Func param
       switch(func) {
         case FUNC_OVERRIDE_CHANNEL:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_CH);
-          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS-1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS-1, GET_SET_DEFAULT(CFN_CH_INDEX(ls)));
           grid.nextLine();
 
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
-          new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(CFN_PARAM(ls)));
           grid.nextLine();
+          break;
+        case FUNC_TRAINER:
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, 4, GET_SET_DEFAULT(CFN_TIMER_INDEX(ls)));
+          grid.nextLine();
+          break;
       }
 
       if (HAS_ENABLE_PARAM(func)) {
         new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_ENABLE);
-        new CheckBox(specialFunctionOneWindow, grid.getFieldSlot(), GET_SET_DEFAULT(CFN_ACTIVE(cfn)));
+        new CheckBox(specialFunctionOneWindow, grid.getFieldSlot(), GET_SET_DEFAULT(CFN_ACTIVE(ls)));
         grid.nextLine();
       }
       else if (HAS_REPEAT_PARAM(func)) { // !1x 1x 1s 2s 3s ...
@@ -155,9 +160,15 @@ public:
         case FUNC_OVERRIDE_CHANNEL:
           putsChn(col1, line2, CFN_CH_INDEX(sf)+1, 0);
           getMixSrcRange(MIXSRC_FIRST_CH, val_min, val_max);
-          lcdDrawNumber(col2, line2, CFN_PARAM(sf), 0);
-          drawCheckBox(col3, line2, CFN_ACTIVE(sf), 0);
+          lcdDrawNumber(col2, line2, CFN_PARAM(sf));
           break;
+
+        case FUNC_TRAINER:
+          drawSource(col1, line2, CFN_CH_INDEX(sf)==0 ? 0 : MIXSRC_Rud+CFN_CH_INDEX(sf)-1);
+          break;
+      }
+      if (HAS_ENABLE_PARAM(func)) {
+        drawCheckBox(col3, line2, CFN_ACTIVE(sf), 0);
       }
     }
 
