@@ -19,6 +19,180 @@
  */
 
 #include "opentx.h"
+#include "model_special_functions.h"
+
+#define SET_DIRTY()     storageDirty(EE_MODEL)
+
+class SpecialFunctionEditWindow : public Page {
+public:
+    SpecialFunctionEditWindow(int8_t index) :
+            Page(),
+            index(index)
+    {
+      buildBody(&body);
+      buildHeader(&header);
+    }
+
+protected:
+    uint8_t index;
+
+    void buildHeader(Window * window)
+    {
+      char s[5]="SF";
+      strAppendUnsigned(&s[2], index);
+      new StaticText(window, {70, 4, 200, 20}, STR_MENUSPECIALFUNCS, MENU_TITLE_COLOR);
+      new StaticText(window, {70, 28, 100, 20}, s, MENU_TITLE_COLOR);
+    }
+
+    void buildBody(Window * window)
+    {
+      //CF.one
+      GridLayout grid(*window);
+      grid.spacer(8);
+
+      CustomFunctionData * cfn = &g_model.customFn[index];
+      uint8_t func = CFN_FUNC(cfn);
+
+      // SWitch
+      new StaticText(window, grid.getLabelSlot(), STR_SWITCH);
+      auto swicthchoice = new SwitchChoice(window, grid.getFieldSlot(), SWSRC_FIRST, SWSRC_LAST, GET_SET_DEFAULT(CFN_SWITCH(cfn)));
+      swicthchoice->setAvailableHandler(isSwitchAvailableInCustomFunctions);
+      grid.nextLine();
+
+      // Function
+      new StaticText(window, grid.getLabelSlot(), STR_FUNC);
+      auto choice = new Choice(window, grid.getFieldSlot(), STR_VFSWFUNC, 0, FUNC_MAX-1, GET_SET_DEFAULT(CFN_FUNC(cfn)));
+      choice->setAvailableHandler(isAssignableFunctionAvailable);
+      grid.nextLine();
+
+      // Func param
+      switch(func) {
+        case FUNC_OVERRIDE_CHANNEL:
+          new StaticText(window, grid.getLabelSlot(), STR_CH);
+          new SourceChoice(window, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS-1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
+          grid.nextLine();
+
+          new StaticText(window, grid.getLabelSlot(), STR_VALUE);
+          new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          grid.nextLine();
+
+          new StaticText(window, grid.getLabelSlot(), STR_ENABLE);
+          new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(CFN_ACTIVE(cfn)));
+          grid.nextLine();
+          break;
+
+      }
+
+
+      window->setInnerHeight(grid.getWindowHeight());
+    }
+};
+
+static constexpr coord_t line1 = 0;
+static constexpr coord_t line2 = 22;
+static constexpr coord_t col1 = 20;
+static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
+static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1;
+
+class SpecialFunctionButton : public Button {
+public:
+    SpecialFunctionButton(Window * parent, const rect_t &rect, uint8_t sfIndex) :
+            Button(parent, rect),
+            sfIndex(sfIndex)
+    {
+      const CustomFunctionData * sf = &g_model.customFn[sfIndex];
+      uint8_t func = CFN_FUNC(sf);
+      if (func < FUNC_FIRST_WITHOUT_ENABLE) {
+        setHeight(getHeight() + 20);
+      }
+    }
+
+    bool isActive()
+    {
+      return 0;
+    }
+
+    virtual void checkEvents() override
+    {
+      if (active != isActive()) {
+        invalidate();
+        active = !active;
+      }
+    }
+
+    void paintSpecialFunctionLine(BitmapBuffer * dc)
+    {
+      //CF.all
+      const CustomFunctionData * sf = &g_model.customFn[sfIndex];
+      uint8_t func = CFN_FUNC(sf);
+
+      drawSwitch(col1, line1, CFN_SWITCH(sf), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << sfIndex)) ? BOLD : 0));
+    }
+
+    virtual void paint(BitmapBuffer * dc) override
+    {
+      if (active)
+        dc->drawSolidFilledRect(2, 2, rect.w - 4, rect.h - 4, WARNING_COLOR);
+      paintSpecialFunctionLine(dc);
+      drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+    }
+
+protected:
+    uint8_t sfIndex;
+    bool active = false;
+};
+
+ModelSpecialFunctionsPage::ModelSpecialFunctionsPage() :
+        PageTab(STR_MENUSPECIALFUNCS, ICON_MODEL_SPECIAL_FUNCTIONS)
+{
+}
+
+void ModelSpecialFunctionsPage::rebuild(Window * window, int8_t focusSpecialFunctionIndex)
+{
+  coord_t scrollPosition = window->getScrollPositionY();
+  window->clear();
+  build(window, focusSpecialFunctionIndex);
+  window->setScrollPositionY(scrollPosition);
+}
+
+void ModelSpecialFunctionsPage::editSpecialFunction(Window * window, uint8_t index)
+{
+  Window * editWindow = new SpecialFunctionEditWindow(index);
+  editWindow->setCloseHandler([=]() {
+      rebuild(window, index);
+  });
+}
+
+
+void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
+  GridLayout grid(*window);
+  grid.spacer(8);
+  grid.setLabelWidth(66);
+
+  Window::clearFocus();
+  char s[5]="SF";
+
+  for(uint8_t  i=0; i < MAX_SPECIAL_FUNCTIONS; i++) {
+    CustomFunctionData * cfn = &g_model.customFn[i];
+
+    strAppendUnsigned(&s[2], i);
+    new TextButton(window, grid.getLabelSlot(), s);
+    Button * button = new SpecialFunctionButton(window, grid.getFieldSlot(), i);
+    if (focusIndex == i)
+      button->setFocus();
+    button->setPressHandler([=]() -> uint8_t {
+        button->bringToTop();
+        Menu * menu = new Menu();
+        menu->addLine(STR_EDIT, [=]() {
+            editSpecialFunction(window, i);
+        });
+        return 0;
+    });
+
+    grid.spacer(button->height() + 5);
+  }
+  window->setInnerHeight(grid.getWindowHeight());
+}
 
 #define MODEL_SPECIAL_FUNC_1ST_COLUMN          60
 #define MODEL_SPECIAL_FUNC_2ND_COLUMN          120

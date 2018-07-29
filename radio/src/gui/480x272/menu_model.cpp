@@ -27,6 +27,7 @@
 #include "model_outputs.h"
 #include "model_curves.h"
 #include "model_logical_switches.h"
+#include "model_special_functions.h"
 
 ModelMenu::ModelMenu():
   TabsGroup()
@@ -41,6 +42,7 @@ ModelMenu::ModelMenu():
   addTab(new ModelOutputsPage());
   addTab(new ModelCurvesPage());
   addTab(new ModelLogicalSwitchesPage());
+  addTab(new ModelSpecialFunctionsPage());
 }
 
 const MenuHandlerFunc menuTabModel[] = {

@@ -1067,6 +1067,7 @@
 #define TR_TELEMETRY_TYPE      TR("Typ", "Typ telemetrie")
 #define TR_TELEMETRY_SENSORS   "Senzory"
 #define TR_VALUE               "Hodnota"
+#define TR_ENABLE                      "Enable"
 #define TR_TOPLCDTIMER         "Stopky horního LCD"
 #define TR_UNIT                "Jednotky"
 #define TR_TELEMETRY_NEWSENSOR INDENT "Přidat senzor ručně"

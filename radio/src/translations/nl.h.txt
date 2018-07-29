@@ -1072,6 +1072,7 @@
 #define TR_TELEMETRY_TYPE      TR("Type", "Telemetrietype")
 #define TR_TELEMETRY_SENSORS   "Sensoren"
 #define TR_VALUE               "Waarde"
+#define TR_ENABLE                      "Enable"
 #define TR_TOPLCDTIMER         "Top LCD Timer"
 #define TR_UNIT                "Eenheid"
 #define TR_TELEMETRY_NEWSENSOR INDENT "Sensor toevoegen ..."
