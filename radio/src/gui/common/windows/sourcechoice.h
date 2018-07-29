@@ -39,12 +39,21 @@ class SourceChoice : public Window {
 
     bool onTouchEnd(coord_t x, coord_t y) override ;
 
+    virtual void setAvailableHandler(std::function<bool(int)> handler);
+
+    void setDisplayHandler(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function)
+    {
+      displayFunction = function;
+    }
+
   protected:
     const char * label;
     int16_t vmin;
     int16_t vmax;
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
+    std::function<bool(int)> isValueAvailable = isSourceAvailable;
+    std::function<void(BitmapBuffer *, LcdFlags, int32_t)> displayFunction;
 };
 
 #endif // _SOURCECHOICE_H_

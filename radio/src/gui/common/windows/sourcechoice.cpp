@@ -30,8 +30,16 @@ void SourceChoice::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  drawSource(dc, 3, 2, value, textColor);
+  if (displayFunction)
+    displayFunction(dc, textColor, value);
+  else
+    drawSource(dc, 3, 2, value, textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
+}
+
+void SourceChoice::setAvailableHandler(std::function<bool(int)> handler)
+{
+  isValueAvailable = handler;
 }
 
 bool SourceChoice::onTouchEnd(coord_t x, coord_t y)
@@ -39,13 +47,15 @@ bool SourceChoice::onTouchEnd(coord_t x, coord_t y)
   if (hasFocus()) {
     int16_t value = getValue();
     do {
-      value += 1;
+      value++;
       if (value > vmax)
         value = vmin;
-    } while (!isSourceAvailable(value));
+    } while (isValueAvailable && !isValueAvailable(value));
     setValue(value);
   }
-  setFocus();
+  else {
+    setFocus();
+  }
   invalidate();
   return true;
 }

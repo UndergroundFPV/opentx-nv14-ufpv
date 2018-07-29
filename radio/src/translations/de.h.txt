@@ -1103,7 +1103,7 @@
 #define TR_PRESET              "Preset"
 #define TR_MIRROR              "Spiegeln"
 #define TR_CLEAR               "Löschen"
-#define TR_RESET               TR("Servowert reset","Servowerte rücksetzen")
+#define TR_RESET               TR("Reset","Rücksetzen")
 #define TR_RESET_SUBMENU       TR("Reset Werte   ==>", "Reset=>Timer Flug Telem")
 #define TR_COUNT               "Punkte"
 #define TR_PT                  "Pt"

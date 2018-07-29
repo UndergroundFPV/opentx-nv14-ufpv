@@ -66,9 +66,27 @@ protected:
           grid.nextLine();
           break;
         case FUNC_TRAINER:
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_TIMER);
           new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, 4, GET_SET_DEFAULT(CFN_TIMER_INDEX(ls)));
           grid.nextLine();
           break;
+        case FUNC_RESET:
+          if (CFN_PARAM(ls) < FUNC_RESET_PARAM_FIRST_TELEM) {
+            new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_RESET);
+            auto resetchoice = new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, FUNC_RESET_PARAM_FIRST_TELEM+lastUsedTelemetryIndex(), GET_SET_DEFAULT(CFN_PARAM(ls)));
+            resetchoice->setAvailableHandler(isSourceAvailableInResetSpecialFunction);
+            resetchoice->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+                if (value < FUNC_RESET_PARAM_FIRST_TELEM)
+                  lcdDrawTextAtIndex(2, 2, STR_VFSWRESET, value, flags);
+                else {
+                  TelemetrySensor * sensor = & g_model.telemetrySensors[value-FUNC_RESET_PARAM_FIRST_TELEM];
+                  lcdDrawSizedText(2, 2, sensor->label, TELEM_LABEL_LEN, flags|ZCHAR);
+                }
+            });
+            grid.nextLine();
+          }
+          break;
+
       }
 
       if (HAS_ENABLE_PARAM(func)) {
@@ -165,6 +183,16 @@ public:
 
         case FUNC_TRAINER:
           drawSource(col1, line2, CFN_CH_INDEX(sf)==0 ? 0 : MIXSRC_Rud+CFN_CH_INDEX(sf)-1);
+          break;
+
+        case FUNC_RESET:
+          if(CFN_PARAM(sf) < FUNC_RESET_PARAM_FIRST_TELEM) {
+            lcdDrawTextAtIndex(col1, line2, STR_VFSWRESET, CFN_PARAM(sf));
+          }
+          else {
+            TelemetrySensor * sensor = & g_model.telemetrySensors[CFN_PARAM(sf)-FUNC_RESET_PARAM_FIRST_TELEM];
+            lcdDrawSizedText(col1, line2, sensor->label, TELEM_LABEL_LEN, ZCHAR);
+          }
           break;
       }
       if (HAS_ENABLE_PARAM(func)) {
