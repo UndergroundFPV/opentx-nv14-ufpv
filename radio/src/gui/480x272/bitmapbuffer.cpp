@@ -75,13 +75,25 @@ void BitmapBuffer::drawVerticalLine(coord_t x, coord_t y, coord_t h, uint8_t pat
 {
   APPLY_OFFSET();
 
-  coord_t hmax = min(height, ymax);
+  if (x < xmin || x >= xmax)
+    return;
 
-  if (x >= width) return;
-  if (y >= hmax) return;
-  if (h<0) { y+=h; h=-h; }
-  if (y<0) { h+=y; y=0; if (h<=0) return; }
-  if (y+h > hmax) { h = hmax - y; }
+  if (h < 0) {
+    y += h;
+    h = -h;
+  }
+
+  if (y < ymin) {
+    h += y-ymin;
+    y = ymin;
+  }
+
+  if (y + h > ymax) {
+    h = ymax - y;
+  }
+
+  if (h <= 0)
+    return;
 
   display_t color = lcdColorTable[COLOR_IDX(att)];
   uint8_t opacity = 0x0F - (att >> 24);
