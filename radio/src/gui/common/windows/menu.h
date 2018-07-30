@@ -38,11 +38,13 @@ class MenuWindow: public Window {
       {
       }
 
+      MenuLine(MenuLine &&) = default;
+
     protected:
       std::string text;
       std::function<void()> onPress;
 
-      // TODO private copy constructor?
+      MenuLine(MenuLine &) = delete;
   };
 
   public:

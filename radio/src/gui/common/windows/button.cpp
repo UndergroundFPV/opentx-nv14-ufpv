@@ -51,7 +51,7 @@ void TextButton::paint(BitmapBuffer * dc)
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, CURVE_AXIS_COLOR);
   }
 
-  dc->drawText(rect.w / 2, (rect.h - getFontHeight(flags)) / 2, text, CENTERED | (enabled() ? 0 : TEXT_DISABLE_COLOR));
+  dc->drawText(rect.w / 2, (rect.h - getFontHeight(flags)) / 2, text.data(), CENTERED | (enabled() ? 0 : TEXT_DISABLE_COLOR));
 }
 
 #include "alpha_button_on.lbm"

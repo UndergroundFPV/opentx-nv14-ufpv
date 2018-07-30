@@ -20,15 +20,14 @@
 
 #include "opentx.h"
 
-TabsGroupHeader::TabsGroupHeader(TabsGroup * menu):
-  Window(menu, { 0, 0, LCD_W, MENU_BODY_TOP }),
+TabsGroupHeader::TabsGroupHeader(TabsGroup * parent):
+  Window(parent, { 0, 0, LCD_W, MENU_BODY_TOP }),
   back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
-       [&]() -> uint8_t {
-         mainWindow.clear();
-         new MainView();
+       [=]() -> uint8_t {
+         parent->deleteLater();
          return 1;
        }, BUTTON_NOFOCUS),
-  carousel(this, menu)
+  carousel(this, parent)
 {
 }
 
@@ -107,4 +106,9 @@ void TabsGroup::checkEvents()
   Window::checkEvents();
   if (currentTab)
     currentTab->checkEvents();
+}
+
+void TabsGroup::paint(BitmapBuffer * dc)
+{
+  dc->clear(TEXT_BGCOLOR);
 }

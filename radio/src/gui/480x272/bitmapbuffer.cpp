@@ -297,13 +297,19 @@ void BitmapBuffer::drawMask(coord_t x, coord_t y, const BitmapBuffer * mask, Lcd
     width = w;
   }
 
-  if (x+width > this->width) {
-    width = this->width-x;
+  if (x + width > xmax) {
+    width = xmax - x;
+  }
+
+  if (y >= ymax || x >= xmax || width <= 0 || x + width < xmin || y + height < ymin) {
+    return;
   }
 
   display_t color = lcdColorTable[COLOR_IDX(flags)];
 
   for (coord_t row=0; row<height; row++) {
+    if (y + row < ymin || y + row >= ymax)
+      continue;
     display_t * p = getPixelPtr(x, y+row);
     const display_t * q = mask->getPixelPtr(offset, row);
     for (coord_t col=0; col<width; col++) {
@@ -336,7 +342,7 @@ void BitmapBuffer::drawBitmapPattern(coord_t x, coord_t y, const uint8_t * bmp, 
   display_t color = lcdColorTable[COLOR_IDX(flags)];
 
   for (coord_t row=0; row<height; row++) {
-    if (y+row < ymin || y+row >= ymax)
+    if (y + row < ymin || y + row >= ymax)
       continue;
     const uint8_t * q = bmp + 4 + row*w + offset;
     for (coord_t col=0; col<width; col++) {

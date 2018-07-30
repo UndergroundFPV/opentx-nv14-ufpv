@@ -23,12 +23,14 @@
 
 #include <vector>
 #include "window.h"
+#include "button.h"
 
 class TabsGroup;
 
-extern TextKeyboard * keyboard;
-
 class PageTab {
+  friend class TabsGroupCarousel;
+  friend class TabsGroup;
+
   public:
     PageTab(const char * title, unsigned icon):
       title(title),
@@ -38,8 +40,11 @@ class PageTab {
 
     virtual void build(Window * window) = 0;
 
-    virtual void checkEvents() { }
+    virtual void checkEvents()
+    {
+    }
 
+  protected:
     const char * title;
     unsigned icon;
 };
@@ -50,9 +55,9 @@ class TabsGroupCarousel: public Window {
 
     void updateInnerWidth();
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     constexpr static uint8_t padding_left = 3;
@@ -66,7 +71,7 @@ class TabsGroupHeader: public Window {
   public:
     TabsGroupHeader(TabsGroup * menu);
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
     void setTitle(const char * title)
     {
@@ -96,7 +101,9 @@ class TabsGroup: public Window {
       }
     }
 
-    virtual void checkEvents() override;
+    void checkEvents() override;
+
+    void paint(BitmapBuffer * dc) override;
 
   protected:
     TabsGroupHeader header;

@@ -125,21 +125,18 @@ MainView::MainView():
 {
   new FabIconButton(this, 50, 100, ICON_MODEL,
                     [=]() -> uint8_t {
-                      mainWindow.clear();
                       new ModelMenu();
                       return 0;
                     });
 
   new FabIconButton(this, LCD_W/2, 100, ICON_RADIO,
                     [=]() -> uint8_t {
-                      mainWindow.clear();
                       new RadioMenu();
                       return 0;
                     });
 
   new FabIconButton(this, LCD_W-50, 100, ICON_THEME,
                     [=]() -> uint8_t {
-                      // mainWindow.clear();
                       // new ModelMenu();
                       return 0;
                     });
@@ -158,7 +155,6 @@ bool MainView::onTouchEnd(coord_t x, coord_t y)
   if (x < 60 && y < 60) {
     Menu * menu = new Menu();
     menu->addLine(STR_MODEL_SELECT, [=]() {
-      mainWindow.clear();
       new ModelselectMenu();
     });
     if (modelHasNotes()) {
@@ -167,7 +163,6 @@ bool MainView::onTouchEnd(coord_t x, coord_t y)
       });
     }
     menu->addLine(STR_MONITOR_SCREENS, [=]() {
-      mainWindow.clear();
       new ChannelsMonitorMenu();
     });
     menu->addLine(STR_RESET_SUBMENU, [=]() {

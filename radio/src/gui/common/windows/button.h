@@ -85,27 +85,21 @@ class Button : public Window {
 
 class TextButton : public Button {
   public:
-    TextButton(Window * parent, const rect_t & rect, const char * text, std::function<uint8_t(void)> onPress=nullptr, uint8_t flags=BUTTON_BACKGROUND):
+    TextButton(Window * parent, const rect_t & rect, const std::string & text, std::function<uint8_t(void)> onPress=nullptr, uint8_t flags=BUTTON_BACKGROUND):
       Button(parent, rect, onPress, flags),
-      text(strdup(text))
+      text(text)
     {
     }
 
-    virtual ~TextButton()
+    void setText(const std::string & text)
     {
-      free(text);
-    }
-
-    void setText(const char * text)
-    {
-      free(this->text);
-      this->text = strdup(text);
+      this->text = text;
     }
 
     virtual void paint(BitmapBuffer * dc) override;
 
   protected:
-    char * text;
+    std::string text;
 };
 
 class IconButton: public Button {
