@@ -20,12 +20,12 @@
 
 #include "opentx.h"
 
-NumberEdit::NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags):
+TimeEdit::TimeEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags):
   BaseNumberEdit(parent, rect, vmin, vmax, getValue, setValue, flags)
 {
 }
 
-void NumberEdit::paint(BitmapBuffer * dc)
+void TimeEdit::paint(BitmapBuffer * dc)
 {
   bool hasFocus = this->hasFocus();
   LcdFlags textColor = 0;
@@ -34,20 +34,13 @@ void NumberEdit::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  int32_t value = _getValue();
-  if (displayFunction) {
-    displayFunction(dc, textColor, value);
-  }
-  else if (value == 0 && zeroText) {
-    dc->drawText(3, 2, zeroText, textColor | flags);
-  }
-  else {
-    drawNumber(dc, 3, 2, value, textColor | flags, 0, prefix, suffix);
-  }
+
+  dc->drawText(3, 2, getTimerString(_getValue(), (flags & TIMEHOUR) != 0), textColor);
+
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
-bool NumberEdit::onTouchEnd(coord_t x, coord_t y)
+bool TimeEdit::onTouchEnd(coord_t x, coord_t y)
 {
   if (!hasFocus()) {
     setFocus();
@@ -61,7 +54,7 @@ bool NumberEdit::onTouchEnd(coord_t x, coord_t y)
   return true;
 }
 
-void NumberEdit::onFocusLost()
+void TimeEdit::onFocusLost()
 {
   NumberKeyboard::instance()->disable();
 }

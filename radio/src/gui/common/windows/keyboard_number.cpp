@@ -25,7 +25,7 @@ constexpr coord_t KEYBOARD_HEIGHT = 90;
 NumberKeyboard * NumberKeyboard::_instance = nullptr;
 
 NumberKeyboard::NumberKeyboard():
-  Keyboard<NumberEdit>(KEYBOARD_HEIGHT)
+  Keyboard<BaseNumberEdit>(KEYBOARD_HEIGHT)
 {
   new TextButton(this, { LCD_W/2 - 115, 10, 50, 30 }, "<<",
                  [=]() -> uint8_t {

@@ -18,31 +18,20 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#ifndef _TIMEEDIT_H_
+#define _TIMEEDIT_H_
 
-#include "window.h"
-#include "mainwindow.h"
-#include "static.h"
-#include "subtitle.h"
-#include "button.h"
-#include "checkbox.h"
-#include "numberedit.h"
-#include "timeedit.h"
-#include "choice.h"
-#include "sourcechoice.h"
-#include "switchchoice.h"
-#include "textedit.h"
-#include "slider.h"
-#include "keyboard_text.h"
-#include "keyboard_number.h"
-#include "keyboard_curve.h"
-#include "tabsgroup.h"
-#include "page.h"
-#include "menu.h"
-#include "alert.h"
-#include "gridlayout.h"
-#include "helpers.h"
-#include "curveedit.h"
+#include "basenumberedit.h"
 
-#endif // _WINDOWS_H_
+class TimeEdit : public BaseNumberEdit {
+  public:
+    TimeEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue = nullptr, LcdFlags flags = 0);
+
+    virtual void paint(BitmapBuffer * dc) override;
+
+    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+
+    virtual void onFocusLost() override;
+};
+
+#endif // _TIMEEDIT_H_

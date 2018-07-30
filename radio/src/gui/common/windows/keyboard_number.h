@@ -23,10 +23,10 @@
 
 #include "keyboard_base.h"
 
-class NumberEdit;
+class BaseNumberEdit;
 
-class NumberKeyboard : public Keyboard<NumberEdit> {
-  friend class NumberEdit;
+class NumberKeyboard : public Keyboard<BaseNumberEdit> {
+  friend class BaseNumberEdit;
 
   public:
     NumberKeyboard();

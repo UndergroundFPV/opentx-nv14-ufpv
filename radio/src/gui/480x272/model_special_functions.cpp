@@ -106,7 +106,14 @@ protected:
         case FUNC_PLAY_SCRIPT:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
           // TODO @bsongis : new FileChoice()
-          grid.nextLine()
+          grid.nextLine();
+          break;
+
+        case FUNC_SET_TIMER:
+          // TODO select timer
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
+          new TimeEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 9 * 60 * 60 - 1, GET_SET_DEFAULT(CFN_PARAM(ls)));
+          grid.nextLine();
           break;
       }
 
@@ -119,15 +126,15 @@ protected:
         new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_REPEAT);
         auto repeat = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), nullptr, -1,  60/CFN_PLAY_REPEAT_MUL, GET_SET_DEFAULT(CFN_PLAY_REPEAT(ls)));
         repeat->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-            if (value == 0) {
-              lcdDrawText(2, 2, "1x", 0);
-            }
-            else if (value == CFN_PLAY_REPEAT_NOSTART) {
-              lcdDrawText(2, 2, "!1x", 0);
-            }
-            else {
-              lcdDrawNumber(2, 2, value*CFN_PLAY_REPEAT_MUL, 0, 0, NULL, "s");
-            }
+          if (value == 0) {
+            lcdDrawText(2, 2, "1x", 0);
+          }
+          else if (value == CFN_PLAY_REPEAT_NOSTART) {
+            lcdDrawText(2, 2, "!1x", 0);
+          }
+          else {
+            lcdDrawNumber(2, 2, value * CFN_PLAY_REPEAT_MUL, 0, 0, NULL, "s");
+          }
         });
       }
     }

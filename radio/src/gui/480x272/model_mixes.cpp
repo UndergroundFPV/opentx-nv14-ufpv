@@ -231,7 +231,7 @@ class MixLineButton : public Button {
       Button(parent, rect),
       mixIndex(mixIndex)
     {
-      const MixData &mix = g_model.mixData[mixIndex];
+      const MixData & mix = g_model.mixData[mixIndex];
       if (mix.swtch || mix.curve.value != 0 || mix.flightModes) {
         setHeight(getHeight() + 20);
       }

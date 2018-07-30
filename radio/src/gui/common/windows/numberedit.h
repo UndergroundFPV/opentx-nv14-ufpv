@@ -21,50 +21,14 @@
 #ifndef _NUMBEREDIT_H_
 #define _NUMBEREDIT_H_
 
-#include "window.h"
-#include "keyboard_number.h"
+#include "basenumberedit.h"
 
-class NumberEdit : public Window {
+class NumberEdit : public BaseNumberEdit {
   public:
     NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax,
                std::function<int32_t()> getValue, std::function<void(int32_t)> setValue = nullptr, LcdFlags flags = 0);
 
     virtual void paint(BitmapBuffer * dc) override;
-
-    void setMin(int32_t value)
-    {
-      vmin = value;
-    }
-
-    void setMax(int32_t value)
-    {
-      vmax = value;
-    }
-
-    void setDefault(int32_t value)
-    {
-      vdefault = value;
-    }
-
-    int32_t getMin() const
-    {
-      return vmin;
-    }
-
-    int32_t getMax() const
-    {
-      return vmax;
-    }
-
-    int32_t getDefault() const
-    {
-      return vdefault;
-    }
-
-    void setStep(int32_t step)
-    {
-      this->step = step;
-    }
 
     void setPrefix(const char * prefix)
     {
@@ -81,18 +45,6 @@ class NumberEdit : public Window {
       zeroText = text;
     }
 
-    void setValue(int32_t value);
-
-    int32_t getValue() const
-    {
-      return _getValue();
-    }
-
-    void setSetValueHandler(std::function<void(int32_t)> handler)
-    {
-      _setValue = handler;
-    }
-
     void setDisplayHandler(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function)
     {
       displayFunction = function;
@@ -100,20 +52,10 @@ class NumberEdit : public Window {
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
-    virtual void onFocusLost() override
-    {
-      NumberKeyboard::instance()->disable();
-    }
+    virtual void onFocusLost() override;
 
   protected:
-    int32_t vdefault = 0;
-    int32_t vmin;
-    int32_t vmax;
-    int32_t step = 1;
-    std::function<int32_t()> _getValue;
-    std::function<void(int32_t)> _setValue;
     std::function<void(BitmapBuffer *, LcdFlags, int32_t)> displayFunction;
-    LcdFlags flags;
     const char * prefix = nullptr;
     const char * suffix = nullptr;
     const char * zeroText = nullptr;

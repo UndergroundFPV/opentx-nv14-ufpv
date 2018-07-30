@@ -568,3 +568,8 @@ char * getCurveString(int idx)
 {
   return getCurveString(tmpHelpersString, idx);
 }
+
+char * getTimerString(putstime_t tme, uint8_t hours)
+{
+  return getTimerString(tmpHelpersString, tme, hours);
+}
