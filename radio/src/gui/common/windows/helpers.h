@@ -21,16 +21,19 @@
 #ifndef _WINDOWS_HELPERS_H_
 #define _WINDOWS_HELPERS_H_
 
-#define GET_VALUE(value)        [=]() -> int32_t { return value; }
-#define GET_DEFAULT(value)      [=]() -> int32_t { return value; }
-#define GET_INVERTED(value)     [=]() -> uint8_t { return !value; }
+#define GET_VALUE(value)                      [=]() -> int32_t { return value; }
+#define GET_DEFAULT(value)                    [=]() -> int32_t { return value; }
+#define GET_INVERTED(value)                   [=]() -> uint8_t { return !value; }
+#define GET_VALUE_WITH_OFFSET(value, offset)  [=]() -> int32_t { return value + offset; }
 
-#define SET_VALUE(value, _newValue) [=](int32_t newValue) { value = _newValue; SET_DIRTY(); }
-#define SET_DEFAULT(value)          [=](int32_t newValue) { value = newValue; SET_DIRTY(); }
-#define SET_INVERTED(value)         [=](uint8_t newValue) { value = !newValue; }
+#define SET_VALUE(value, _newValue)           [=](int32_t newValue) { value = _newValue; SET_DIRTY(); }
+#define SET_DEFAULT(value)                    [=](int32_t newValue) { value = newValue; SET_DIRTY(); }
+#define SET_INVERTED(value)                   [=](uint8_t newValue) { value = !newValue; }
+#define SET_VALUE_WITH_OFFSET(value, offset)  [=](int32_t newValue) { value = newValue - offset; SET_DIRTY(); }
 
 #define GET_SET_DEFAULT(value)  GET_DEFAULT(value), SET_DEFAULT(value)
 #define GET_SET_INVERTED(value) GET_INVERTED(value), SET_INVERTED(value)
+#define GET_SET_WITH_OFFSET(value, offset) GET_VALUE_WITH_OFFSET(value, offset), SET_VALUE_WITH_OFFSET(value, offset)
 
 #endif // _WINDOWS_HELPERS_H_
 
