@@ -101,6 +101,13 @@ protected:
           grid.nextLine();
           break;
 
+        case FUNC_PLAY_TRACK:
+        case FUNC_BACKGND_MUSIC:
+        case FUNC_PLAY_SCRIPT:
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
+          // TODO @bsongis : new FileChoice()
+          grid.nextLine()
+          break;
       }
 
       if (HAS_ENABLE_PARAM(func)) {
@@ -227,6 +234,15 @@ public:
 
         case FUNC_PLAY_SOUND:
           lcdDrawTextAtIndex(col1, line2, STR_FUNCSOUNDS, CFN_PARAM(sf));
+          break;
+
+        case FUNC_PLAY_TRACK:
+        case FUNC_BACKGND_MUSIC:
+        case FUNC_PLAY_SCRIPT:
+          if (ZEXIST(sf->play.name))
+            lcdDrawSizedText(col1, line2, sf->play.name, sizeof(sf->play.name), 0);
+          else
+            lcdDrawTextAtIndex(col1, line2, STR_VCSWFUNC, 0, 0);
           break;
       }
       if (HAS_ENABLE_PARAM(func)) {
