@@ -52,6 +52,11 @@ class Choice : public Window {
 
     virtual void setAvailableHandler(std::function<bool(int)> handler);
 
+    void setDisplayHandler(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function)
+    {
+        displayFunction = function;
+    }
+
   protected:
     const char * values;
     int16_t vmin;
@@ -59,6 +64,7 @@ class Choice : public Window {
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
     std::function<bool(int)> isValueAvailable;
+    std::function<void(BitmapBuffer *, LcdFlags, int32_t)> displayFunction;
     LcdFlags flags;
 };
 

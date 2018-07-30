@@ -908,6 +908,7 @@ extern const pm_char STR_BLCOLOR[];
   extern const pm_char STR_TELEMETRY_TYPE[];
   extern const pm_char STR_TELEMETRY_SENSORS[];
   extern const pm_char STR_VALUE[];
+extern const pm_char STR_REPEAT[];
 extern const pm_char STR_ENABLE[];
   extern const pm_char STR_TOPLCDTIMER[];
   extern const pm_char STR_UNIT[] PROGMEM;

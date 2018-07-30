@@ -1090,6 +1090,7 @@
 #define TR_TELEMETRY_TYPE      "Telemetrityp"
 #define TR_TELEMETRY_SENSORS   "Sensorer"
 #define TR_VALUE               "Värde"
+#define TR_REPEAT                      "Repeat"
 #define TR_ENABLE                      "Enable"
 #define TR_TOPLCDTIMER         "Top LCD Timer"
 #define TR_UNIT                "Enhet"

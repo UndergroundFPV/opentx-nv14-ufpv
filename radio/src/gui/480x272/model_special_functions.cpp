@@ -94,6 +94,13 @@ protected:
           new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(CFN_PARAM(ls)));
           grid.nextLine();
           break;
+
+        case FUNC_PLAY_SOUND:
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
+          new Choice(specialFunctionOneWindow, grid.getFieldSlot(), STR_FUNCSOUNDS, 0, AU_SPECIAL_SOUND_LAST-AU_SPECIAL_SOUND_FIRST-1, GET_SET_DEFAULT(CFN_PARAM(ls)));
+          grid.nextLine();
+          break;
+
       }
 
       if (HAS_ENABLE_PARAM(func)) {
@@ -102,7 +109,19 @@ protected:
         grid.nextLine();
       }
       else if (HAS_REPEAT_PARAM(func)) { // !1x 1x 1s 2s 3s ...
-        // TODO
+        new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_REPEAT);
+        auto repeat = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), nullptr, -1,  60/CFN_PLAY_REPEAT_MUL, GET_SET_DEFAULT(CFN_PLAY_REPEAT(ls)));
+        repeat->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+            if (value == 0) {
+              lcdDrawText(2, 2, "1x", 0);
+            }
+            else if (value == CFN_PLAY_REPEAT_NOSTART) {
+              lcdDrawText(2, 2, "!1x", 0);
+            }
+            else {
+              lcdDrawNumber(2, 2, value*CFN_PLAY_REPEAT_MUL, 0, 0, NULL, "s");
+            }
+        });
       }
     }
 
@@ -152,7 +171,7 @@ public:
     {
       const CustomFunctionData * sf = &g_model.customFn[sfIndex];
       uint8_t func = CFN_FUNC(sf);
-      if (func < FUNC_FIRST_WITHOUT_ENABLE) {
+      if (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func)) {
         setHeight(getHeight() + 20);
       }
     }
@@ -205,9 +224,24 @@ public:
         case FUNC_VOLUME:
           drawSource(col1, line2, CFN_PARAM(sf), 0);
           break;
+
+        case FUNC_PLAY_SOUND:
+          lcdDrawTextAtIndex(col1, line2, STR_FUNCSOUNDS, CFN_PARAM(sf));
+          break;
       }
       if (HAS_ENABLE_PARAM(func)) {
         drawCheckBox(col3, line2, CFN_ACTIVE(sf), 0);
+      }
+      else if (HAS_REPEAT_PARAM(func)) {
+        if (CFN_PLAY_REPEAT(sf) == 0) {
+          lcdDrawText(col3, line2, "1x", 0);
+        }
+        else if (CFN_PLAY_REPEAT(sf) == CFN_PLAY_REPEAT_NOSTART) {
+          lcdDrawText(col3, line2, "!1x", 0);
+        }
+        else {
+          lcdDrawNumber(col3+12, line2, CFN_PLAY_REPEAT(sf)*CFN_PLAY_REPEAT_MUL, 0|RIGHT, 0, NULL, "s");
+        }
       }
     }
 
