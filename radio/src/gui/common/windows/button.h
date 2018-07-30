@@ -42,29 +42,34 @@ class Button : public Window {
     {
     }
 
-    void enable(bool enabled=true) {
+    void enable(bool enabled=true)
+    {
       if (enabled)
         flags &= ~BUTTON_DISABLED;
       else
         flags |= BUTTON_DISABLED;
     }
 
-    void disable() {
+    void disable()
+    {
       enable(false);
     }
 
-    void check(bool checked=true) {
+    void check(bool checked=true)
+    {
       if (checked)
         flags |= BUTTON_CHECKED;
       else
         flags &= ~BUTTON_CHECKED;
     }
 
-    bool enabled() {
+    bool enabled()
+    {
       return !(flags & BUTTON_DISABLED);
     }
 
-    bool checked() {
+    bool checked()
+    {
       if (flags & BUTTON_CHECKED_ON_FOCUS)
         return hasFocus();
       else
@@ -76,7 +81,7 @@ class Button : public Window {
       onPress = handler;
     }
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     std::function<uint8_t(void)> onPress;
@@ -89,6 +94,7 @@ class TextButton : public Button {
       Button(parent, rect, onPress, flags),
       text(text)
     {
+      windowFlags = OPAQUE;
     }
 
     void setText(const std::string & text)
@@ -96,7 +102,7 @@ class TextButton : public Button {
       this->text = text;
     }
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
   protected:
     std::string text;
@@ -110,7 +116,7 @@ class IconButton: public Button {
     {
     }
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
   protected:
     uint8_t icon;
@@ -120,7 +126,7 @@ class FabIconButton: public Button {
   public:
     FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t flags=0);
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
   protected:
     uint8_t icon;

@@ -31,7 +31,7 @@ template <class T>
 class Keyboard: public Window {
   public:
     Keyboard(coord_t height):
-      Window(nullptr, {0, LCD_H - height, LCD_W, height})
+      Window(nullptr, {0, LCD_H - height, LCD_W, height}, OPAQUE)
     {
     }
 

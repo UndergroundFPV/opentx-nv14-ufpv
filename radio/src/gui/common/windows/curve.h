@@ -32,7 +32,7 @@ struct CurvePoint {
 class CurveWindow: public Window {
   public:
     CurveWindow(Window * parent, const rect_t & rect, std::function<int(int)> function, std::function<int()> position=nullptr):
-      Window(parent, rect),
+      Window(parent, rect, OPAQUE),
       function(std::move(function)),
       position(std::move(position))
     {

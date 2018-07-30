@@ -31,7 +31,7 @@ class Window {
   friend class GridLayout;
 
   public:
-    Window(Window * parent, const rect_t & rect);
+    Window(Window * parent, const rect_t & rect, uint8_t flags=0);
 
     virtual ~Window();
 
@@ -91,6 +91,16 @@ class Window {
     {
       rect.y = y;
       invalidate();
+    }
+
+    coord_t left() const
+    {
+      return rect.x;
+    }
+
+    coord_t right() const
+    {
+      return rect.x + rect.w;
     }
 
     coord_t top() const
@@ -180,9 +190,14 @@ class Window {
     virtual void checkEvents();
 
   protected:
+    enum Attributes {
+      OPAQUE = 1,
+    };
+
     Window * parent;
     std::list<Window *> children;
     rect_t rect;
+    uint8_t windowFlags;
 
     coord_t scrollPositionX = 0;
     coord_t scrollPositionY = 0;

@@ -68,9 +68,7 @@ class StaticBitmap: public Window {
 
     void paint(BitmapBuffer * dc)
     {
-      TRACE("avant draw bitmap %p", this);
       dc->drawBitmap(0, 0, bitmap);
-      TRACE("apres draw bitmap %p", this);
     }
 
     const BitmapBuffer * bitmap;

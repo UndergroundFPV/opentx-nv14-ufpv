@@ -23,7 +23,7 @@
 
 Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
                std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
-  Window(parent, rect),
+  Window(parent, rect, OPAQUE),
   values(values),
   vmin(vmin),
   vmax(vmax),

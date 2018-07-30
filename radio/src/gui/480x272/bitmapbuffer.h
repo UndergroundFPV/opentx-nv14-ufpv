@@ -160,12 +160,12 @@ class BitmapBufferBase
 
   protected:
     uint8_t format;
-    uint16_t width;
-    uint16_t height;
-    uint16_t xmin;
-    uint16_t xmax;
-    uint16_t ymin;
-    uint16_t ymax;
+    coord_t width;
+    coord_t height;
+    coord_t xmin;
+    coord_t xmax;
+    coord_t ymin;
+    coord_t ymax;
     coord_t offsetX;
     coord_t offsetY;
     T * data;

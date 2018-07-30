@@ -23,11 +23,12 @@
 Window * Window::focusWindow = nullptr;
 std::list<Window *> Window::trash;
 
-Window::Window(Window * parent, const rect_t & rect):
+Window::Window(Window * parent, const rect_t & rect, uint8_t flags):
   innerWidth(rect.w),
   innerHeight(rect.h),
   parent(parent),
-  rect(rect)
+  rect(rect),
+  windowFlags(flags)
 {
   if (parent) {
     parent->addChild(this);
@@ -133,7 +134,33 @@ void Window::paintChildren(BitmapBuffer * dc)
   coord_t y = dc->getOffsetY();
   coord_t xmin, xmax, ymin, ymax;
   dc->getClippingRect(xmin, xmax, ymin, ymax);
-  for (auto child: children) {
+
+  auto it = children.begin();
+
+  for (auto rit=children.rbegin(); rit != children.rend(); rit++) {
+    auto child = *rit;
+    if ((child->windowFlags & OPAQUE) && child->top() == 0 && child->height() == height() && child->left() == 0 && child->width() == width()) {
+      it = (++rit).base();
+      break;
+    }
+  }
+
+  for (; it != children.end(); it++) {
+    auto child = *it;
+
+    coord_t child_xmin = x + child->rect.x;
+    if (child_xmin >= xmax)
+      continue;
+    coord_t child_ymin = y + child->rect.y;
+    if (child_ymin >= ymax)
+      continue;
+    coord_t child_xmax = child_xmin + child->rect.w;
+    if (child_xmax < xmin)
+      continue;
+    coord_t child_ymax = child_ymin + child->rect.h;
+    if (child_ymax < ymin)
+      continue;
+
     dc->setOffset(x + child->rect.x + child->scrollPositionX, y + child->rect.y + child->scrollPositionY);
     dc->setClippingRect(max(xmin, x + child->rect.left()),
                         min(xmax, x + child->rect.right()),

@@ -113,7 +113,7 @@ protected:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_TIMER);
           auto timerchoice = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), STR_TIMER, 1, TIMERS, GET_SET_WITH_OFFSET(CFN_TIMER_INDEX(cfn),1));
           timerchoice->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-              drawStringWithIndex(2, 2, STR_TIMER, CFN_TIMER_INDEX(cfn)+1, 0);
+            drawStringWithIndex(2, 2, STR_TIMER, CFN_TIMER_INDEX(cfn)+1, 0);
           });
           grid.nextLine();
           

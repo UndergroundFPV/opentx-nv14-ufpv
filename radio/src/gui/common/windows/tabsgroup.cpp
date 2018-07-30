@@ -21,7 +21,7 @@
 #include "opentx.h"
 
 TabsGroupHeader::TabsGroupHeader(TabsGroup * parent):
-  Window(parent, { 0, 0, LCD_W, MENU_BODY_TOP }),
+  Window(parent, { 0, 0, LCD_W, MENU_BODY_TOP }, OPAQUE),
   back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
        [=]() -> uint8_t {
          parent->deleteLater();
@@ -41,7 +41,7 @@ void TabsGroupHeader::paint(BitmapBuffer * dc)
 }
 
 TabsGroupCarousel::TabsGroupCarousel(Window * parent, TabsGroup * menu):
-  Window(parent, { TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, MENU_HEADER_HEIGHT }),
+  Window(parent, { TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, MENU_HEADER_HEIGHT }, OPAQUE),
   menu(menu)
 {
 }
@@ -73,7 +73,7 @@ bool TabsGroupCarousel::onTouchEnd(coord_t x, coord_t y)
 }
 
 TabsGroup::TabsGroup():
-  Window(&mainWindow, { 0, 0, LCD_W, LCD_H }),
+  Window(&mainWindow, { 0, 0, LCD_W, LCD_H }, OPAQUE),
   header(this),
   body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
 {

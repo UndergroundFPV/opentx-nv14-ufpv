@@ -21,7 +21,7 @@
 #include "opentx.h"
 
 PageHeader::PageHeader(Page * parent, const rect_t & rect):
-  Window(parent, rect),
+  Window(parent, rect, OPAQUE),
   back(this, { 0, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH }, ICON_BACK,
        [=]() -> uint8_t {
          parent->deleteLater();
@@ -36,7 +36,7 @@ void PageHeader::paint(BitmapBuffer * dc)
 }
 
 Page::Page():
-  Window(&mainWindow, {0, 0, LCD_W, LCD_H}),
+  Window(&mainWindow, {0, 0, LCD_W, LCD_H}, OPAQUE),
   header(this, {0, 0, LCD_W, headerHeight}),
   body(this, {0, headerHeight, LCD_W, LCD_H - headerHeight})
 {

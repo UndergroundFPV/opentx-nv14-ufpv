@@ -31,7 +31,7 @@ class TextEdit : public Window {
 
   public:
     TextEdit(Window * parent, const rect_t &rect, char * value, uint8_t length, LcdFlags flags = 0) :
-      Window(parent, rect),
+      Window(parent, rect, OPAQUE),
       value(value),
       length(length)
     {

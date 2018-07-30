@@ -21,7 +21,7 @@
 #include "opentx.h"
 
 MenuWindow::MenuWindow(Menu * parent):
-  Window(parent, {LCD_W / 2 - 100, LCD_H / 2, 200, 0})
+  Window(parent, {LCD_W / 2 - 100, LCD_H / 2, 200, 0}, OPAQUE)
 {
 }
 
