@@ -20,6 +20,7 @@
 
 #include "opentx.h"
 #include "radio_setup.h"
+#include "radio_sdmanager.h"
 #include "radio_calibration.h"
 #include "radio_version.h"
 
@@ -27,20 +28,15 @@ RadioMenu::RadioMenu():
   TabsGroup()
 {
   addTab(new RadioSetupPage());
+  addTab(new RadioSdManagerPage());
   addTab(new RadioCalibrationPage());
   addTab(new RadioVersionPage());
 }
 
 const MenuHandlerFunc menuTabGeneral[] = {
-  menuRadioSdManager,
-  menuRadioSpecialFunctions,
-  menuRadioTrainer,
-  menuRadioHardware,
+//  menuRadioSdManager,
+//  menuRadioSpecialFunctions,
+//  menuRadioTrainer,
+//  menuRadioHardware,
   // menuRadioVersion,
 };
-
-bool menuRadioSpecialFunctions(event_t event)
-{
-  MENU(STR_MENUSPECIALFUNCS, RADIO_ICONS, menuTabGeneral, MENU_RADIO_SPECIAL_FUNCTIONS, MAX_SPECIAL_FUNCTIONS, { NAVIGATION_LINE_BY_LINE|4/*repeated*/ });
-  return menuSpecialFunctions(event, g_eeGeneral.customFn, globalFunctionsContext);
-}
