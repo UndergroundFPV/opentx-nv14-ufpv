@@ -403,7 +403,6 @@ void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t l
   uint32_t fontindex = FONTINDEX(flags);
   const pm_uchar * font = fontsTable[fontindex];
   const uint16_t * fontspecs = fontspecsTable[fontindex];
-  BitmapBuffer * fontcache = NULL;
 
   if (flags & RIGHT) {
     INCREMENT_POS(-width);
@@ -413,59 +412,6 @@ void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t l
   }
 
   coord_t & pos = (flags & VERTICAL) ? y : x;
-
-  if ((flags & INVERS) && ((~flags & BLINK) || BLINK_ON_PHASE)) {
-    uint16_t fgColor = lcdColorTable[COLOR_IDX(flags)];
-    if (fgColor == lcdColorTable[TEXT_COLOR_INDEX]) {
-      flags = TEXT_INVERTED_COLOR | (flags & 0x0ffff);
-    }
-    if (fontindex == STDSIZE_INDEX) {
-      if (fgColor == lcdColorTable[TEXT_COLOR_INDEX]) {
-        drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, INVERT_HORZ_MARGIN-1, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
-        drawSolidFilledRect(x+width-1, y, INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
-        fontcache = fontCache[1];
-      }
-      else {
-        drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, width+2*INVERT_HORZ_MARGIN-1, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
-      }
-    }
-    else if (fontindex == TINSIZE_INDEX) {
-      drawSolidFilledRect(x-INVERT_HORZ_MARGIN+2, y, width+2*INVERT_HORZ_MARGIN-5, height+2, TEXT_INVERTED_BGCOLOR);
-    }
-    else if (fontindex == SMLSIZE_INDEX) {
-      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, width+2*INVERT_HORZ_MARGIN-2, height+2, TEXT_INVERTED_BGCOLOR);
-    }
-    else if (fontindex == MIDSIZE_INDEX) {
-      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y-1, width+2*INVERT_HORZ_MARGIN-2, height+3, TEXT_INVERTED_BGCOLOR);  // MIDSIZE and DBLSIZE font are missing a pixel on top compared to others
-    }
-    else if (fontindex == DBLSIZE_INDEX) {
-      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y-1, width+2*INVERT_HORZ_MARGIN-2, height+3, TEXT_INVERTED_BGCOLOR); // MIDSIZE and DBLSIZE font are missing a pixel on top compared to others
-    }
-    else if (fontindex == XXLSIZE_INDEX) {
-      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, width+2*INVERT_HORZ_MARGIN-2, height+2, TEXT_INVERTED_BGCOLOR);
-    }
-    else {
-      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, width+2*INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
-    }
-  }
-  else if (!(flags & NO_FONTCACHE)) {
-    if (fontindex == STDSIZE_INDEX) {
-      uint16_t fgColor = lcdColorTable[COLOR_IDX(flags)];
-      uint16_t * pixel = getPixelPtr(x, y);
-      if (pixel) {
-        uint16_t bgColor = *pixel;
-        if (fgColor == lcdColorTable[TEXT_COLOR_INDEX] && bgColor == lcdColorTable[TEXT_BGCOLOR_INDEX]) {
-          fontcache = fontCache[0];
-        }
-        else if (fgColor == lcdColorTable[TEXT_INVERTED_COLOR_INDEX] && bgColor == lcdColorTable[TEXT_INVERTED_BGCOLOR_INDEX]) {
-          fontcache = fontCache[1];
-        }
-        else {
-          // TRACE("No cache for \"%s\"", s);
-        }
-      }
-    }
-  }
 
   bool setpos = false;
   const coord_t orig_pos = pos;

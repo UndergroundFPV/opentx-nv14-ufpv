@@ -21,7 +21,7 @@
 #include "opentx.h"
 
 MenuWindow::MenuWindow(Menu * parent):
-  Window(parent, {LCD_W / 2 - 100, LCD_H / 2, 200, 0}, OPAQUE)
+  Window(parent, {LCD_W / 2 - 100, LCD_H / 2 - 20 /* to avoid redraw the menus header */, 200, 0}, OPAQUE)
 {
 }
 
@@ -45,14 +45,22 @@ void MenuWindow::paint(BitmapBuffer * dc)
 
 void MenuWindow::updatePosition()
 {
-  coord_t h = lines.size() * lineHeight;
+  int count = min<int>(8, lines.size());
+  coord_t h = count * lineHeight;
   setTop((LCD_H - h) / 2);
   setHeight(h);
+  setInnerHeight(lines.size() * lineHeight);
 }
 
 bool Menu::onTouchEnd(coord_t x, coord_t y)
 {
   Window::onTouchEnd(x, y);
   deleteLater();
+  return true;
+}
+
+bool Menu::onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY)
+{
+  Window::onTouchSlide(x, y, startX, startY, slideX, slideY);
   return true;
 }

@@ -32,7 +32,8 @@ Window::Window(Window * parent, const rect_t & rect, uint8_t flags):
 {
   if (parent) {
     parent->addChild(this);
-    invalidate();
+    if (!(flags & TRANSPARENT))
+      invalidate();
   }
 }
 

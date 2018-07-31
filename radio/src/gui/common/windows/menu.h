@@ -1,3 +1,5 @@
+#include <utility>
+
 /*
  * Copyright (C) OpenTX
  *
@@ -23,7 +25,7 @@
 
 #include <vector>
 #include <functional>
-#include "window.h"
+#include "mainwindow.h"
 
 class Menu;
 
@@ -32,19 +34,19 @@ class MenuWindow: public Window {
     friend class MenuWindow;
 
     public:
-      MenuLine(const std::string & text, std::function<void()> onPress):
-        text(text),
-        onPress(onPress)
+      MenuLine(std::string text, std::function<void()> onPress):
+        text(std::move(text)),
+        onPress(std::move(onPress))
       {
       }
+
+      MenuLine(MenuLine &) = delete;
 
       MenuLine(MenuLine &&) = default;
 
     protected:
       std::string text;
       std::function<void()> onPress;
-
-      MenuLine(MenuLine &) = delete;
   };
 
   public:
@@ -69,7 +71,7 @@ class MenuWindow: public Window {
 class Menu : public Window {
   public:
     Menu() :
-      Window(&mainWindow, {0, 0, LCD_W, LCD_H}),
+      Window(&mainWindow, {0, 0, LCD_W, LCD_H}, TRANSPARENT),
       menuWindow(this)
     {
     }
@@ -83,20 +85,17 @@ class Menu : public Window {
 
     void addLine(const std::string & text, std::function<void()> onPress)
     {
-      menuWindow.addLine(text, onPress);
+      menuWindow.addLine(text, std::move(onPress));
     }
 
-    virtual bool onTouchStart(coord_t x, coord_t y) override
+    bool onTouchStart(coord_t x, coord_t y) override
     {
       return true;
     }
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
-    virtual bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY)
-    {
-      return true;
-    }
+    bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY) override;
 
   protected:
     MenuWindow menuWindow;

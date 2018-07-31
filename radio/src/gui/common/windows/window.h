@@ -223,6 +223,7 @@ class Window {
   protected:
     enum Attributes {
       OPAQUE = 1,
+      TRANSPARENT = 2,
     };
 
     Window * parent;

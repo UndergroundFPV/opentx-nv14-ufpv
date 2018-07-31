@@ -218,7 +218,7 @@ class BitmapBuffer: public BitmapBufferBase<uint16_t>
 
     inline void clear(LcdFlags flags=0)
     {
-      drawSolidFilledRect(0, 0, width, height, flags);
+      drawSolidFilledRect(0, 0, width - offsetX, height - offsetY, flags);
     }
 
     inline void drawPixel(display_t * p, display_t value)
