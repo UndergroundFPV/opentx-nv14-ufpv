@@ -22,6 +22,7 @@
 #define _BUTTON_H_
 
 #include <functional>
+#include <string>
 #include "window.h"
 
 enum ButtonFlags {

@@ -41,16 +41,16 @@ void CurveWindow::drawBackground(BitmapBuffer * dc)
 
 coord_t CurveWindow::getPointX(int x)
 {
-  return limit(0,
-               width() / 2 + divRoundClosest(x * width() / 2, RESX),
-               width() - 1);
+  return limit<coord_t>(0,
+                        width() / 2 + divRoundClosest(x * width() / 2, RESX),
+                        width() - 1);
 }
 
 coord_t CurveWindow::getPointY(int y)
 {
-  return limit(0,
-               height() / 2 - divRoundClosest(y * height() / 2, RESX),
-               height() - 1);
+  return limit<coord_t>(0,
+                        height() / 2 - divRoundClosest(y * height() / 2, RESX),
+                        height() - 1);
 }
 
 void CurveWindow::drawCurve(BitmapBuffer * dc)
