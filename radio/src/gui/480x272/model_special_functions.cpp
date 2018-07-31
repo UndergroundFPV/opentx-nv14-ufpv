@@ -94,8 +94,7 @@ protected:
 
         case FUNC_VOLUME:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_SPEAKER_VOLUME);
-          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_CH,
-                           GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(CFN_PARAM(cfn)));
           grid.nextLine();
           break;
 
@@ -136,6 +135,26 @@ protected:
                     GET_SET_DEFAULT(CFN_PARAM(cfn)));
          grid.nextLine();
          break;
+
+        case FUNC_PLAY_VALUE:
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_TELEM, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          grid.nextLine();
+          break;
+
+        case FUNC_HAPTIC:
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
+          new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 3, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          grid.nextLine();
+          break;
+
+        case FUNC_LOGS:
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
+          NumberEdit * edit = new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 255, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          edit->setDisplayHandler([=](BitmapBuffer *dc, LcdFlags flags, int32_t value) {
+            lcdDrawNumber(2, 2, CFN_PARAM(cfn), PREC1, sizeof(CFN_PARAM(cfn)), nullptr, "s");
+          });
+          break;
       }
 
       if (HAS_ENABLE_PARAM(func)) {
@@ -196,7 +215,7 @@ static constexpr coord_t line1 = 0;
 static constexpr coord_t line2 = 22;
 static constexpr coord_t col1 = 20;
 static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
-static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1;
+static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1 + 20;
 
 class SpecialFunctionButton : public Button {
 public:
@@ -279,6 +298,18 @@ public:
 
         case FUNC_SET_FAILSAFE:
           lcdDrawTextAtIndex(col1, line2, "\004Int.Ext.", CFN_PARAM(cfn), 0);
+          break;
+
+        case FUNC_PLAY_VALUE:
+          drawSource(col1, line2, CFN_PARAM(cfn), 0);
+          break;
+
+        case FUNC_HAPTIC:
+          lcdDrawNumber(col1, line2, CFN_PARAM(cfn), 0);
+          break;
+
+        case FUNC_LOGS:
+          lcdDrawNumber(col3, line1, CFN_PARAM(cfn), PREC1, sizeof(CFN_PARAM(cfn)), nullptr, "s");
           break;
       }
       if (HAS_ENABLE_PARAM(func)) {
