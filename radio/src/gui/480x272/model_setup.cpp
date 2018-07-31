@@ -202,9 +202,7 @@ void ModelSetupPage::build(Window * window)
     new StaticText(window, grid.getLabelSlot(true), STR_BEEPCOUNTDOWN);
     new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1,
                GET_SET_DEFAULT(g_model.timers[i].countdownBeep));
-    new Choice(window, grid.getFieldSlot(2, 1), STR_COUNTDOWNVALUES, 0, 3,
-               GET_DEFAULT(g_model.timers[i].countdownStart + 2),
-               SET_VALUE(g_model.timers[i].countdownStart, newValue - 2));
+    new Choice(window, grid.getFieldSlot(2, 1), STR_COUNTDOWNVALUES, 0, 3, GET_SET_WITH_OFFSET(g_model.timers[i].countdownStart, 2));
     grid.nextLine();
 
     // Timer persistent
