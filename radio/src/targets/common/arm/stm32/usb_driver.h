@@ -33,6 +33,15 @@ enum usbMode {
   USB_MAX_MODE=USB_MASS_STORAGE_MODE
 #endif
 };
+#ifdef USB_JOYSTICK
+#define USB_DEFAULT_MODE   USB_JOYSTICK_MODE
+#elif defined(USB_MASS_STORAGE)
+#define USB_DEFAULT_MODE   USB_MASS_STORAGE_MODE
+#elif defined(USB_SERIAL)
+#define USB_DEFAULT_MODE   USB_SERIAL_MODE
+#else
+#define USB_DEFAULT_MODE   USB_UNSELECTED_MODE
+#endif
 
 int usbPlugged();
 void usbInit();
