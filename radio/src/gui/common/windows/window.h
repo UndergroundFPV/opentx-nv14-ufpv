@@ -164,15 +164,14 @@ class Window {
       innerHeight = h;
     }
 
-    coord_t getScrollPositionY()
+    coord_t getScrollPositionY() const
     {
       return scrollPositionY;
     }
 
-    void setScrollPositionY(coord_t y)
-    {
-      scrollPositionY = y;
-    }
+    void setScrollPositionX(coord_t value);
+
+    void setScrollPositionY(coord_t value);
 
     virtual void paint(BitmapBuffer * dc)
     {
@@ -206,8 +205,6 @@ class Window {
 
     void moveWindowsTop(coord_t y, coord_t delta);
 
-    coord_t innerWidth, innerHeight; // TODO protected later
-
     void invalidate()
     {
       invalidate({0, 0, rect.w, rect.h});
@@ -229,12 +226,15 @@ class Window {
     Window * parent;
     std::list<Window *> children;
     rect_t rect;
-    uint8_t windowFlags;
-
+    coord_t innerWidth;
+    coord_t innerHeight;
     coord_t scrollPositionX = 0;
     coord_t scrollPositionY = 0;
+    uint8_t windowFlags;
+
     static Window * focusWindow;
     static std::list<Window *> trash;
+
     std::function<void()> onClose;
 
     void attach(Window * window);

@@ -25,6 +25,15 @@ MenuWindow::MenuWindow(Menu * parent):
 {
 }
 
+void MenuWindow::select(int index)
+{
+  selectedIndex = index;
+  if (innerHeight > height()) {
+    setScrollPositionY(-limit<coord_t>(0, lineHeight * index - 3 * lineHeight, innerHeight - height()));
+  }
+}
+
+
 bool MenuWindow::onTouchEnd(coord_t x, coord_t y)
 {
   int index = y / lineHeight;
@@ -34,11 +43,12 @@ bool MenuWindow::onTouchEnd(coord_t x, coord_t y)
 
 void MenuWindow::paint(BitmapBuffer * dc)
 {
+  int width = (innerHeight > height() ? 195 : 200);
   dc->clear(HEADER_BGCOLOR);
   for (unsigned i=0; i<lines.size(); i++) {
-    dc->drawText(10, i * lineHeight + (lineHeight - 22) / 2, lines[i].text.data(), MENU_TITLE_COLOR);
+    dc->drawText(10, i * lineHeight + (lineHeight - 22) / 2, lines[i].text.data(), selectedIndex == i ? WARNING_COLOR : MENU_TITLE_COLOR);
     if (i > 0) {
-      dc->drawSolidHorizontalLine(0, i * lineHeight, 200, CURVE_AXIS_COLOR);
+      dc->drawSolidHorizontalLine(0, i * lineHeight, width, CURVE_AXIS_COLOR);
     }
   }
 }

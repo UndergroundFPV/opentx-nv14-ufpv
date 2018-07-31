@@ -58,12 +58,15 @@ class MenuWindow: public Window {
       updatePosition();
     }
 
+    void select(int index);
+
     virtual void paint(BitmapBuffer * dc) override;
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     std::vector<MenuLine> lines;
+    int selectedIndex = -1;
     static constexpr uint8_t lineHeight = 40;
     void updatePosition();
 };
@@ -86,6 +89,11 @@ class Menu : public Window {
     void addLine(const std::string & text, std::function<void()> onPress)
     {
       menuWindow.addLine(text, std::move(onPress));
+    }
+
+    void select(int index)
+    {
+      menuWindow.select(index);
     }
 
     bool onTouchStart(coord_t x, coord_t y) override

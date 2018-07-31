@@ -24,10 +24,10 @@ Window * Window::focusWindow = nullptr;
 std::list<Window *> Window::trash;
 
 Window::Window(Window * parent, const rect_t & rect, uint8_t flags):
-  innerWidth(rect.w),
-  innerHeight(rect.h),
   parent(parent),
   rect(rect),
+  innerWidth(rect.w),
+  innerHeight(rect.h),
   windowFlags(flags)
 {
   if (parent) {
@@ -105,9 +105,27 @@ void Window::setFocus()
   invalidate();
 }
 
+void Window::setScrollPositionX(coord_t value)
+{
+  coord_t newScrollPosition = max<coord_t>(0, min<coord_t>(innerWidth - width(), value));
+  if (newScrollPosition != scrollPositionX) {
+    scrollPositionX = newScrollPosition;
+    invalidate();
+  }
+}
+
+void Window::setScrollPositionY(coord_t value)
+{
+  coord_t newScrollPosition = max<coord_t>(0, min<coord_t>(innerHeight - height(), value));
+  if (newScrollPosition != scrollPositionY) {
+    scrollPositionY = newScrollPosition;
+    invalidate();
+  }
+}
+
 void Window::scrollTo(Window * child)
 {
-  /*if (child->top() < scrollPositionY) {
+  /* TODO if (child->top() < scrollPositionY) {
     scrollPositionY = child->top();
   }*/
 
@@ -117,8 +135,8 @@ void Window::scrollTo(Window * child)
     bottom += parent->top();
     parent = parent->getParent();
   }
-  if (bottom > height() - scrollPositionY) {
-    setScrollPositionY(height() - bottom);
+  if (bottom > scrollPositionY + height() - 5) {
+    setScrollPositionY(bottom - height() + 5);
   }
 }
 
@@ -165,7 +183,7 @@ void Window::paintChildren(BitmapBuffer * dc)
     if (child_ymax <= ymin)
       continue;
 
-    dc->setOffset(x + child->rect.x + child->scrollPositionX, y + child->rect.y + child->scrollPositionY);
+    dc->setOffset(x + child->rect.x - child->scrollPositionX, y + child->rect.y - child->scrollPositionY);
     dc->setClippingRect(max(xmin, x + child->rect.left()),
                         min(xmax, x + child->rect.right()),
                         max(ymin, y + child->rect.top()),
@@ -186,7 +204,7 @@ bool Window::onTouchStart(coord_t x, coord_t y)
   for (auto it = children.rbegin(); it != children.rend(); ++it) {
     auto child = *it;
     if (pointInRect(x, y, child->rect)) {
-      if (child->onTouchStart(x - child->rect.x - child->scrollPositionX, y - child->rect.y - child->scrollPositionY)) {
+      if (child->onTouchStart(x - child->rect.x + child->scrollPositionX, y - child->rect.y + child->scrollPositionY)) {
         return true;
       }
     }
@@ -200,7 +218,7 @@ bool Window::onTouchEnd(coord_t x, coord_t y)
   for (auto it = children.rbegin(); it != children.rend(); ++it) {
     auto child = *it;
     if (pointInRect(x, y, child->rect)) {
-      if (child->onTouchEnd(x - child->rect.x - child->scrollPositionX, y - child->rect.y - child->scrollPositionY)) {
+      if (child->onTouchEnd(x - child->rect.x + child->scrollPositionX, y - child->rect.y + child->scrollPositionY)) {
         return true;
       }
     }
@@ -221,20 +239,12 @@ bool Window::onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, 
   }
 
   if (slideY && innerHeight > rect.h) {
-    coord_t newScrollPosition = limit<coord_t>(-innerHeight + rect.h, scrollPositionY + slideY, 0);
-    if (newScrollPosition != scrollPositionY) {
-      scrollPositionY = newScrollPosition;
-      invalidate();
-    }
+    setScrollPositionY(scrollPositionY - slideY);
     return true;
   }
 
   if (slideX && innerWidth > rect.w) {
-    coord_t newScrollPosition = limit<coord_t>(-innerWidth + rect.w, scrollPositionX + slideX, 0);
-    if (newScrollPosition != scrollPositionX) {
-      scrollPositionX = newScrollPosition;
-      invalidate();
-    }
+    setScrollPositionX(scrollPositionX - slideX);
     return true;
   }
 
@@ -264,12 +274,13 @@ void Window::moveWindowsTop(coord_t y, coord_t delta)
       child->rect.y += delta;
     }
   }
+  innerHeight += delta;
 }
 
 void Window::invalidate(const rect_t & rect)
 {
   if (parent) {
-    parent->invalidate({this->rect.x + rect.x + parent->scrollPositionX, this->rect.y + rect.y + parent->scrollPositionY, rect.w, rect.h});
+    parent->invalidate({this->rect.x + rect.x - parent->scrollPositionX, this->rect.y + rect.y - parent->scrollPositionY, rect.w, rect.h});
   }
 }
 
@@ -277,10 +288,10 @@ void Window::drawVerticalScrollbar(BitmapBuffer * dc)
 {
   if (innerHeight > rect.h) {
     coord_t x = rect.w - 3;
-    coord_t y = -scrollPositionY + 3;
+    coord_t y = scrollPositionY + 3;
     coord_t h = rect.h - 6;
     lcd->drawSolidFilledRect(x, y, 1, h, LINE_COLOR);
-    coord_t yofs = (-h*scrollPositionY + innerHeight/2) / innerHeight;
+    coord_t yofs = (h*scrollPositionY + innerHeight/2) / innerHeight;
     coord_t yhgt = (h*rect.h + innerHeight/2) / innerHeight;
     if (yhgt + yofs > h)
       yhgt = h - yofs;

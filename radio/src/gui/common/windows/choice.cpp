@@ -56,6 +56,9 @@ void Choice::paint(BitmapBuffer * dc)
 bool Choice::onTouchEnd(coord_t x, coord_t y)
 {
   auto menu = new Menu();
+  auto value = getValue();
+  int count = 0;
+  int current = -1;
   uint8_t len = values[0];
   for (int i=vmin; i<vmax; ++i) {
     if (isValueAvailable && !isValueAvailable(i))
@@ -63,6 +66,13 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
     menu->addLine(std::string(values+1+(i-vmin)*len, len), [=]() {
       setValue(i);
     });
+    if (value == i) {
+      current = count;
+    }
+    ++count;
+  }
+  if (current >= 0) {
+    menu->select(current);
   }
   setFocus();
   return true;
