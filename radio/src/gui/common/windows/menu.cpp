@@ -46,7 +46,7 @@ void MenuWindow::paint(BitmapBuffer * dc)
   int width = (innerHeight > height() ? 195 : 200);
   dc->clear(HEADER_BGCOLOR);
   for (unsigned i=0; i<lines.size(); i++) {
-    dc->drawText(10, i * lineHeight + (lineHeight - 22) / 2, lines[i].text.data(), selectedIndex == i ? WARNING_COLOR : MENU_TITLE_COLOR);
+    dc->drawText(10, i * lineHeight + (lineHeight - 22) / 2, lines[i].text.data(), selectedIndex == (int)i ? WARNING_COLOR : MENU_TITLE_COLOR);
     if (i > 0) {
       dc->drawSolidHorizontalLine(0, i * lineHeight, width, CURVE_AXIS_COLOR);
     }
