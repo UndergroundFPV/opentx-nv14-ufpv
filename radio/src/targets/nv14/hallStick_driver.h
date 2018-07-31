@@ -39,10 +39,16 @@
 
 ***************************************************************************************************/
 #define HALLSTICK_BUFF_SIZE             ( 512 )
-#define FLYSKY_HALL_BAUDRATE            (921600)
-#define FLYSKY_HALL_CHANNEL_COUNT       (4)
+#define FLYSKY_HALL_BAUDRATE            ( 921600 )
+#define FLYSKY_HALL_CHANNEL_COUNT       ( 4 )
 
-extern signed short HallChVal[FLYSKY_HALL_CHANNEL_COUNT];
+#define MAX_ADC_CHANNEL_VALUE           ( 4095 )
+#define MIN_ADC_CHANNLE_VALUE           ( 0 )
+#define MIDDLE_ADC_CHANNLE_VALUE        ( 2047 )
+
+
+
+extern unsigned short HallChVal[FLYSKY_HALL_CHANNEL_COUNT];
 
 typedef  struct
 {
@@ -61,7 +67,6 @@ typedef  struct
 typedef  struct
 {
     signed short channel[4];
-    signed short servoValue;
 }STRUCT_HALL_CHANNEL;
 
 typedef  struct
@@ -126,8 +131,6 @@ typedef  struct
     unsigned char status;
     unsigned char recevied;
     unsigned char msg_OK;
-  //unsigned char RxBuffer[HALLSTICK_BUFF_SIZE];
-    //UNION_HALLDATA Payload;
 } STRUCT_HALL;
 
 enum
@@ -177,12 +180,10 @@ extern void reset_hall_stick( void );
 extern void get_hall_config( void );
 extern void hall_stick_init(uint32_t baudrate);
 extern void hall_stick_loop( void );
-extern void hallSerialPutc(char c);
-extern uint16_t hallIn(uint8_t chan);
+extern uint16_t get_hall_adc_value(uint8_t ch);
 
 
 #endif
-
 
 
 

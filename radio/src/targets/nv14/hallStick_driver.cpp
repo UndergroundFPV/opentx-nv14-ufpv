@@ -26,7 +26,7 @@ unsigned char HallCmd[64] __DMA;
 STRUCT_HALL HallProtocol = { 0 };
 STRUCT_HALL_CHANNEL Channel;
 STRUCT_STICK_CALIBRATION StickCallbration[4] = { {0, 0, 0} };
-signed short HallChVal[4];
+unsigned short HallChVal[4];
 
 /* crc16 implementation according to CCITT standards */
 const unsigned short CRC16Table[256]= {
@@ -77,26 +77,19 @@ unsigned short  calc_crc16(void *pBuffer,unsigned char BufferSize)
     return crc16;
 }
 
-int16_t getHallADValue(uint8_t chan)
+uint16_t get_hall_adc_value(uint8_t ch)
 {
-  if (chan >= FLYSKY_HALL_CHANNEL_COUNT) {
-    return 0;
-  }
-
-  if (chan < 2)
-    return -(HallChVal[chan] - 1000) * 4;
-  else
-    return (HallChVal[chan] - 1000) * 4;
-}
-
-int16_t hallValue(uint8_t chan)
-{
-  if (chan > FLYSKY_HALL_CHANNEL_COUNT - 1)
+  if (ch >= FLYSKY_HALL_CHANNEL_COUNT)
   {
     return 0;
   }
 
-  return HallChVal[chan];
+  if (ch < 2)
+  {
+    return MAX_ADC_CHANNEL_VALUE - HallChVal[ch];
+  }
+
+  return HallChVal[ch];
 }
 
 
@@ -334,43 +327,40 @@ static void Parse_Character(unsigned char ch)
     return ;
 }
 
-STRUCT_HALL_CHANNEL HallChannel[4];
 
-void ConvertChannel( void )
+void convert_hall_to_adcVaule( void )
 {
     uint16_t value;
 
-    for (uint8_t i = 0; i < 4; i++ ) {
+    for ( uint8_t i = 0; i < 4; i++ )
+    {
         if (Channel.channel[i] < StickCallbration[i].mid)
         {
             value = StickCallbration[i].mid - StickCallbration[i].min;
-            value = ( 500 * (StickCallbration[i].mid - Channel.channel[i] ) ) / ( value );
+            value = ( MIDDLE_ADC_CHANNLE_VALUE * (StickCallbration[i].mid - Channel.channel[i] ) ) / ( value );
 
-            if (value >= 500 ) {
-                value = 500;
+            if (value >= MIDDLE_ADC_CHANNLE_VALUE ) {
+                value = MIDDLE_ADC_CHANNLE_VALUE;
             }
 
-            HallChannel[i].servoValue = 1500 - value;
+            HallChVal[i] = MIDDLE_ADC_CHANNLE_VALUE - value;
         }
         else
         {
             value = StickCallbration[i].max - StickCallbration[i].mid;
 
-            value = (500 * (Channel.channel[i] - StickCallbration[i].mid ) ) / (value );
+            value = ( MIDDLE_ADC_CHANNLE_VALUE * (Channel.channel[i] - StickCallbration[i].mid ) ) / (value );
 
-            if(value >= 500 )
+            if (value >= MIDDLE_ADC_CHANNLE_VALUE )
             {
-                value = 500;
+                value = MIDDLE_ADC_CHANNLE_VALUE;
             }
 
-            HallChannel[i].servoValue = value + 1500;
+            HallChVal[i] = MIDDLE_ADC_CHANNLE_VALUE + value + 1;
         }
-
-        HallChVal[i] = HallChannel[i].servoValue;
-        extern void setFlySkyChannelData(int channel, int16_t steroValue);
-        setFlySkyChannelData(i, HallChannel[i].servoValue);
     }
 }
+
 
 /* Run it in 1ms timer routine */
 void hall_stick_loop(void )
@@ -398,8 +388,7 @@ void hall_stick_loop(void )
                 else if ( 0x0c == HallProtocol.hallID.hall_Id.packetID )
                 {
                     memcpy(&Channel, HallProtocol.data, sizeof(Channel));
-
-                    ConvertChannel();
+                    convert_hall_to_adcVaule();
                 }
             }
         }

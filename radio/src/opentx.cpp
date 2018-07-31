@@ -1550,13 +1550,12 @@ void getADC()
 
 #if defined(FLYSKY_HALL_STICKS) // TBC: use the same jitter as other analog input
 
-  extern int16_t getHallADValue(uint8_t chan);
 
-  for ( uint8_t x=0; x<NUM_ANALOGS; x++ ) {
+  for ( uint8_t x = 0; x < NUM_ANALOGS; x++ ) {
 
-    uint16_t v;
+    uint16_t v = 0;
     if ( x < 4 ) { // FLYSKY_HALL_CHANNEL_COUNT
-        v = getHallADValue(x) >> (1 - ANALOG_SCALE);
+        v = get_hall_adc_value(x) >> (1 - ANALOG_SCALE);
     } else {
         v = getAnalogValue(x) >> (1 - ANALOG_SCALE);
     }
