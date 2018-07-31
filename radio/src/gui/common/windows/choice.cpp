@@ -20,6 +20,10 @@
 
 #include "opentx.h"
 
+const uint8_t LBM_DROPDOWN[] = {
+#include "mask_dropdown.lbm"
+};
+
 Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
                std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
   Window(parent, rect, OPAQUE),
@@ -46,23 +50,21 @@ void Choice::paint(BitmapBuffer * dc)
   else
     drawTextAtIndex(dc, 3, 2, values, getValue() - vmin, flags | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
+  dc->drawBitmapPattern(rect.w - 14, (rect.h - 5) / 2, LBM_DROPDOWN, lineColor);
 }
 
 bool Choice::onTouchEnd(coord_t x, coord_t y)
 {
-  if (hasFocus()) {
-    int16_t value = getValue();
-    do {
-      value++;
-      if (value > vmax)
-        value = vmin;
-    } while (isValueAvailable && !isValueAvailable(value));
-    setValue(value);
+  auto menu = new Menu();
+  uint8_t len = values[0];
+  for (int i=vmin; i<vmax; ++i) {
+    if (isValueAvailable && !isValueAvailable(i))
+      continue;
+    menu->addLine(std::string(values+1+(i-vmin)*len, len), [=]() {
+      setValue(i);
+    });
   }
-  else {
-    setFocus();
-  }
-  invalidate();
+  setFocus();
   return true;
 }
 

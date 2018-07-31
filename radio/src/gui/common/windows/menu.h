@@ -32,7 +32,7 @@ class MenuWindow: public Window {
     friend class MenuWindow;
 
     public:
-      MenuLine(const char * text, std::function<void()> onPress):
+      MenuLine(const std::string & text, std::function<void()> onPress):
         text(text),
         onPress(onPress)
       {
@@ -50,7 +50,7 @@ class MenuWindow: public Window {
   public:
     MenuWindow(Menu * parent);
 
-    void addLine(const char * text, std::function<void()> onPress)
+    void addLine(const std::string & text, std::function<void()> onPress)
     {
       lines.emplace_back(text, onPress);
       updatePosition();
@@ -81,7 +81,7 @@ class Menu : public Window {
     }
 #endif
 
-    void addLine(const char * text, std::function<void()> onPress)
+    void addLine(const std::string & text, std::function<void()> onPress)
     {
       menuWindow.addLine(text, onPress);
     }
