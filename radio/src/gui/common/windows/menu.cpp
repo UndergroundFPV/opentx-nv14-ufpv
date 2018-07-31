@@ -29,7 +29,7 @@ void MenuWindow::select(int index)
 {
   selectedIndex = index;
   if (innerHeight > height()) {
-    setScrollPositionY(-limit<coord_t>(0, lineHeight * index - 3 * lineHeight, innerHeight - height()));
+    setScrollPositionY(lineHeight * index - 3 * lineHeight);
   }
 }
 

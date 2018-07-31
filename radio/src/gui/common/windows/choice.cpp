@@ -1,3 +1,5 @@
+#include <utility>
+
 /*
  * Copyright (C) OpenTX
  *
@@ -26,12 +28,12 @@ const uint8_t LBM_DROPDOWN[] = {
 
 Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
                std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
-  Window(parent, rect, OPAQUE),
+  Window(parent, rect),
   values(values),
   vmin(vmin),
   vmax(vmax),
-  getValue(getValue),
-  setValue(setValue),
+  getValue(std::move(getValue)),
+  setValue(std::move(setValue)),
   flags(flags)
 {
 }
@@ -45,8 +47,8 @@ void Choice::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  if (displayFunction)
-    displayFunction(dc, textColor, getValue());
+  if (textHandler)
+    dc->drawText(3, 2, textHandler(getValue()).c_str());
   else
     drawTextAtIndex(dc, 3, 2, values, getValue() - vmin, flags | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
@@ -59,21 +61,39 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
   auto value = getValue();
   int count = 0;
   int current = -1;
-  uint8_t len = values[0];
-  for (int i=vmin; i<vmax; ++i) {
-    if (isValueAvailable && !isValueAvailable(i))
-      continue;
-    menu->addLine(std::string(values+1+(i-vmin)*len, len), [=]() {
-      setValue(i);
-    });
-    if (value == i) {
-      current = count;
+
+  if (textHandler) {
+    for (int i = vmin; i < vmax; ++i) {
+      if (isValueAvailable && !isValueAvailable(i))
+        continue;
+      menu->addLine(textHandler(i), [=]() {
+        setValue(i);
+      });
+      if (value == i) {
+        current = count;
+      }
+      ++count;
     }
-    ++count;
   }
+  else {
+    uint8_t len = values[0];
+    for (int i = vmin; i < vmax; ++i) {
+      if (isValueAvailable && !isValueAvailable(i))
+        continue;
+      menu->addLine(std::string(values + 1 + (i - vmin) * len, len), [=]() {
+        setValue(i);
+      });
+      if (value == i) {
+        current = count;
+      }
+      ++count;
+    }
+  }
+
   if (current >= 0) {
     menu->select(current);
   }
+
   setFocus();
   return true;
 }

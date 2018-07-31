@@ -33,7 +33,6 @@ enum ButtonFlags {
   BUTTON_DISABLED = 16,
 };
 
-
 class Button : public Window {
   public:
     Button(Window * parent, const rect_t & rect, std::function<uint8_t(void)> onPress=nullptr, uint8_t flags=0):

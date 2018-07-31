@@ -18,54 +18,32 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _TEXTEDIT_H_
-#define _TEXTEDIT_H_
+#ifndef _FILECHOICE_H_
+#define _FILECHOICE_H_
 
 #include "window.h"
-#include "keyboard_text.h"
 
-uint8_t zlen(const char *str, uint8_t size);
-
-class TextEdit : public Window {
-  friend class TextKeyboard;
-
+class FileChoice: public Window {
   public:
-    TextEdit(Window * parent, const rect_t &rect, char * value, uint8_t length, LcdFlags flags = 0) :
-      Window(parent, rect),
-      value(value),
-      length(length)
-    {
-    }
+    FileChoice(Window * parent, const rect_t & rect, std::string folder, const char * extension, int maxlen, std::function<std::string()> getValue, std::function<void(std::string)> setValue);
 
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
-      return "TextEdit";
+      return "FileChoice";
     }
 #endif
 
-    uint8_t getMaxLength()
-    {
-      return length;
-    }
+    void paint(BitmapBuffer * dc) override;
 
-    char * getData()
-    {
-      return value;
-    }
-
-    virtual void paint(BitmapBuffer * dc) override;
-
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
-
-    virtual void onFocusLost() override
-    {
-      TextKeyboard::instance()->disable();
-    }
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
-    char * value;
-    uint8_t length;
+    std::string folder;
+    const char * extension;
+    int maxlen;
+    std::function<std::string()> getValue;
+    std::function<void(std::string)> setValue;
 };
 
-#endif // _TEXTEDIT_H_
+#endif // _FILECHOICE_H_

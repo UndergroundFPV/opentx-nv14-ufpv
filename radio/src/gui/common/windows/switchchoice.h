@@ -27,7 +27,7 @@
 class SwitchChoice : public Window {
   public:
     SwitchChoice(Window * parent, const rect_t & rect, int vmin, int vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):
-      Window(parent, rect, OPAQUE),
+      Window(parent, rect),
       vmin(vmin),
       vmax(vmax),
       getValue(getValue),

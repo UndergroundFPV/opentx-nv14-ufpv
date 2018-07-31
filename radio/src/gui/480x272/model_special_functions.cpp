@@ -47,7 +47,7 @@ protected:
 
     void updateSpecialFunctionOneWindow()
     {
-      //SF.one variable part
+      // SF.one variable part
       GridLayout grid(*specialFunctionOneWindow);
       specialFunctionOneWindow->clear();
 
@@ -58,8 +58,7 @@ protected:
       switch(func) {
         case FUNC_OVERRIDE_CHANNEL:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_CH);
-          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS - 1,
-                           GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS - 1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
           grid.nextLine();
 
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
@@ -109,30 +108,37 @@ protected:
         case FUNC_BACKGND_MUSIC:
         case FUNC_PLAY_SCRIPT:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
-          // TODO @bsongis : new FileChoice()
+          new FileChoice(specialFunctionOneWindow, grid.getFieldSlot(),
+            func == FUNC_PLAY_SCRIPT ? SCRIPTS_FUNCS_PATH : std::string(SOUNDS_PATH, SOUNDS_PATH_LNG_OFS) + std::string(currentLanguagePack->id, 2),
+            func == FUNC_PLAY_SCRIPT ? SCRIPTS_EXT : SOUNDS_EXT,
+            sizeof(cfn->play.name),
+            [=]() {
+              return std::string(cfn->play.name, ZLEN(cfn->play.name));
+            },
+            [=](std::string newValue) {
+              strncpy(cfn->play.name, newValue.c_str(), sizeof(cfn->play.name));
+              SET_DIRTY();
+            });
           grid.nextLine();
           break;
 
         case FUNC_SET_TIMER: {
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), "TIMER");
-          auto timerchoice = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), STR_TIMER, 1, TIMERS,
-                                        GET_SET_WITH_OFFSET(CFN_TIMER_INDEX(cfn), 1));
-          timerchoice->setDisplayHandler([=](BitmapBuffer *dc, LcdFlags flags, int32_t value) {
-              drawStringWithIndex(2, 2, STR_TIMER, CFN_TIMER_INDEX(cfn) + 1, 0);
+          auto timerchoice = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), STR_TIMER, 1, TIMERS, GET_SET_WITH_OFFSET(CFN_TIMER_INDEX(cfn), 1));
+          timerchoice->setTextHandler([](int32_t value) {
+            return std::string(STR_TIMER) + std::to_string(value + 1);
           });
           grid.nextLine();
 
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
-          new TimeEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 9 * 60 * 60 - 1,
-                       GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          new TimeEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 9 * 60 * 60 - 1, GET_SET_DEFAULT(CFN_PARAM(cfn)));
           grid.nextLine();
           break;
         }
 
        case FUNC_SET_FAILSAFE:
          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_MODULE);
-         new Choice(specialFunctionOneWindow, grid.getFieldSlot(), "\004Int.Ext.", 0, NUM_MODULES - 1,
-                    GET_SET_DEFAULT(CFN_PARAM(cfn)));
+         new Choice(specialFunctionOneWindow, grid.getFieldSlot(), "\004Int.Ext.", 0, NUM_MODULES - 1, GET_SET_DEFAULT(CFN_PARAM(cfn)));
          grid.nextLine();
          break;
 
@@ -167,16 +173,13 @@ protected:
       else if (HAS_REPEAT_PARAM(func)) { // !1x 1x 1s 2s 3s ...
         new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_REPEAT);
         auto repeat = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), nullptr, -1,  60/CFN_PLAY_REPEAT_MUL, GET_SET_DEFAULT(CFN_PLAY_REPEAT(cfn)));
-        repeat->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-          if (value == 0) {
-            lcdDrawText(2, 2, "1x", 0);
-          }
-          else if (value == CFN_PLAY_REPEAT_NOSTART) {
-            lcdDrawText(2, 2, "!1x", 0);
-          }
-          else {
-            lcdDrawNumber(2, 2, value * CFN_PLAY_REPEAT_MUL, 0, 0, NULL, "s");
-          }
+        repeat->setTextHandler([](int32_t value) -> std::string {
+          if (value == 0)
+            return "1x";
+          else if (value == CFN_PLAY_REPEAT_NOSTART)
+            return "!1x";
+          else
+            return std::to_string(value * CFN_PLAY_REPEAT_MUL) + "s";
         });
       }
     }
@@ -201,6 +204,7 @@ protected:
       auto choice = new Choice(window, grid.getFieldSlot(), STR_VFSWFUNC, 0, FUNC_MAX-1, GET_DEFAULT(CFN_FUNC(cfn)),
                                [=](int32_t newValue) {
                                    CFN_FUNC(cfn) = newValue;
+                                   CFN_RESET(cfn);
                                    SET_DIRTY();
                                    updateSpecialFunctionOneWindow();
                                });

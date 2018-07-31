@@ -31,6 +31,7 @@
 #include "choice.h"
 #include "sourcechoice.h"
 #include "switchchoice.h"
+#include "filechoice.h"
 #include "textedit.h"
 #include "slider.h"
 #include "keyboard_text.h"

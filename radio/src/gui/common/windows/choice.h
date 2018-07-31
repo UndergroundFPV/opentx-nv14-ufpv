@@ -63,12 +63,12 @@ class Choice : public Window {
 
     void setAvailableHandler(std::function<bool(int)> handler)
     {
-      isValueAvailable = handler;
+      isValueAvailable = std::move(handler);
     }
 
-    void setDisplayHandler(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function)
+    void setTextHandler(std::function<std::string(int32_t)> handler)
     {
-      displayFunction = function;
+      textHandler = std::move(handler);
     }
 
   protected:
@@ -78,7 +78,7 @@ class Choice : public Window {
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
     std::function<bool(int)> isValueAvailable;
-    std::function<void(BitmapBuffer *, LcdFlags, int32_t)> displayFunction;
+    std::function<std::string(int32_t)> textHandler;
     LcdFlags flags;
 };
 

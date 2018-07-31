@@ -17,6 +17,7 @@ set(SRC
     ${WINDOWS_DIRECTORY}/page.cpp
     ${WINDOWS_DIRECTORY}/sourcechoice.cpp
     ${WINDOWS_DIRECTORY}/switchchoice.cpp
+    ${WINDOWS_DIRECTORY}/filechoice.cpp
     ${WINDOWS_DIRECTORY}/slider.cpp
     ${WINDOWS_DIRECTORY}/menu.cpp
     ${WINDOWS_DIRECTORY}/alert.cpp
