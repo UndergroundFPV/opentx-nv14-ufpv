@@ -86,7 +86,7 @@ void intmodulePxxStart()
 
   USART_DeInit(INTMODULE_USART);
   USART_InitTypeDef USART_InitStructure;
-  USART_InitStructure.USART_BaudRate = 115200;
+  USART_InitStructure.USART_BaudRate = INTERNAL_MODULE_BAUDRATE;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -186,18 +186,16 @@ uint8_t intmoduleGetByte(uint8_t * byte)
 #endif
 }
 
-void intmoduleSendNextFrame()
+void intmoduleSendBufferDMA(uint8_t * data, uint8_t size)
 {
   if (IS_PXX_PROTOCOL(s_current_protocol[INTERNAL_MODULE]) || IS_FLYSKY_PROTOCOL(s_current_protocol[INTERNAL_MODULE])) {
-    uint8_t * data = modulePulsesData[INTERNAL_MODULE].pxx_uart.pulses;
-    uint8_t size = modulePulsesData[INTERNAL_MODULE].pxx_uart.ptr - data;
     if (size) {
       DMA_InitTypeDef DMA_InitStructure;
       DMA_DeInit(INTMODULE_TX_DMA_STREAM);
       DMA_InitStructure.DMA_Channel = INTMODULE_DMA_CHANNEL;
       DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&INTMODULE_USART->DR);
       DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-      DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(modulePulsesData[INTERNAL_MODULE].pxx_uart.pulses);
+      DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(data);
       DMA_InitStructure.DMA_BufferSize = size;
       DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
       DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
@@ -214,6 +212,13 @@ void intmoduleSendNextFrame()
       USART_DMACmd(INTMODULE_USART, USART_DMAReq_Tx, ENABLE);
     }
   }
+}
+
+void intmoduleSendNextFrame()
+{
+    uint8_t * data = modulePulsesData[INTERNAL_MODULE].pxx_uart.pulses;
+    uint8_t size = modulePulsesData[INTERNAL_MODULE].pxx_uart.ptr - data;
+    intmoduleSendBufferDMA(data, size);
 }
 
 extern "C" void INTMODULE_TIMER_IRQHandler()
