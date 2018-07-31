@@ -532,7 +532,7 @@ void setFlySkyChannelData(int channel, int16_t steroValue)
     if((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY) && (set_loop_cnt++ % 1000 ==0)) {
         TRACE_NOCRLF("HALL(%0d): ", FLYSKY_HALL_BAUDRATE);
         for(int idx=0; idx < NUM_OF_NV14_CHANNELS; idx++) {
-            TRACE_NOCRLF("CH%0d:%0d(%0d) ", idx+1, rx_info.stero_value[idx], getHallADValue(idx));
+            TRACE_NOCRLF("CH%0d:%0d ", idx+1, rx_info.stero_value[idx]);
         }
         TRACE(" ");
     }
