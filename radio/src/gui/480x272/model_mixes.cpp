@@ -242,7 +242,7 @@ class MixLineButton : public Button {
       return isMixActive(mixIndex);
     }
 
-    virtual void checkEvents() override
+    void checkEvents() override
     {
       if (active != isActive()) {
         invalidate();

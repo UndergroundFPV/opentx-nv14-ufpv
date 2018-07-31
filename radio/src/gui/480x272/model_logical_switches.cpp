@@ -51,7 +51,7 @@ class LogicalSwitchEditWindow: public Page {
       return getSwitch(SWSRC_FIRST_LOGICAL_SWITCH+ls);
     }
 
-    virtual void checkEvents() override
+    void checkEvents() override
     {
       if (active != isActive()) {
         headerSwitchName->setFlags(isActive() ? BOLD|WARNING_COLOR : MENU_TITLE_COLOR);
@@ -245,7 +245,7 @@ class LogicalSwitchButton : public Button {
       return getSwitch(SWSRC_FIRST_LOGICAL_SWITCH + lsIndex);
     }
 
-    virtual void checkEvents() override
+    void checkEvents() override
     {
       if (active != isActive()) {
         invalidate();

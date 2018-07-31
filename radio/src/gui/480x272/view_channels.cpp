@@ -55,13 +55,13 @@ class ChannelsMonitorBody: public Window {
       setInnerHeight(ROW_HEIGHT * MAX_OUTPUT_CHANNELS + BAR_HEIGHT);
     }
 
-    virtual void checkEvents() override
+    void checkEvents() override
     {
       // will always force a full monitor window refresh
       invalidate();
     }
 
-    virtual void paint(BitmapBuffer * dc) override
+    void paint(BitmapBuffer * dc) override
     {
       for (uint8_t i=0; i < MAX_OUTPUT_CHANNELS; i++) {
         drawComboOutputBar(Y_OUTBAR, i * ROW_HEIGHT + BAR_HEIGHT, LCD_W - 2 * Y_OUTBAR, BAR_HEIGHT, i);

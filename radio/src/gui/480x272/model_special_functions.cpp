@@ -201,7 +201,7 @@ public:
       return 0;
     }
 
-    virtual void checkEvents() override
+    void checkEvents() override
     {
       if (active != isActive()) {
         invalidate();

@@ -37,6 +37,13 @@ bool Button::onTouchEnd(coord_t x, coord_t y)
   return true;
 }
 
+void Button::checkEvents()
+{
+  Window::checkEvents();
+  if (onCheck)
+    onCheck();
+}
+
 void TextButton::paint(BitmapBuffer * dc)
 {
   if (checked()) {

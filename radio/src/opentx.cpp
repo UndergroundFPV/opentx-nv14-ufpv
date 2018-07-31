@@ -1198,7 +1198,7 @@ class ThrottleAlert: public Alert {
     }
 
   protected:
-    virtual void checkEvents() override {
+    void checkEvents() override {
       if (!isThrottleWarningAlertNeeded()) {
         deleteLater();
       }

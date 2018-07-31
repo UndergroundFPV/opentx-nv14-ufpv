@@ -82,10 +82,18 @@ class Button : public Window {
       onPress = handler;
     }
 
+    void setCheckHandler(std::function<void(void)> handler)
+    {
+      onCheck = handler;
+    }
+
     bool onTouchEnd(coord_t x, coord_t y) override;
+
+    void checkEvents() override;
 
   protected:
     std::function<uint8_t(void)> onPress;
+    std::function<void(void)> onCheck;
     uint8_t flags;
 };
 

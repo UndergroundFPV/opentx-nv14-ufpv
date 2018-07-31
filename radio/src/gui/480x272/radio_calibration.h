@@ -6,7 +6,7 @@ class RadioCalibrationPage: public PageTab {
 
     virtual void build(Window * window) override;
 
-    virtual void checkEvents() override;
+    void checkEvents() override;
 
   protected:
     TextButton * button = nullptr;
