@@ -33,7 +33,7 @@ class StaticText : public Window {
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
-      return "StaticText(" + text + ")";
+      return "StaticText \"" + text + "\"";
     }
 #endif
 
@@ -63,7 +63,7 @@ class Subtitle: public StaticText {
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
-      return "Subtitle(" + text + ")";
+      return "Subtitle \"" + text + "\"";
     }
 #endif
 };

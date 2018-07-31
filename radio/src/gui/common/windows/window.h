@@ -44,9 +44,8 @@ class Window {
 
     std::string getRectString()
     {
-      std::string result;
-      result.reserve(32);
-      sprintf((char *)result.data(), "[%d, %d, %d, %d]", left(), top(), width(), height());
+      char result[32];
+      sprintf(result, "[%d, %d, %d, %d]", left(), top(), width(), height());
       return result;
     }
 

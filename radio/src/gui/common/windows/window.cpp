@@ -126,7 +126,6 @@ void Window::fullPaint(BitmapBuffer * dc)
 #if defined(DEBUG_WINDOWS)
   TRACE("%s", getWindowDebugString().c_str());
 #endif
-
   paint(dc);
   drawVerticalScrollbar(dc);
   paintChildren(dc);
@@ -159,10 +158,10 @@ void Window::paintChildren(BitmapBuffer * dc)
     if (child_ymin >= ymax)
       continue;
     coord_t child_xmax = child_xmin + child->rect.w;
-    if (child_xmax < xmin)
+    if (child_xmax <= xmin)
       continue;
     coord_t child_ymax = child_ymin + child->rect.h;
-    if (child_ymax < ymin)
+    if (child_ymax <= ymin)
       continue;
 
     dc->setOffset(x + child->rect.x + child->scrollPositionX, y + child->rect.y + child->scrollPositionY);
