@@ -21,6 +21,9 @@
 #ifndef _STATIC_H_
 #define _STATIC_H_
 
+#include <string>
+#include "window.h"
+
 class StaticText : public Window {
   public:
     StaticText(Window * parent, const rect_t & rect, const char * text, LcdFlags flags = 0) :
