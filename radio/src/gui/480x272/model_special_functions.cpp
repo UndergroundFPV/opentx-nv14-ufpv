@@ -58,7 +58,8 @@ protected:
       switch(func) {
         case FUNC_OVERRIDE_CHANNEL:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_CH);
-          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS-1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS - 1,
+                           GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
           grid.nextLine();
 
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
@@ -75,14 +76,16 @@ protected:
         case FUNC_RESET:
           if (CFN_PARAM(cfn) < FUNC_RESET_PARAM_FIRST_TELEM) {
             new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_RESET);
-            auto resetchoice = new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, FUNC_RESET_PARAM_FIRST_TELEM+lastUsedTelemetryIndex(), GET_SET_DEFAULT(CFN_PARAM(cfn)));
+            auto resetchoice = new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0,
+                                                FUNC_RESET_PARAM_FIRST_TELEM + lastUsedTelemetryIndex(),
+                                                GET_SET_DEFAULT(CFN_PARAM(cfn)));
             resetchoice->setAvailableHandler(isSourceAvailableInResetSpecialFunction);
-            resetchoice->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+            resetchoice->setDisplayHandler([=](BitmapBuffer *dc, LcdFlags flags, int32_t value) {
                 if (value < FUNC_RESET_PARAM_FIRST_TELEM)
                   lcdDrawTextAtIndex(2, 2, STR_VFSWRESET, value, flags);
                 else {
-                  TelemetrySensor * sensor = & g_model.telemetrySensors[value-FUNC_RESET_PARAM_FIRST_TELEM];
-                  lcdDrawSizedText(2, 2, sensor->label, TELEM_LABEL_LEN, flags|ZCHAR);
+                  TelemetrySensor *sensor = &g_model.telemetrySensors[value - FUNC_RESET_PARAM_FIRST_TELEM];
+                  lcdDrawSizedText(2, 2, sensor->label, TELEM_LABEL_LEN, flags | ZCHAR);
                 }
             });
             grid.nextLine();
@@ -91,13 +94,15 @@ protected:
 
         case FUNC_VOLUME:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_SPEAKER_VOLUME);
-          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_CH,
+                           GET_SET_DEFAULT(CFN_PARAM(cfn)));
           grid.nextLine();
           break;
 
         case FUNC_PLAY_SOUND:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
-          new Choice(specialFunctionOneWindow, grid.getFieldSlot(), STR_FUNCSOUNDS, 0, AU_SPECIAL_SOUND_LAST-AU_SPECIAL_SOUND_FIRST-1, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          new Choice(specialFunctionOneWindow, grid.getFieldSlot(), STR_FUNCSOUNDS, 0,
+                     AU_SPECIAL_SOUND_LAST - AU_SPECIAL_SOUND_FIRST - 1, GET_SET_DEFAULT(CFN_PARAM(cfn)));
           grid.nextLine();
           break;
 
@@ -109,18 +114,28 @@ protected:
           grid.nextLine();
           break;
 
-        case FUNC_SET_TIMER:
-          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_TIMER);
-          auto timerchoice = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), STR_TIMER, 1, TIMERS, GET_SET_WITH_OFFSET(CFN_TIMER_INDEX(cfn),1));
-          timerchoice->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-            drawStringWithIndex(2, 2, STR_TIMER, CFN_TIMER_INDEX(cfn)+1, 0);
+        case FUNC_SET_TIMER: {
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), "TIMER");
+          auto timerchoice = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), STR_TIMER, 1, TIMERS,
+                                        GET_SET_WITH_OFFSET(CFN_TIMER_INDEX(cfn), 1));
+          timerchoice->setDisplayHandler([=](BitmapBuffer *dc, LcdFlags flags, int32_t value) {
+              drawStringWithIndex(2, 2, STR_TIMER, CFN_TIMER_INDEX(cfn) + 1, 0);
           });
           grid.nextLine();
-          
+
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
-          new TimeEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 9 * 60 * 60 - 1, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          new TimeEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 9 * 60 * 60 - 1,
+                       GET_SET_DEFAULT(CFN_PARAM(cfn)));
           grid.nextLine();
           break;
+        }
+
+       case FUNC_SET_FAILSAFE:
+         new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_MODULE);
+         new Choice(specialFunctionOneWindow, grid.getFieldSlot(), "\004Int.Ext.", 0, NUM_MODULES - 1,
+                    GET_SET_DEFAULT(CFN_PARAM(cfn)));
+         grid.nextLine();
+         break;
       }
 
       if (HAS_ENABLE_PARAM(func)) {
@@ -260,6 +275,10 @@ public:
 
         case FUNC_SET_TIMER:
           drawStringWithIndex(col1, line2, STR_TIMER, CFN_TIMER_INDEX(cfn)+1, 0);
+          break;
+
+        case FUNC_SET_FAILSAFE:
+          lcdDrawTextAtIndex(col1, line2, "\004Int.Ext.", CFN_PARAM(cfn), 0);
           break;
       }
       if (HAS_ENABLE_PARAM(func)) {
