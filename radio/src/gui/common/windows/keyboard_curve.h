@@ -34,6 +34,13 @@ class CurveKeyboard : public Keyboard<CurveEdit> {
 
     ~CurveKeyboard();
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "CurveKeyboard";
+    }
+#endif
+
     static CurveKeyboard * instance()
     {
       if (!_instance)

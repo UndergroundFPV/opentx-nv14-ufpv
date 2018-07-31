@@ -24,7 +24,6 @@
 #include "window.h"
 #include "mainwindow.h"
 #include "static.h"
-#include "subtitle.h"
 #include "button.h"
 #include "checkbox.h"
 #include "numberedit.h"

@@ -123,6 +123,10 @@ void Window::scrollTo(Window * child)
 
 void Window::fullPaint(BitmapBuffer * dc)
 {
+#if defined(DEBUG_WINDOWS)
+  TRACE("%s", getWindowDebugString().c_str());
+#endif
+
   paint(dc);
   drawVerticalScrollbar(dc);
   paintChildren(dc);

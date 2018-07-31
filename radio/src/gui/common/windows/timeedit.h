@@ -27,11 +27,18 @@ class TimeEdit : public BaseNumberEdit {
   public:
     TimeEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue = nullptr, LcdFlags flags = 0);
 
-    virtual void paint(BitmapBuffer * dc) override;
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "TimeEdit";
+    }
+#endif
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    void paint(BitmapBuffer * dc) override;
 
-    virtual void onFocusLost() override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
+
+    void onFocusLost() override;
 };
 
 #endif // _TIMEEDIT_H_

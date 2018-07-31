@@ -28,7 +28,7 @@
 class TabsGroup;
 
 class PageTab {
-  friend class TabsGroupCarousel;
+  friend class TabsCarousel;
   friend class TabsGroup;
 
   public:
@@ -49,9 +49,16 @@ class PageTab {
     unsigned icon;
 };
 
-class TabsGroupCarousel: public Window {
+class TabsCarousel: public Window {
   public:
-    TabsGroupCarousel(Window * parent, TabsGroup * menu);
+    TabsCarousel(Window * parent, TabsGroup * menu);
+
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "TabsCarousel";
+    }
+#endif
 
     void updateInnerWidth();
 
@@ -71,6 +78,13 @@ class TabsGroupHeader: public Window {
   public:
     TabsGroupHeader(TabsGroup * menu);
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "TabsGroupHeader";
+    }
+#endif
+
     void paint(BitmapBuffer * dc) override;
 
     void setTitle(const char * title)
@@ -80,15 +94,22 @@ class TabsGroupHeader: public Window {
 
   protected:
     IconButton back;
-    TabsGroupCarousel carousel;
+    TabsCarousel carousel;
     const char * title = nullptr;
 };
 
 class TabsGroup: public Window {
-    friend class TabsGroupCarousel;
+    friend class TabsCarousel;
 
   public:
     TabsGroup();
+
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "TabsGroup";
+    }
+#endif
 
     void addTab(PageTab * page);
 

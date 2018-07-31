@@ -29,6 +29,13 @@ class Alert : public Window {
 
     virtual ~Alert();
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "Alert";
+    }
+#endif
+
     virtual void paint(BitmapBuffer * dc) override;
 
     virtual bool onTouchEnd(coord_t x, coord_t y) override {

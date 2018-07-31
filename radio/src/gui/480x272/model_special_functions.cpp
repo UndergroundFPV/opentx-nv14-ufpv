@@ -149,12 +149,14 @@ protected:
           break;
 
         case FUNC_LOGS:
+        {
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
-          NumberEdit * edit = new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 255, GET_SET_DEFAULT(CFN_PARAM(cfn)));
-          edit->setDisplayHandler([=](BitmapBuffer *dc, LcdFlags flags, int32_t value) {
+          auto edit = new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 255, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          edit->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
             lcdDrawNumber(2, 2, CFN_PARAM(cfn), PREC1, sizeof(CFN_PARAM(cfn)), nullptr, "s");
           });
           break;
+        }
       }
 
       if (HAS_ENABLE_PARAM(func)) {
@@ -181,7 +183,7 @@ protected:
 
     void buildBody(Window * window)
     {
-      //SF.one
+      // SF.one
       GridLayout grid(*window);
       grid.spacer(8);
 

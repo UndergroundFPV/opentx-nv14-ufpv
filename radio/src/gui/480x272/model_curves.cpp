@@ -142,10 +142,10 @@ class CurveButton : public Button {
     {
       if (isCurveFilled(index)) {
         setHeight(130);
-        new CurveWindow(this, {5, 5, 120, 120},
-                        [=](int x) -> int {
-                          return applyCustomCurve(x, index);
-                        });
+        new Curve(this, {5, 5, 120, 120},
+                  [=](int x) -> int {
+                    return applyCustomCurve(x, index);
+                  });
       }
     }
 

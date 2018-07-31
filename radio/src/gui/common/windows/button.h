@@ -43,6 +43,13 @@ class Button : public Window {
     {
     }
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "Button";
+    }
+#endif
+
     void enable(bool enabled=true)
     {
       if (enabled)
@@ -106,6 +113,13 @@ class TextButton : public Button {
       windowFlags = OPAQUE;
     }
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "TextButton(" + text + ")";
+    }
+#endif
+
     void setText(const std::string & text)
     {
       this->text = text;
@@ -125,6 +139,13 @@ class IconButton: public Button {
     {
     }
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "IconButton(" + std::to_string(icon) + ")";
+    }
+#endif
+
     void paint(BitmapBuffer * dc) override;
 
   protected:
@@ -134,6 +155,13 @@ class IconButton: public Button {
 class FabIconButton: public Button {
   public:
     FabIconButton(Window * parent, coord_t x, coord_t y, uint8_t icon, std::function<uint8_t(void)> onPress, uint8_t flags=0);
+
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "FabIconButton(" + std::to_string(icon) + ")";
+    }
+#endif
 
     void paint(BitmapBuffer * dc) override;
 

@@ -20,7 +20,7 @@
 
 #include "opentx.h"
 
-void CurveWindow::drawBackground(BitmapBuffer * dc)
+void Curve::drawBackground(BitmapBuffer * dc)
 {
   lcdSetColor(RGB(0xE0, 0xE0, 0xE0));
   dc->clear(CUSTOM_COLOR);
@@ -39,21 +39,21 @@ void CurveWindow::drawBackground(BitmapBuffer * dc)
   // drawSolidRect(dc, 0, 0, width(), height(), 1, TEXT_COLOR);
 }
 
-coord_t CurveWindow::getPointX(int x)
+coord_t Curve::getPointX(int x)
 {
   return limit<coord_t>(0,
                         width() / 2 + divRoundClosest(x * width() / 2, RESX),
                         width() - 1);
 }
 
-coord_t CurveWindow::getPointY(int y)
+coord_t Curve::getPointY(int y)
 {
   return limit<coord_t>(0,
                         height() / 2 - divRoundClosest(y * height() / 2, RESX),
                         height() - 1);
 }
 
-void CurveWindow::drawCurve(BitmapBuffer * dc)
+void Curve::drawCurve(BitmapBuffer * dc)
 {
   auto prev = (coord_t) -1;
 
@@ -75,7 +75,7 @@ void CurveWindow::drawCurve(BitmapBuffer * dc)
   }
 }
 
-void CurveWindow::drawPosition(BitmapBuffer * dc)
+void Curve::drawPosition(BitmapBuffer * dc)
 {
   int valueX = position();
   int valueY = function(valueX);
@@ -97,7 +97,7 @@ void CurveWindow::drawPosition(BitmapBuffer * dc)
   dc->drawText(11, 10, coords, SMLSIZE|TEXT_BGCOLOR);
 }
 
-void CurveWindow::drawPoint(BitmapBuffer * dc, const CurvePoint & point)
+void Curve::drawPoint(BitmapBuffer * dc, const CurvePoint & point)
 {
   coord_t x = getPointX(point.coords.x);
   coord_t y = getPointY(point.coords.y);
@@ -106,7 +106,7 @@ void CurveWindow::drawPoint(BitmapBuffer * dc, const CurvePoint & point)
   dc->drawBitmapPattern(x-4, y-4, LBM_CURVE_POINT_CENTER, TEXT_BGCOLOR);
 }
 
-void CurveWindow::paint(BitmapBuffer * dc)
+void Curve::paint(BitmapBuffer * dc)
 {
   drawBackground(dc);
   drawCurve(dc);
@@ -118,13 +118,13 @@ void CurveWindow::paint(BitmapBuffer * dc)
   }
 }
 
-void CurveWindow::addPoint(const point_t & point, LcdFlags flags)
+void Curve::addPoint(const point_t & point, LcdFlags flags)
 {
   points.push_back({point, flags});
   invalidate();
 }
 
-void CurveWindow::clearPoints()
+void Curve::clearPoints()
 {
   points.clear();
   invalidate();

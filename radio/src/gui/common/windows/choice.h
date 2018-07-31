@@ -25,12 +25,18 @@
 
 class CustomCurveChoice : public Window {
   public:
-    CustomCurveChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax,
-        std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0
-    );
-    virtual void paint(BitmapBuffer * dc) override;
+    CustomCurveChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0);
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "CustomCurveChoice";
+    }
+#endif
+
+    void paint(BitmapBuffer * dc) override;
+
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     int16_t vmin;
@@ -42,19 +48,27 @@ class CustomCurveChoice : public Window {
 
 class Choice : public Window {
   public:
-    Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
-           std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0
-    );
+    Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0);
 
-    virtual void paint(BitmapBuffer * dc) override;
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "Choice";
+    }
+#endif
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    void paint(BitmapBuffer * dc) override;
 
-    virtual void setAvailableHandler(std::function<bool(int)> handler);
+    bool onTouchEnd(coord_t x, coord_t y) override;
+
+    void setAvailableHandler(std::function<bool(int)> handler)
+    {
+      isValueAvailable = handler;
+    }
 
     void setDisplayHandler(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function)
     {
-        displayFunction = function;
+      displayFunction = function;
     }
 
   protected:

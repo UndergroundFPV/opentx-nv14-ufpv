@@ -41,6 +41,13 @@ class Page: public Window {
 
     virtual ~Page();
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "Page";
+    }
+#endif
+
     bool onTouchStart(coord_t x, coord_t y) override
     {
       Window::onTouchStart(x, y);

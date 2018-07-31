@@ -33,6 +33,13 @@ class NumberKeyboard : public Keyboard<BaseNumberEdit> {
 
     ~NumberKeyboard();
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "NumberKeyboard";
+    }
+#endif
+
     static NumberKeyboard * instance() {
       if (!_instance)
         _instance = new NumberKeyboard();

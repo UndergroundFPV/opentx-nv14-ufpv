@@ -33,6 +33,13 @@ class MainWindow: public Window {
     {
     }
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "MainWindow";
+    }
+#endif
+
     void checkEvents() override;
 
     void invalidate(const rect_t & rect) override;

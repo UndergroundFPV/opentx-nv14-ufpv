@@ -33,10 +33,18 @@ class CheckBox : public Window {
     {
     }
 
-    void paint(BitmapBuffer * dc);
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+        return "CheckBox";
+    }
+#endif
 
-    bool onTouchEnd(coord_t x, coord_t y);
+    void paint(BitmapBuffer * dc) override;
 
+    bool onTouchEnd(coord_t x, coord_t y) override;
+
+  protected:
     const char * label;
     std::function<uint8_t()> getValue;
     std::function<void(uint8_t)> setValue;

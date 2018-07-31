@@ -21,7 +21,7 @@
 #include "opentx.h"
 
 CurveEdit::CurveEdit(Window * parent, const rect_t &rect, uint8_t index) :
-  CurveWindow(parent, rect, [=](int x) -> int {
+  Curve(parent, rect, [=](int x) -> int {
     return applyCustomCurve(x, index);
   }),
   index(index),

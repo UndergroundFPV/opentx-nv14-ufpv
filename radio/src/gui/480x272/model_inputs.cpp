@@ -85,7 +85,7 @@ class InputEditWindow: public Page {
   protected:
     uint8_t input;
     uint8_t index;
-    CurveWindow preview;
+    Curve preview;
     Choice * trimChoice = nullptr;
     Window * updateCurvesWindow = nullptr;
     Choice * curveTypeChoice = nullptr;

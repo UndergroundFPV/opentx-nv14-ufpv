@@ -74,6 +74,13 @@ class Menu : public Window {
     {
     }
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "Menu";
+    }
+#endif
+
     void addLine(const char * text, std::function<void()> onPress)
     {
       menuWindow.addLine(text, onPress);

@@ -25,15 +25,17 @@ class StaticText : public Window {
   public:
     StaticText(Window * parent, const rect_t & rect, const char * text, LcdFlags flags = 0) :
       Window(parent, rect),
-      flags(flags),
-      text(strdup(text))
+      text(text),
+      flags(flags)
     {
     }
 
-    ~StaticText()
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
     {
-      free(text);
+      return "StaticText(" + text + ")";
     }
+#endif
 
     void setFlags(LcdFlags flags)
     {
@@ -43,13 +45,27 @@ class StaticText : public Window {
 
     void paint(BitmapBuffer * dc)
     {
-      dc->drawText(0, 3, text, flags);
+      dc->drawText(0, 3, text.c_str(), flags);
     }
 
-    LcdFlags flags;
-
   protected:
-    char * text;
+    std::string text;
+    LcdFlags flags;
+};
+
+class Subtitle: public StaticText {
+  public:
+    Subtitle(Window * parent, const rect_t & rect, const char * text):
+      StaticText(parent, rect, text, BOLD)
+    {
+    }
+
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "Subtitle(" + text + ")";
+    }
+#endif
 };
 
 class StaticBitmap: public Window {
@@ -66,11 +82,19 @@ class StaticBitmap: public Window {
     {
     }
 
-    void paint(BitmapBuffer * dc)
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "StaticBitmap";
+    }
+#endif
+
+    void paint(BitmapBuffer * dc) override
     {
       dc->drawBitmap(0, 0, bitmap);
     }
 
+  protected:
     const BitmapBuffer * bitmap;
 };
 

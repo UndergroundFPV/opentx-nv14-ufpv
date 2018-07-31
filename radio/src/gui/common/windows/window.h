@@ -22,6 +22,7 @@
 #define _WINDOW_H_
 
 #include <list>
+#include <string.h>
 #include <utility>
 #include <functional>
 #include "bitmapbuffer.h"
@@ -34,6 +35,37 @@ class Window {
     Window(Window * parent, const rect_t & rect, uint8_t flags=0);
 
     virtual ~Window();
+
+#if defined(DEBUG_WINDOWS)
+    virtual std::string getName()
+    {
+      return "Window";
+    }
+
+    std::string getRectString()
+    {
+      std::string result;
+      result.reserve(32);
+      sprintf((char *)result.data(), "[%d, %d, %d, %d]", left(), top(), width(), height());
+      return result;
+    }
+
+    std::string getIndentString()
+    {
+      std::string result;
+      auto tmp = parent;
+      while (tmp) {
+        result += "  ";
+        tmp = tmp->getParent();
+      }
+      return result;
+    }
+
+    std::string getWindowDebugString()
+    {
+      return getIndentString() + getName() + " " + getRectString();
+    }
+#endif
 
     Window * getParent() const
     {

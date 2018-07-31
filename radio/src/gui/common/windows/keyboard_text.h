@@ -33,6 +33,13 @@ class TextKeyboard : public Keyboard<TextEdit> {
 
     ~TextKeyboard();
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "TextKeyboard";
+    }
+#endif
+
     static TextKeyboard * instance() {
       if (!_instance)
         _instance = new TextKeyboard();

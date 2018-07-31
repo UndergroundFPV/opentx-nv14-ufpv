@@ -24,7 +24,7 @@
 #include "curve.h"
 #include "keyboard_curve.h"
 
-class CurveEdit: public CurveWindow {
+class CurveEdit: public Curve {
   friend class CurveKeyboard;
 
   public:

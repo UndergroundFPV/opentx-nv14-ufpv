@@ -35,6 +35,13 @@ class SourceChoice : public Window {
     {
     }
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "SourceChoice";
+    }
+#endif
+
     void paint(BitmapBuffer * dc) override ;
 
     bool onTouchEnd(coord_t x, coord_t y) override ;

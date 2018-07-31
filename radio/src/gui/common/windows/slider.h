@@ -35,13 +35,20 @@ class Slider : public Window {
     {
     }
 
-    virtual void paint(BitmapBuffer * dc) override;
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+        return "Slider";
+    }
+#endif
 
-    virtual bool onTouchStart(coord_t x, coord_t y) override;
+    void paint(BitmapBuffer * dc) override;
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    bool onTouchStart(coord_t x, coord_t y) override;
 
-    virtual bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY) override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
+
+    bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY) override;
 
   protected:
     int value(coord_t x) const;

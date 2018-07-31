@@ -29,14 +29,21 @@ struct CurvePoint {
   LcdFlags flags;
 };
 
-class CurveWindow: public Window {
+class Curve: public Window {
   public:
-    CurveWindow(Window * parent, const rect_t & rect, std::function<int(int)> function, std::function<int()> position=nullptr):
+    Curve(Window * parent, const rect_t & rect, std::function<int(int)> function, std::function<int()> position=nullptr):
       Window(parent, rect, OPAQUE),
       function(std::move(function)),
       position(std::move(position))
     {
     }
+
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "Curve";
+    }
+#endif
 
     void checkEvents() override
     {

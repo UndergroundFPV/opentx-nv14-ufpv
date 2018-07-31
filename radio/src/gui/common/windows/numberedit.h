@@ -28,6 +28,13 @@ class NumberEdit : public BaseNumberEdit {
     NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax,
                std::function<int32_t()> getValue, std::function<void(int32_t)> setValue = nullptr, LcdFlags flags = 0);
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "NumberEdit(" + std::to_string(getValue()) + ")";
+    }
+#endif
+
     virtual void paint(BitmapBuffer * dc) override;
 
     void setPrefix(const char * prefix)

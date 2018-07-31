@@ -20,7 +20,6 @@
 
 #include "opentx.h"
 
-
 Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
                std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
   Window(parent, rect, OPAQUE),
@@ -31,11 +30,6 @@ Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_
   setValue(setValue),
   flags(flags)
 {
-}
-
-void Choice::setAvailableHandler(std::function<bool(int)> handler)
-{
-  isValueAvailable = handler;
 }
 
 void Choice::paint(BitmapBuffer * dc)

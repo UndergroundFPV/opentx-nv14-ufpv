@@ -40,18 +40,18 @@ void TabsGroupHeader::paint(BitmapBuffer * dc)
   }
 }
 
-TabsGroupCarousel::TabsGroupCarousel(Window * parent, TabsGroup * menu):
+TabsCarousel::TabsCarousel(Window * parent, TabsGroup * menu):
   Window(parent, { TOPBAR_BUTTON_WIDTH, 0, LCD_W - TOPBAR_BUTTON_WIDTH, MENU_HEADER_HEIGHT }, OPAQUE),
   menu(menu)
 {
 }
 
-void TabsGroupCarousel::updateInnerWidth()
+void TabsCarousel::updateInnerWidth()
 {
   setInnerWidth(padding_left + TOPBAR_BUTTON_WIDTH * menu->tabs.size());
 }
 
-void TabsGroupCarousel::paint(BitmapBuffer * dc)
+void TabsCarousel::paint(BitmapBuffer * dc)
 {
   dc->drawSolidFilledRect(0, 0, padding_left, TOPBAR_BUTTON_WIDTH, HEADER_BGCOLOR);
   for (unsigned i=0; i<menu->tabs.size(); i++) {
@@ -64,7 +64,7 @@ void TabsGroupCarousel::paint(BitmapBuffer * dc)
   }
 }
 
-bool TabsGroupCarousel::onTouchEnd(coord_t x, coord_t y)
+bool TabsCarousel::onTouchEnd(coord_t x, coord_t y)
 {
   unsigned index = (x - padding_left) / TOPBAR_BUTTON_WIDTH;
   menu->setCurrentTab(index);

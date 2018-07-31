@@ -37,6 +37,13 @@ class TextEdit : public Window {
     {
     }
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "TextEdit";
+    }
+#endif
+
     uint8_t getMaxLength()
     {
       return length;
