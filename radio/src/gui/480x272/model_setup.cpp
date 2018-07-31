@@ -443,6 +443,7 @@ void ModelSetupPage::updateInternalModuleWindow()
         internalModuleRange->check(false);
       }
       if (moduleFlag[INTERNAL_MODULE] == MODULE_BIND) {
+        internalModuleBind->setText(STR_MODULE_BIND);
         resetPulsesFlySky(INTERNAL_MODULE);
         return 0;
       }
@@ -455,13 +456,15 @@ void ModelSetupPage::updateInternalModuleWindow()
     internalModuleBind->setCheckHandler([=]() {
 #if 0
       if (condition) {
-        internalModuleBind->check(true_or_false);
+        internalModuleBind->setText(...);
+        internalModuleBind->check(...);
       }
 #endif
     });
     internalModuleRange = new TextButton(internalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE);
     internalModuleRange->setPressHandler([=]() -> uint8_t {
       if (moduleFlag[INTERNAL_MODULE] == MODULE_BIND) {
+        internalModuleBind->setText(STR_MODULE_BIND);
         internalModuleBind->check(false);
       }
       if (moduleFlag[INTERNAL_MODULE] == MODULE_RANGECHECK) {
@@ -611,10 +614,12 @@ void ModelSetupPage::updateExternalModuleWindow()
                                               externalModuleRange->check(false);
                                             }
                                             if (moduleFlag[EXTERNAL_MODULE] == MODULE_BIND) {
+                                              externalModuleBind->setText(STR_MODULE_BIND);
                                               moduleFlag[EXTERNAL_MODULE] = MODULE_NORMAL_MODE;
                                               return 0;
                                             }
                                             else {
+                                              externalModuleBind->setText(STR_MODULE_BINDING);
                                               moduleFlag[EXTERNAL_MODULE] = MODULE_BIND;
                                               return 1;
                                             }
@@ -623,6 +628,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       externalModuleRange = new TextButton(externalModuleWindow, grid.getFieldSlot(2, 1), STR_MODULE_RANGE,
                                            [=]() -> uint8_t {
                                              if (moduleFlag[EXTERNAL_MODULE] == MODULE_BIND) {
+                                               externalModuleBind->setText(STR_MODULE_BIND);
                                                externalModuleBind->check(false);
                                              }
                                              if (moduleFlag[EXTERNAL_MODULE] == MODULE_RANGECHECK) {

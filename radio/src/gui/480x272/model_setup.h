@@ -18,8 +18,8 @@ class ModelSetupPage: public PageTab {
     Choice * failSafeChoice= nullptr;
 
     TextButton * internalModuleBind = nullptr;
-    Button * externalModuleBind = nullptr;
+    TextButton * externalModuleBind = nullptr;
     TextButton * switchWarn[NUM_SWITCHES] = {nullptr};
-    Button * internalModuleRange = nullptr;
-    Button * externalModuleRange = nullptr;
+    TextButton * internalModuleRange = nullptr;
+    TextButton * externalModuleRange = nullptr;
 };
