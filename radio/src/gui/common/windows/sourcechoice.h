@@ -32,8 +32,8 @@ class SourceChoice : public Window {
       Window(parent, rect),
       vmin(vmin),
       vmax(vmax),
-      getValue(getValue),
-      setValue(setValue)
+      getValue(std::move(getValue)),
+      setValue(std::move(setValue))
     {
     }
 
@@ -44,9 +44,9 @@ class SourceChoice : public Window {
     }
 #endif
 
-    void paint(BitmapBuffer * dc) override ;
+    void paint(BitmapBuffer * dc) override;
 
-    bool onTouchEnd(coord_t x, coord_t y) override ;
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
     void setAvailableHandler(std::function<bool(int)> handler)
     {
@@ -54,7 +54,6 @@ class SourceChoice : public Window {
     }
 
   protected:
-    const char * label;
     int16_t vmin;
     int16_t vmax;
     std::function<int16_t()> getValue;

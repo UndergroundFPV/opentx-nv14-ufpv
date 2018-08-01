@@ -118,6 +118,12 @@ class Window {
       return rect.h;
     }
 
+    void setLeft(coord_t x)
+    {
+      rect.x = x;
+      invalidate();
+    }
+
     void setTop(coord_t y)
     {
       rect.y = y;

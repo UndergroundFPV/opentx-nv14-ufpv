@@ -76,11 +76,10 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
     }
   }
   else {
-    uint8_t len = values[0];
     for (int i = vmin; i < vmax; ++i) {
       if (isValueAvailable && !isValueAvailable(i))
         continue;
-      menu->addLine(std::string(values + 1 + (i - vmin) * len, len), [=]() {
+      menu->addLine(TEXT_AT_INDEX(values, i - vmin), [=]() {
         setValue(i);
       });
       if (value == i) {

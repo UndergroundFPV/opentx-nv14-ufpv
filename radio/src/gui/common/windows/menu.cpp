@@ -21,7 +21,7 @@
 #include "opentx.h"
 
 MenuWindow::MenuWindow(Menu * parent):
-  Window(parent, {LCD_W / 2 - 100, LCD_H / 2 - 20 /* to avoid redraw the menus header */, 200, 0}, OPAQUE)
+  Window(parent, {LCD_W / 2 - 100, LCD_H / 2 - 30 /* to avoid redraw the menus header */, 200, 0}, OPAQUE)
 {
 }
 
@@ -38,7 +38,7 @@ bool MenuWindow::onTouchEnd(coord_t x, coord_t y)
 {
   int index = y / lineHeight;
   lines[index].onPress();
-  return true;
+  return false; // = close the menu (inverted so that click outside the menu closes it)
 }
 
 void MenuWindow::paint(BitmapBuffer * dc)
@@ -64,8 +64,9 @@ void MenuWindow::updatePosition()
 
 bool Menu::onTouchEnd(coord_t x, coord_t y)
 {
-  Window::onTouchEnd(x, y);
-  deleteLater();
+  if (!Window::onTouchEnd(x, y)) {
+    deleteLater();
+  }
   return true;
 }
 

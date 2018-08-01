@@ -60,9 +60,9 @@ class MenuWindow: public Window {
 
     void select(int index);
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     std::vector<MenuLine> lines;
@@ -85,6 +85,13 @@ class Menu : public Window {
       return "Menu";
     }
 #endif
+
+    void setNavigationBar(Window * window)
+    {
+      menuWindow.setLeft(window->right());
+      menuWindow.setTop(window->top());
+      menuWindow.setHeight(window->height());
+    }
 
     void addLine(const std::string & text, std::function<void()> onPress)
     {

@@ -20,6 +20,33 @@
 
 #include "opentx.h"
 
+class SourceMenuHeader: public Window {
+  public:
+    SourceMenuHeader(Menu * menu):
+      Window(menu, { 35, 95, 50, 370 })
+    {
+      char icon[] = " ";
+      for (int i=0; i<12; i++) {
+        icon[0] = '\307' + i;
+        new TextButton(this, {0, 30 * i, 50, 30}, icon);
+      }
+    }
+
+    void paint(BitmapBuffer * dc) override
+    {
+      dc->clear(CURVE_AXIS_COLOR); // TODO only after the latest button
+    }
+
+    bool onTouchEnd(coord_t x, coord_t y) override
+    {
+      Window::onTouchEnd(x, y);
+      return true; // = don't close the menu (inverted so that click outside the menu closes it)
+    }
+
+  protected:
+    int8_t selected = -1;
+};
+
 void SourceChoice::paint(BitmapBuffer * dc)
 {
   bool hasFocus = this->hasFocus();
@@ -36,18 +63,29 @@ void SourceChoice::paint(BitmapBuffer * dc)
 
 bool SourceChoice::onTouchEnd(coord_t x, coord_t y)
 {
-  if (hasFocus()) {
-    int16_t value = getValue();
-    do {
-      value++;
-      if (value > vmax)
-        value = vmin;
-    } while (isValueAvailable && !isValueAvailable(value));
-    setValue(value);
+  auto menu = new Menu();
+  auto value = getValue();
+  int count = 0;
+  int current = -1;
+
+  for (int i = vmin; i < vmax; ++i) {
+    if (isValueAvailable && !isValueAvailable(i))
+      continue;
+    menu->addLine(getSourceString(i), [=]() {
+      setValue(i);
+    });
+    if (value == i) {
+      current = count;
+    }
+    ++count;
   }
-  else {
-    setFocus();
+
+  menu->setNavigationBar(new SourceMenuHeader(menu));
+
+  if (current >= 0) {
+    menu->select(current);
   }
-  invalidate();
+
+  setFocus();
   return true;
 }
