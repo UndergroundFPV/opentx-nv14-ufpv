@@ -231,7 +231,7 @@ public:
     {
       const CustomFunctionData * cfn = &g_model.customFn[sfIndex];
       uint8_t func = CFN_FUNC(cfn);
-      if (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func)) {
+      if (!CFN_EMPTY(cfn) && (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func))) {
         setHeight(getHeight() + 20);
       }
     }
@@ -256,6 +256,8 @@ public:
       uint8_t func = CFN_FUNC(cfn);
 
       drawSwitch(col1, line1, CFN_SWITCH(cfn), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << sfIndex)) ? BOLD : 0));
+      if(CFN_EMPTY(cfn))
+        return;
       lcdDrawTextAtIndex(col2, line1, STR_VFSWFUNC, func, 0);
       int16_t val_min = 0;
       int16_t val_max = 255;
@@ -377,6 +379,8 @@ void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
   Window::clearFocus();
   char s[5]="SF";
 
+  CustomFunctionData * functions = g_model.customFn; //TODO global/cfn
+
   for(uint8_t  i=0; i < MAX_SPECIAL_FUNCTIONS; i++) {
     CustomFunctionData * cfn = &g_model.customFn[i];
 
@@ -391,6 +395,41 @@ void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
         menu->addLine(STR_EDIT, [=]() {
             editSpecialFunction(window, i);
         });
+        if (!CFN_EMPTY(cfn)) {
+          menu->addLine(STR_COPY, [=]() {
+              clipboard.type = CLIPBOARD_TYPE_CUSTOM_FUNCTION;
+              clipboard.data.cfn = *cfn;
+          });
+        }
+        if (clipboard.type == CLIPBOARD_TYPE_CUSTOM_FUNCTION) {
+          menu->addLine(STR_PASTE, [=]() {
+              *cfn = clipboard.data.cfn;
+              SET_DIRTY();
+          });
+        }
+        if (!CFN_EMPTY(cfn) && CFN_EMPTY(&functions[MAX_SPECIAL_FUNCTIONS-1])) {
+          menu->addLine(STR_INSERT, [=]() {
+              memmove(cfn+1, cfn, (MAX_SPECIAL_FUNCTIONS-menuVerticalPosition-1)*sizeof(CustomFunctionData));
+              memset(cfn, 0, sizeof(CustomFunctionData));
+              SET_DIRTY();
+          });
+        }
+        if (!CFN_EMPTY(cfn)) {
+          menu->addLine(STR_CLEAR, [=]() {
+              memset(cfn, 0, sizeof(CustomFunctionData));
+              SET_DIRTY();
+          });
+        }
+        for (int j=i; j<MAX_SPECIAL_FUNCTIONS; j++) {
+          if (!CFN_EMPTY(&functions[j])) {
+            menu->addLine(STR_DELETE, [=]() {
+                memmove(cfn, cfn+1, (MAX_SPECIAL_FUNCTIONS-i-1)*sizeof(CustomFunctionData));
+                memset(&g_model.customFn[MAX_SPECIAL_FUNCTIONS-1], 0, sizeof(CustomFunctionData));
+                SET_DIRTY();
+            });
+            break;
+          }
+        }
         return 0;
     });
 
