@@ -52,7 +52,6 @@ void RadioHardwarePage::build(Window * window)
     new Choice(window, grid.getFieldSlot(2,1), STR_POTTYPES, POT_NONE, POT_WITHOUT_DETENT+1,
                [=]() -> uint8_t {
                    return BF_GET(g_eeGeneral.potsConfig, 2 * i, 2);
-
                },
                [=](uint8_t newValue) {
                    BF_SET(g_eeGeneral.potsConfig, newValue, 2 * i, 2);
@@ -70,7 +69,6 @@ void RadioHardwarePage::build(Window * window)
     new Choice(window, grid.getFieldSlot(2,1), STR_SWTYPES, SWITCH_NONE, SWITCH_TYPE_MAX(i)+1,
                [=]() -> uint8_t {
                    return BF_GET(g_eeGeneral.switchConfig, 2 * i, 2);
-
                },
                [=](uint8_t newValue) {
                    BF_SET(g_eeGeneral.switchConfig, newValue, 2 * i, 2);
