@@ -18,23 +18,27 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _MODEL_SPECIAL_FUNCTIONS_H
-#define _MODEL_SPECIAL_FUNCTIONS_H
+#ifndef _SPECIAL_FUNCTIONS_H
+#define _SPECIAL_FUNCTIONS_H
 
 #include "gui/common/windows/windows.h"
 
-class ModelSpecialFunctionsPage: public PageTab {
-public:
-    ModelSpecialFunctionsPage();
+struct CustomFunctionData;
 
-    virtual void build(Window * window) override {
+class SpecialFunctionsPage: public PageTab {
+  public:
+    SpecialFunctionsPage(CustomFunctionData * functions);
+
+    void build(Window * window) override
+    {
       build(window, -1);
     }
 
-protected:
+  protected:
+    CustomFunctionData * functions;
     void build(Window * window, int8_t focusSpecialFunctionIndex);
     void rebuild(Window * window, int8_t focusSpecialFunctionIndex);
     void editSpecialFunction(Window * window, uint8_t index);
 };
 
-#endif //_MODEL_SPECIAL_FUNCTIONS_H
+#endif //_SPECIAL_FUNCTIONS_H

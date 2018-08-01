@@ -21,6 +21,7 @@
 #include "opentx.h"
 #include "radio_setup.h"
 #include "radio_sdmanager.h"
+#include "special_functions.h"
 #include "radio_calibration.h"
 #include "radio_version.h"
 
@@ -29,14 +30,9 @@ RadioMenu::RadioMenu():
 {
   addTab(new RadioSetupPage());
   addTab(new RadioSdManagerPage());
+  addTab(new SpecialFunctionsPage(g_eeGeneral.customFn));
+  // TODO trainer
+  // TODO hardware
   addTab(new RadioCalibrationPage());
   addTab(new RadioVersionPage());
 }
-
-const MenuHandlerFunc menuTabGeneral[] = {
-//  menuRadioSdManager,
-//  menuRadioSpecialFunctions,
-//  menuRadioTrainer,
-//  menuRadioHardware,
-  // menuRadioVersion,
-};

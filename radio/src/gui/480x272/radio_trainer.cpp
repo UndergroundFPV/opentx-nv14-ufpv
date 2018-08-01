@@ -25,6 +25,7 @@
 #define TRAINER_COLUMN_2       TRAINER_COLUMN_1+TRAINER_COLUMN_WIDTH
 #define TRAINER_COLUMN_3       TRAINER_COLUMN_2+TRAINER_COLUMN_WIDTH
 
+#if 0
 bool menuRadioTrainer(event_t event)
 {
   uint8_t y;
@@ -103,3 +104,4 @@ bool menuRadioTrainer(event_t event)
 
   return true;
 }
+#endif

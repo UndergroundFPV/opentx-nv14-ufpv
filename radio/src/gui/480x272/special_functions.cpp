@@ -19,30 +19,30 @@
  */
 
 #include "opentx.h"
-#include "model_special_functions.h"
+#include "special_functions.h"
 
-#define SET_DIRTY()     storageDirty(EE_MODEL)
+#define SET_DIRTY()     storageDirty(functions == g_model.customFn ? EE_MODEL : EE_GENERAL)
 
 class SpecialFunctionEditWindow : public Page {
 public:
-    SpecialFunctionEditWindow(int8_t index) :
-            Page(),
-            index(index)
+    SpecialFunctionEditWindow(CustomFunctionData * functions, uint8_t index):
+      Page(),
+      functions(functions),
+      index(index)
     {
       buildBody(&body);
       buildHeader(&header);
     }
 
 protected:
+    CustomFunctionData * functions;
     uint8_t index;
     Window * specialFunctionOneWindow = nullptr;
 
     void buildHeader(Window * window)
     {
-      char s[5]="SF";
-      strAppendUnsigned(&s[2], index);
       new StaticText(window, {70, 4, 200, 20}, STR_MENUSPECIALFUNCS, MENU_TITLE_COLOR);
-      new StaticText(window, {70, 28, 100, 20}, s, MENU_TITLE_COLOR);
+      new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
     }
 
     void updateSpecialFunctionOneWindow()
@@ -51,7 +51,7 @@ protected:
       GridLayout grid(*specialFunctionOneWindow);
       specialFunctionOneWindow->clear();
 
-      CustomFunctionData * cfn = &g_model.customFn[index];
+      CustomFunctionData * cfn = &functions[index];
       uint8_t func = CFN_FUNC(cfn);
 
       // Func param
@@ -190,13 +190,14 @@ protected:
       GridLayout grid(*window);
       grid.spacer(8);
 
-      CustomFunctionData * cfn = &g_model.customFn[index];
-      uint8_t func = CFN_FUNC(cfn);
+      CustomFunctionData * cfn = &functions[index];
 
-      // SWitch
+      // Switch
       new StaticText(window, grid.getLabelSlot(), STR_SWITCH);
       auto swicthchoice = new SwitchChoice(window, grid.getFieldSlot(), SWSRC_FIRST, SWSRC_LAST, GET_SET_DEFAULT(CFN_SWITCH(cfn)));
-      swicthchoice->setAvailableHandler(isSwitchAvailableInCustomFunctions);
+      swicthchoice->setAvailableHandler([=](int value) {
+        return (functions == g_model.customFn ? isSwitchAvailable(value, ModelCustomFunctionsContext) : isSwitchAvailable(value, GeneralCustomFunctionsContext));
+      });
       grid.nextLine();
 
       // Function
@@ -208,7 +209,9 @@ protected:
                                    SET_DIRTY();
                                    updateSpecialFunctionOneWindow();
                                });
-      choice->setAvailableHandler(isAssignableFunctionAvailable);
+      choice->setAvailableHandler([=](int value) {
+        return isAssignableFunctionAvailable(value, functions);
+      });
       grid.nextLine();
 
       specialFunctionOneWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
@@ -223,13 +226,14 @@ static constexpr coord_t col1 = 20;
 static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
 static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1 + 20;
 
-class SpecialFunctionButton : public Button {
-public:
-    SpecialFunctionButton(Window * parent, const rect_t &rect, uint8_t sfIndex) :
-            Button(parent, rect),
-            sfIndex(sfIndex)
+class SpecialFunctionButton: public Button {
+  public:
+    SpecialFunctionButton(Window * parent, const rect_t & rect, CustomFunctionData * functions, uint8_t index):
+      Button(parent, rect),
+      functions(functions),
+      index(index)
     {
-      const CustomFunctionData * cfn = &g_model.customFn[sfIndex];
+      const CustomFunctionData * cfn = &functions[index];
       uint8_t func = CFN_FUNC(cfn);
       if (!CFN_EMPTY(cfn) && (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func) || (func == FUNC_PLAY_TRACK || func == FUNC_BACKGND_MUSIC || func == FUNC_PLAY_SCRIPT))) {
         setHeight(getHeight() + 20);
@@ -238,7 +242,8 @@ public:
 
     bool isActive()
     {
-      return 0;
+      // TODO
+      return false;
     }
 
     void checkEvents() override
@@ -251,13 +256,14 @@ public:
 
     void paintSpecialFunctionLine(BitmapBuffer * dc)
     {
-      //SF.all
-      const CustomFunctionData * cfn = &g_model.customFn[sfIndex];
+      // SF.all
+      const CustomFunctionData * cfn = &functions[index];
       uint8_t func = CFN_FUNC(cfn);
 
-      drawSwitch(col1, line1, CFN_SWITCH(cfn), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << sfIndex)) ? BOLD : 0));
-      if(CFN_EMPTY(cfn))
+      drawSwitch(col1, line1, CFN_SWITCH(cfn), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index)) ? BOLD : 0));
+      if (CFN_EMPTY(cfn))
         return;
+
       lcdDrawTextAtIndex(col2, line1, STR_VFSWFUNC, func, 0);
       int16_t val_min = 0;
       int16_t val_max = 255;
@@ -345,16 +351,18 @@ public:
     }
 
 protected:
-    uint8_t sfIndex;
+    CustomFunctionData * functions;
+    uint8_t index;
     bool active = false;
 };
 
-ModelSpecialFunctionsPage::ModelSpecialFunctionsPage() :
-        PageTab(STR_MENUSPECIALFUNCS, ICON_MODEL_SPECIAL_FUNCTIONS)
+SpecialFunctionsPage::SpecialFunctionsPage(CustomFunctionData * functions):
+  PageTab(functions == g_model.customFn ? STR_MENUCUSTOMFUNC : STR_MENUSPECIALFUNCS, functions == g_model.customFn ? ICON_MODEL_SPECIAL_FUNCTIONS : ICON_RADIO_GLOBAL_FUNCTIONS),
+  functions(functions)
 {
 }
 
-void ModelSpecialFunctionsPage::rebuild(Window * window, int8_t focusSpecialFunctionIndex)
+void SpecialFunctionsPage::rebuild(Window * window, int8_t focusSpecialFunctionIndex)
 {
   coord_t scrollPosition = window->getScrollPositionY();
   window->clear();
@@ -362,16 +370,16 @@ void ModelSpecialFunctionsPage::rebuild(Window * window, int8_t focusSpecialFunc
   window->setScrollPositionY(scrollPosition);
 }
 
-void ModelSpecialFunctionsPage::editSpecialFunction(Window * window, uint8_t index)
+void SpecialFunctionsPage::editSpecialFunction(Window * window, uint8_t index)
 {
-  Window * editWindow = new SpecialFunctionEditWindow(index);
+  Window * editWindow = new SpecialFunctionEditWindow(functions, index);
   editWindow->setCloseHandler([=]() {
-      rebuild(window, index);
+    rebuild(window, index);
   });
 }
 
-
-void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
+void SpecialFunctionsPage::build(Window * window, int8_t focusIndex)
+{
   GridLayout grid(*window);
   grid.spacer(8);
   grid.setLabelWidth(66);
@@ -379,14 +387,12 @@ void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
   Window::clearFocus();
   char s[5]="SF";
 
-  CustomFunctionData * functions = g_model.customFn; //TODO global/cfn
-
   for(uint8_t  i=0; i < MAX_SPECIAL_FUNCTIONS; i++) {
-    CustomFunctionData * cfn = &g_model.customFn[i];
+    CustomFunctionData * cfn = &functions[i];
 
     strAppendUnsigned(&s[2], i);
     new TextButton(window, grid.getLabelSlot(), s);
-    Button * button = new SpecialFunctionButton(window, grid.getFieldSlot(), i);
+    Button * button = new SpecialFunctionButton(window, grid.getFieldSlot(), functions, i);
     if (focusIndex == i)
       button->setFocus();
     button->setPressHandler([=]() -> uint8_t {
@@ -426,7 +432,7 @@ void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
           if (!CFN_EMPTY(&functions[j])) {
             menu->addLine(STR_DELETE, [=]() {
                 memmove(cfn, cfn+1, (MAX_SPECIAL_FUNCTIONS-i-1)*sizeof(CustomFunctionData));
-                memset(&g_model.customFn[MAX_SPECIAL_FUNCTIONS-1], 0, sizeof(CustomFunctionData));
+                memset(&functions[MAX_SPECIAL_FUNCTIONS-1], 0, sizeof(CustomFunctionData));
                 SET_DIRTY();
                 rebuild(window, i);
             });
@@ -441,12 +447,15 @@ void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
   window->setInnerHeight(grid.getWindowHeight());
 }
 
+#if 0
+
 #define MODEL_SPECIAL_FUNC_1ST_COLUMN          60
 #define MODEL_SPECIAL_FUNC_2ND_COLUMN          120
 #define MODEL_SPECIAL_FUNC_2ND_COLUMN_EXT      (lcdNextPos + 5)
 #define MODEL_SPECIAL_FUNC_3RD_COLUMN          295
 #define MODEL_SPECIAL_FUNC_4TH_COLUMN          440
 #define MODEL_SPECIAL_FUNC_4TH_COLUMN_ONOFF    450
+
 
 void onCustomFunctionsFileSelectionMenu(const char * result)
 {
@@ -836,9 +845,4 @@ bool menuSpecialFunctions(event_t event, CustomFunctionData * functions, CustomF
 
   return true;
 }
-
-bool menuModelSpecialFunctions(event_t event)
-{
-  MENU(STR_MENUCUSTOMFUNC, MODEL_ICONS, menuTabModel, MENU_MODEL_SPECIAL_FUNCTIONS, MAX_SPECIAL_FUNCTIONS, { NAVIGATION_LINE_BY_LINE|4/*repeated*/ });
-  return menuSpecialFunctions(event, g_model.customFn, modelFunctionsContext);
-}
+#endif

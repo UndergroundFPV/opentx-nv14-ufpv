@@ -74,6 +74,7 @@ enum MenuRadioHardwareItems {
 #endif
 #define SWITCH_TYPE_MAX(sw)            ((MIXSRC_SF-MIXSRC_FIRST_SWITCH == sw || MIXSRC_SH-MIXSRC_FIRST_SWITCH == sw) ? SWITCH_2POS : SWITCH_3POS)
 
+#if 0
 bool menuRadioHardware(event_t event)
 {
   MENU(STR_HARDWARE, RADIO_ICONS, menuTabGeneral, MENU_RADIO_HARDWARE, ITEM_RADIO_HARDWARE_MAX, { 0, LABEL(Sticks), 0, 0, 0, 0, LABEL(Pots), POTS_ROWS, LABEL(Switches), SWITCHES_ROWS, 0, BLUETOOTH_ROWS 0, 0, 0 });
@@ -239,3 +240,4 @@ bool menuRadioHardware(event_t event)
 
   return true;
 }
+#endif

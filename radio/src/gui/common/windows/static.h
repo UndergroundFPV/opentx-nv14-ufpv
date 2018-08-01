@@ -26,9 +26,9 @@
 
 class StaticText : public Window {
   public:
-    StaticText(Window * parent, const rect_t & rect, const char * text, LcdFlags flags = 0) :
+    StaticText(Window * parent, const rect_t & rect, std::string text, LcdFlags flags = 0) :
       Window(parent, rect),
-      text(text),
+      text(std::move(text)),
       flags(flags)
     {
     }

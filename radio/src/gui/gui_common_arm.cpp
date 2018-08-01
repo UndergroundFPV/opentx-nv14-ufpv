@@ -359,13 +359,13 @@ bool isSwitchAvailableInLogicalSwitches(int swtch)
   return isSwitchAvailable(swtch, LogicalSwitchesContext);
 }
 
-bool isSwitchAvailableInCustomFunctions(int swtch)
+/* bool isSwitchAvailableInCustomFunctions(int swtch)
 {
   if (menuHandlers[menuLevel] == menuModelSpecialFunctions)
     return isSwitchAvailable(swtch, ModelCustomFunctionsContext);
   else
     return isSwitchAvailable(swtch, GeneralCustomFunctionsContext);
-}
+} */
 
 bool isSwitchAvailableInMixes(int swtch)
 {
@@ -410,10 +410,10 @@ bool isLogicalSwitchFunctionAvailable(int function)
   return function != LS_FUNC_RANGE;
 }
 
-bool isAssignableFunctionAvailable(int function)
+bool isAssignableFunctionAvailable(int function, CustomFunctionData * functions)
 {
 #if defined(OVERRIDE_CHANNEL_FUNCTION) || defined(GVARS)
-  bool modelFunctions = (menuHandlers[menuLevel] == menuModelSpecialFunctions);
+  bool modelFunctions = (functions == g_model.customFn);
 #endif
 
   switch (function) {
