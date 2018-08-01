@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -18,22 +18,19 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
-#include "radio_setup.h"
-#include "radio_sdmanager.h"
-#include "special_functions.h"
-#include "radio_calibration.h"
-#include "radio_version.h"
-#include "radio_hardware.h"
+#ifndef _RADIO_HARDWARE_H
+#define _RADIO_HARDWARE_H
 
-RadioMenu::RadioMenu():
-  TabsGroup()
-{
-  addTab(new RadioSetupPage());
-  addTab(new RadioSdManagerPage());
-  addTab(new SpecialFunctionsPage(g_eeGeneral.customFn));
-  // TODO trainer
-  addTab(new RadioHardwarePage());
-  addTab(new RadioCalibrationPage());
-  addTab(new RadioVersionPage());
-}
+#include "gui/common/windows/windows.h"
+
+class RadioHardwarePage: public PageTab {
+public:
+    RadioHardwarePage();
+
+    virtual void build(Window * window);
+
+protected:
+
+};
+
+#endif //_RADIO_HARDWARE_H

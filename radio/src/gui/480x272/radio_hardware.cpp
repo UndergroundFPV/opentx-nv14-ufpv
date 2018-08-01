@@ -30,10 +30,25 @@ void RadioHardwarePage::build(Window * window) {
   GridLayout grid(*window);
   grid.spacer(8);
   grid.setLabelWidth(70);
+
+  new StaticText(window, grid.getLabelSlot(), STR_STICKS);
+  grid.nextLine();
+
+  for(int i=0; i < NUM_SWITCHES; i++){
+    new StaticText(window, grid.getLabelSlot(), STR_STICKS);
+  }
 }
+/*
+void editStickHardwareSettings(coord_t x, coord_t y, int idx, event_t event, LcdFlags flags)
+{
+  lcdDrawTextAtIndex(INDENT_WIDTH, y, STR_VSRCRAW, idx+1, 0);
+  if (ZEXIST(g_eeGeneral.anaNames[idx]) || (flags && s_editMode > 0))
+    editName(x, y, g_eeGeneral.anaNames[idx], LEN_ANA_NAME, event, flags);
+  else
+    lcdDrawMMM(x, y, flags);
+}*/
 
 enum MenuRadioHardwareItems {
-  ITEM_RADIO_HARDWARE_CALIBRATION,
   ITEM_RADIO_HARDWARE_LABEL_STICKS,
   ITEM_RADIO_HARDWARE_STICK1,
   ITEM_RADIO_HARDWARE_STICK2,
@@ -42,13 +57,6 @@ enum MenuRadioHardwareItems {
   ITEM_RADIO_HARDWARE_LABEL_POTS,
   ITEM_RADIO_HARDWARE_POT1,
   ITEM_RADIO_HARDWARE_POT2,
-  ITEM_RADIO_HARDWARE_POT3,
-  ITEM_RADIO_HARDWARE_LS,
-  ITEM_RADIO_HARDWARE_RS,
-#if defined(PCBX12S)
-  ITEM_RADIO_HARDWARE_LS2,
-  ITEM_RADIO_HARDWARE_RS2,
-#endif
   ITEM_RADIO_HARDWARE_LABEL_SWITCHES,
   ITEM_RADIO_HARDWARE_SA,
   ITEM_RADIO_HARDWARE_SB,
@@ -58,15 +66,6 @@ enum MenuRadioHardwareItems {
   ITEM_RADIO_HARDWARE_SF,
   ITEM_RADIO_HARDWARE_SG,
   ITEM_RADIO_HARDWARE_SH,
-  ITEM_RADIO_HARDWARE_SERIAL_BAUDRATE,
-#if defined(BLUETOOTH)
-  ITEM_RADIO_HARDWARE_BLUETOOTH_MODE,
-  ITEM_RADIO_HARDWARE_BLUETOOTH_PAIRING_CODE,
-  ITEM_RADIO_HARDWARE_BLUETOOTH_NAME,
-#endif
-#if defined(AUX_SERIAL) && defined(DEBUG)
-  ITEM_RADIO_HARDWARE_UART3_MODE,
-#endif
   ITEM_RADIO_HARDWARE_JITTER_FILTER,
   ITEM_RADIO_HARDWARE_BAT_CAL,
   ITEM_RADIO_HARDWARE_MAX
