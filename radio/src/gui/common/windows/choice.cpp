@@ -63,7 +63,7 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
   int current = -1;
 
   if (textHandler) {
-    for (int i = vmin; i < vmax; ++i) {
+    for (int i = vmin; i <= vmax; ++i) {
       if (isValueAvailable && !isValueAvailable(i))
         continue;
       menu->addLine(textHandler(i), [=]() {

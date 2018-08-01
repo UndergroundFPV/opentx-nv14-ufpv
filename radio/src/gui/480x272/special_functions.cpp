@@ -75,17 +75,15 @@ protected:
         case FUNC_RESET:
           if (CFN_PARAM(cfn) < FUNC_RESET_PARAM_FIRST_TELEM) {
             new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_RESET);
-            auto resetchoice = new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0,
-                                                FUNC_RESET_PARAM_FIRST_TELEM + lastUsedTelemetryIndex(),
-                                                GET_SET_DEFAULT(CFN_PARAM(cfn)));
-            resetchoice->setAvailableHandler(isSourceAvailableInResetSpecialFunction);
-            resetchoice->setDisplayHandler([=](BitmapBuffer *dc, LcdFlags flags, int32_t value) {
-                if (value < FUNC_RESET_PARAM_FIRST_TELEM)
-                  lcdDrawTextAtIndex(2, 2, STR_VFSWRESET, value, flags);
-                else {
-                  TelemetrySensor *sensor = &g_model.telemetrySensors[value - FUNC_RESET_PARAM_FIRST_TELEM];
-                  lcdDrawSizedText(2, 2, sensor->label, TELEM_LABEL_LEN, flags | ZCHAR);
-                }
+            auto choice = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), nullptr, 0,
+                                     FUNC_RESET_PARAM_FIRST_TELEM + lastUsedTelemetryIndex(),
+                                     GET_SET_DEFAULT(CFN_PARAM(cfn)));
+            choice->setAvailableHandler(isSourceAvailableInResetSpecialFunction);
+            choice->setTextHandler([=](int32_t value) {
+              if (value < FUNC_RESET_PARAM_FIRST_TELEM)
+                return TEXT_AT_INDEX(STR_VFSWRESET, value);
+              else
+                return std::string(g_model.telemetrySensors[value - FUNC_RESET_PARAM_FIRST_TELEM].label, TELEM_LABEL_LEN);
             });
             grid.nextLine();
           }
@@ -123,8 +121,8 @@ protected:
           break;
 
         case FUNC_SET_TIMER: {
-          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), "TIMER");
-          auto timerchoice = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), STR_TIMER, 1, TIMERS, GET_SET_WITH_OFFSET(CFN_TIMER_INDEX(cfn), 1));
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_TIMER);
+          auto timerchoice = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), nullptr, 0, TIMERS - 1, GET_SET_DEFAULT(CFN_TIMER_INDEX(cfn)));
           timerchoice->setTextHandler([](int32_t value) {
             return std::string(STR_TIMER) + std::to_string(value + 1);
           });

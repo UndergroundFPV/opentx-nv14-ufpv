@@ -24,6 +24,8 @@
 #include <functional>
 #include "window.h"
 
+bool isSourceAvailable(int source);
+
 class SourceChoice : public Window {
   public:
     SourceChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):
@@ -46,11 +48,9 @@ class SourceChoice : public Window {
 
     bool onTouchEnd(coord_t x, coord_t y) override ;
 
-    virtual void setAvailableHandler(std::function<bool(int)> handler);
-
-    void setDisplayHandler(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function)
+    void setAvailableHandler(std::function<bool(int)> handler)
     {
-      displayFunction = function;
+      isValueAvailable = std::move(handler);
     }
 
   protected:
@@ -60,7 +60,6 @@ class SourceChoice : public Window {
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
     std::function<bool(int)> isValueAvailable = isSourceAvailable;
-    std::function<void(BitmapBuffer *, LcdFlags, int32_t)> displayFunction;
 };
 
 #endif // _SOURCECHOICE_H_
