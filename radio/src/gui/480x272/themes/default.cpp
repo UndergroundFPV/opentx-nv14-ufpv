@@ -315,12 +315,12 @@ class DefaultTheme: public Theme
 
     virtual void drawBackground() const
     {
-      if (backgroundBitmap) {
-        lcd->drawBitmap(0, 0, backgroundBitmap);
-      }
-      else {
+      if (!backgroundBitmap || backgroundBitmap->getFormat() == BMP_ARGB4444 || backgroundBitmap->getWidth() != LCD_W || backgroundBitmap->getHeight() != LCD_H) {
         lcdSetColor(g_eeGeneral.themeData.options[0].unsignedValue);
         lcdDrawSolidFilledRect(0, 0, LCD_W, LCD_H, CUSTOM_COLOR);
+      }
+      if (backgroundBitmap) {
+        lcd->drawBitmap(0, 0, backgroundBitmap);
       }
     }
 
