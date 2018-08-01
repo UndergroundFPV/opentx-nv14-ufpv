@@ -231,8 +231,7 @@ public:
     {
       const CustomFunctionData * cfn = &g_model.customFn[sfIndex];
       uint8_t func = CFN_FUNC(cfn);
-      if (!CFN_EMPTY(cfn) && (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func) || (func == FUNC_PLAY_TRACK || func == FUNC_BACKGND_MUSIC || func == FUNC_PLAY_SCRIPT)))
-      {
+      if (!CFN_EMPTY(cfn) && (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func) || (func == FUNC_PLAY_TRACK || func == FUNC_BACKGND_MUSIC || func == FUNC_PLAY_SCRIPT))) {
         setHeight(getHeight() + 20);
       }
     }
@@ -406,6 +405,7 @@ void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
           menu->addLine(STR_PASTE, [=]() {
               *cfn = clipboard.data.cfn;
               SET_DIRTY();
+              rebuild(window, i);
           });
         }
         if (!CFN_EMPTY(cfn) && CFN_EMPTY(&functions[MAX_SPECIAL_FUNCTIONS-1])) {
@@ -413,6 +413,7 @@ void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
               memmove(cfn+1, cfn, (MAX_SPECIAL_FUNCTIONS-menuVerticalPosition-1)*sizeof(CustomFunctionData));
               memset(cfn, 0, sizeof(CustomFunctionData));
               SET_DIRTY();
+              rebuild(window, i);
           });
         }
         if (!CFN_EMPTY(cfn)) {
@@ -427,6 +428,7 @@ void ModelSpecialFunctionsPage::build(Window * window, int8_t focusIndex) {
                 memmove(cfn, cfn+1, (MAX_SPECIAL_FUNCTIONS-i-1)*sizeof(CustomFunctionData));
                 memset(&g_model.customFn[MAX_SPECIAL_FUNCTIONS-1], 0, sizeof(CustomFunctionData));
                 SET_DIRTY();
+                rebuild(window, i);
             });
             break;
           }
