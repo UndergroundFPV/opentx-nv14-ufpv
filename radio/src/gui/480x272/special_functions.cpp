@@ -258,6 +258,9 @@ class SpecialFunctionButton: public Button {
     {
       // SF.all
       const CustomFunctionData * cfn = &functions[index];
+      if (functions[index].func == FUNC_OVERRIDE_CHANNEL && functions != g_model.customFn) {
+        functions[index].func = FUNC_OVERRIDE_CHANNEL+1;
+      }
       uint8_t func = CFN_FUNC(cfn);
 
       drawSwitch(col1, line1, CFN_SWITCH(cfn), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index)) ? BOLD : 0));
