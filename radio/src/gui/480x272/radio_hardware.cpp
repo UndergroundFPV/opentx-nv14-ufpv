@@ -19,6 +19,18 @@
  */
 
 #include "opentx.h"
+#include "radio_hardware.h"
+
+RadioHardwarePage::RadioHardwarePage():
+        PageTab(STR_HARDWARE, ICON_RADIO_HARDWARE)
+{
+}
+
+void RadioHardwarePage::build(Window * window) {
+  GridLayout grid(*window);
+  grid.spacer(8);
+  grid.setLabelWidth(70);
+}
 
 enum MenuRadioHardwareItems {
   ITEM_RADIO_HARDWARE_CALIBRATION,
