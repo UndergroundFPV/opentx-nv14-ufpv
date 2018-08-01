@@ -21,19 +21,20 @@
 #include "opentx.h"
 #include "radio_hardware.h"
 
-#define SET_DIRTY()     storageDirty(EE_MODEL)
+#define SET_DIRTY() storageDirty(EE_GENERAL)
 
 RadioHardwarePage::RadioHardwarePage():
-        PageTab(STR_HARDWARE, ICON_RADIO_HARDWARE)
+  PageTab(STR_HARDWARE, ICON_RADIO_HARDWARE)
 {
 }
 
-void RadioHardwarePage::build(Window * window) {
+void RadioHardwarePage::build(Window * window)
+{
   GridLayout grid(*window);
   grid.spacer(8);
-  grid.setLabelWidth(70);
+  grid.setLabelWidth(80);
 
-  new StaticText(window, grid.getLabelSlot(), STR_STICKS);
+  new Subtitle(window, grid.getLineSlot(), STR_STICKS);
   grid.nextLine();
   for(int i=0; i < NUM_STICKS; i++){
     new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+1)));
@@ -41,7 +42,7 @@ void RadioHardwarePage::build(Window * window) {
     grid.nextLine();
   }
 
-  new StaticText(window, grid.getLabelSlot(), STR_POTS);
+  new Subtitle(window, grid.getLineSlot(), STR_POTS);
   grid.nextLine();
   for(int i=NUM_STICKS; i < NUM_STICKS+NUM_POTS; i++){
     new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+1)));
@@ -78,7 +79,7 @@ void RadioHardwarePage::build(Window * window) {
     grid.nextLine();
   }
 
-  new StaticText(window, grid.getLabelSlot(), STR_SWITCH);
+  new Subtitle(window, grid.getLineSlot(), STR_SWITCHES);
   grid.nextLine();
   for(int i=MIXSRC_FIRST_SWITCH-MIXSRC_Rud; i < MIXSRC_FIRST_SWITCH-MIXSRC_Rud+NUM_SWITCHES; i++){
     new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+1)));
