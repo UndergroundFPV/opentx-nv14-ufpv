@@ -23,6 +23,8 @@
 
 #define SET_DIRTY() storageDirty(EE_GENERAL)
 
+#define SWITCH_TYPE_MAX(sw)            ((MIXSRC_SF-MIXSRC_FIRST_SWITCH == sw || MIXSRC_SH-MIXSRC_FIRST_SWITCH == sw) ? SWITCH_2POS : SWITCH_3POS)
+
 RadioHardwarePage::RadioHardwarePage():
   PageTab(STR_HARDWARE, ICON_RADIO_HARDWARE)
 {
@@ -44,61 +46,42 @@ void RadioHardwarePage::build(Window * window)
 
   new Subtitle(window, grid.getLineSlot(), STR_POTS);
   grid.nextLine();
-  for(int i=NUM_STICKS; i < NUM_STICKS+NUM_POTS; i++){
-    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+1)));
-    new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i], LEN_ANA_NAME);
-
-
+  for(int i=0; i < NUM_POTS; i++){
+    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+NUM_STICKS+1)));
+    new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i+NUM_STICKS], LEN_ANA_NAME);
     new Choice(window, grid.getFieldSlot(2,1), STR_POTTYPES, POT_NONE, POT_WITHOUT_DETENT+1,
-               [=]() -> int16_t {
-                   uint8_t shift = (2*i);
-                   uint8_t mask = (0x03 << shift);
-                   return (g_eeGeneral.potsConfig & mask) >> shift;
+               [=]() -> uint8_t {
+                   return BF_GET(g_eeGeneral.potsConfig, 2 * i, 2);
+
                },
-               [=](int16_t newValue) {
-                   uint8_t shift = (2*i);
-                   uint8_t mask = (0x03 << shift);
-                   g_eeGeneral.potsConfig &= ~mask;
-                   g_eeGeneral.potsConfig |= (newValue << shift);;
+               [=](uint8_t newValue) {
+                   BF_SET(g_eeGeneral.potsConfig, newValue, 2 * i, 2);
                    SET_DIRTY();
                });
-
-
-    /*uint8_t shift = (2*idx);
-        uint8_t mask = (0x03 << shift);
-        lcdDrawTextAtIndex(INDENT_WIDTH, y, STR_VSRCRAW, NUM_STICKS+idx+1, menuHorizontalPosition < 0 ? attr : 0);
-        if (ZEXIST(g_eeGeneral.anaNames[NUM_STICKS+idx]) || (attr && menuHorizontalPosition == 0))
-          editName(HW_SETTINGS_COLUMN, y, g_eeGeneral.anaNames[NUM_STICKS+idx], LEN_ANA_NAME, event, attr && menuHorizontalPosition == 0);
-        else
-          lcdDrawMMM(HW_SETTINGS_COLUMN, y, 0);
-        uint8_t potType = (g_eeGeneral.potsConfig & mask) >> shift;
-        potType = editChoice(HW_SETTINGS_COLUMN+50, y, STR_POTTYPES, potType, POT_NONE, POT_WITHOUT_DETENT, menuHorizontalPosition == 1 ? attr : 0, event);
-        g_eeGeneral.potsConfig &= ~mask;
-        g_eeGeneral.potsConfig |= (potType << shift);*/
-
     grid.nextLine();
   }
 
   new Subtitle(window, grid.getLineSlot(), STR_SWITCHES);
   grid.nextLine();
-  for(int i=MIXSRC_FIRST_SWITCH-MIXSRC_Rud; i < MIXSRC_FIRST_SWITCH-MIXSRC_Rud+NUM_SWITCHES; i++){
-    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+1)));
-    new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i], LEN_ANA_NAME);
+
+  for(int i=0; i < NUM_SWITCHES; i++){
+    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+MIXSRC_FIRST_SWITCH-MIXSRC_Rud+1)));
+    new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i+MIXSRC_FIRST_SWITCH-MIXSRC_Rud], LEN_ANA_NAME);
+    new Choice(window, grid.getFieldSlot(2,1), STR_SWTYPES, SWITCH_NONE, SWITCH_TYPE_MAX(i)+1,
+               [=]() -> uint8_t {
+                   return BF_GET(g_eeGeneral.switchConfig, 2 * i, 2);
+
+               },
+               [=](uint8_t newValue) {
+                   BF_SET(g_eeGeneral.switchConfig, newValue, 2 * i, 2);
+                   SET_DIRTY();
+               });
     grid.nextLine();
 
   window->setInnerHeight(grid.getWindowHeight());
   }
 
 }
-/*
-void editStickHardwareSettings(coord_t x, coord_t y, int idx, event_t event, LcdFlags flags)
-{
-  lcdDrawTextAtIndex(INDENT_WIDTH, y, STR_VSRCRAW, idx+1, 0);
-  if (ZEXIST(g_eeGeneral.anaNames[idx]) || (flags && s_editMode > 0))
-    editName(x, y, g_eeGeneral.anaNames[idx], LEN_ANA_NAME, event, flags);
-  else
-    lcdDrawMMM(x, y, flags);
-}*/
 
 enum MenuRadioHardwareItems {
   ITEM_RADIO_HARDWARE_LABEL_STICKS,
