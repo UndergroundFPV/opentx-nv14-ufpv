@@ -418,7 +418,7 @@ void drawSleepBitmap()
 void drawShutdownAnimation(uint32_t index, const char * message)
 {
   static uint32_t last_index = 0xffffffff;
-  static const BitmapBuffer * shutdown = BitmapBuffer::load(getThemePath("shutdown.bmp"));
+  static const BitmapBuffer * shutdown = BitmapBuffer::load(getThemePath("mask_monitor.png"));
   static BitmapBuffer * shutdownCircle = BitmapBuffer::loadMask(getThemePath("mask_shutdown_circle.png"));
 
   if (shutdown) {

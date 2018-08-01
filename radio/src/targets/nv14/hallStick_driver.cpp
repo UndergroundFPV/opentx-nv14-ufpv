@@ -363,7 +363,7 @@ void convert_hall_to_adcVaule( void )
 
 
 /* Run it in 1ms timer routine */
-void hall_stick_loop(void )
+void hall_stick_loop(void)
 {
     unsigned char ch;
     static unsigned int getCfgTime = get_tmr10ms();

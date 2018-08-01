@@ -1548,26 +1548,26 @@ void getADC()
   }
 #endif
 
-#if defined(FLYSKY_HALL_STICKS) // TBC: use the same jitter as other analog input
-
-
-  for ( uint8_t x = 0; x < NUM_ANALOGS; x++ ) {
-
-    uint16_t v = 0;
-    if ( x < 4 ) { // FLYSKY_HALL_CHANNEL_COUNT
-        v = get_hall_adc_value(x) >> (1 - ANALOG_SCALE);
-    } else {
-        v = getAnalogValue(x) >> (1 - ANALOG_SCALE);
-    }
-
-#else
   DEBUG_TIMER_START(debugTimerAdcRead);
   adcRead();
   DEBUG_TIMER_STOP(debugTimerAdcRead);
 
-  for (uint8_t x=0; x<NUM_ANALOGS; x++) {
-    uint16_t v = getAnalogValue(x) >> (1 - ANALOG_SCALE);
-#endif
+  for ( uint8_t x = 0; x < NUM_ANALOGS; x++ )
+  {
+    uint16_t v = 0;
+
+    if ( x < 4 )
+    {
+        #if defined(FLYSKY_HALL_STICKS)
+        v = get_hall_adc_value(x) >> (1 - ANALOG_SCALE);
+        #else
+        v = getAnalogValue(x) >> (1 - ANALOG_SCALE);
+        #endif
+    }
+    else
+    {
+        v = getAnalogValue(x) >> (1 - ANALOG_SCALE);
+    }
 
 #if defined(VIRTUAL_INPUTS)
     // Jitter filter:
@@ -1636,7 +1636,7 @@ void getADC()
         }
       }
     }
-  }
+  }//for ( uint8_t x = 0; x < NUM_ANALOGS; x++ )
 }
 #endif  // #if defined(CPUARM)
 

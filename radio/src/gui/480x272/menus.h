@@ -237,6 +237,8 @@ enum EnumTabMonitors
   e_MonChannels2,
   e_MonChannels3,
   e_MonChannels4,
+  e_MonChannels5,
+  e_MonChannels6,
   e_MonLogicalSwitches,
   e_MonTabChannelsPagesCount
 };

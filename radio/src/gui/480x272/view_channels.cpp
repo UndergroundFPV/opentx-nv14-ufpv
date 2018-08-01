@@ -135,6 +135,8 @@ const MenuHandlerFunc menuTabMonitors[] PROGMEM = {
   menuChannelsMonitor<1>,
   menuChannelsMonitor<2>,
   menuChannelsMonitor<3>,
+  menuChannelsMonitor<4>,
+  menuChannelsMonitor<5>,
   menuLogicalSwitches
 };
 
