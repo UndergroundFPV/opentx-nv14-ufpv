@@ -144,6 +144,20 @@ enum
     CHECKSUM,
 };
 
+enum HALLSTICK_SEND_STATE_E {
+    HALLSTICK_SEND_STATE_IDLE,
+    HALLSTICK_STATE_SEND_RESET,
+    HALLSTICK_STATE_GET_CONFIG,
+    HALLSTICK_STATE_GET_FIRMWARE,
+    HALLSTICK_STATE_UPDATE_FW
+};
+
+enum TRANSFER_DIR_E {
+    TRANSFER_DIR_HALLSTICK,
+    TRANSFER_DIR_TXMCU,
+    TRANSFER_DIR_HOSTPC,
+    TRANSFER_DIR_RFMODULE,
+};
 
 #define HALL_PROTOLO_HEAD                ( 0x55 )
 
@@ -171,6 +185,8 @@ enum
 #define HALL_RX_DMA_Stream_IRQHandler     DMA1_Stream2_IRQHandler
 #define HALL_TX_DMA_Stream_IRQHandler     DMA1_Stream4_IRQHandler
 
+//#include "fifo.h"
+//extern Fifo<uint8_t, HALLSTICK_BUFF_SIZE> hallStickTxFifo;
 
 
 /***************************************************************************************************
@@ -181,7 +197,8 @@ extern void get_hall_config( void );
 extern void hall_stick_init(uint32_t baudrate);
 extern void hall_stick_loop( void );
 extern uint16_t get_hall_adc_value(uint8_t ch);
-
+extern void hallSerialPutc(char c);
+bool is_flysky_update_firmware();
 
 #endif
 

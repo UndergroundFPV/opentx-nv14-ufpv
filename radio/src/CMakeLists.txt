@@ -44,6 +44,7 @@ option(TRACE_SIMPGMSPACE "Turn on traces in simpgmspace.cpp" ON)
 option(TRACE_LUA_INTERNALS "Turn on traces for Lua internals" OFF)
 option(FRSKY_STICKS "Reverse sticks for FrSky sticks" OFF)
 option(FLYSKY_HALL_STICKS "Reverse sticks for FlySky hall sticks" ON)
+option(FLYSKY_USB_SERIAL "USB as serial output, set OFF for USB download" ON)
 option(NANO "Use nano newlib and binalloc")
 option(NIGHTLY_BUILD_WARNING "Warn this is a nightly build" OFF)
 option(USEHORUSBT "X9E BT module replaced by Horus BT module" OFF)
@@ -348,7 +349,7 @@ if(FRSKY_STICKS)
 endif()
 
 if (FLYSKY_HALL_STICKS)
-  add_definitions(-DFLYSKY_HALL_STICKS)
+  add_definitions(-DFLYSKY_HALL_STICKS -DFLYSKY_USB_SERIAL)
 endif()
 
 
