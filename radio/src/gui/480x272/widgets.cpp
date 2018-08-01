@@ -421,14 +421,16 @@ void drawShutdownAnimation(uint32_t index, const char * message)
   static const BitmapBuffer * shutdown = BitmapBuffer::load(getThemePath("mask_monitor.png"));
   static BitmapBuffer * shutdownCircle = BitmapBuffer::loadMask(getThemePath("mask_shutdown_circle.png"));
 
+
   if (shutdown) {
     if (index < last_index) {
-      theme->drawBackground();
+      // theme->drawBackground();
+      lcdDrawBlackOverlay();
       lcd->drawBitmap((LCD_W-shutdown->getWidth())/2, (LCD_H-shutdown->getHeight())/2, shutdown);
-      lcdStoreBackupBuffer();
+      // lcdStoreBackupBuffer();
     }
     else {
-      lcdRestoreBackupBuffer();
+      // lcdRestoreBackupBuffer();
       if (shutdownCircle) {
         int quarter = index / (PWR_PRESS_SHUTDOWN_DELAY / 5);
         if (quarter >= 1) lcd->drawMask(LCD_W/2,                            (LCD_H-SHUTDOWN_CIRCLE_DIAMETER)/2, shutdownCircle, TEXT_COLOR, 0, SHUTDOWN_CIRCLE_DIAMETER/2);

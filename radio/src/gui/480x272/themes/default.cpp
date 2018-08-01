@@ -357,17 +357,6 @@ class DefaultTheme: public Theme
       return iconMask[index];
     }
 
-    virtual bool drawMenuIcon(uint8_t index, uint8_t position, bool selected) const
-    {
-      if (selected) {
-        lcd->drawBitmap(position*TOPBAR_BUTTON_WIDTH, 0, menuIconSelected[index]);
-      }
-      else {
-        lcd->drawBitmap(position*TOPBAR_BUTTON_WIDTH, 0, menuIconNormal[index]);
-      }
-      // TODO return menuHeaderWindow.touchPressed(position*TOPBAR_BUTTON_WIDTH, 0, TOPBAR_BUTTON_WIDTH, TOPBAR_BUTTON_WIDTH);
-    }
-
   protected:
     static const BitmapBuffer * backgroundBitmap;
     static BitmapBuffer * keyboardBitmap;
