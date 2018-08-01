@@ -169,12 +169,12 @@ void RadioSetupPage::build(Window * window)
 
   // Beeps pitch
   new StaticText(window, grid.getLabelSlot(), STR_SPKRPITCH, true);
-  NumberEdit * edit = new NumberEdit(window, grid.getFieldSlot(3, 0), 0, 300,
-                 GET_DEFAULT(15 * g_eeGeneral.speakerPitch),
-                 [=](int32_t newValue) {
-                   g_eeGeneral.speakerPitch = newValue / 15;
-                   SET_DIRTY();
-                 });
+  auto edit = new NumberEdit(window, grid.getFieldSlot(), 0, 300,
+                             GET_DEFAULT(15 * g_eeGeneral.speakerPitch),
+                             [=](int32_t newValue) {
+                                g_eeGeneral.speakerPitch = newValue / 15;
+                               SET_DIRTY();
+                             });
   edit->setStep(15);
   edit->setPrefix("+");
   edit->setSuffix("Hz");
@@ -190,14 +190,14 @@ void RadioSetupPage::build(Window * window)
   grid.nextLine();
 
   new StaticText(window, grid.getLabelSlot(), STR_PITCH_AT_ZERO, true);
-  new NumberEdit(window, grid.getFieldSlot(), VARIO_FREQUENCY_ZERO-400, VARIO_FREQUENCY_ZERO+400,
+  edit = new NumberEdit(window, grid.getFieldSlot(), VARIO_FREQUENCY_ZERO-400, VARIO_FREQUENCY_ZERO+400,
                  GET_DEFAULT(VARIO_FREQUENCY_ZERO+(g_eeGeneral.varioPitch*10)),
                  [=](int8_t newValue) {
                    g_eeGeneral.varioPitch = (newValue - VARIO_FREQUENCY_ZERO) / 10;
                    SET_DIRTY();
                  });
   edit->setStep(10);
-  edit->setPrefix("Hz");
+  edit->setSuffix("Hz");
   grid.nextLine();
 
 /*

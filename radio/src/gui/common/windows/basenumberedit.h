@@ -66,9 +66,14 @@ class BaseNumberEdit : public Window {
       return vdefault;
     }
 
-    void setStep(int32_t step)
+    void setStep(int32_t value)
     {
-      this->step = step;
+      step = value;
+    }
+
+    int32_t getStep() const
+    {
+      return step;
     }
 
     void setValue(int32_t value)

@@ -35,16 +35,16 @@ class NumberEdit : public BaseNumberEdit {
     }
 #endif
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
-    void setPrefix(const char * prefix)
+    void setPrefix(const char * value)
     {
-      this->prefix = prefix;
+      prefix = value;
     }
 
-    void setSuffix(const char * suffix)
+    void setSuffix(const char * value)
     {
-      this->suffix = suffix;
+      suffix = value;
     }
 
     void setZeroText(const char * text)
@@ -54,12 +54,12 @@ class NumberEdit : public BaseNumberEdit {
 
     void setDisplayHandler(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function)
     {
-      displayFunction = function;
+      displayFunction = std::move(function);
     }
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
-    virtual void onFocusLost() override;
+    void onFocusLost() override;
 
   protected:
     std::function<void(BitmapBuffer *, LcdFlags, int32_t)> displayFunction;

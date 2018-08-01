@@ -30,7 +30,7 @@ NumberKeyboard::NumberKeyboard():
   new TextButton(this, { LCD_W/2 - 115, 10, 50, 30 }, "<<",
                  [=]() -> uint8_t {
                    if (field) {
-                     field->setValue(field->getValue() - 10);
+                     field->setValue(field->getValue() - 10 * field->getStep());
                    }
                    return 0;
                  }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
@@ -38,7 +38,7 @@ NumberKeyboard::NumberKeyboard():
   new TextButton(this, { LCD_W/2 - 55, 10, 50, 30 }, "-",
                  [=]() -> uint8_t {
                    if (field) {
-                     field->setValue(field->getValue() - 1);
+                     field->setValue(field->getValue() - field->getStep());
                    }
                    return 0;
                  }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
@@ -46,7 +46,7 @@ NumberKeyboard::NumberKeyboard():
   new TextButton(this, { LCD_W/2 + 5, 10, 50, 30 }, "+",
                  [=]() -> uint8_t {
                    if (field) {
-                     field->setValue(field->getValue() + 1);
+                     field->setValue(field->getValue() + field->getStep());
                    }
                    return 0;
                  }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
@@ -54,7 +54,7 @@ NumberKeyboard::NumberKeyboard():
   new TextButton(this, { LCD_W/2 + 65, 10, 50, 30 }, ">>",
                  [=]() -> uint8_t {
                    if (field) {
-                     field->setValue(field->getValue() + 10);
+                     field->setValue(field->getValue() + 10 * field->getStep());
                    }
                    return 0;
                  }, BUTTON_BACKGROUND | BUTTON_NOFOCUS);
