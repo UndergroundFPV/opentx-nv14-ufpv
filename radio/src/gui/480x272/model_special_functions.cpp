@@ -231,7 +231,8 @@ public:
     {
       const CustomFunctionData * cfn = &g_model.customFn[sfIndex];
       uint8_t func = CFN_FUNC(cfn);
-      if (!CFN_EMPTY(cfn) && (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func))) {
+      if (!CFN_EMPTY(cfn) && (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func) || (func == FUNC_PLAY_TRACK || func == FUNC_BACKGND_MUSIC || func == FUNC_PLAY_SCRIPT)))
+      {
         setHeight(getHeight() + 20);
       }
     }
