@@ -41,7 +41,7 @@ protected:
 
     void buildHeader(Window * window)
     {
-      new StaticText(window, {70, 4, 200, 20}, STR_MENUSPECIALFUNCS, MENU_TITLE_COLOR);
+      new StaticText(window, {70, 4, 200, 20}, functions == g_model.customFn ? STR_MENUCUSTOMFUNC : STR_MENUSPECIALFUNCS, MENU_TITLE_COLOR);
       new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
     }
 
