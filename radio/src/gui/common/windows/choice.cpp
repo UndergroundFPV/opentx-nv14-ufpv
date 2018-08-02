@@ -62,32 +62,23 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
   int count = 0;
   int current = -1;
 
-  if (textHandler) {
-    for (int i = vmin; i <= vmax; ++i) {
-      if (isValueAvailable && !isValueAvailable(i))
-        continue;
+  for (int i = vmin; i <= vmax; ++i) {
+    if (isValueAvailable && !isValueAvailable(i))
+      continue;
+    if (textHandler) {
       menu->addLine(textHandler(i), [=]() {
         setValue(i);
       });
-      if (value == i) {
-        current = count;
-      }
-      ++count;
     }
-  }
-  else {
-    // TODO discuss <= with @bsongis
-    for (int i = vmin; i <= vmax; ++i) {
-      if (isValueAvailable && !isValueAvailable(i))
-        continue;
+    else {
       menu->addLine(TEXT_AT_INDEX(values, i - vmin), [=]() {
         setValue(i);
       });
-      if (value == i) {
-        current = count;
-      }
-      ++count;
     }
+    if (value == i) {
+      current = count;
+    }
+    ++count;
   }
 
   if (current >= 0) {
