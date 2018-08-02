@@ -40,7 +40,7 @@ void RadioHardwarePage::build(Window * window)
   new Subtitle(window, grid.getLineSlot(), STR_STICKS);
   grid.nextLine();
   for(int i=0; i < NUM_STICKS; i++){
-    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+1)));
+    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i + 1)));
     new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i], LEN_ANA_NAME);
     grid.nextLine();
   }
@@ -49,9 +49,9 @@ void RadioHardwarePage::build(Window * window)
   new Subtitle(window, grid.getLineSlot(), STR_POTS);
   grid.nextLine();
   for(int i=0; i < NUM_POTS; i++){
-    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+NUM_STICKS+1)));
-    new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i+NUM_STICKS], LEN_ANA_NAME);
-    new Choice(window, grid.getFieldSlot(2,1), STR_POTTYPES, POT_NONE, POT_WITHOUT_DETENT+1,GET_SET_BF(g_eeGeneral.potsConfig, 2 * i, 2));
+    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i + NUM_STICKS + 1)));
+    new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i + NUM_STICKS], LEN_ANA_NAME);
+    new Choice(window, grid.getFieldSlot(2,1), STR_POTTYPES, POT_NONE, POT_WITHOUT_DETENT + 1,GET_SET_BF(g_eeGeneral.potsConfig, 2 * i, 2));
     grid.nextLine();
   }
 
