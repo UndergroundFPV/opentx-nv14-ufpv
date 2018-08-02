@@ -19,6 +19,104 @@
  */
 
 #include "opentx.h"
+#include "model_telemetry.h"
+
+#define SET_DIRTY() storageDirty(EE_GENERAL)
+
+ModelTelemetryPage::ModelTelemetryPage():
+        PageTab(STR_MENUTELEMETRY, ICON_MODEL_TELEMETRY)
+{
+}
+
+void ModelTelemetryPage::build(Window * window) {
+  GridLayout grid(*window);
+  grid.spacer(8);
+  grid.setLabelWidth(180);
+
+  //RSSI
+  if (g_model.moduleData[INTERNAL_MODULE].rfProtocol == RF_PROTO_OFF &&
+      g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_MULTIMODULE  &&
+      g_model.moduleData[EXTERNAL_MODULE].getMultiProtocol(false) == MM_RF_PROTO_FS_AFHDS2A)
+    new Subtitle(window, grid.getLineSlot(), "RSNR");
+  else
+    new Subtitle(window, grid.getLineSlot(), "RSSI");
+  grid.nextLine();
+
+  new StaticText(window, grid.getLabelSlot(true), STR_LOWALARM);
+  auto edit = new NumberEdit(window, grid.getFieldSlot(), -30, 30, GET_SET_DEFAULT(g_model.rssiAlarms.warning));
+  edit->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+    drawNumber(dc, 2, 2, g_model.rssiAlarms.getWarningRssi(), flags);
+  });
+  grid.nextLine();
+
+  new StaticText(window, grid.getLabelSlot(true), STR_CRITICALALARM);
+  edit = new NumberEdit(window, grid.getFieldSlot(), -30, 30, GET_SET_DEFAULT(g_model.rssiAlarms.critical));
+  edit->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+    drawNumber(dc, 2, 2, g_model.rssiAlarms.getCriticalRssi(), flags);
+  });
+  grid.nextLine();
+
+  new StaticText(window, grid.getLabelSlot(true), STR_DISABLE_ALARM);
+  new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.rssiAlarms.disabled));
+  grid.nextLine();
+
+  //Sensors
+  new Subtitle(window, grid.getLineSlot(), STR_TELEMETRY_SENSORS);
+  new StaticText(window, grid.getFieldSlot(2,0), STR_VALUE);
+  if (!g_model.ignoreSensorIds && !IS_SPEKTRUM_PROTOCOL())
+    new StaticText(window, grid.getFieldSlot(2,1), STR_ID);
+  grid.nextLine();
+
+  new TextButton(window, grid.getLineSlot(), STR_DISCOVER_SENSORS,
+                 []() -> uint8_t {
+                   //TODO bistable triggering disco
+                   return 0;
+                 });
+  grid.nextLine();
+
+  new TextButton(window, grid.getLineSlot(), STR_TELEMETRY_NEWSENSOR,
+                 []() -> uint8_t {
+                   //TODO open a 'one' page
+                     return 0;
+                   });
+  grid.nextLine();
+
+  new TextButton(window, grid.getLineSlot(), STR_DELETE_ALL_SENSORS,
+                 []() -> uint8_t {
+                    //TODO confirmation before delete
+                   for (int i=0; i<MAX_TELEMETRY_SENSORS; i++) {
+                     delTelemetryIndex(i);
+                   }
+                   return 0;
+                 });
+  grid.nextLine();
+
+
+  new StaticText(window, grid.getLabelSlot(true), STR_IGNORE_INSTANCE);
+  new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.ignoreSensorIds));
+  grid.nextLine();
+
+
+  //Vario
+  grid.setLabelWidth(100);
+  new Subtitle(window, grid.getLineSlot(), STR_VARIO);
+  grid.nextLine();
+  new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
+  // TODO sensor source ?
+  grid.nextLine();
+  new StaticText(window, grid.getLabelSlot(true), STR_RANGE);
+  new NumberEdit(window, grid.getFieldSlot(2,0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMin, -10));
+  new NumberEdit(window, grid.getFieldSlot(2,1), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMax, 10));
+  grid.nextLine();
+  new StaticText(window, grid.getLabelSlot(true), STR_CENTER);
+  new NumberEdit(window, grid.getFieldSlot(3,0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMin, -5), PREC1);
+  new NumberEdit(window, grid.getFieldSlot(3,1), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMax, 5), PREC1);
+  new Choice(window, grid.getFieldSlot(3,2), STR_VVARIOCENTER, 0, 2, GET_SET_DEFAULT(g_model.frsky.varioCenterSilent));
+  //TODO above limits make no sense, why do I need 0,2 for only 2 vals
+  grid.nextLine();
+
+  window->setInnerHeight(grid.getWindowHeight());
+}
 
 enum MenuModelTelemetryFrskyItems {
   ITEM_TELEMETRY_PROTOCOL_TYPE,
@@ -404,12 +502,7 @@ void onSensorMenu(const char * result)
 
 bool menuModelTelemetryFrsky(event_t event)
 {
-  if (warningResult) {
-    warningResult = 0;
-    for (int i=0; i<MAX_TELEMETRY_SENSORS; i++) {
-      delTelemetryIndex(i);
-    }
-  }
+
 
   MENU(STR_MENUTELEMETRY, MODEL_ICONS, menuTabModel, MENU_MODEL_TELEMETRY_FRSKY, ITEM_TELEMETRY_MAX, { TELEMETRY_TYPE_ROWS RSSI_ROWS SENSORS_ROWS VARIO_ROWS });
 
@@ -475,13 +568,6 @@ bool menuModelTelemetryFrsky(event_t event)
         g_model.telemetryProtocol = checkIncDec(event, g_model.telemetryProtocol, PROTOCOL_TELEMETRY_FIRST, PROTOCOL_TELEMETRY_LAST, EE_MODEL, isTelemetryProtocolAvailable);
         break;
 
-      case ITEM_TELEMETRY_SENSORS_LABEL:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_TELEMETRY_SENSORS);
-        lcdDrawText(TELEM_COL2, y, STR_VALUE, 0);
-        if (!g_model.ignoreSensorIds && !IS_SPEKTRUM_PROTOCOL()) {
-          lcdDrawText(TELEM_COL5, y, STR_ID, 0);
-        }
-        break;
 
       case ITEM_TELEMETRY_DISCOVER_SENSORS:
         lcdDrawText(MENUS_MARGIN_LEFT+INDENT_WIDTH, y, allowNewSensors ? NO_INDENT(STR_STOP_DISCOVER_SENSORS) : NO_INDENT(STR_DISCOVER_SENSORS), attr);
@@ -506,96 +592,14 @@ bool menuModelTelemetryFrsky(event_t event)
         }
         break;
 
-      case ITEM_TELEMETRY_DELETE_ALL_SENSORS:
-        lcdDrawText(MENUS_MARGIN_LEFT+INDENT_WIDTH, y, NO_INDENT(STR_DELETE_ALL_SENSORS), attr);
-        if (attr)
-          s_editMode = 0;
-        if (attr && event==EVT_KEY_LONG(KEY_ENTER)) {
-          killEvents(KEY_ENTER);
-          POPUP_CONFIRMATION(STR_CONFIRMDELETE);
-        }
-        break;
 
-      case ITEM_TELEMETRY_IGNORE_SENSOR_INSTANCE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_IGNORE_INSTANCE);
-        g_model.ignoreSensorIds = editCheckBox(g_model.ignoreSensorIds, TELEM_COL2, y, attr, event);
-        break;
-
-      case ITEM_TELEMETRY_RSSI_LABEL:
-#if defined(MULTIMODULE)
-        if (g_model.moduleData[INTERNAL_MODULE].rfProtocol == RF_PROTO_OFF &&
-          g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_MULTIMODULE  &&
-          g_model.moduleData[EXTERNAL_MODULE].getMultiProtocol(false) == MM_RF_PROTO_FS_AFHDS2A)
-          lcdDrawText(MENUS_MARGIN_LEFT, y, PSTR("RSNR"));
-        else
-#endif
-        lcdDrawText(MENUS_MARGIN_LEFT, y, PSTR("RSSI"));
-        break;
-
-      case ITEM_TELEMETRY_RSSI_ALARM1:
-      case ITEM_TELEMETRY_RSSI_ALARM2: {
-        bool warning = (k==ITEM_TELEMETRY_RSSI_ALARM1);
-        lcdDrawText(MENUS_MARGIN_LEFT, y, (warning ? STR_LOWALARM : STR_CRITICALALARM));
-        lcdDrawNumber(TELEM_COL2, y, warning? g_model.rssiAlarms.getWarningRssi() : g_model.rssiAlarms.getCriticalRssi(), LEFT|attr, 3);
-
-        if (attr && s_editMode>0) {
-          if (warning)
-            CHECK_INCDEC_MODELVAR(event, g_model.rssiAlarms.warning, -30, 30);
-          else
-            CHECK_INCDEC_MODELVAR(event, g_model.rssiAlarms.critical, -30, 30);
-        }
-        break;
-      }
-      case ITEM_TELEMETRY_DISABLE_ALARMS:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_DISABLE_ALARM);
-        g_model.rssiAlarms.disabled = editCheckBox(g_model.rssiAlarms.disabled, TELEM_COL3, y, attr, event);
-        break;
 #if defined(VARIO)
-      case ITEM_TELEMETRY_VARIO_LABEL:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_VARIO);
-        break;
 
       case ITEM_TELEMETRY_VARIO_SOURCE:
         lcdDrawText(MENUS_MARGIN_LEFT, y, STR_SOURCE);
         drawSource(TELEM_COL2, y, g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM+3*(g_model.frsky.varioSource-1) : 0, attr);
         if (attr) {
           g_model.frsky.varioSource = checkIncDec(event, g_model.frsky.varioSource, 0, MAX_TELEMETRY_SENSORS, EE_MODEL|NO_INCDEC_MARKS, isSensorAvailable);
-        }
-        break;
-
-      case ITEM_TELEMETRY_VARIO_RANGE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_RANGE);
-        lcdDrawNumber(TELEM_COL2, y, -10+g_model.frsky.varioMin, (menuHorizontalPosition==0 ? attr : 0)|LEFT);
-        lcdDrawNumber(TELEM_COL3, y, 10+g_model.frsky.varioMax, (menuHorizontalPosition==1 ? attr : 0)|LEFT);
-        if (attr && s_editMode>0) {
-          switch (menuHorizontalPosition) {
-            case 0:
-              CHECK_INCDEC_MODELVAR(event, g_model.frsky.varioMin, -7, 7);
-              break;
-            case 1:
-              CHECK_INCDEC_MODELVAR(event, g_model.frsky.varioMax, -7, 7);
-              break;
-          }
-        }
-        break;
-
-      case ITEM_TELEMETRY_VARIO_CENTER:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_CENTER);
-        lcdDrawNumber(TELEM_COL2, y, -5+g_model.frsky.varioCenterMin, (menuHorizontalPosition==0 ? attr : 0)|PREC1|LEFT);
-        lcdDrawNumber(TELEM_COL3, y, 5+g_model.frsky.varioCenterMax, (menuHorizontalPosition==1 ? attr : 0)|PREC1|LEFT);
-        lcdDrawTextAtIndex(TELEM_COL4, y, STR_VVARIOCENTER, g_model.frsky.varioCenterSilent, (menuHorizontalPosition==2 ? attr : 0));
-        if (attr && s_editMode>0) {
-          switch (menuHorizontalPosition) {
-            case 0:
-              CHECK_INCDEC_MODELVAR(event, g_model.frsky.varioCenterMin, -16, 5+min<int8_t>(10, g_model.frsky.varioCenterMax+5));
-              break;
-            case 1:
-              CHECK_INCDEC_MODELVAR(event, g_model.frsky.varioCenterMax, -5+max<int8_t>(-10, g_model.frsky.varioCenterMin-5), +15);
-              break;
-            case 2:
-              CHECK_INCDEC_MODELVAR_ZERO(event, g_model.frsky.varioCenterSilent, 1);
-              break;
-          }
         }
         break;
 #endif
