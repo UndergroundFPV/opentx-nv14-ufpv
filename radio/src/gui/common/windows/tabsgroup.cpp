@@ -79,6 +79,13 @@ TabsGroup::TabsGroup():
 {
 }
 
+TabsGroup::~TabsGroup()
+{
+  TextKeyboard::instance()->disable();
+  NumberKeyboard::instance()->disable();
+  CurveKeyboard::instance()->disable();
+}
+
 void TabsGroup::addTab(PageTab * page)
 {
   tabs.push_back(page);

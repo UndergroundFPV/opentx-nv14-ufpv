@@ -104,6 +104,8 @@ class TabsGroup: public Window {
   public:
     TabsGroup();
 
+    ~TabsGroup();
+
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
