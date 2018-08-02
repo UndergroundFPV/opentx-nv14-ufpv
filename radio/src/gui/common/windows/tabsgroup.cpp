@@ -119,3 +119,13 @@ void TabsGroup::paint(BitmapBuffer * dc)
 {
   dc->clear(TEXT_BGCOLOR);
 }
+
+bool TabsGroup::onTouchEnd(coord_t x, coord_t y)
+{
+  if (Window::onTouchEnd(x, y))
+    return true;
+  TextKeyboard::instance()->disable();
+  NumberKeyboard::instance()->disable();
+  CurveKeyboard::instance()->disable();
+  return true;
+}

@@ -87,9 +87,9 @@ class TabsGroupHeader: public Window {
 
     void paint(BitmapBuffer * dc) override;
 
-    void setTitle(const char * title)
+    void setTitle(const char * value)
     {
-      this->title = title;
+      title = value;
     }
 
   protected:
@@ -127,6 +127,8 @@ class TabsGroup: public Window {
     void checkEvents() override;
 
     void paint(BitmapBuffer * dc) override;
+
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     TabsGroupHeader header;
