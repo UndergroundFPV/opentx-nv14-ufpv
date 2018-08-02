@@ -26,7 +26,7 @@ const uint8_t LBM_DROPDOWN[] = {
 #include "mask_dropdown.lbm"
 };
 
-Choice::Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax,
+Choice::Choice(Window * parent, const rect_t &rect, const char * values, int16_t vmin, int16_t vmax,
                std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
   Window(parent, rect),
   values(values),
@@ -90,7 +90,7 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
 }
 
 
-CustomCurveChoice::CustomCurveChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax,
+CustomCurveChoice::CustomCurveChoice(Window * parent, const rect_t &rect, int16_t vmin, int16_t vmax,
                                      std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags) :
   Window(parent, rect),
   vmin(vmin),
@@ -112,7 +112,7 @@ void CustomCurveChoice::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  dc->drawText( 3, 2, getCurveString(s, value), flags | textColor);
+  dc->drawText(3, 2, getCurveString(s, value), flags | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
