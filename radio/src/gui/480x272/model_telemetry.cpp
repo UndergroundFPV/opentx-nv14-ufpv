@@ -21,7 +21,7 @@
 #include "opentx.h"
 #include "model_telemetry.h"
 
-#define SET_DIRTY() storageDirty(EE_GENERAL)
+#define SET_DIRTY() storageDirty(EE_MODEL)
 
 class SensorEditWindow : public Page {
   public:
@@ -49,7 +49,53 @@ class SensorEditWindow : public Page {
       // Sensor variable part
       GridLayout grid(*sensorOneWindow);
       sensorOneWindow->clear();
+      TelemetrySensor * sensor = &g_model.telemetrySensors[index];
 
+      if (sensor->type == TELEM_TYPE_CALCULATED) {
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_FORMULA);
+        new Choice(sensorOneWindow, grid.getFieldSlot(), STR_VFORMULAS, 0, TELEM_FORMULA_LAST, GET_DEFAULT(sensor->formula),
+                   [=](uint8_t newValue) {
+                     sensor->formula = newValue;
+                     sensor->param = 0;
+                     if (sensor->formula == TELEM_FORMULA_CELL) {
+                       sensor->unit = UNIT_VOLTS;
+                       sensor->prec = 2;
+                     }
+                     else if (sensor->formula == TELEM_FORMULA_DIST) {
+                       sensor->unit = UNIT_DIST;
+                       sensor->prec = 0;
+                     }
+                     else if (sensor->formula == TELEM_FORMULA_CONSUMPTION) {
+                       sensor->unit = UNIT_MAH;
+                       sensor->prec = 0;
+                     }
+                     SET_DIRTY();
+                     telemetryItems[index].clear();
+                     updateSensorOneWindow();
+                   });
+        grid.nextLine();
+
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_UNIT);
+        new Choice(sensorOneWindow, grid.getFieldSlot(), STR_VTELEMUNIT, 0, UNIT_MAX, GET_DEFAULT(sensor->unit),
+                   [=](uint8_t newValue) {
+                     sensor->unit = newValue;
+                     if (sensor->unit == UNIT_FAHRENHEIT) {
+                       sensor->prec = 0;
+                     }
+                     SET_DIRTY();
+                     telemetryItems[index].clear();
+                     updateSensorOneWindow();
+                   });
+        grid.nextLine();
+
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CELLSENSOR);
+      }
+      else { // CUSTOM sensor
+
+      }
+      coord_t delta = sensorOneWindow->adjustHeight();
+      Window * parent = sensorOneWindow->getParent();
+      parent->moveWindowsTop(sensorOneWindow->top(), delta);
     }
 
     void buildBody(Window * window)
@@ -67,7 +113,18 @@ class SensorEditWindow : public Page {
 
       //Type
       new StaticText(window, grid.getLabelSlot(), STR_TYPE);
-      new Choice(window, grid.getFieldSlot(), STR_VSENSORTYPES, 0, 1, GET_SET_DEFAULT(sensor->type));
+      new Choice(window, grid.getFieldSlot(), STR_VSENSORTYPES, 0, 1, GET_DEFAULT(sensor->type),
+                 [=](uint8_t newValue) {
+                   sensor->type = newValue;
+                   sensor->instance = 0;
+                   if (sensor->type == TELEM_TYPE_CALCULATED) {
+                     sensor->param = 0;
+                     sensor->filter = 0;
+                     sensor->autoOffset = 0;
+                   }
+                   SET_DIRTY();
+                   updateSensorOneWindow();
+                 });
       grid.nextLine();
 
       sensorOneWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
@@ -173,7 +230,17 @@ void ModelTelemetryPage::build(Window * window) {
   new Subtitle(window, grid.getLineSlot(), STR_VARIO);
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
-  // TODO sensor source ?
+  auto choice = new SourceChoice(window, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
+                   GET_DEFAULT(g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM + 3 * (g_model.frsky.varioSource - 1) : MIXSRC_NONE),
+                   SET_VALUE(g_model.frsky.varioSource, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 -1));
+  choice->setAvailableHandler([=](int16_t value) {
+    if (value == MIXSRC_NONE)
+      return true;
+    if (value < MIXSRC_FIRST_TELEM)
+      return false;
+    auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
+    return qr.rem == 0 && isSensorAvailable(qr.quot + 1);
+  });
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_RANGE);
   new NumberEdit(window, grid.getFieldSlot(2,0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMin, -10));
@@ -316,23 +383,7 @@ bool menuModelSensor(event_t event)
     LcdFlags attr = (menuVerticalPosition==k ? (s_editMode>0 ? BLINK|INVERS : INVERS) : 0);
 
     switch (k) {
-      case SENSOR_FIELD_NAME:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_NAME);
-        editName(SENSOR_2ND_COLUMN, y, sensor->label, TELEM_LABEL_LEN, event, attr);
-        break;
 
-      case SENSOR_FIELD_TYPE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_TYPE));
-        sensor->type = editChoice(SENSOR_2ND_COLUMN, y, STR_VSENSORTYPES, sensor->type, 0, 1, attr, event);
-        if (attr && checkIncDec_Ret) {
-          sensor->instance = 0;
-          if (sensor->type == TELEM_TYPE_CALCULATED) {
-            sensor->param = 0;
-            sensor->filter = 0;
-            sensor->autoOffset = 0;
-          }
-        }
-        break;
 
       case SENSOR_FIELD_ID:
         if (sensor->type == TELEM_TYPE_CUSTOM) {
@@ -351,25 +402,7 @@ bool menuModelSensor(event_t event)
             }
           }
         }
-        else {
-          lcdDrawText(MENUS_MARGIN_LEFT, y, STR_FORMULA);
-          sensor->formula = editChoice(SENSOR_2ND_COLUMN, y, STR_VFORMULAS, sensor->formula, 0, TELEM_FORMULA_LAST, attr, event);
-          if (attr && checkIncDec_Ret) {
-            sensor->param = 0;
-            if (sensor->formula == TELEM_FORMULA_CELL) {
-              sensor->unit = UNIT_VOLTS;
-              sensor->prec = 2;
-            }
-            else if (sensor->formula == TELEM_FORMULA_DIST) {
-              sensor->unit = UNIT_DIST;
-              sensor->prec = 0;
-            }
-            else if (sensor->formula == TELEM_FORMULA_CONSUMPTION) {
-              sensor->unit = UNIT_MAH;
-              sensor->prec = 0;
-            }
-          }
-        }
+
         break;
 
       case SENSOR_FIELD_UNIT:
