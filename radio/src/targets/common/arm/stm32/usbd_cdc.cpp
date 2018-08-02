@@ -216,18 +216,13 @@ static uint16_t VCP_DataRx (uint8_t* Buf, uint32_t Len)
   //        available characters, return VCP_FAIL. Maybe that will throttle down
   //        the sender and we will receive the same packet at a later time.
 
+#if defined(CLI)
   //copy data to the application FIFO
   for (uint32_t i = 0; i < Len; i++)
   {
-#if defined(CLI)
     cliRxFifo.push(Buf[i]);
-#endif
-
-#if defined(USB_SERIAL) && defined(FLYSKY_HALL_STICKS)
-    extern Fifo<uint8_t, HALLSTICK_BUFF_SIZE> hallStickTxFifo;
-    hallStickTxFifo.push(Buf[i]);
-#endif
   }
+#endif
 
   return USBD_OK;
 }
