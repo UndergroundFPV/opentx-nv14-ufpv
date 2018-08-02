@@ -232,7 +232,7 @@ void ModelTelemetryPage::build(Window * window) {
   new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
   auto choice = new SourceChoice(window, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
                    GET_DEFAULT(g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM + 3 * (g_model.frsky.varioSource - 1) : MIXSRC_NONE),
-                   SET_VALUE(g_model.frsky.varioSource, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 -1));
+                   SET_VALUE(g_model.frsky.varioSource, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
   choice->setAvailableHandler([=](int16_t value) {
     if (value == MIXSRC_NONE)
       return true;
