@@ -29,7 +29,9 @@ public:
 
     virtual void build(Window * window) override;
 
-protected:
+  protected:
+    void editSensor(Window * window, uint8_t index);
+    void rebuild(Window * window);
 };
 
 #endif //_MODEL_TELEMETRY_H

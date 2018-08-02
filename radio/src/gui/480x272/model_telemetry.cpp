@@ -23,15 +23,86 @@
 
 #define SET_DIRTY() storageDirty(EE_GENERAL)
 
+class SensorEditWindow : public Page {
+  public:
+    SensorEditWindow(uint8_t index):
+      Page(),
+      index(index)
+    {
+      buildBody(&body);
+      buildHeader(&header);
+    }
+
+  protected:
+    uint8_t index;
+    Window * sensorOneWindow = nullptr;
+
+    void buildHeader(Window * window)
+    {
+      new StaticText(window, {70, 4, 200, 20}, STR_SENSOR + std::to_string(index + 1), MENU_TITLE_COLOR);
+      // dynamic display of sensor value ?
+      //new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
+    }
+
+    void updateSensorOneWindow()
+    {
+      // Sensor variable part
+      GridLayout grid(*sensorOneWindow);
+      sensorOneWindow->clear();
+
+    }
+
+    void buildBody(Window * window)
+    {
+      // Sensor one
+      GridLayout grid(*window);
+      grid.spacer(8);
+
+      TelemetrySensor * sensor = &g_model.telemetrySensors[index];
+
+      //Name
+      new StaticText(window, grid.getLabelSlot(), STR_NAME);
+      new TextEdit(window, grid.getFieldSlot(), sensor->label, TELEM_LABEL_LEN);
+      grid.nextLine();
+
+      //Type
+      new StaticText(window, grid.getLabelSlot(), STR_TYPE);
+      new Choice(window, grid.getFieldSlot(), STR_VSENSORTYPES, 0, 1, GET_SET_DEFAULT(sensor->type));
+      grid.nextLine();
+
+      sensorOneWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
+      updateSensorOneWindow();
+      grid.addWindow(sensorOneWindow);
+    }
+};
+
 ModelTelemetryPage::ModelTelemetryPage():
         PageTab(STR_MENUTELEMETRY, ICON_MODEL_TELEMETRY)
 {
+}
+
+void ModelTelemetryPage::rebuild(Window * window)
+{
+  coord_t scrollPosition = window->getScrollPositionY();
+  window->clear();
+  build(window);
+  window->setScrollPositionY(scrollPosition);
+}
+
+
+void ModelTelemetryPage::editSensor(Window * window, uint8_t index)
+{
+  Window * editWindow = new SensorEditWindow(index);
+  editWindow->setCloseHandler([=]() {
+    rebuild(window);
+  });
 }
 
 void ModelTelemetryPage::build(Window * window) {
   GridLayout grid(*window);
   grid.spacer(8);
   grid.setLabelWidth(180);
+
 
   //RSSI
   if (g_model.moduleData[INTERNAL_MODULE].rfProtocol == RF_PROTO_OFF &&
@@ -75,8 +146,8 @@ void ModelTelemetryPage::build(Window * window) {
   grid.nextLine();
 
   new TextButton(window, grid.getLineSlot(), STR_TELEMETRY_NEWSENSOR,
-                 []() -> uint8_t {
-                   //TODO open a 'one' page
+                 [=]() -> uint8_t {
+                     editSensor(window, 0);
                      return 0;
                    });
   grid.nextLine();
@@ -111,8 +182,7 @@ void ModelTelemetryPage::build(Window * window) {
   new StaticText(window, grid.getLabelSlot(true), STR_CENTER);
   new NumberEdit(window, grid.getFieldSlot(3,0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMin, -5), PREC1);
   new NumberEdit(window, grid.getFieldSlot(3,1), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMax, 5), PREC1);
-  new Choice(window, grid.getFieldSlot(3,2), STR_VVARIOCENTER, 0, 2, GET_SET_DEFAULT(g_model.frsky.varioCenterSilent));
-  //TODO above limits make no sense, why do I need 0,2 for only 2 vals
+  new Choice(window, grid.getFieldSlot(3,2), STR_VVARIOCENTER, 0, 1, GET_SET_DEFAULT(g_model.frsky.varioCenterSilent));
   grid.nextLine();
 
   window->setInnerHeight(grid.getWindowHeight());

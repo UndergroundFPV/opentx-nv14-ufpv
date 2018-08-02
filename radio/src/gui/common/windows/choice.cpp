@@ -76,7 +76,8 @@ bool Choice::onTouchEnd(coord_t x, coord_t y)
     }
   }
   else {
-    for (int i = vmin; i < vmax; ++i) {
+    // TODO discuss <= with @bsongis
+    for (int i = vmin; i <= vmax; ++i) {
       if (isValueAvailable && !isValueAvailable(i))
         continue;
       menu->addLine(TEXT_AT_INDEX(values, i - vmin), [=]() {
