@@ -59,10 +59,13 @@
   #define NUM_ANALOGS_ADC_EXT          (NUM_ANALOGS - 10)
 #else
   #define FIRST_ANALOG_ADC             0
+  #define FIRST_SUB_ANALOG_ADC         0
   #define NUM_ANALOGS_ADC              NUM_ANALOGS
+  #define NUM_SUB_ANALOGS_ADC          NUM_SUB_ANALOGS
 #endif
 
 uint16_t adcValues[NUM_ANALOGS] __DMA;
+uint16_t subAdcValues[NUM_SUB_ANALOGS] __DMA;
 
 void adcInit()
 {
@@ -95,7 +98,11 @@ void adcInit()
   ADC_MAIN->CR1 = ADC_CR1_SCAN;
   ADC_MAIN->CR2 = ADC_CR2_ADON | ADC_CR2_DMA | ADC_CR2_DDS;
   ADC_MAIN->SQR1 = (NUM_ANALOGS_ADC-1) << 20; // bits 23:20 = number of conversions
-
+#if defined(PCBNV14)
+  ADC_SUB->CR1 = ADC_CR1_SCAN;
+  ADC_SUB->CR2 = ADC_CR2_ADON | ADC_CR2_DMA | ADC_CR2_DDS;
+  ADC_SUB->SQR1 = (NUM_ANALOGS_ADC-1) << 20; // bits 23:20 = number of conversions
+#endif
 #if defined(PCBX10)
   if (STICKS_PWM_ENABLED()) {
     ADC_MAIN->SQR2 = (ADC_CHANNEL_EXT1<<0) + (ADC_CHANNEL_EXT2<<5); // conversions 7 and more
@@ -127,6 +134,8 @@ void adcInit()
 #elif defined(PCBNV14)
   ADC_MAIN->SQR2 = (ADC_CHANNEL_BATT<<0); // conversions 7 and more
   ADC_MAIN->SQR3 = (ADC_CHANNEL_STICK_LH<<0) + (ADC_CHANNEL_STICK_LV<<5) + (ADC_CHANNEL_STICK_RV<<10) + (ADC_CHANNEL_STICK_RH<<15) + (ADC_CHANNEL_POT1<<20) + (ADC_CHANNEL_POT2<<25); // conversions 1 to 6
+  ADC_SUB->SQR2 = (ADC_CHANNEL_BATT<<0); // conversions 7 and more
+  ADC_SUB->SQR3 = (ADC_CHANNEL_STICK_LH<<0) + (ADC_CHANNEL_STICK_LV<<5) + (ADC_CHANNEL_STICK_RV<<10) + (ADC_CHANNEL_STICK_RH<<15) + (ADC_CHANNEL_POT1<<20) + (ADC_CHANNEL_POT2<<25); // conversions 1 to 6
 
 #else
   ADC_MAIN->SQR2 = (ADC_CHANNEL_POT3<<0) + (ADC_CHANNEL_SLIDER1<<5) + (ADC_CHANNEL_SLIDER2<<10) + (ADC_CHANNEL_BATT<<15); // conversions 7 and more
@@ -138,12 +147,23 @@ void adcInit()
 
   ADC->CCR = 0;
 
-  ADC_DMA_Stream->CR = DMA_SxCR_PL | ADC_DMA_SxCR_CHSEL | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;
-  ADC_DMA_Stream->PAR = CONVERT_PTR_UINT(&ADC_MAIN->DR);
-  ADC_DMA_Stream->M0AR = CONVERT_PTR_UINT(&adcValues[FIRST_ANALOG_ADC]);
-  ADC_DMA_Stream->NDTR = NUM_ANALOGS_ADC;
-  ADC_DMA_Stream->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0;
+  ADC_MAIN_DMA_Stream->CR = DMA_SxCR_PL | ADC_DMA_SxCR_CHSEL | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;
+  ADC_MAIN_DMA_Stream->PAR = CONVERT_PTR_UINT(&ADC_MAIN->DR);
+  ADC_MAIN_DMA_Stream->M0AR = CONVERT_PTR_UINT(&adcValues[FIRST_ANALOG_ADC]);
+  ADC_MAIN_DMA_Stream->NDTR = NUM_ANALOGS_ADC;
+  ADC_MAIN_DMA_Stream->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0;
+#if defined(PCBNV14)
+  ADC_SUB->SMPR1 = ADC_SAMPTIME + (ADC_SAMPTIME<<3) + (ADC_SAMPTIME<<6) + (ADC_SAMPTIME<<9) + (ADC_SAMPTIME<<12) + (ADC_SAMPTIME<<15) + (ADC_SAMPTIME<<18) + (ADC_SAMPTIME<<21) + (ADC_SAMPTIME<<24);
+  ADC_SUB->SMPR2 = ADC_SAMPTIME + (ADC_SAMPTIME<<3) + (ADC_SAMPTIME<<6) + (ADC_SAMPTIME<<9) + (ADC_SAMPTIME<<12) + (ADC_SAMPTIME<<15) + (ADC_SAMPTIME<<18) + (ADC_SAMPTIME<<21) + (ADC_SAMPTIME<<24) + (ADC_SAMPTIME<<27);
 
+  ADC->CCR = 0;
+
+  ADC_SUB_DMA_Stream->CR = DMA_SxCR_PL | ADC_DMA_SxCR_CHSEL | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;
+  ADC_SUB_DMA_Stream->PAR = CONVERT_PTR_UINT(&ADC_SUB->DR);
+  ADC_SUB_DMA_Stream->M0AR = CONVERT_PTR_UINT(&subAdcValues[FIRST_SUB_ANALOG_ADC]);
+  ADC_SUB_DMA_Stream->NDTR = NUM_SUB_ANALOGS_ADC;
+  ADC_SUB_DMA_Stream->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0;
+#endif
 #if defined(PCBX9E)
   ADC_EXT->CR1 = ADC_CR1_SCAN;
   ADC_EXT->CR2 = ADC_CR2_ADON | ADC_CR2_DMA | ADC_CR2_DDS;
@@ -169,12 +189,18 @@ void adcInit()
 
 void adcSingleRead()
 {
-  ADC_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
+  ADC_MAIN_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
   ADC_MAIN->SR &= ~(uint32_t)(ADC_SR_EOC | ADC_SR_STRT | ADC_SR_OVR);
-  ADC_SET_DMA_FLAGS();
-  ADC_DMA_Stream->CR |= DMA_SxCR_EN; // Enable DMA
+  ADC_MAIN_SET_DMA_FLAGS();
+  ADC_MAIN_DMA_Stream->CR |= DMA_SxCR_EN; // Enable DMA
   ADC_MAIN->CR2 |= (uint32_t) ADC_CR2_SWSTART;
-
+#if defined(PCBNV14)
+  ADC_SUB_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
+  ADC_SUB->SR &= ~(uint32_t)(ADC_SR_EOC | ADC_SR_STRT | ADC_SR_OVR);
+  ADC_SUB_SET_DMA_FLAGS();
+  ADC_SUB_DMA_Stream->CR |= DMA_SxCR_EN; // Enable DMA
+  ADC_SUB->CR2 |= (uint32_t) ADC_CR2_SWSTART;
+#endif
 #if defined(PCBX9E)
   ADC_EXT_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
   ADC_EXT->SR &= ~(uint32_t) ( ADC_SR_EOC | ADC_SR_STRT | ADC_SR_OVR );
@@ -193,11 +219,23 @@ void adcSingleRead()
   ADC_EXT_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
 #else
   for (unsigned int i = 0; i < 10000; i++) {
-    if (ADC_TRANSFER_COMPLETE()) {
+#if defined(PCBNV14)
+    if (ADC_MAIN_TRANSFER_COMPLETE() && ADC_MAIN_TRANSFER_COMPLETE())
+    {
       break;
     }
+#else
+    if (ADC_MAIN_TRANSFER_COMPLETE())
+    {
+      break;
+    }
+#endif
   }
-  ADC_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
+
+  ADC_MAIN_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
+#if defined(PCBNV14)
+  ADC_SUB_DMA_Stream->CR &= ~DMA_SxCR_EN; // Disable DMA
+#endif
 #endif
 }
 

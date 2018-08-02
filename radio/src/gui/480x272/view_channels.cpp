@@ -253,10 +253,12 @@ void drawComboOutputBar(coord_t x, coord_t y, coord_t w, coord_t h, uint8_t chan
 
 coord_t drawChannelsMonitorLegend(coord_t x, const pm_char * s, int color)
 {
+#if 1
   lcdDrawSolidFilledRect(x, MENU_FOOTER_TOP + 2, LEG_COLORBOX + 2, LEG_COLORBOX + 2, BARGRAPH_BGCOLOR);
   lcdDrawSolidFilledRect(x + 1, MENU_FOOTER_TOP + 3, LEG_COLORBOX, LEG_COLORBOX, color);
   lcdDrawText(x + 20, MENU_FOOTER_TOP, s, TEXT_STATUSBAR_COLOR);
   return x + 25 + getTextWidth(s);
+#endif
 }
 
 bool menuChannelsMonitor(event_t event, uint8_t page)

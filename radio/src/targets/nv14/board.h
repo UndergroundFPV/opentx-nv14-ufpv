@@ -336,6 +336,13 @@ enum Analogs {
   NUM_ANALOGS
 };
 
+enum subAnalogs {
+  SWA,
+  SWC,
+  NUM_SUB_ANALOGS
+};
+
+
 enum CalibratedAnalogs {
   CALIBRATED_STICK1,
   CALIBRATED_STICK2,
@@ -348,7 +355,10 @@ enum CalibratedAnalogs {
 
 #define IS_POT(x)                       ((x)>=POT_FIRST && (x)<=POT_LAST)
 #define IS_SLIDER(x)                    (false)
+
 extern uint16_t adcValues[NUM_ANALOGS];
+extern uint16_t subAdcValues[NUM_SUB_ANALOGS];
+
 void adcInit(void);
 void adcRead(void);
 uint16_t getAnalogValue(uint8_t index);
