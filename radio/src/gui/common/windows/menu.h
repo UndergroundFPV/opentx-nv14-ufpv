@@ -30,6 +30,8 @@
 class Menu;
 
 class MenuWindow: public Window {
+  friend class Menu;
+
   class MenuLine {
     friend class MenuWindow;
 
@@ -55,7 +57,13 @@ class MenuWindow: public Window {
     void addLine(const std::string & text, std::function<void()> onPress)
     {
       lines.emplace_back(text, onPress);
-      updatePosition();
+      invalidate();
+    }
+
+    void removeLines()
+    {
+      lines.clear();
+      invalidate();
     }
 
     void select(int index);
@@ -68,7 +76,6 @@ class MenuWindow: public Window {
     std::vector<MenuLine> lines;
     int selectedIndex = -1;
     static constexpr uint8_t lineHeight = 40;
-    void updatePosition();
 };
 
 class Menu : public Window {
@@ -93,10 +100,9 @@ class Menu : public Window {
       menuWindow.setHeight(window->height());
     }
 
-    void addLine(const std::string & text, std::function<void()> onPress)
-    {
-      menuWindow.addLine(text, std::move(onPress));
-    }
+    void addLine(const std::string & text, std::function<void()> onPress);
+
+    void removeLines();
 
     void select(int index)
     {
@@ -114,6 +120,7 @@ class Menu : public Window {
 
   protected:
     MenuWindow menuWindow;
+    void updatePosition();
 };
 
 #endif

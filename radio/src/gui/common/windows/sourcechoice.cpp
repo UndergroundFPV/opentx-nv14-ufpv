@@ -20,16 +20,64 @@
 
 #include "opentx.h"
 
+class SourceMenuHeaderButton: public Button {
+  public:
+    SourceMenuHeaderButton(Window * window, const rect_t & rect, char picto):
+      Button(window, rect, nullptr, BUTTON_CHECKED_ON_FOCUS),
+      picto(picto)
+    {
+    }
+
+    void paint(BitmapBuffer * dc) override
+    {
+      if (checked()) {
+        dc->drawSolidFilledRect(11, 0, 28, 28, HEADER_BGCOLOR);
+        dc->drawSizedText(rect.w / 2, (rect.h - getFontHeight(flags)) / 2, &picto, 1, CENTERED | MENU_TITLE_COLOR);
+      }
+      else {
+        dc->drawSizedText(rect.w / 2, (rect.h - getFontHeight(flags)) / 2, &picto, 1, CENTERED | TEXT_COLOR);
+      }
+    }
+
+    bool onTouchEnd(coord_t x, coord_t y) override
+    {
+      if (hasFocus()) {
+        check(false);
+        clearFocus();
+      }
+      else {
+        setFocus();
+      }
+      onPress();
+      return true;
+    }
+
+  protected:
+    char picto;
+};
+
 class SourceMenuHeader: public Window {
   public:
-    SourceMenuHeader(Menu * menu):
+    SourceMenuHeader(SourceChoice * choice, Menu * menu):
       Window(menu, { 35, 95, 50, 370 })
     {
-      char icon[] = " ";
-      for (int i=0; i<12; i++) {
-        icon[0] = '\307' + i;
-        new TextButton(this, {0, 30 * i, 50, 30}, icon);
-      }
+      coord_t y = 5;
+      addButton(choice, menu, MIXSRC_FIRST_INPUT, MIXSRC_LAST_INPUT, char('\314'), y);
+#if defined(LUA_MODEL_SCRIPTS)
+      addButton(choice, menu, MIXSRC_FIRST_LUA, MIXSRC_LAST_LUA, char('\322'), y);
+#endif
+      addButton(choice, menu, MIXSRC_FIRST_STICK, MIXSRC_LAST_STICK, char('\307'), y);
+      addButton(choice, menu, MIXSRC_FIRST_POT, MIXSRC_LAST_POT, char('\310'), y);
+      addButton(choice, menu, MIXSRC_MAX, MIXSRC_MAX, char('\315'), y);
+#if defined(HELI)
+      addButton(choice, menu, MIXSRC_FIRST_HELI, MIXSRC_LAST_HELI, char('\316'), y);
+#endif
+      addButton(choice, menu, MIXSRC_FIRST_TRIM, MIXSRC_LAST_TRIM, char('\313'), y);
+      addButton(choice, menu, MIXSRC_FIRST_SWITCH, MIXSRC_LAST_SWITCH, char('\312'), y);
+      addButton(choice, menu, MIXSRC_FIRST_TRAINER, MIXSRC_LAST_TRAINER, char('\317'), y);
+      addButton(choice, menu, MIXSRC_FIRST_CH, MIXSRC_LAST_CH, char('\320'), y);
+      addButton(choice, menu, MIXSRC_FIRST_GVAR, MIXSRC_LAST_GVAR, char('\311'), y);
+      addButton(choice, menu, MIXSRC_FIRST_TELEM, MIXSRC_LAST_TELEM, char('\321'), y);
     }
 
     void paint(BitmapBuffer * dc) override
@@ -44,7 +92,31 @@ class SourceMenuHeader: public Window {
     }
 
   protected:
-    int8_t selected = -1;
+    void addButton(SourceChoice * choice, Menu * menu, int16_t filtermin, int16_t filtermax, char picto, coord_t & y)
+    {
+      int vmin = choice->vmin;
+      int vmax = choice->vmax;
+
+      if (vmin > filtermin || vmax < filtermin)
+        return;
+
+      if (choice->isValueAvailable && getFirstAvailable(filtermin, filtermax, choice->isValueAvailable) == MIXSRC_NONE)
+        return;
+
+      auto button = new SourceMenuHeaderButton(this, {0, y, 50, 30}, picto);
+      button->setPressHandler([=]() {
+        if (button->hasFocus()) {
+          choice->fillMenu(menu, [=](int16_t index) {
+            return index >= filtermin && index <= filtermax;
+          });
+        }
+        else {
+          choice->fillMenu(menu);
+        }
+        return 1;
+      });
+      y += 30;
+    }
 };
 
 void SourceChoice::paint(BitmapBuffer * dc)
@@ -61,14 +133,17 @@ void SourceChoice::paint(BitmapBuffer * dc)
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
-bool SourceChoice::onTouchEnd(coord_t x, coord_t y)
+void SourceChoice::fillMenu(Menu * menu, std::function<bool(int16_t)> filter)
 {
-  auto menu = new Menu();
   auto value = getValue();
   int count = 0;
   int current = -1;
 
-  for (int i = vmin; i < vmax; ++i) {
+  menu->removeLines();
+
+  for (int i = vmin; i <= vmax; ++i) {
+    if (filter && !filter(i))
+      continue;
     if (isValueAvailable && !isValueAvailable(i))
       continue;
     menu->addLine(getSourceString(i), [=]() {
@@ -80,11 +155,17 @@ bool SourceChoice::onTouchEnd(coord_t x, coord_t y)
     ++count;
   }
 
-  menu->setNavigationBar(new SourceMenuHeader(menu));
-
   if (current >= 0) {
     menu->select(current);
   }
+}
+
+bool SourceChoice::onTouchEnd(coord_t x, coord_t y)
+{
+  auto menu = new Menu();
+  fillMenu(menu);
+
+  menu->setNavigationBar(new SourceMenuHeader(this, menu));
 
   setFocus();
   return true;

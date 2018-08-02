@@ -53,13 +53,28 @@ void MenuWindow::paint(BitmapBuffer * dc)
   }
 }
 
-void MenuWindow::updatePosition()
+void Menu::updatePosition()
 {
-  int count = min<int>(8, lines.size());
-  coord_t h = count * lineHeight;
-  setTop((LCD_H - h) / 2);
-  setHeight(h);
-  setInnerHeight(lines.size() * lineHeight);
+  if (children.size() == 1) {
+    // there is no navigation bar at the left, we may center the window on screen
+    int count = min<int>(8, menuWindow.lines.size());
+    coord_t h = count * menuWindow.lineHeight;
+    menuWindow.setTop((LCD_H - h) / 2);
+    menuWindow.setHeight(h);
+  }
+  menuWindow.setInnerHeight(menuWindow.lines.size() * menuWindow.lineHeight);
+}
+
+void Menu::addLine(const std::string & text, std::function<void()> onPress)
+{
+  menuWindow.addLine(text, std::move(onPress));
+  updatePosition();
+}
+
+void Menu::removeLines()
+{
+  menuWindow.removeLines();
+  updatePosition();
 }
 
 bool Menu::onTouchEnd(coord_t x, coord_t y)

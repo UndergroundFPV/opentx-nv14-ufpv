@@ -33,10 +33,12 @@
 #endif
 
 #if defined(CPUARM)
+
+#include <functional>
 typedef bool (*IsValueAvailable)(int);
 
 int circularIncDec(int current, int inc, int min, int max, IsValueAvailable isValueAvailable=NULL);
-int getFirstAvailable(int min, int max, IsValueAvailable isValueAvailable);
+int getFirstAvailable(int min, int max, std::function<bool(int)>isValueAvailable);
 
 bool isTrimModeAvailable(int mode);
 bool isInputAvailable(int input);

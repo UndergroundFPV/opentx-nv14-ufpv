@@ -607,7 +607,7 @@ bool modelHasNotes()
   return false;
 }
 
-int getFirstAvailable(int min, int max, IsValueAvailable isValueAvailable)
+int getFirstAvailable(int min, int max, std::function<bool(int)>isValueAvailable)
 {
   int retval = 0;
   for (int i = min; i <= max; i++) {

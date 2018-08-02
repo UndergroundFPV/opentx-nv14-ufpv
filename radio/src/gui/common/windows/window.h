@@ -162,12 +162,24 @@ class Window {
 
     void setInnerWidth(coord_t w)
     {
-      innerWidth = w;
+      if (w > width()) {
+        innerWidth = w;
+      }
+      else {
+        innerWidth = width();
+        scrollPositionX = 0;
+      }
     }
 
     void setInnerHeight(coord_t h)
     {
-      innerHeight = h;
+      if (h > height()) {
+        innerHeight = h;
+      }
+      else {
+        innerHeight = height();
+        scrollPositionY = 0;
+      }
     }
 
     coord_t getScrollPositionY() const

@@ -24,9 +24,13 @@
 #include <functional>
 #include "window.h"
 
+class Menu;
+
 bool isSourceAvailable(int source);
 
 class SourceChoice : public Window {
+  friend class SourceMenuHeader;
+
   public:
     SourceChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):
       Window(parent, rect),
@@ -59,6 +63,7 @@ class SourceChoice : public Window {
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
     std::function<bool(int)> isValueAvailable = isSourceAvailable;
+    void fillMenu(Menu * menu, std::function<bool(int16_t)> condition=nullptr);
 };
 
 #endif // _SOURCECHOICE_H_
