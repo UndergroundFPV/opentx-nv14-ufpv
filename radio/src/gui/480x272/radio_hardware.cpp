@@ -36,250 +36,52 @@ void RadioHardwarePage::build(Window * window)
   grid.spacer(8);
   grid.setLabelWidth(80);
 
+  // Sticks
   new Subtitle(window, grid.getLineSlot(), STR_STICKS);
   grid.nextLine();
   for(int i=0; i < NUM_STICKS; i++){
-    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, i + 1));
+    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+1)));
     new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i], LEN_ANA_NAME);
     grid.nextLine();
   }
 
+    //Pots
   new Subtitle(window, grid.getLineSlot(), STR_POTS);
   grid.nextLine();
   for(int i=0; i < NUM_POTS; i++){
-    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, i + NUM_STICKS + 1));
+    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i+NUM_STICKS+1)));
     new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i+NUM_STICKS], LEN_ANA_NAME);
-    new Choice(window, grid.getFieldSlot(2,1), STR_POTTYPES, POT_NONE, POT_WITHOUT_DETENT+1,
-               [=]() -> uint8_t {
-                   return BF_GET(g_eeGeneral.potsConfig, 2 * i, 2);
-               },
-               [=](uint8_t newValue) {
-                   BF_SET(g_eeGeneral.potsConfig, newValue, 2 * i, 2);
-                   SET_DIRTY();
-               });
+    new Choice(window, grid.getFieldSlot(2,1), STR_POTTYPES, POT_NONE, POT_WITHOUT_DETENT+1,GET_SET_BF(g_eeGeneral.potsConfig, 2 * i, 2));
     grid.nextLine();
   }
 
+  //Switches
   new Subtitle(window, grid.getLineSlot(), STR_SWITCHES);
   grid.nextLine();
-  for (int i=0; i < NUM_SWITCHES; i++) {
-    new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, i + MIXSRC_FIRST_SWITCH-MIXSRC_Rud + 1));
-    new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i+MIXSRC_FIRST_SWITCH-MIXSRC_Rud], LEN_ANA_NAME);
-    new Choice(window, grid.getFieldSlot(2,1), STR_SWTYPES, SWITCH_NONE, SWITCH_TYPE_MAX(i)+1,
-               [=]() -> uint8_t {
-                   return BF_GET(g_eeGeneral.switchConfig, 2 * i, 2);
-               },
-               [=](uint8_t newValue) {
-                   BF_SET(g_eeGeneral.switchConfig, newValue, 2 * i, 2);
-                   SET_DIRTY();
-               });
+  for(int i=0; i < NUM_SWITCHES; i++) {
+    new StaticText(window, grid.getLabelSlot(true),
+                   TEXT_AT_INDEX(STR_VSRCRAW, (i + MIXSRC_FIRST_SWITCH - MIXSRC_Rud + 1)));
+    new TextEdit(window, grid.getFieldSlot(2, 0), g_eeGeneral.anaNames[i + MIXSRC_FIRST_SWITCH - MIXSRC_Rud],
+                 LEN_ANA_NAME);
+    new Choice(window, grid.getFieldSlot(2, 1), STR_SWTYPES, SWITCH_NONE, SWITCH_TYPE_MAX(i) + 1, GET_SET_BF(g_eeGeneral.switchConfig, 2 * i, 2));
     grid.nextLine();
   }
+
+  grid.setLabelWidth(150);
+
+  // ADC filter
+  new StaticText(window, grid.getLabelSlot(), STR_JITTER_FILTER);
+  new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_eeGeneral.jitterFilter));
+  grid.nextLine();
+
+  // Bat calibration
+  new StaticText(window, grid.getLabelSlot(), STR_BATT_CALIB);
+  auto batCal = new NumberEdit(window, grid.getFieldSlot(), -127, 127, GET_SET_DEFAULT(g_eeGeneral.txVoltageCalibration));
+  batCal->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+      drawNumber(dc, 2, 2, getBatteryVoltage(), flags | PREC2, 0, nullptr, "V");
+  });
+  grid.nextLine();
 
   window->setInnerHeight(grid.getWindowHeight());
 }
 
-enum MenuRadioHardwareItems {
-  ITEM_RADIO_HARDWARE_LABEL_STICKS,
-  ITEM_RADIO_HARDWARE_STICK1,
-  ITEM_RADIO_HARDWARE_STICK2,
-  ITEM_RADIO_HARDWARE_STICK3,
-  ITEM_RADIO_HARDWARE_STICK4,
-  ITEM_RADIO_HARDWARE_LABEL_POTS,
-  ITEM_RADIO_HARDWARE_POT1,
-  ITEM_RADIO_HARDWARE_POT2,
-  ITEM_RADIO_HARDWARE_LABEL_SWITCHES,
-  ITEM_RADIO_HARDWARE_SA,
-  ITEM_RADIO_HARDWARE_SB,
-  ITEM_RADIO_HARDWARE_SC,
-  ITEM_RADIO_HARDWARE_SD,
-  ITEM_RADIO_HARDWARE_SE,
-  ITEM_RADIO_HARDWARE_SF,
-  ITEM_RADIO_HARDWARE_SG,
-  ITEM_RADIO_HARDWARE_SH,
-  ITEM_RADIO_HARDWARE_JITTER_FILTER,
-  ITEM_RADIO_HARDWARE_BAT_CAL,
-  ITEM_RADIO_HARDWARE_MAX
-};
-
-#define HW_SETTINGS_COLUMN             150
-#if defined(PCBX10)
-#define POTS_ROWS                      NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1
-#else
-#define POTS_ROWS                      NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1
-#endif
-#define SWITCHES_ROWS                  NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1, NAVIGATION_LINE_BY_LINE|1
-#if defined(BLUETOOTH)
-#define BLUETOOTH_ROWS                 0, uint8_t(g_eeGeneral.bluetoothMode != BLUETOOTH_TELEMETRY ? HIDDEN_ROW : -1), uint8_t(g_eeGeneral.bluetoothMode == BLUETOOTH_OFF ? -1 : 0),
-#else
-#define BLUETOOTH_ROWS
-#endif
-#define SWITCH_TYPE_MAX(sw)            ((MIXSRC_SF-MIXSRC_FIRST_SWITCH == sw || MIXSRC_SH-MIXSRC_FIRST_SWITCH == sw) ? SWITCH_2POS : SWITCH_3POS)
-
-#if 0
-bool menuRadioHardware(event_t event)
-{
-  MENU(STR_HARDWARE, RADIO_ICONS, menuTabGeneral, MENU_RADIO_HARDWARE, ITEM_RADIO_HARDWARE_MAX, { 0, LABEL(Sticks), 0, 0, 0, 0, LABEL(Pots), POTS_ROWS, LABEL(Switches), SWITCHES_ROWS, 0, BLUETOOTH_ROWS 0, 0, 0 });
-
-  uint8_t sub = menuVerticalPosition;
-
-  for (int i=0; i<NUM_BODY_LINES; ++i) {
-    coord_t y = MENU_CONTENT_TOP + i*FH;
-    int k = i + menuVerticalOffset;
-    for (int j=0; j<=k; j++) {
-      if (mstate_tab[j] == HIDDEN_ROW)
-        k++;
-    }
-    LcdFlags attr = (sub == k ? ((s_editMode>0) ? BLINK|INVERS : INVERS) : 0);
-    switch (k) {
-      case ITEM_RADIO_HARDWARE_CALIBRATION:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, "Calibration", attr);
-        if (attr && s_editMode>0) {
-          pushMenu(menuRadioCalibration);
-        }
-        break;
-      case ITEM_RADIO_HARDWARE_LABEL_STICKS:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_STICKS);
-        break;
-
-      case ITEM_RADIO_HARDWARE_STICK1:
-      case ITEM_RADIO_HARDWARE_STICK2:
-      case ITEM_RADIO_HARDWARE_STICK3:
-      case ITEM_RADIO_HARDWARE_STICK4:
-        editStickHardwareSettings(HW_SETTINGS_COLUMN, y, k - ITEM_RADIO_HARDWARE_STICK1, event, attr);
-        break;
-
-      case ITEM_RADIO_HARDWARE_LS:
-      case ITEM_RADIO_HARDWARE_RS:
-#if defined(PCBX12S)
-      case ITEM_RADIO_HARDWARE_LS2:
-      case ITEM_RADIO_HARDWARE_RS2:
-#endif
-      {
-        int idx = k - ITEM_RADIO_HARDWARE_LS;
-        uint8_t mask = (0x01 << idx);
-        lcdDrawTextAtIndex(INDENT_WIDTH, y, STR_VSRCRAW, NUM_STICKS+NUM_POTS+idx+1, menuHorizontalPosition < 0 ? attr : 0);
-        if (ZEXIST(g_eeGeneral.anaNames[NUM_STICKS+NUM_POTS+idx]) || (attr && menuHorizontalPosition == 0))
-          editName(HW_SETTINGS_COLUMN, y, g_eeGeneral.anaNames[NUM_STICKS+NUM_POTS+idx], LEN_ANA_NAME, event, attr && menuHorizontalPosition == 0);
-        else
-          lcdDrawMMM(HW_SETTINGS_COLUMN, y, 0);
-        uint8_t potType = (g_eeGeneral.slidersConfig & mask) >> idx;
-        potType = editChoice(HW_SETTINGS_COLUMN+50, y, STR_SLIDERTYPES, potType, SLIDER_NONE, SLIDER_WITH_DETENT, menuHorizontalPosition == 1 ? attr : 0, event);
-        g_eeGeneral.slidersConfig &= ~mask;
-        g_eeGeneral.slidersConfig |= (potType << idx);
-        break;
-      }
-
-      case ITEM_RADIO_HARDWARE_LABEL_POTS:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_POTS);
-        break;
-
-      case ITEM_RADIO_HARDWARE_POT1:
-      case ITEM_RADIO_HARDWARE_POT2:
-      case ITEM_RADIO_HARDWARE_POT3:
-      {
-        int idx = k - ITEM_RADIO_HARDWARE_POT1;
-        uint8_t shift = (2*idx);
-        uint8_t mask = (0x03 << shift);
-        lcdDrawTextAtIndex(INDENT_WIDTH, y, STR_VSRCRAW, NUM_STICKS+idx+1, menuHorizontalPosition < 0 ? attr : 0);
-        if (ZEXIST(g_eeGeneral.anaNames[NUM_STICKS+idx]) || (attr && menuHorizontalPosition == 0))
-          editName(HW_SETTINGS_COLUMN, y, g_eeGeneral.anaNames[NUM_STICKS+idx], LEN_ANA_NAME, event, attr && menuHorizontalPosition == 0);
-        else
-          lcdDrawMMM(HW_SETTINGS_COLUMN, y, 0);
-        uint8_t potType = (g_eeGeneral.potsConfig & mask) >> shift;
-        potType = editChoice(HW_SETTINGS_COLUMN+50, y, STR_POTTYPES, potType, POT_NONE, POT_WITHOUT_DETENT, menuHorizontalPosition == 1 ? attr : 0, event);
-        g_eeGeneral.potsConfig &= ~mask;
-        g_eeGeneral.potsConfig |= (potType << shift);
-        break;
-      }
-      case ITEM_RADIO_HARDWARE_LABEL_SWITCHES:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_SWITCHES);
-        break;
-      case ITEM_RADIO_HARDWARE_SA:
-      case ITEM_RADIO_HARDWARE_SB:
-      case ITEM_RADIO_HARDWARE_SC:
-      case ITEM_RADIO_HARDWARE_SD:
-      case ITEM_RADIO_HARDWARE_SE:
-      case ITEM_RADIO_HARDWARE_SF:
-      case ITEM_RADIO_HARDWARE_SG:
-      case ITEM_RADIO_HARDWARE_SH:
-      {
-        int index = k-ITEM_RADIO_HARDWARE_SA;
-        int config = SWITCH_CONFIG(index);
-        lcdDrawTextAtIndex(INDENT_WIDTH, y, STR_VSRCRAW, MIXSRC_FIRST_SWITCH-MIXSRC_Rud+index+1, menuHorizontalPosition < 0 ? attr : 0);
-        if (ZEXIST(g_eeGeneral.switchNames[index]) || (attr && menuHorizontalPosition == 0))
-          editName(HW_SETTINGS_COLUMN, y, g_eeGeneral.switchNames[index], LEN_SWITCH_NAME, event, menuHorizontalPosition == 0 ? attr : 0);
-        else
-          lcdDrawMMM(HW_SETTINGS_COLUMN, y, 0);
-        config = editChoice(HW_SETTINGS_COLUMN+50, y, STR_SWTYPES, config, SWITCH_NONE, SWITCH_TYPE_MAX(index), menuHorizontalPosition == 1 ? attr : 0, event);
-        if (attr && checkIncDec_Ret) {
-          swconfig_t mask = (swconfig_t)0x03 << (2*index);
-          g_eeGeneral.switchConfig = (g_eeGeneral.switchConfig & ~mask) | ((swconfig_t(config) & 0x03) << (2*index));
-        }
-        break;
-      }
-
-      case ITEM_RADIO_HARDWARE_SERIAL_BAUDRATE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_MAXBAUDRATE);
-        lcdDrawNumber(HW_SETTINGS_COLUMN+50, y, CROSSFIRE_BAUDRATES[g_eeGeneral.telemetryBaudrate], attr|LEFT);
-        if (attr) {
-          g_eeGeneral.telemetryBaudrate = DIM(CROSSFIRE_BAUDRATES) - 1 - checkIncDecModel(event, DIM(CROSSFIRE_BAUDRATES) - 1 - g_eeGeneral.telemetryBaudrate, 0, DIM(CROSSFIRE_BAUDRATES) - 1);
-          if (checkIncDec_Ret) {
-            pauseMixerCalculations();
-            pausePulses();
-            EXTERNAL_MODULE_OFF();
-            CoTickDelay(10); // 20ms so that the pulses interrupt will reinit the frame rate
-            telemetryProtocol = 255; // force telemetry port + module reinitialization
-            EXTERNAL_MODULE_ON();
-            resumePulses();
-            resumeMixerCalculations();
-          }
-        }
-        break;
-
-#if defined(BLUETOOTH)
-      case ITEM_RADIO_HARDWARE_BLUETOOTH_MODE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLUETOOTH);
-        g_eeGeneral.bluetoothMode = editChoice(HW_SETTINGS_COLUMN+50, y, STR_BLUETOOTH_MODES, g_eeGeneral.bluetoothMode, BLUETOOTH_OFF, BLUETOOTH_TRAINER, attr, event);
-        break;
-
-      case ITEM_RADIO_HARDWARE_BLUETOOTH_PAIRING_CODE:
-        lcdDrawText(INDENT_WIDTH, y, STR_BLUETOOTH_PIN_CODE);
-        lcdDrawText(HW_SETTINGS_COLUMN+50, y, "0000", 0);
-        break;
-
-      case ITEM_RADIO_HARDWARE_BLUETOOTH_NAME:
-        lcdDrawText(INDENT_WIDTH, y, STR_NAME);
-        editName(HW_SETTINGS_COLUMN+50, y, g_eeGeneral.bluetoothName, LEN_BLUETOOTH_NAME, event, attr);
-        break;
-#endif
-
-#if defined(AUX_SERIAL) && defined(DEBUG)
-      case ITEM_RADIO_HARDWARE_UART3_MODE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_UART3MODE);
-        g_eeGeneral.auxSerialMode = editChoice(HW_SETTINGS_COLUMN+50, y, STR_UART3MODES, g_eeGeneral.auxSerialMode, 0, UART_MODE_MAX, attr, event);
-        if (attr && checkIncDec_Ret) {
-          auxSerialInit(g_eeGeneral.auxSerialMode, modelTelemetryProtocol());
-        }
-        break;
-#endif
-
-      case ITEM_RADIO_HARDWARE_JITTER_FILTER:
-      {
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_JITTER_FILTER);
-        uint8_t b = 1-g_eeGeneral.jitterFilter;
-        g_eeGeneral.jitterFilter = 1 - editCheckBox(b, HW_SETTINGS_COLUMN+50, y, attr, event);
-        break;
-      }
-
-      case ITEM_RADIO_HARDWARE_BAT_CAL:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BATT_CALIB);
-        lcdDrawNumber(HW_SETTINGS_COLUMN+50, y, getBatteryVoltage(), attr|LEFT|PREC2, 0, NULL, "V");
-        if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.txVoltageCalibration, -127, 127);
-        break;
-    }
-  }
-
-  return true;
-}
-#endif
