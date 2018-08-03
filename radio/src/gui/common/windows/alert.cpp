@@ -33,7 +33,7 @@
 #define ALERT_BUTTON_TOP          300
 
 Alert::Alert(uint8_t type, std::string title, std::string message):
-  Window(&mainWindow, {0, 0, LCD_W, LCD_H}),
+  Window(&mainWindow, {0, 0, LCD_W, LCD_H}, OPAQUE),
   type(type),
   title(std::move(title)),
   message(std::move(message))

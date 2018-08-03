@@ -32,15 +32,15 @@
 #define ALERT_BUTTON_TOP          300
 
 Confirmation::Confirmation(uint8_t type, std::string title, std::string message, std::function<void(void)> onConfirm):
-  Window(&mainWindow, {0, 0, LCD_W, LCD_H}),
+  Window(&mainWindow, {0, 0, LCD_W, LCD_H}, OPAQUE),
   type(type),
   title(std::move(title)),
   message(std::move(message))
 {
   new FabIconButton(this, LCD_W - 50, ALERT_BUTTON_TOP, ICON_NEXT,
                     [=]() -> uint8_t {
-                      this->deleteLater();
                       onConfirm();
+                      deleteLater();
                       return 0;
                     });
 }

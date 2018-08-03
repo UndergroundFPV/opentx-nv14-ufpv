@@ -27,6 +27,13 @@ class Confirmation : public Window {
   public:
     Confirmation(uint8_t type, std::string title, std::string message="", std::function<void(void)> onConfirm=nullptr);
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "Confirmation";
+    }
+#endif
+
     void paint(BitmapBuffer * dc) override;
 
     bool onTouchEnd(coord_t x, coord_t y) override {
