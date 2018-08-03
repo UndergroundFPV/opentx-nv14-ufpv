@@ -38,7 +38,7 @@ class Slider : public Window {
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
-        return "Slider";
+      return "Slider";
     }
 #endif
 
