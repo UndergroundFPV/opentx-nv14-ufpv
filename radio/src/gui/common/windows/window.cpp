@@ -295,6 +295,6 @@ void Window::drawVerticalScrollbar(BitmapBuffer * dc)
     coord_t yhgt = (h*rect.h + innerHeight/2) / innerHeight;
     if (yhgt + yofs > h)
       yhgt = h - yofs;
-    dc->drawSolidFilledRect(x-1, y + yofs, 3, yhgt, SCROLLBOX_COLOR);
+    dc->drawSolidFilledRect(x-1, y + yofs, 3, yhgt, scrollbarColor);
   }
 }

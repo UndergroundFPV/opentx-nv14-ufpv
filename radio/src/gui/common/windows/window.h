@@ -188,6 +188,11 @@ class Window {
       }
     }
 
+    void setScrollbarColor(LcdFlags color)
+    {
+      scrollbarColor = color;
+    }
+
     coord_t getScrollPositionY() const
     {
       return scrollPositionY;
@@ -255,6 +260,7 @@ class Window {
     coord_t scrollPositionX = 0;
     coord_t scrollPositionY = 0;
     uint8_t windowFlags;
+    LcdFlags scrollbarColor = SCROLLBOX_COLOR;
 
     static Window * focusWindow;
     static std::list<Window *> trash;
