@@ -18,8 +18,8 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WINDOWS_H_
-#define _WINDOWS_H_
+#ifndef _LIBWINDOWS_H_
+#define _LIBWINDOWS_H_
 
 #include "window.h"
 #include "mainwindow.h"
@@ -40,10 +40,9 @@
 #include "tabsgroup.h"
 #include "page.h"
 #include "menu.h"
-#include "alert.h"
-#include "confirmation.h"
+#include "dialog.h"
 #include "gridlayout.h"
 #include "helpers.h"
 #include "curveedit.h"
 
-#endif // _WINDOWS_H_
+#endif // _LIBWINDOWS_H_

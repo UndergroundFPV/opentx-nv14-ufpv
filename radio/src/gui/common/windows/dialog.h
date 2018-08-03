@@ -18,30 +18,30 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _CONFIRMATION_H_
-#define _CONFIRMATION_H_
+#ifndef _DIALOG_H_
+#define _DIALOG_H_
 
 #include "button.h"
 
-class Confirmation : public Window {
+class Dialog : public Window {
   public:
-    Confirmation(uint8_t type, std::string title, std::string message="", std::function<void(void)> onConfirm=nullptr);
+    Dialog(uint8_t type, std::string title, std::string message="", std::function<void(void)> onConfirm=nullptr);
 
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
-      return "Confirmation";
+      return "Dialog";
     }
 #endif
 
+    ~Dialog()
+    {
+      deleteChildren();
+    }
+
     void paint(BitmapBuffer * dc) override;
 
-    bool onTouchEnd(coord_t x, coord_t y) override
-    {
-      Window::onTouchEnd(x, y);
-      deleteLater();
-      return true;
-    }
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     uint8_t type;

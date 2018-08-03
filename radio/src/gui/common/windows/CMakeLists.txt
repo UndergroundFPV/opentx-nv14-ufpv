@@ -21,8 +21,7 @@ set(SRC
     ${WINDOWS_DIRECTORY}/filechoice.cpp
     ${WINDOWS_DIRECTORY}/slider.cpp
     ${WINDOWS_DIRECTORY}/menu.cpp
-    ${WINDOWS_DIRECTORY}/alert.cpp
-    ${WINDOWS_DIRECTORY}/confirmation.cpp
+    ${WINDOWS_DIRECTORY}/dialog.cpp
     ${WINDOWS_DIRECTORY}/curve.cpp
     ${WINDOWS_DIRECTORY}/curveedit.cpp
     )

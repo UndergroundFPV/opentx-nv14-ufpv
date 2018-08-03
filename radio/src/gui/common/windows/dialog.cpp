@@ -18,7 +18,7 @@
  * GNU General Public License for more details.
  */
 
-#include "confirmation.h"
+#include "dialog.h"
 #include "mainwindow.h"
 #include "opentx.h"
 
@@ -31,7 +31,7 @@
 #define ALERT_ACTION_TOP          230
 #define ALERT_BUTTON_TOP          300
 
-Confirmation::Confirmation(uint8_t type, std::string title, std::string message, std::function<void(void)> onConfirm):
+Dialog::Dialog(uint8_t type, std::string title, std::string message, std::function<void(void)> onConfirm):
   Window(&mainWindow, {0, 0, LCD_W, LCD_H}, OPAQUE),
   type(type),
   title(std::move(title)),
@@ -39,13 +39,13 @@ Confirmation::Confirmation(uint8_t type, std::string title, std::string message,
 {
   new FabIconButton(this, LCD_W - 50, ALERT_BUTTON_TOP, ICON_NEXT,
                     [=]() -> uint8_t {
-                      onConfirm();
-                      deleteLater();
+                      if (onConfirm)
+                        onConfirm();
                       return 0;
                     });
 }
 
-void Confirmation::paint(BitmapBuffer * dc)
+void Dialog::paint(BitmapBuffer * dc)
 {
   theme->drawBackground();
 
@@ -78,4 +78,17 @@ void Confirmation::paint(BitmapBuffer * dc)
    // TODO remove action? dc->drawText(ALERT_FRAME_PADDING+5, ALERT_ACTION_TOP, action);
   }
 #endif
+}
+
+bool Dialog::onTouchEnd(coord_t x, coord_t y)
+{
+  Window::onTouchEnd(x, y);
+  deleteLater();
+  return true;
+}
+
+
+void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound)
+{
+  new Dialog(WARNING_TYPE_ALERT, title, msg);
 }

@@ -1189,16 +1189,17 @@ bool isThrottleWarningAlertNeeded()
 }
 
 #if defined(COLORLCD)
-#include "alert.h"
-class ThrottleAlert: public Alert {
+#include "dialog.h"
+class ThrottleAlert: public Dialog {
   public:
     ThrottleAlert():
-      Alert(WARNING_TYPE_ALERT, STR_THROTTLEWARN, STR_THROTTLENOTIDLE)
+      Dialog(WARNING_TYPE_ALERT, STR_THROTTLEWARN, STR_THROTTLENOTIDLE)
     {
     }
 
   protected:
-    void checkEvents() override {
+    void checkEvents() override
+    {
       if (!isThrottleWarningAlertNeeded()) {
         deleteLater();
       }
