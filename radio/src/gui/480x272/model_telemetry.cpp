@@ -45,6 +45,24 @@ class SensorEditWindow : public Page {
       //new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
     }
 
+    SourceChoice * buildSensorSource(Window * window, const rect_t & rect, uint8_t * source, IsValueAvailable isValueAvailable)
+    {
+      auto choice = new SourceChoice(window, rect, MIXSRC_NONE, MIXSRC_LAST_TELEM,
+                                     GET_DEFAULT(*source ? MIXSRC_FIRST_TELEM + 3 * (*source - 1) : MIXSRC_NONE),
+                                     [=](uint8_t newValue) {
+                                       *source = newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1;
+                                     });
+      choice->setAvailableHandler([=](int16_t value) {
+        if (value == MIXSRC_NONE)
+          return true;
+        if (value < MIXSRC_FIRST_TELEM)
+          return false;
+        auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
+        return qr.rem == 0 && isValueAvailable(qr.quot + 1);
+      });
+      return choice;
+    }
+
     void updateSensorOneWindow()
     {
       // Sensor variable part
@@ -107,49 +125,19 @@ class SensorEditWindow : public Page {
         grid.nextLine();
       }
 
-      //PARAM1
+      // Sensor custom parameters
       if (sensor->type == TELEM_TYPE_CALCULATED) {
         if (sensor->formula == TELEM_FORMULA_CELL) {
           new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CELLSENSOR);
-          auto choice = new SourceChoice(sensorOneWindow, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
-                                         GET_DEFAULT(sensor->cell.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->cell.source - 1) : MIXSRC_NONE),
-                                         SET_VALUE(sensor->cell.source, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
-          choice->setAvailableHandler([=](int16_t value) {
-            if (value == MIXSRC_NONE)
-              return true;
-            if (value < MIXSRC_FIRST_TELEM)
-              return false;
-            auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
-            return qr.rem == 0 && isCellsSensor(qr.quot + 1);
-          });
+          buildSensorSource(sensorOneWindow, grid.getFieldSlot(), &sensor->cell.source, isCellsSensor);
         }
         else if (sensor->formula == TELEM_FORMULA_DIST) {
           new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_GPSSENSOR);
-          auto choice = new SourceChoice(sensorOneWindow, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
-                                         GET_DEFAULT(sensor->dist.gps ? MIXSRC_FIRST_TELEM + 3 * (sensor->dist.gps - 1) : MIXSRC_NONE),
-                                         SET_VALUE(sensor->dist.gps, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
-          choice->setAvailableHandler([=](int16_t value) {
-            if (value == MIXSRC_NONE)
-              return true;
-            if (value < MIXSRC_FIRST_TELEM)
-              return false;
-            auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
-            return qr.rem == 0 && isGPSSensor(qr.quot + 1);
-          });
+          buildSensorSource(sensorOneWindow, grid.getFieldSlot(), &sensor->dist.gps, isGPSSensor);
         }
         else if (sensor->formula == TELEM_FORMULA_CONSUMPTION) {
           new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CURRENTSENSOR);
-          auto choice = new SourceChoice(sensorOneWindow, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
-                                         GET_DEFAULT(sensor->consumption.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->consumption.source - 1) : MIXSRC_NONE),
-                                         SET_VALUE(sensor->consumption.source, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
-          choice->setAvailableHandler([=](int16_t value) {
-            if (value == MIXSRC_NONE)
-              return true;
-            if (value < MIXSRC_FIRST_TELEM)
-              return false;
-            auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
-            return qr.rem == 0 && isSensorAvailable(qr.quot + 1);
-          });
+          buildSensorSource(sensorOneWindow, grid.getFieldSlot(), &sensor->consumption.source, isSensorAvailable);
         }
       }
 
@@ -166,12 +154,12 @@ class SensorEditWindow : public Page {
 
       TelemetrySensor * sensor = &g_model.telemetrySensors[index];
 
-      //Name
+      // Name
       new StaticText(window, grid.getLabelSlot(), STR_NAME);
       new TextEdit(window, grid.getFieldSlot(), sensor->label, TELEM_LABEL_LEN);
       grid.nextLine();
 
-      //Type
+      // Type
       new StaticText(window, grid.getLabelSlot(), STR_TYPE);
       new Choice(window, grid.getFieldSlot(), STR_VSENSORTYPES, 0, 1, GET_DEFAULT(sensor->type),
                  [=](uint8_t newValue) {
@@ -222,7 +210,7 @@ void ModelTelemetryPage::build(Window * window)
   grid.setLabelWidth(180);
 
 
-  //RSSI
+  // RSSI
   if (g_model.moduleData[INTERNAL_MODULE].rfProtocol == RF_PROTO_OFF &&
       g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_MULTIMODULE &&
       g_model.moduleData[EXTERNAL_MODULE].getMultiProtocol(false) == MM_RF_PROTO_FS_AFHDS2A)
@@ -249,7 +237,7 @@ void ModelTelemetryPage::build(Window * window)
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.rssiAlarms.disabled));
   grid.nextLine();
 
-  //Sensors
+  // Sensors
   new Subtitle(window, grid.getLineSlot(), STR_TELEMETRY_SENSORS);
   new StaticText(window, grid.getFieldSlot(2, 0), STR_VALUE);
   if (!g_model.ignoreSensorIds && !IS_SPEKTRUM_PROTOCOL())
@@ -287,8 +275,7 @@ void ModelTelemetryPage::build(Window * window)
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.ignoreSensorIds));
   grid.nextLine();
 
-
-  //Vario
+  // Vario
   grid.setLabelWidth(100);
   new Subtitle(window, grid.getLineSlot(), STR_VARIO);
   grid.nextLine();
