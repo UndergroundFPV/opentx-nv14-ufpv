@@ -34,7 +34,6 @@ void MenuWindow::select(int index)
   }
 }
 
-
 bool MenuWindow::onTouchEnd(coord_t x, coord_t y)
 {
   int index = y / lineHeight;
