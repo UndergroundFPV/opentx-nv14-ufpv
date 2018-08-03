@@ -21,7 +21,6 @@
 #ifndef _SLIDER_H_
 #define _SLIDER_H_
 
-#include <functional>
 #include "window.h"
 
 class Slider : public Window {
