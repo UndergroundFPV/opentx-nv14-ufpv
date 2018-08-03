@@ -18,7 +18,12 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "tabsgroup.h"
+#include "mainwindow.h"
+#include "keyboard_number.h"
+#include "keyboard_text.h"
+#include "keyboard_curve.h"
+#include "opentx.h" // TODO for constants...
 
 TabsGroupHeader::TabsGroupHeader(TabsGroup * parent):
   Window(parent, { 0, 0, LCD_W, MENU_BODY_TOP }, OPAQUE),

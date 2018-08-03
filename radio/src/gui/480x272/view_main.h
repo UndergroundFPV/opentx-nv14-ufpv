@@ -18,14 +18,18 @@
  * GNU General Public License for more details.
  */
 
-#include "tabsgroup.h"
+#ifndef _VIEW_MAIN_H_
+#define _VIEW_MAIN_H_
 
-class RadioSdManagerPage: public PageTab {
+#include "window.h"
+
+class ViewMain: public Window {
   public:
-    RadioSdManagerPage();
-
-    void build(Window * window) override;
-
-  protected:
-    void rebuild(Window * window);
+    ViewMain();
+    virtual ~ViewMain();
+    bool onTouchEnd(coord_t x, coord_t y) override;
+    void paint(BitmapBuffer * dc) override;
 };
+
+#endif // _VIEW_MAIN_H_
+

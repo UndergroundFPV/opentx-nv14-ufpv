@@ -18,8 +18,10 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "keyboard_curve.h"
 #include "curveedit.h"
+#include "button.h"
+#include "lcd.h"
 
 constexpr coord_t KEYBOARD_HEIGHT = 110;
 

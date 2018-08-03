@@ -21,7 +21,7 @@
 #ifndef _MODEL_INPUTS_H
 #define _MODEL_INPUTS_H
 
-#include "gui/common/windows/windows.h"
+#include "tabsgroup.h"
 
 class ModelInputsPage: public PageTab {
 public:

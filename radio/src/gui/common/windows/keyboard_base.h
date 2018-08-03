@@ -21,7 +21,7 @@
 #ifndef _KEYBOARD_BASE_H_
 #define _KEYBOARD_BASE_H_
 
-#include "window.h"
+#include "mainwindow.h"
 #include "lcd_types.h"
 
 class Page;
@@ -67,7 +67,7 @@ class Keyboard: public Window {
       Window * parent = field;
       while (1) {
         Window * tmp = parent->getParent();
-        if (dynamic_cast<Page *>(tmp) || dynamic_cast<TabsGroup *>(tmp)) {
+        if ((tmp->getWindowFlags() & OPAQUE) && tmp->width() == LCD_W && tmp->height() == LCD_H) {
           return parent;
         }
         parent = tmp;

@@ -18,7 +18,13 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "keyboard_text.h"
+#include "textedit.h"
+#include "fonts.h"
+#include "lcd.h"
+
+int8_t char2idx(char c);
+char idx2char(int8_t idx);
 
 constexpr coord_t KEYBOARD_HEIGHT = 160;
 

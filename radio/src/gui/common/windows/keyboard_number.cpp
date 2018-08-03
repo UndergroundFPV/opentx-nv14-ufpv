@@ -18,7 +18,10 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "keyboard_number.h"
+#include "button.h"
+#include "basenumberedit.h"
+#include "lcd.h"
 
 constexpr coord_t KEYBOARD_HEIGHT = 90;
 

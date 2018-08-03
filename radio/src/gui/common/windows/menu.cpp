@@ -18,7 +18,7 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "menu.h"
 
 MenuWindow::MenuWindow(Menu * parent):
   Window(parent, {LCD_W / 2 - 100, LCD_H / 2 - 30 /* to avoid redraw the menus header */, 200, 0}, OPAQUE)
@@ -58,11 +58,11 @@ void Menu::updatePosition()
   if (children.size() == 1) {
     // there is no navigation bar at the left, we may center the window on screen
     int count = min<int>(8, menuWindow.lines.size());
-    coord_t h = count * menuWindow.lineHeight;
+    coord_t h = count * MenuWindow::lineHeight;
     menuWindow.setTop((LCD_H - h) / 2);
     menuWindow.setHeight(h);
   }
-  menuWindow.setInnerHeight(menuWindow.lines.size() * menuWindow.lineHeight);
+  menuWindow.setInnerHeight(menuWindow.lines.size() * MenuWindow::lineHeight);
 }
 
 void Menu::addLine(const std::string & text, std::function<void()> onPress)

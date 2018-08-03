@@ -22,6 +22,7 @@
 #define _PAGE_H_
 
 #include "window.h"
+#include "button.h"
 
 class Page;
 

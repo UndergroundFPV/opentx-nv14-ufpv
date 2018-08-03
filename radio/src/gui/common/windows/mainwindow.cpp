@@ -19,7 +19,10 @@
  */
 
 #include "touch_driver.h"
-#include "opentx.h"
+#include "lcd.h"
+#include "mainwindow.h"
+
+void DMACopy(void * src, void * dest, unsigned len);
 
 MainWindow mainWindow;
 

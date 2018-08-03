@@ -18,7 +18,12 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "page.h"
+#include "mainwindow.h"
+#include "keyboard_number.h"
+#include "keyboard_text.h"
+#include "keyboard_curve.h"
+#include "opentx.h" // TODO for constants
 
 PageHeader::PageHeader(Page * parent, const rect_t & rect):
   Window(parent, rect, OPAQUE),

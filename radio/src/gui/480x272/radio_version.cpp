@@ -18,8 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
 #include "radio_version.h"
+#include "opentx.h"
+#include "windows.h"
 
 RadioVersionPage::RadioVersionPage():
   PageTab(STR_MENUVERSION, ICON_RADIO_VERSION)

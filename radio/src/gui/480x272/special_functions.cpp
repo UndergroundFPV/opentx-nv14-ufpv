@@ -18,8 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
 #include "special_functions.h"
+#include "opentx.h"
+#include "windows.h"
 
 #define SET_DIRTY()     storageDirty(functions == g_model.customFn ? EE_MODEL : EE_GENERAL)
 

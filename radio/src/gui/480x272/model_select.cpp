@@ -19,7 +19,9 @@
  */
 
 #include <algorithm>
+#include "model_select.h"
 #include "opentx.h"
+#include "windows.h"
 #include "storage/modelslist.h"
 
 #define CATEGORIES_WIDTH               120

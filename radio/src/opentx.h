@@ -626,8 +626,9 @@ uint16_t evalChkSum();
   #define RAISE_ALERT(...)
   #define ALERT(...)
 #elif defined(COLORLCD)
-  #define RAISE_ALERT(title, msg, info, sound) new Alert(WARNING_TYPE_ALERT, title, msg, info/*, sound*/)
-  #define ALERT(title, msg, sound) new Alert(WARNING_TYPE_ALERT, title, msg, nullptr/* , sound*/)
+  void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound);
+  #define RAISE_ALERT(title, msg, info, sound) raiseAlert(title, msg, info, sound)
+  #define ALERT(title, msg, sound) raiseAlert(title, msg, nullptr, sound)
 #elif defined(VOICE)
   #define RAISE_ALERT(title, msg, info, sound) showAlertBox(title, msg, info, sound)
   #define ALERT(title, msg, sound) alert(title, msg, sound)

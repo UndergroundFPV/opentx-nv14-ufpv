@@ -18,7 +18,8 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "checkbox.h"
+#include "draw_functions.h"
 
 void CheckBox::paint(BitmapBuffer * dc)
 {

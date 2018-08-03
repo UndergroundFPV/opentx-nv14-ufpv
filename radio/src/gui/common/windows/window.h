@@ -18,6 +18,7 @@
  * GNU General Public License for more details.
  */
 
+
 #ifndef _WINDOW_H_
 #define _WINDOW_H_
 
@@ -69,6 +70,11 @@ class Window {
     Window * getParent() const
     {
       return parent;
+    }
+
+    uint8_t getWindowFlags() const
+    {
+      return windowFlags;
     }
 
     void setCloseHandler(std::function<void()> handler)
@@ -255,7 +261,7 @@ class Window {
 
     std::function<void()> onClose;
 
-    void attach(Window * window);
+    void  attach(Window * window);
 
     void detach();
 

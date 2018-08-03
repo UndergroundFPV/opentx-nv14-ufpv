@@ -20,8 +20,9 @@
 
 #define LANGUAGE_PACKS_DEFINITION
 
-#include "opentx.h"
 #include "radio_setup.h"
+#include "opentx.h"
+#include "windows.h"
 
 #define SET_DIRTY()     storageDirty(EE_GENERAL)
 

@@ -21,9 +21,8 @@
 #ifndef _BUTTON_H_
 #define _BUTTON_H_
 
-#include <functional>
-#include <string>
 #include "window.h"
+#include <string>
 
 enum ButtonFlags {
   BUTTON_BACKGROUND = 1,

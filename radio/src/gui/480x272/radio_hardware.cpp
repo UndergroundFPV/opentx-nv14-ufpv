@@ -18,8 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
 #include "radio_hardware.h"
+#include "opentx.h"
+#include "windows.h"
 
 #define SET_DIRTY() storageDirty(EE_GENERAL)
 

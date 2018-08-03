@@ -1,4 +1,5 @@
 set(WINDOWS_DIRECTORY gui/common/windows)
+include_directories(${WINDOWS_DIRECTORY})
 
 set(SRC
     ${SRC}

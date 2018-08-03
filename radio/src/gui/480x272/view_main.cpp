@@ -18,7 +18,13 @@
  * GNU General Public License for more details.
  */
 
+#include "view_main.h"
+#include "menu_radio.h"
+#include "menu_model.h"
+#include "model_select.h"
+#include "view_channels.h"
 #include "opentx.h"
+#include "windows.h"
 
 #define TRIM_WIDTH                     121
 #define TRIM_LH_X                      10
@@ -120,7 +126,7 @@ int getMainViewsCount()
   return MAX_CUSTOM_SCREENS;
 }
 
-MainView::MainView():
+ViewMain::ViewMain():
   Window(&mainWindow, { 0, 0, LCD_W, LCD_H })
 {
   new FabIconButton(this, 50, 100, ICON_MODEL,
@@ -142,12 +148,12 @@ MainView::MainView():
                     });
 }
 
-MainView::~MainView()
+ViewMain::~ViewMain()
 {
   deleteChildren();
 }
 
-bool MainView::onTouchEnd(coord_t x, coord_t y)
+bool ViewMain::onTouchEnd(coord_t x, coord_t y)
 {
   if (Window::onTouchEnd(x, y))
     return true;
@@ -195,7 +201,7 @@ bool MainView::onTouchEnd(coord_t x, coord_t y)
   return false;
 }
 
-void MainView::paint(BitmapBuffer * dc)
+void ViewMain::paint(BitmapBuffer * dc)
 {
   theme->drawBackground();
 

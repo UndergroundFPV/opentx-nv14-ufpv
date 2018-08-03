@@ -18,9 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include <stdio.h>
-#include "opentx.h"
 #include "model_inputs.h"
+#include "opentx.h"
+#include "windows.h"
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
 

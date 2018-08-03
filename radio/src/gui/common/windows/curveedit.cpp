@@ -18,7 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "curveedit.h"
+#include "keyboard_curve.h"
+#include "opentx.h" // TODO for applyCustomCurve
 
 CurveEdit::CurveEdit(Window * parent, const rect_t &rect, uint8_t index) :
   Curve(parent, rect, [=](int x) -> int {
@@ -72,6 +74,11 @@ bool CurveEdit::onTouchEnd(coord_t x, coord_t y)
   }
 
   return true;
+}
+
+void CurveEdit::onFocusLost()
+{
+  CurveKeyboard::instance()->disable();
 }
 
 void CurveEdit::next()

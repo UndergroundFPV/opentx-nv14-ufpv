@@ -11,7 +11,6 @@ set(SIMU_SRC
   simutouch.cpp
   )
 
-
 remove_definitions(-DCLI)
 
 if(SDL_FOUND)
@@ -27,7 +26,7 @@ if(Qt5Widgets_FOUND)
   set(SIMULATOR_FLAVOUR opentx-${FLAVOUR})
   set(SIMULATOR_TARGET ${SIMULATOR_FLAVOUR}-simulator)
   add_definitions(-DSIMULATOR_FLAVOUR="${SIMULATOR_FLAVOUR}")
-  include_directories(${COMPANION_SRC_DIRECTORY} ${COMPANION_SRC_DIRECTORY}/simulation)
+  # include_directories(${COMPANION_SRC_DIRECTORY} ${COMPANION_SRC_DIRECTORY}/simulation)
   qt5_wrap_cpp(SIMULATOR_SRC ${COMPANION_SRC_DIRECTORY}/simulation/simulatorinterface.h opentxsimulator.h)
   list(APPEND SIMULATOR_SRC ${SIMU_SRC} opentxsimulator.cpp)
   add_library(${SIMULATOR_TARGET} SHARED ${SIMULATOR_SRC})

@@ -26,6 +26,8 @@
 #include <vector>
 #include <functional>
 #include "mainwindow.h"
+#include <string>
+
 
 class Menu;
 
@@ -93,7 +95,7 @@ class Menu : public Window {
     }
 #endif
 
-    void setNavigationBar(Window * window)
+    void setToolbar(Window * window)
     {
       menuWindow.setLeft(window->right());
       menuWindow.setTop(window->top());

@@ -607,3 +607,8 @@ OS_TID CoCreateTask(FUNCPtr task, void *argv, uint32_t parameter, void * stk, ui
   pthread_create(&tid, NULL, start_routine, (void *)task);
   return tid;
 }
+
+void DMACopy(void * src, void * dest, unsigned size)
+{
+  memcpy(dest, src, size);
+}

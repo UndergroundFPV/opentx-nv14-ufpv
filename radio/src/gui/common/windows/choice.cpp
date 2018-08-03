@@ -20,7 +20,10 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "choice.h"
+#include "menu.h"
+#include "draw_functions.h"
+#include "strhelpers.h"
 
 const uint8_t LBM_DROPDOWN[] = {
 #include "mask_dropdown.lbm"
@@ -55,7 +58,7 @@ void Choice::paint(BitmapBuffer * dc)
   dc->drawBitmapPattern(rect.w - 14, (rect.h - 5) / 2, LBM_DROPDOWN, lineColor);
 }
 
-bool Choice::onTouchEnd(coord_t x, coord_t y)
+bool Choice::onTouchEnd(coord_t, coord_t)
 {
   auto menu = new Menu();
   auto value = getValue();
@@ -95,8 +98,8 @@ CustomCurveChoice::CustomCurveChoice(Window * parent, const rect_t &rect, int16_
   Window(parent, rect),
   vmin(vmin),
   vmax(vmax),
-  getValue(getValue),
-  setValue(setValue),
+  getValue(std::move(getValue)),
+  setValue(std::move(setValue)),
   flags(flags)
 {
 }

@@ -18,14 +18,14 @@
  * GNU General Public License for more details.
  */
 
+#ifndef _MENU_RADIO_H_
+#define _MENU_RADIO_H_
+
 #include "tabsgroup.h"
 
-class RadioSdManagerPage: public PageTab {
+class RadioMenu: public TabsGroup {
   public:
-    RadioSdManagerPage();
-
-    void build(Window * window) override;
-
-  protected:
-    void rebuild(Window * window);
+    RadioMenu();
 };
+
+#endif // _MENU_RADIO_H_

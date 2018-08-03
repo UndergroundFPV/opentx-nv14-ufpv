@@ -18,7 +18,11 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "curve.h"
+#include "lcd.h"
+#include "otx_math.h"
+#include "bitmaps.h"
+#include "strhelpers.h"
 
 void Curve::drawBackground(BitmapBuffer * dc)
 {

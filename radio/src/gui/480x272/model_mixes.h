@@ -18,11 +18,10 @@
  * GNU General Public License for more details.
  */
 
-
 #ifndef _MODEL_MIXES_H_
 #define _MODEL_MIXES_H_
 
-#include "gui/common/windows/windows.h"
+#include "tabsgroup.h"
 
 class ModelMixesPage: public PageTab {
   public:

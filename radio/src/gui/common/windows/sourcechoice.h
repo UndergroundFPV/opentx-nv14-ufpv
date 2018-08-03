@@ -21,7 +21,6 @@
 #ifndef _SOURCECHOICE_H_
 #define _SOURCECHOICE_H_
 
-#include <functional>
 #include "window.h"
 
 class Menu;
@@ -29,7 +28,7 @@ class Menu;
 bool isSourceAvailable(int source);
 
 class SourceChoice : public Window {
-  friend class SourceMenuHeader;
+  template <class T> friend class MenuToolbar;
 
   public:
     SourceChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):

@@ -18,7 +18,10 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "button.h"
+#include "draw_functions.h"
+#include "lcd.h"
+#include "theme.h"
 
 bool Button::onTouchEnd(coord_t x, coord_t y)
 {

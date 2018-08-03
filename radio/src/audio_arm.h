@@ -173,13 +173,19 @@ struct AudioFragment {
     strcpy(file, filename);
   }
 
-  void clear() { memset(this, 0, sizeof(AudioFragment)); };
+  void clear()
+  {
+    memset(reinterpret_cast<void*>(this), 0, sizeof(AudioFragment));
+  };
 };
 
 class ToneContext {
   public:
 
-    inline void clear() { memset(this, 0, sizeof(ToneContext)); };
+    inline void clear()
+    {
+      memset(reinterpret_cast<void*>(this), 0, sizeof(ToneContext));
+    };
     bool isFree() const { return fragment.type == FRAGMENT_EMPTY; };
     int mixBuffer(AudioBuffer *buffer, int volume, unsigned int fade);
 

@@ -18,8 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
 #include "radio_calibration.h"
+#include "opentx.h"
+#include "windows.h"
 
 class StickCalibrationWindow: public Window {
   public:

@@ -22,8 +22,7 @@
 #define _KEYBOARD_TEXT_H_
 
 #include "keyboard_base.h"
-
-class TextEdit;
+#include "textedit.h"
 
 class TextKeyboard : public Keyboard<TextEdit> {
   friend class TextEdit;
@@ -31,7 +30,7 @@ class TextKeyboard : public Keyboard<TextEdit> {
   public:
     TextKeyboard();
 
-    ~TextKeyboard();
+    ~TextKeyboard() override;
 
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
@@ -53,9 +52,9 @@ class TextKeyboard : public Keyboard<TextEdit> {
 
     void setCursorPos(coord_t x);
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
   protected:
     static TextKeyboard * _instance;

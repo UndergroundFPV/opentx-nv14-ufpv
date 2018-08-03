@@ -21,6 +21,8 @@
 #ifndef _TELEMETRY_H_
 #define _TELEMETRY_H_
 
+#include "myeeprom.h"
+
 #if defined(TELEMETRY_FRSKY)
   // FrSky Telemetry
   #include "frsky.h"

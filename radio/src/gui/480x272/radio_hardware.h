@@ -18,19 +18,19 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _RADIO_HARDWARE_H
-#define _RADIO_HARDWARE_H
+#ifndef _RADIO_HARDWARE_H_
+#define _RADIO_HARDWARE_H_
 
-#include "gui/common/windows/windows.h"
+#include "tabsgroup.h"
 
 class RadioHardwarePage: public PageTab {
-public:
+  public:
     RadioHardwarePage();
 
-    virtual void build(Window * window);
+    void build(Window * window) override;
 
-protected:
+  protected:
 
 };
 
-#endif //_RADIO_HARDWARE_H
+#endif //_RADIO_HARDWARE_H_

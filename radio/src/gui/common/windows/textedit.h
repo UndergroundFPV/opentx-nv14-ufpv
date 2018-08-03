@@ -22,7 +22,6 @@
 #define _TEXTEDIT_H_
 
 #include "window.h"
-#include "keyboard_text.h"
 
 uint8_t zlen(const char *str, uint8_t size);
 
@@ -54,14 +53,11 @@ class TextEdit : public Window {
       return value;
     }
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
+    bool onTouchEnd(coord_t x, coord_t y) override;
 
-    virtual void onFocusLost() override
-    {
-      TextKeyboard::instance()->disable();
-    }
+    void onFocusLost() override;
 
   protected:
     char * value;

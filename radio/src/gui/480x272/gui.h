@@ -70,33 +70,6 @@
 #define MENU_TITLE_NEXT_POS            (lcdNextPos + 10)
 #define MENU_INIT_VPOS                 -1
 
-#if defined(PCBNV14)
-#include "common/windows/windows.h"
-class ModelMenu: public TabsGroup {
-  public:
-    ModelMenu();
-};
-class RadioMenu: public TabsGroup {
-  public:
-    RadioMenu();
-};
-class ModelselectMenu: public TabsGroup {
-  public:
-    ModelselectMenu();
-};
-class MainView: public Window {
-  public:
-    MainView();
-    virtual ~MainView();
-    virtual bool onTouchEnd(coord_t x, coord_t y) override;
-    virtual void paint(BitmapBuffer * dc) override;
-};
-class ChannelsMonitorMenu: public TabsGroup {
-  public:
-    ChannelsMonitorMenu();
-};
-#endif
-
 #if defined(HELI) && defined(GVARS) && defined(LUA_MODEL_SCRIPTS)
 #define MENU_ICONS_SPACING             31
 #else

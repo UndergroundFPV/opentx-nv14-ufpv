@@ -22,7 +22,6 @@
 #define _CURVEEDIT_H_
 
 #include "curve.h"
-#include "keyboard_curve.h"
 
 class CurveEdit: public Curve {
   friend class CurveKeyboard;
@@ -39,10 +38,7 @@ class CurveEdit: public Curve {
 
     bool onTouchEnd(coord_t x, coord_t y) override;
 
-    virtual void onFocusLost() override
-    {
-      CurveKeyboard::instance()->disable();
-    }
+    void onFocusLost() override;
 
   protected:
     uint8_t index;

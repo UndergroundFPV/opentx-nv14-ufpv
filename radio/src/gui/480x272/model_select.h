@@ -18,14 +18,14 @@
  * GNU General Public License for more details.
  */
 
+#ifndef _MODEL_SELECT_H_
+#define _MODEL_SELECT_H_
+
 #include "tabsgroup.h"
 
-class RadioSdManagerPage: public PageTab {
+class ModelselectMenu: public TabsGroup {
   public:
-    RadioSdManagerPage();
-
-    void build(Window * window) override;
-
-  protected:
-    void rebuild(Window * window);
+    ModelselectMenu();
 };
+
+#endif // _MODEL_SELECT_H_

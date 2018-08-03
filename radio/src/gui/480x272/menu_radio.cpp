@@ -18,13 +18,14 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "menu_radio.h"
 #include "radio_setup.h"
 #include "radio_sdmanager.h"
 #include "special_functions.h"
 #include "radio_calibration.h"
 #include "radio_version.h"
 #include "radio_hardware.h"
+#include "myeeprom.h"
 
 RadioMenu::RadioMenu():
   TabsGroup()

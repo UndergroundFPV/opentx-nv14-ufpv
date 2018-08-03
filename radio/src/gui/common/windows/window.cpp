@@ -18,7 +18,7 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "window.h"
 
 Window * Window::focusWindow = nullptr;
 std::list<Window *> Window::trash;

@@ -21,40 +21,47 @@
 #ifndef _SWITCHCHOICE_H_
 #define _SWITCHCHOICE_H_
 
-#include <functional>
 #include "window.h"
 
+class Menu;
+bool isSwitchAvailableInMixes(int swtch);
+
 class SwitchChoice : public Window {
+  template <class T> friend class MenuToolbar;
+
   public:
     SwitchChoice(Window * parent, const rect_t & rect, int vmin, int vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue):
       Window(parent, rect),
       vmin(vmin),
       vmax(vmax),
-      getValue(getValue),
-      setValue(setValue)
+      getValue(std::move(getValue)),
+      setValue(std::move(setValue))
     {
     }
 
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
-        return "SourceChoice";
+      return "SwitchChoice";
     }
 #endif
 
-    void paint(BitmapBuffer * dc) override ;
+    void paint(BitmapBuffer * dc) override;
 
     bool onTouchEnd(coord_t x, coord_t y) override ;
 
-    virtual void setAvailableHandler(std::function<bool(int)> handler);
+    void setAvailableHandler(std::function<bool(int)> handler)
+    {
+        isValueAvailable = std::move(handler);
+    }
 
   protected:
-    const char * label;
     int16_t vmin;
     int16_t vmax;
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
-    std::function<bool(int)> isValueAvailable;
+    std::function<bool(int)> isValueAvailable = isSwitchAvailableInMixes;
+    void fillMenu(Menu * menu, std::function<bool(int16_t)> condition=nullptr);
 };
 
 #endif // _SWITCHCHOICE_H_

@@ -22,6 +22,8 @@
 #define _CHOICE_H_
 
 #include "window.h"
+#include <string>
+
 
 class CustomCurveChoice : public Window {
   public:

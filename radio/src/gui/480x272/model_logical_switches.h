@@ -21,7 +21,7 @@
 #ifndef _MODEL_LOGICAL_SWITCHES_H
 #define _MODEL_LOGICAL_SWITCHES_H
 
-#include "gui/common/windows/windows.h"
+#include "tabsgroup.h"
 
 class ModelLogicalSwitchesPage: public PageTab {
 public:

@@ -18,8 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
 #include "model_curves.h"
+#include "opentx.h"
+#include "windows.h"
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
 

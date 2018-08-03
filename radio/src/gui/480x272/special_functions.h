@@ -21,7 +21,7 @@
 #ifndef _SPECIAL_FUNCTIONS_H
 #define _SPECIAL_FUNCTIONS_H
 
-#include "gui/common/windows/windows.h"
+#include "tabsgroup.h"
 
 struct CustomFunctionData;
 

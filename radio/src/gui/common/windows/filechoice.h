@@ -22,6 +22,7 @@
 #define _FILECHOICE_H_
 
 #include "window.h"
+#include <string>
 
 class FileChoice: public Window {
   public:

@@ -18,7 +18,9 @@
  * GNU General Public License for more details.
  */
 
+#include "view_channels.h"
 #include "opentx.h"
+#include "windows.h"
 
 #define RECT_OFFSET                    80
 #define ROW_HEIGHT                     42

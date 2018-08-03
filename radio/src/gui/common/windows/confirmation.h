@@ -27,11 +27,11 @@ class Confirmation : public Window {
   public:
     Confirmation(uint8_t type, const char * title, const char * message=nullptr, const char * action=nullptr);
 
-    virtual ~Alert();
+    ~Confirmation();
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override {
+    bool onTouchEnd(coord_t x, coord_t y) override {
       deleteLater();
       return true;
     }

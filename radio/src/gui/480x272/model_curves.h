@@ -22,7 +22,7 @@
 #ifndef _MODEL_CURVES_H_
 #define _MODEL_CURVES_H_
 
-#include "gui/common/windows/windows.h"
+#include "tabsgroup.h"
 
 class ModelCurvesPage: public PageTab {
   public:

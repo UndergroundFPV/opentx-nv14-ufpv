@@ -21,7 +21,7 @@
 #ifndef _MODEL_TELEMETRY_H
 #define _MODEL_TELEMETRY_H
 
-#include "gui/common/windows/windows.h"
+#include "tabsgroup.h"
 
 class ModelTelemetryPage: public PageTab {
 public:

@@ -18,104 +18,36 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "sourcechoice.h"
+#include "menutoolbar.h"
+#include "menu.h"
+#include "dataconstants.h"
+#include "lcd.h"
+#include "strhelpers.h"
 
-class SourceMenuHeaderButton: public Button {
+class SourceChoiceMenuToolbar : public MenuToolbar<SourceChoice> {
   public:
-    SourceMenuHeaderButton(Window * window, const rect_t & rect, char picto):
-      Button(window, rect, nullptr, BUTTON_CHECKED_ON_FOCUS),
-      picto(picto)
+    SourceChoiceMenuToolbar(SourceChoice * choice, Menu * menu):
+      MenuToolbar<SourceChoice>(choice, menu)
     {
-    }
-
-    void paint(BitmapBuffer * dc) override
-    {
-      if (checked()) {
-        dc->drawSolidFilledRect(11, 0, 28, 28, HEADER_BGCOLOR);
-        dc->drawSizedText(rect.w / 2, (rect.h - getFontHeight(flags)) / 2, &picto, 1, CENTERED | MENU_TITLE_COLOR);
-      }
-      else {
-        dc->drawSizedText(rect.w / 2, (rect.h - getFontHeight(flags)) / 2, &picto, 1, CENTERED | TEXT_COLOR);
-      }
-    }
-
-    bool onTouchEnd(coord_t x, coord_t y) override
-    {
-      if (hasFocus()) {
-        check(false);
-        clearFocus();
-      }
-      else {
-        setFocus();
-      }
-      onPress();
-      return true;
-    }
-
-  protected:
-    char picto;
-};
-
-class SourceMenuHeader: public Window {
-  public:
-    SourceMenuHeader(SourceChoice * choice, Menu * menu):
-      Window(menu, { 35, 95, 50, 370 })
-    {
-      coord_t y = 5;
-      addButton(choice, menu, MIXSRC_FIRST_INPUT, MIXSRC_LAST_INPUT, char('\314'), y);
+      addButton(char('\314'), MIXSRC_FIRST_INPUT, MIXSRC_LAST_INPUT);
 #if defined(LUA_MODEL_SCRIPTS)
-      addButton(choice, menu, MIXSRC_FIRST_LUA, MIXSRC_LAST_LUA, char('\322'), y);
+      addButton(char('\322'), MIXSRC_LAST_LUA, MIXSRC_FIRST_LUA);
 #endif
-      addButton(choice, menu, MIXSRC_FIRST_STICK, MIXSRC_LAST_STICK, char('\307'), y);
-      addButton(choice, menu, MIXSRC_FIRST_POT, MIXSRC_LAST_POT, char('\310'), y);
-      addButton(choice, menu, MIXSRC_MAX, MIXSRC_MAX, char('\315'), y);
+      addButton(char('\307'), MIXSRC_FIRST_STICK, MIXSRC_LAST_STICK);
+      addButton(char('\310'), MIXSRC_LAST_POT, MIXSRC_FIRST_POT);
+      addButton(char('\315'), MIXSRC_MAX, MIXSRC_MAX);
 #if defined(HELI)
-      addButton(choice, menu, MIXSRC_FIRST_HELI, MIXSRC_LAST_HELI, char('\316'), y);
+      addButton(char('\316'), MIXSRC_LAST_HELI, MIXSRC_FIRST_HELI);
 #endif
-      addButton(choice, menu, MIXSRC_FIRST_TRIM, MIXSRC_LAST_TRIM, char('\313'), y);
-      addButton(choice, menu, MIXSRC_FIRST_SWITCH, MIXSRC_LAST_SWITCH, char('\312'), y);
-      addButton(choice, menu, MIXSRC_FIRST_TRAINER, MIXSRC_LAST_TRAINER, char('\317'), y);
-      addButton(choice, menu, MIXSRC_FIRST_CH, MIXSRC_LAST_CH, char('\320'), y);
-      addButton(choice, menu, MIXSRC_FIRST_GVAR, MIXSRC_LAST_GVAR, char('\311'), y);
-      addButton(choice, menu, MIXSRC_FIRST_TELEM, MIXSRC_LAST_TELEM, char('\321'), y);
-    }
-
-    void paint(BitmapBuffer * dc) override
-    {
-      dc->clear(CURVE_AXIS_COLOR); // TODO only after the latest button
-    }
-
-    bool onTouchEnd(coord_t x, coord_t y) override
-    {
-      Window::onTouchEnd(x, y);
-      return true; // = don't close the menu (inverted so that click outside the menu closes it)
-    }
-
-  protected:
-    void addButton(SourceChoice * choice, Menu * menu, int16_t filtermin, int16_t filtermax, char picto, coord_t & y)
-    {
-      int vmin = choice->vmin;
-      int vmax = choice->vmax;
-
-      if (vmin > filtermin || vmax < filtermin)
-        return;
-
-      if (choice->isValueAvailable && getFirstAvailable(filtermin, filtermax, choice->isValueAvailable) == MIXSRC_NONE)
-        return;
-
-      auto button = new SourceMenuHeaderButton(this, {0, y, 50, 30}, picto);
-      button->setPressHandler([=]() {
-        if (button->hasFocus()) {
-          choice->fillMenu(menu, [=](int16_t index) {
-            return index >= filtermin && index <= filtermax;
-          });
-        }
-        else {
-          choice->fillMenu(menu);
-        }
-        return 1;
-      });
-      y += 30;
+      addButton(char('\313'), MIXSRC_LAST_TRIM, MIXSRC_FIRST_TRIM);
+      addButton(char('\312'), MIXSRC_LAST_SWITCH, MIXSRC_FIRST_SWITCH);
+      addButton(char('\317'), MIXSRC_LAST_TRAINER, MIXSRC_FIRST_TRAINER);
+      addButton(char('\320'), MIXSRC_LAST_CH, MIXSRC_FIRST_CH);
+#if defined(GVARS)
+      addButton(char('\311'), MIXSRC_LAST_GVAR, MIXSRC_FIRST_GVAR);
+#endif
+      addButton(char('\321'), MIXSRC_LAST_TELEM, MIXSRC_FIRST_TELEM);
     }
 };
 
@@ -160,12 +92,12 @@ void SourceChoice::fillMenu(Menu * menu, std::function<bool(int16_t)> filter)
   }
 }
 
-bool SourceChoice::onTouchEnd(coord_t x, coord_t y)
+bool SourceChoice::onTouchEnd(coord_t, coord_t)
 {
   auto menu = new Menu();
   fillMenu(menu);
 
-  menu->setNavigationBar(new SourceMenuHeader(this, menu));
+  menu->setToolbar(new SourceChoiceMenuToolbar(this, menu));
 
   setFocus();
   return true;

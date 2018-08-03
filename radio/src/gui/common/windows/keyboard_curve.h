@@ -22,9 +22,9 @@
 #define _KEYBOARD_CURVE_H_
 
 #include "keyboard_base.h"
+#include "curveedit.h"
 
 class Button;
-class CurveEdit;
 
 class CurveKeyboard : public Keyboard<CurveEdit> {
   friend class CurveEdit;
@@ -50,7 +50,7 @@ class CurveKeyboard : public Keyboard<CurveEdit> {
 
     void setField(CurveEdit * field);
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
   protected:
     static CurveKeyboard * _instance;

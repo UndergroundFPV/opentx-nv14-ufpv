@@ -18,11 +18,10 @@
  * GNU General Public License for more details.
  */
 
-
 #ifndef _MODEL_OUTPUTS_H_
 #define _MODEL_OUTPUTS_H_
 
-#include "gui/common/windows/windows.h"
+#include "tabsgroup.h"
 
 class ModelOutputsPage: public PageTab {
   public:

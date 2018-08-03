@@ -22,8 +22,7 @@
 #define _KEYBOARD_NUMBER_H_
 
 #include "keyboard_base.h"
-
-class BaseNumberEdit;
+#include "basenumberedit.h"
 
 class NumberKeyboard : public Keyboard<BaseNumberEdit> {
   friend class BaseNumberEdit;
@@ -31,7 +30,7 @@ class NumberKeyboard : public Keyboard<BaseNumberEdit> {
   public:
     NumberKeyboard();
 
-    ~NumberKeyboard();
+    ~NumberKeyboard() override;
 
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
@@ -40,13 +39,14 @@ class NumberKeyboard : public Keyboard<BaseNumberEdit> {
     }
 #endif
 
-    static NumberKeyboard * instance() {
+    static NumberKeyboard * instance()
+    {
       if (!_instance)
         _instance = new NumberKeyboard();
       return _instance;
     }
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
   protected:
     static NumberKeyboard * _instance;

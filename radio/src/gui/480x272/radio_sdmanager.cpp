@@ -18,8 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
 #include "radio_sdmanager.h"
+#include "opentx.h"
+#include "windows.h"
 
 RadioSdManagerPage::RadioSdManagerPage():
   PageTab(SD_IS_HC() ? STR_SDHC_CARD : STR_SD_CARD, ICON_RADIO_SD_BROWSER)

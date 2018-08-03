@@ -18,7 +18,23 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "switchchoice.h"
+#include "menutoolbar.h"
+#include "menu.h"
+#include "draw_functions.h"
+#include "strhelpers.h"
+#include "dataconstants.h"
+
+class SwitchChoiceMenuToolbar : public MenuToolbar<SwitchChoice> {
+  public:
+    SwitchChoiceMenuToolbar(SwitchChoice * choice, Menu * menu):
+      MenuToolbar<SwitchChoice>(choice, menu)
+    {
+      addButton(char('\312'), SWSRC_FIRST_SWITCH, SWSRC_LAST_SWITCH);
+      addButton(char('\313'), SWSRC_FIRST_TRIM, SWSRC_LAST_TRIM);
+      addButton(char('\312'), SWSRC_FIRST_LOGICAL_SWITCH, SWSRC_LAST_LOGICAL_SWITCH);
+    }
+};
 
 void SwitchChoice::paint(BitmapBuffer * dc)
 {
@@ -34,27 +50,40 @@ void SwitchChoice::paint(BitmapBuffer * dc)
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
-void SwitchChoice::setAvailableHandler(std::function<bool(int)> handler)
+void SwitchChoice::fillMenu(Menu * menu, std::function<bool(int16_t)> filter)
 {
-  isValueAvailable = handler;
+  auto value = getValue();
+  int count = 0;
+  int current = -1;
+
+  menu->removeLines();
+
+  for (int i = vmin; i <= vmax; ++i) {
+    if (filter && !filter(i))
+      continue;
+    if (isValueAvailable && !isValueAvailable(i))
+      continue;
+    menu->addLine(getSwitchString(i), [=]() {
+      setValue(i);
+    });
+    if (value == i) {
+      current = count;
+    }
+    ++count;
+  }
+
+  if (current >= 0) {
+    menu->select(current);
+  }
 }
 
-bool SwitchChoice::onTouchEnd(coord_t x, coord_t y)
+bool SwitchChoice::onTouchEnd(coord_t, coord_t)
 {
-  if (hasFocus()) {
-    int16_t value = getValue();
+  auto menu = new Menu();
+  fillMenu(menu);
 
-    do {
-      if (++value > vmax) {
-        value = vmin;
-      }
-    } while (isValueAvailable && !isValueAvailable(value));
+  menu->setToolbar(new SwitchChoiceMenuToolbar(this, menu));
 
-    setValue(value);
-  }
-  else {
-    setFocus();
-  }
-  invalidate();
+  setFocus();
   return true;
 }

@@ -1189,7 +1189,7 @@ bool isThrottleWarningAlertNeeded()
 }
 
 #if defined(COLORLCD)
-
+#include "alert.h"
 class ThrottleAlert: public Alert {
   public:
     ThrottleAlert():
@@ -2547,6 +2547,8 @@ uint16_t stackAvailable()
   #define OPENTX_INIT_ARGS
 #endif
 
+#include "view_main.h"
+
 void opentxInit(OPENTX_INIT_ARGS)
 {
   TRACE("opentxInit");
@@ -2555,7 +2557,7 @@ void opentxInit(OPENTX_INIT_ARGS)
   // menuHandlers[0] = menuMainView;//menuMainView;
   #if MENUS_LOCK != 2/*no menus*/
     // menuHandlers[1] = menuModelSetup;//menuModelSelect;
-    new MainView();
+    new ViewMain();
   #endif
 #endif
 

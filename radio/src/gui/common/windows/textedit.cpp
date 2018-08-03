@@ -18,7 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "textedit.h"
+#include "keyboard_text.h"
+#include "draw_functions.h"
 
 void TextEdit::paint(BitmapBuffer * dc)
 {
@@ -57,3 +59,9 @@ bool TextEdit::onTouchEnd(coord_t x, coord_t y)
 
   return true;
 }
+
+void TextEdit::onFocusLost()
+{
+  TextKeyboard::instance()->disable();
+}
+

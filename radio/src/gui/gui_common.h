@@ -56,6 +56,7 @@ enum SwitchContext
 bool isSwitchAvailable(int swtch, SwitchContext context);
 bool isLogicalSwitchFunctionAvailable(int function);
 bool isLogicalSwitchAvailable(int index);
+struct CustomFunctionData;
 bool isAssignableFunctionAvailable(int function, CustomFunctionData * functions);
 bool isSourceAvailable(int source);
 bool isSourceAvailableInGlobalFunctions(int source);

@@ -19,6 +19,7 @@
  */
 
 #include "opentx.h"
+#include "menu_model.h"
 #include "model_setup.h"
 #include "model_heli.h"
 #include "model_flightmodes.h"
@@ -27,8 +28,8 @@
 #include "model_outputs.h"
 #include "model_curves.h"
 #include "model_logical_switches.h"
-#include "model_telemetry.h"
 #include "special_functions.h"
+#include "model_telemetry.h"
 
 ModelMenu::ModelMenu():
   TabsGroup()

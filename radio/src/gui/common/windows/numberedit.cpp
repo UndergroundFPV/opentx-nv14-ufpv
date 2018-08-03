@@ -18,7 +18,9 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "numberedit.h"
+#include "draw_functions.h"
+#include "keyboard_number.h"
 
 NumberEdit::NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags):
   BaseNumberEdit(parent, rect, vmin, vmax, getValue, setValue, flags)

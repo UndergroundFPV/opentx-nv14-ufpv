@@ -1,5 +1,3 @@
-#include <utility>
-
 /*
  * Copyright (C) OpenTX
  *
@@ -20,7 +18,10 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
+#include "filechoice.h"
+#include "menu.h"
+#include "draw_functions.h"
+#include "sdcard.h"
 
 const uint8_t LBM_FOLDER[] = {
 #include "mask_folder.lbm"

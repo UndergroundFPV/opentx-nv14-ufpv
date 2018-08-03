@@ -19,6 +19,9 @@
  */
 
 #include "opentx.h"
+#include "alert.h"
+#include "mainwindow.h"
+#include "button.h"
 
 #define ALERT_FRAME_TOP           70
 #define ALERT_FRAME_HEIGHT        250
@@ -87,4 +90,9 @@ void Alert::paint(BitmapBuffer * dc)
   if (action) {
    // TODO remove action? dc->drawText(ALERT_FRAME_PADDING+5, ALERT_ACTION_TOP, action);
   }
+}
+
+void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound)
+{
+  new Alert(WARNING_TYPE_ALERT, title, msg, nullptr/* , sound*/);
 }
