@@ -20,7 +20,7 @@
 
 #include "radio_calibration.h"
 #include "opentx.h"
-#include "windows.h"
+#include "libwindows.h"
 
 class StickCalibrationWindow: public Window {
   public:

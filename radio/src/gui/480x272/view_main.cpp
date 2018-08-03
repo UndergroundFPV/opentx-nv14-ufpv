@@ -24,7 +24,7 @@
 #include "model_select.h"
 #include "view_channels.h"
 #include "opentx.h"
-#include "windows.h"
+#include "libwindows.h"
 
 #define TRIM_WIDTH                     121
 #define TRIM_LH_X                      10

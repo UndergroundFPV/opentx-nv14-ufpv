@@ -20,7 +20,7 @@
 
 #include "view_channels.h"
 #include "opentx.h"
-#include "windows.h"
+#include "libwindows.h"
 
 #define RECT_OFFSET                    80
 #define ROW_HEIGHT                     42

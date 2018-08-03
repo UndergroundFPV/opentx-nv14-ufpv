@@ -22,7 +22,7 @@
 
 #include "radio_setup.h"
 #include "opentx.h"
-#include "windows.h"
+#include "libwindows.h"
 
 #define SET_DIRTY()     storageDirty(EE_GENERAL)
 
