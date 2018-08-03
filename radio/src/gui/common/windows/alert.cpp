@@ -18,45 +18,31 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
 #include "alert.h"
+#include "opentx.h"
 #include "mainwindow.h"
 #include "button.h"
 
 #define ALERT_FRAME_TOP           70
-#define ALERT_FRAME_HEIGHT        250
 #define ALERT_FRAME_PADDING       10
-
 #define ALERT_BITMAP_PADDING      15
-
 #define ALERT_TITLE_LEFT          135
 #define ALERT_TITLE_LINE_HEIGHT   30
-
 #define ALERT_MESSAGE_TOP         210
-
 #define ALERT_ACTION_TOP          230
-
 #define ALERT_BUTTON_TOP          300
 
-Alert::Alert(uint8_t type, const char * title, const char * message, const char * action):
+Alert::Alert(uint8_t type, std::string title, std::string message):
   Window(&mainWindow, {0, 0, LCD_W, LCD_H}),
   type(type),
-  title(title ? strdup(title) : nullptr),
-  message(message ? strdup(message) : nullptr),
-  action(action ? strdup(action) : nullptr)
+  title(std::move(title)),
+  message(std::move(message))
 {
   new FabIconButton(this, LCD_W - 50, ALERT_BUTTON_TOP, ICON_NEXT,
                     [=]() -> uint8_t {
                       this->deleteLater();
                       return 0;
                     });
-}
-
-Alert::~Alert()
-{
-  free(title);
-  free(message);
-  free(action);
 }
 
 void Alert::paint(BitmapBuffer * dc)
@@ -75,24 +61,26 @@ void Alert::paint(BitmapBuffer * dc)
     dc->drawText(ALERT_TITLE_LEFT, ALERT_FRAME_TOP + ALERT_FRAME_PADDING, STR_WARNING, ALARM_COLOR|DBLSIZE);
     dc->drawText(ALERT_TITLE_LEFT, ALERT_FRAME_TOP + ALERT_FRAME_PADDING + ALERT_TITLE_LINE_HEIGHT, title, ALARM_COLOR|DBLSIZE);
 #else
-    dc->drawText(ALERT_TITLE_LEFT, ALERT_FRAME_TOP + ALERT_FRAME_PADDING, title, ALARM_COLOR|DBLSIZE);
+    dc->drawText(ALERT_TITLE_LEFT, ALERT_FRAME_TOP + ALERT_FRAME_PADDING, title.c_str(), ALARM_COLOR|DBLSIZE);
     dc->drawText(ALERT_TITLE_LEFT, ALERT_FRAME_TOP + ALERT_FRAME_PADDING + ALERT_TITLE_LINE_HEIGHT, STR_WARNING, ALARM_COLOR|DBLSIZE);
 #endif
   }
-  else if (title) {
-    dc->drawText(ALERT_TITLE_LEFT, ALERT_FRAME_TOP + ALERT_FRAME_PADDING, title, ALARM_COLOR|DBLSIZE);
+  else if (title.c_str()) {
+    dc->drawText(ALERT_TITLE_LEFT, ALERT_FRAME_TOP + ALERT_FRAME_PADDING, title.c_str(), ALARM_COLOR|DBLSIZE);
   }
 
-  if (message) {
-    dc->drawText(ALERT_FRAME_PADDING+5, ALERT_MESSAGE_TOP, message, MIDSIZE);
+  if (message.c_str()) {
+    dc->drawText(ALERT_FRAME_PADDING+5, ALERT_MESSAGE_TOP, message.c_str(), MIDSIZE);
   }
 
-  if (action) {
+#if 0
+  if (action.c_str()) {
    // TODO remove action? dc->drawText(ALERT_FRAME_PADDING+5, ALERT_ACTION_TOP, action);
   }
+#endif
 }
 
 void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound)
 {
-  new Alert(WARNING_TYPE_ALERT, title, msg, nullptr/* , sound*/);
+  new Alert(WARNING_TYPE_ALERT, title, msg);
 }

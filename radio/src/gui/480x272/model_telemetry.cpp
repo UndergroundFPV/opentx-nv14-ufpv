@@ -212,10 +212,11 @@ void ModelTelemetryPage::build(Window * window) {
 
   new TextButton(window, grid.getLineSlot(), STR_DELETE_ALL_SENSORS,
                  []() -> uint8_t {
-                    //TODO confirmation before delete
-                   for (int i=0; i<MAX_TELEMETRY_SENSORS; i++) {
-                     delTelemetryIndex(i);
-                   }
+                    new Confirmation(WARNING_TYPE_CONFIRM, STR_CONFIRMDELETE, "", [=]() {
+                      for (int i=0; i<MAX_TELEMETRY_SENSORS; i++) {
+                        delTelemetryIndex(i);
+                      }
+                    });
                    return 0;
                  });
   grid.nextLine();

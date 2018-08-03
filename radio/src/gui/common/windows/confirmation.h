@@ -21,13 +21,11 @@
 #ifndef _CONFIRMATION_H_
 #define _CONFIRMATION_H_
 
-#include "window.h"
+#include "button.h"
 
 class Confirmation : public Window {
   public:
-    Confirmation(uint8_t type, const char * title, const char * message=nullptr, const char * action=nullptr);
-
-    ~Confirmation();
+    Confirmation(uint8_t type, std::string title, std::string message="", std::function<void(void)> onConfirm=nullptr);
 
     void paint(BitmapBuffer * dc) override;
 
@@ -38,9 +36,9 @@ class Confirmation : public Window {
 
   protected:
     uint8_t type;
-    char * title;
-    char * message;
-    char * action;
+    std::string title;
+    std::string message;
+    // std::function<uint8_t(void)> onConfirm;
 };
 
 #endif // _CONFIRMATION_H_

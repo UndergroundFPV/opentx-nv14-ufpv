@@ -25,9 +25,7 @@
 
 class Alert : public Window {
   public:
-    Alert(uint8_t type, const char * title, const char * message=nullptr, const char * action=nullptr);
-
-    virtual ~Alert();
+    Alert(uint8_t type, std::string title, std::string message="");
 
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
@@ -36,18 +34,17 @@ class Alert : public Window {
     }
 #endif
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
-    virtual bool onTouchEnd(coord_t x, coord_t y) override {
+    bool onTouchEnd(coord_t x, coord_t y) override {
       deleteLater();
       return true;
     }
 
   protected:
     uint8_t type;
-    char * title;
-    char * message;
-    char * action;
+    std::string title;
+    std::string message;
 };
 
 #endif

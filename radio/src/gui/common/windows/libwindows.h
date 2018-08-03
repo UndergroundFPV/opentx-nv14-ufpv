@@ -41,6 +41,7 @@
 #include "page.h"
 #include "menu.h"
 #include "alert.h"
+#include "confirmation.h"
 #include "gridlayout.h"
 #include "helpers.h"
 #include "curveedit.h"
