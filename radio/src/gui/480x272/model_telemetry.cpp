@@ -26,7 +26,7 @@
 
 class SensorEditWindow : public Page {
   public:
-    SensorEditWindow(uint8_t index):
+    SensorEditWindow(uint8_t index) :
       Page(),
       index(index)
     {
@@ -53,6 +53,7 @@ class SensorEditWindow : public Page {
       TelemetrySensor * sensor = &g_model.telemetrySensors[index];
 
       if (sensor->type == TELEM_TYPE_CALCULATED) {
+        // Formula
         new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_FORMULA);
         new Choice(sensorOneWindow, grid.getFieldSlot(), STR_VFORMULAS, 0, TELEM_FORMULA_LAST, GET_DEFAULT(sensor->formula),
                    [=](uint8_t newValue) {
@@ -75,7 +76,10 @@ class SensorEditWindow : public Page {
                      updateSensorOneWindow();
                    });
         grid.nextLine();
+      }
 
+      // Unit
+      if ((sensor->type == TELEM_TYPE_CALCULATED && (sensor->formula == TELEM_FORMULA_DIST)) || sensor->isConfigurable()) {
         new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_UNIT);
         new Choice(sensorOneWindow, grid.getFieldSlot(), STR_VTELEMUNIT, 0, UNIT_MAX, GET_DEFAULT(sensor->unit),
                    [=](uint8_t newValue) {
@@ -88,12 +92,67 @@ class SensorEditWindow : public Page {
                      updateSensorOneWindow();
                    });
         grid.nextLine();
-
-        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CELLSENSOR);
       }
-      else { // CUSTOM sensor
 
+      // Precision
+      if (sensor->isPrecConfigurable() && sensor->unit != UNIT_FAHRENHEIT) {
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_PRECISION);
+        new Choice(sensorOneWindow, grid.getFieldSlot(), STR_VPREC, 0, 2, GET_DEFAULT(sensor->prec),
+                   [=](uint8_t newValue) {
+                     sensor->prec = newValue;
+                     SET_DIRTY();
+                     telemetryItems[index].clear();
+                     updateSensorOneWindow();
+                   });
+        grid.nextLine();
       }
+
+      //PARAM1
+      if (sensor->type == TELEM_TYPE_CALCULATED) {
+        if (sensor->formula == TELEM_FORMULA_CELL) {
+          new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CELLSENSOR);
+          auto choice = new SourceChoice(sensorOneWindow, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
+                                         GET_DEFAULT(sensor->cell.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->cell.source - 1) : MIXSRC_NONE),
+                                         SET_VALUE(sensor->cell.source, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
+          choice->setAvailableHandler([=](int16_t value) {
+            if (value == MIXSRC_NONE)
+              return true;
+            if (value < MIXSRC_FIRST_TELEM)
+              return false;
+            auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
+            return qr.rem == 0 && isCellsSensor(qr.quot + 1);
+          });
+        }
+        else if (sensor->formula == TELEM_FORMULA_DIST) {
+          new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_GPSSENSOR);
+          auto choice = new SourceChoice(sensorOneWindow, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
+                                         GET_DEFAULT(sensor->dist.gps ? MIXSRC_FIRST_TELEM + 3 * (sensor->dist.gps - 1) : MIXSRC_NONE),
+                                         SET_VALUE(sensor->dist.gps, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
+          choice->setAvailableHandler([=](int16_t value) {
+            if (value == MIXSRC_NONE)
+              return true;
+            if (value < MIXSRC_FIRST_TELEM)
+              return false;
+            auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
+            return qr.rem == 0 && isGPSSensor(qr.quot + 1);
+          });
+        }
+        else if (sensor->formula == TELEM_FORMULA_CONSUMPTION) {
+          new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CURRENTSENSOR);
+          auto choice = new SourceChoice(sensorOneWindow, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
+                                         GET_DEFAULT(sensor->consumption.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->consumption.source - 1) : MIXSRC_NONE),
+                                         SET_VALUE(sensor->consumption.source, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
+          choice->setAvailableHandler([=](int16_t value) {
+            if (value == MIXSRC_NONE)
+              return true;
+            if (value < MIXSRC_FIRST_TELEM)
+              return false;
+            auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
+            return qr.rem == 0 && isSensorAvailable(qr.quot + 1);
+          });
+        }
+      }
+
       coord_t delta = sensorOneWindow->adjustHeight();
       Window * parent = sensorOneWindow->getParent();
       parent->moveWindowsTop(sensorOneWindow->top(), delta);
@@ -128,14 +187,14 @@ class SensorEditWindow : public Page {
                  });
       grid.nextLine();
 
-      sensorOneWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
+      sensorOneWindow = new Window(window, {0, grid.getWindowHeight(), LCD_W, 0});
       updateSensorOneWindow();
       grid.addWindow(sensorOneWindow);
     }
 };
 
-ModelTelemetryPage::ModelTelemetryPage():
-        PageTab(STR_MENUTELEMETRY, ICON_MODEL_TELEMETRY)
+ModelTelemetryPage::ModelTelemetryPage() :
+  PageTab(STR_MENUTELEMETRY, ICON_MODEL_TELEMETRY)
 {
 }
 
@@ -156,7 +215,8 @@ void ModelTelemetryPage::editSensor(Window * window, uint8_t index)
   });
 }
 
-void ModelTelemetryPage::build(Window * window) {
+void ModelTelemetryPage::build(Window * window)
+{
   GridLayout grid(*window);
   grid.spacer(8);
   grid.setLabelWidth(180);
@@ -164,7 +224,7 @@ void ModelTelemetryPage::build(Window * window) {
 
   //RSSI
   if (g_model.moduleData[INTERNAL_MODULE].rfProtocol == RF_PROTO_OFF &&
-      g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_MULTIMODULE  &&
+      g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_MULTIMODULE &&
       g_model.moduleData[EXTERNAL_MODULE].getMultiProtocol(false) == MM_RF_PROTO_FS_AFHDS2A)
     new Subtitle(window, grid.getLineSlot(), "RSNR");
   else
@@ -191,9 +251,9 @@ void ModelTelemetryPage::build(Window * window) {
 
   //Sensors
   new Subtitle(window, grid.getLineSlot(), STR_TELEMETRY_SENSORS);
-  new StaticText(window, grid.getFieldSlot(2,0), STR_VALUE);
+  new StaticText(window, grid.getFieldSlot(2, 0), STR_VALUE);
   if (!g_model.ignoreSensorIds && !IS_SPEKTRUM_PROTOCOL())
-    new StaticText(window, grid.getFieldSlot(2,1), STR_ID);
+    new StaticText(window, grid.getFieldSlot(2, 1), STR_ID);
   grid.nextLine();
 
   new TextButton(window, grid.getLineSlot(), STR_DISCOVER_SENSORS,
@@ -205,18 +265,19 @@ void ModelTelemetryPage::build(Window * window) {
 
   new TextButton(window, grid.getLineSlot(), STR_TELEMETRY_NEWSENSOR,
                  [=]() -> uint8_t {
-                     editSensor(window, 0);
-                     return 0;
-                   });
+                   editSensor(window, 0);
+                   return 0;
+                 });
   grid.nextLine();
 
   new TextButton(window, grid.getLineSlot(), STR_DELETE_ALL_SENSORS,
                  []() -> uint8_t {
-                    new Confirmation(WARNING_TYPE_CONFIRM, STR_CONFIRMDELETE, "", [=]() {
-                      for (int i=0; i<MAX_TELEMETRY_SENSORS; i++) {
-                        delTelemetryIndex(i);
-                      }
-                    });
+                   new Confirmation(WARNING_TYPE_CONFIRM, STR_CONFIRMDELETE, "", [=]() {
+                     TRACE("DOING IT");
+                     for (int i = 0; i < MAX_TELEMETRY_SENSORS; i++) {
+                       delTelemetryIndex(i);
+                     }
+                   });
                    return 0;
                  });
   grid.nextLine();
@@ -233,8 +294,8 @@ void ModelTelemetryPage::build(Window * window) {
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
   auto choice = new SourceChoice(window, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
-                   GET_DEFAULT(g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM + 3 * (g_model.frsky.varioSource - 1) : MIXSRC_NONE),
-                   SET_VALUE(g_model.frsky.varioSource, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
+                                 GET_DEFAULT(g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM + 3 * (g_model.frsky.varioSource - 1) : MIXSRC_NONE),
+                                 SET_VALUE(g_model.frsky.varioSource, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
   choice->setAvailableHandler([=](int16_t value) {
     if (value == MIXSRC_NONE)
       return true;
@@ -245,13 +306,13 @@ void ModelTelemetryPage::build(Window * window) {
   });
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_RANGE);
-  new NumberEdit(window, grid.getFieldSlot(2,0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMin, -10));
-  new NumberEdit(window, grid.getFieldSlot(2,1), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMax, 10));
+  new NumberEdit(window, grid.getFieldSlot(2, 0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMin, -10));
+  new NumberEdit(window, grid.getFieldSlot(2, 1), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMax, 10));
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_CENTER);
-  new NumberEdit(window, grid.getFieldSlot(3,0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMin, -5), PREC1);
-  new NumberEdit(window, grid.getFieldSlot(3,1), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMax, 5), PREC1);
-  new Choice(window, grid.getFieldSlot(3,2), STR_VVARIOCENTER, 0, 1, GET_SET_DEFAULT(g_model.frsky.varioCenterSilent));
+  new NumberEdit(window, grid.getFieldSlot(3, 0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMin, -5), PREC1);
+  new NumberEdit(window, grid.getFieldSlot(3, 1), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMax, 5), PREC1);
+  new Choice(window, grid.getFieldSlot(3, 2), STR_VVARIOCENTER, 0, 1, GET_SET_DEFAULT(g_model.frsky.varioCenterSilent));
   grid.nextLine();
 
   window->setInnerHeight(grid.getWindowHeight());
@@ -321,9 +382,9 @@ enum MenuModelTelemetryFrskyItems {
 #define SENSOR_ROWS(x)                (isTelemetryFieldAvailable(x) ? (uint8_t)0 : HIDDEN_ROW)
 #define SENSORS_ROWS                  LABEL(Sensors), SENSOR_ROWS(0), SENSOR_ROWS(1), SENSOR_ROWS(2), SENSOR_ROWS(3), SENSOR_ROWS(4), SENSOR_ROWS(5), SENSOR_ROWS(6), SENSOR_ROWS(7), SENSOR_ROWS(8), SENSOR_ROWS(9), SENSOR_ROWS(10), SENSOR_ROWS(11), SENSOR_ROWS(12), SENSOR_ROWS(13), SENSOR_ROWS(14), SENSOR_ROWS(15), SENSOR_ROWS(16), SENSOR_ROWS(17), SENSOR_ROWS(18), SENSOR_ROWS(19), SENSOR_ROWS(20), SENSOR_ROWS(21), SENSOR_ROWS(22), SENSOR_ROWS(23), SENSOR_ROWS(24), SENSOR_ROWS(25), SENSOR_ROWS(26), SENSOR_ROWS(27), SENSOR_ROWS(28), SENSOR_ROWS(29), SENSOR_ROWS(30), SENSOR_ROWS(31), 0, 0, 0, 0,
 #if defined(VARIO)
-  #define VARIO_ROWS                  LABEL(Vario), 0, 1, 2,
+#define VARIO_ROWS                  LABEL(Vario), 0, 1, 2,
 #else
-  #define VARIO_ROWS
+#define VARIO_ROWS
 #endif
 #define RSSI_ROWS                     LABEL(RSSI), 0, 0, 0,
 #define VARIO_RANGE_ROWS              3
@@ -333,7 +394,7 @@ enum SensorFields {
   SENSOR_FIELD_NAME,
   SENSOR_FIELD_TYPE,
   SENSOR_FIELD_ID,
-  SENSOR_FIELD_FORMULA=SENSOR_FIELD_ID,
+  SENSOR_FIELD_FORMULA = SENSOR_FIELD_ID,
   SENSOR_FIELD_UNIT,
   SENSOR_FIELD_PRECISION,
   SENSOR_FIELD_PARAM1,
@@ -366,23 +427,26 @@ bool menuModelSensor(event_t event)
 {
   TelemetrySensor * sensor = &g_model.telemetrySensors[s_currIdx];
 
-  SUBMENU("SENSOR", ICON_MODEL_TELEMETRY, SENSOR_FIELD_MAX, { 0, 0, sensor->type == TELEM_TYPE_CALCULATED ? (uint8_t)0 : (uint8_t)1, SENSOR_UNIT_ROWS, SENSOR_PREC_ROWS, SENSOR_PARAM1_ROWS, SENSOR_PARAM2_ROWS, SENSOR_PARAM3_ROWS, SENSOR_PARAM4_ROWS, SENSOR_AUTOOFFSET_ROWS, SENSOR_ONLYPOS_ROWS, SENSOR_FILTER_ROWS, SENSOR_PERSISTENT_ROWS, 0 });
-  lcdDrawNumber(lcdNextPos, 3, s_currIdx+1, MENU_TITLE_COLOR|LEFT);
-  drawSensorCustomValue(50, 3+FH, s_currIdx, getValue(MIXSRC_FIRST_TELEM+3*s_currIdx), MENU_TITLE_COLOR|LEFT);
+  SUBMENU("SENSOR", ICON_MODEL_TELEMETRY, SENSOR_FIELD_MAX, {
+    0, 0, sensor->type == TELEM_TYPE_CALCULATED ? (uint8_t) 0
+                                                : (uint8_t) 1, SENSOR_UNIT_ROWS, SENSOR_PREC_ROWS, SENSOR_PARAM1_ROWS, SENSOR_PARAM2_ROWS, SENSOR_PARAM3_ROWS, SENSOR_PARAM4_ROWS, SENSOR_AUTOOFFSET_ROWS, SENSOR_ONLYPOS_ROWS, SENSOR_FILTER_ROWS, SENSOR_PERSISTENT_ROWS, 0
+  });
+  lcdDrawNumber(lcdNextPos, 3, s_currIdx + 1, MENU_TITLE_COLOR | LEFT);
+  drawSensorCustomValue(50, 3 + FH, s_currIdx, getValue(MIXSRC_FIRST_TELEM + 3 * s_currIdx), MENU_TITLE_COLOR | LEFT);
 
-  for (uint8_t i=0; i<NUM_BODY_LINES+1; i++) {
-    coord_t y = MENU_CONTENT_TOP - FH - 2 + i*FH;
+  for (uint8_t i = 0; i < NUM_BODY_LINES + 1; i++) {
+    coord_t y = MENU_CONTENT_TOP - FH - 2 + i * FH;
     int k = i + menuVerticalOffset;
 
-    for (int j=0; j<k; j++) {
-      if (mstate_tab[j+1] == HIDDEN_ROW) {
-        if (++k >= (int)DIM(mstate_tab)) {
+    for (int j = 0; j < k; j++) {
+      if (mstate_tab[j + 1] == HIDDEN_ROW) {
+        if (++k >= (int) DIM(mstate_tab)) {
           return true;
         }
       }
     }
 
-    LcdFlags attr = (menuVerticalPosition==k ? (s_editMode>0 ? BLINK|INVERS : INVERS) : 0);
+    LcdFlags attr = (menuVerticalPosition == k ? (s_editMode > 0 ? BLINK | INVERS : INVERS) : 0);
 
     switch (k) {
 
@@ -390,12 +454,12 @@ bool menuModelSensor(event_t event)
       case SENSOR_FIELD_ID:
         if (sensor->type == TELEM_TYPE_CUSTOM) {
           lcdDrawText(MENUS_MARGIN_LEFT, y, STR_ID);
-          lcdDrawHexNumber(SENSOR_2ND_COLUMN, y, sensor->id, LEFT|(menuHorizontalPosition==0 ? attr : 0));
-          lcdDrawNumber(SENSOR_3RD_COLUMN, y, sensor->instance, LEFT|(menuHorizontalPosition==1 ? attr : 0));
+          lcdDrawHexNumber(SENSOR_2ND_COLUMN, y, sensor->id, LEFT | (menuHorizontalPosition == 0 ? attr : 0));
+          lcdDrawNumber(SENSOR_3RD_COLUMN, y, sensor->instance, LEFT | (menuHorizontalPosition == 1 ? attr : 0));
           if (attr) {
             switch (menuHorizontalPosition) {
               case 0:
-                sensor->id = checkIncDec(event, sensor->id, 0x0000, 0xffff, INCDEC_REP10|NO_INCDEC_MARKS);
+                sensor->id = checkIncDec(event, sensor->id, 0x0000, 0xffff, INCDEC_REP10 | NO_INCDEC_MARKS);
                 break;
 
               case 1:
@@ -434,33 +498,35 @@ bool menuModelSensor(event_t event)
         if (sensor->type == TELEM_TYPE_CALCULATED) {
           if (sensor->formula == TELEM_FORMULA_CELL) {
             lcdDrawText(MENUS_MARGIN_LEFT, y, STR_CELLSENSOR);
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->cell.source ? MIXSRC_FIRST_TELEM+3*(sensor->cell.source-1) : 0, attr);
+            drawSource(SENSOR_2ND_COLUMN, y, sensor->cell.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->cell.source - 1) : 0, attr);
             if (attr) {
-              sensor->cell.source = checkIncDec(event, sensor->cell.source, 0, MAX_TELEMETRY_SENSORS, EE_MODEL|NO_INCDEC_MARKS, isCellsSensor);
+              sensor->cell.source = checkIncDec(event, sensor->cell.source, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS, isCellsSensor);
             }
             break;
           }
           else if (sensor->formula == TELEM_FORMULA_DIST) {
             lcdDrawText(MENUS_MARGIN_LEFT, y, STR_GPSSENSOR);
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->dist.gps ? MIXSRC_FIRST_TELEM+3*(sensor->dist.gps-1) : 0, attr);
+            drawSource(SENSOR_2ND_COLUMN, y, sensor->dist.gps ? MIXSRC_FIRST_TELEM + 3 * (sensor->dist.gps - 1) : 0, attr);
             if (attr) {
-              sensor->dist.gps = checkIncDec(event, sensor->dist.gps, 0, MAX_TELEMETRY_SENSORS, EE_MODEL|NO_INCDEC_MARKS, isGPSSensor);
+              sensor->dist.gps = checkIncDec(event, sensor->dist.gps, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS, isGPSSensor);
             }
             break;
           }
           else if (sensor->formula == TELEM_FORMULA_CONSUMPTION) {
             lcdDrawText(MENUS_MARGIN_LEFT, y, STR_CURRENTSENSOR);
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->consumption.source ? MIXSRC_FIRST_TELEM+3*(sensor->consumption.source-1) : 0, attr);
+            drawSource(SENSOR_2ND_COLUMN, y, sensor->consumption.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->consumption.source - 1) : 0, attr);
             if (attr) {
-              sensor->consumption.source = checkIncDec(event, sensor->consumption.source, 0, MAX_TELEMETRY_SENSORS, EE_MODEL|NO_INCDEC_MARKS, isSensorAvailable);
+              sensor->consumption.source = checkIncDec(event, sensor->consumption.source, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS,
+                                                       isSensorAvailable);
             }
             break;
           }
           else if (sensor->formula == TELEM_FORMULA_TOTALIZE) {
             lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_SOURCE));
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->consumption.source ? MIXSRC_FIRST_TELEM+3*(sensor->consumption.source-1) : 0, attr);
+            drawSource(SENSOR_2ND_COLUMN, y, sensor->consumption.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->consumption.source - 1) : 0, attr);
             if (attr) {
-              sensor->consumption.source = checkIncDec(event, sensor->consumption.source, 0, MAX_TELEMETRY_SENSORS, EE_MODEL|NO_INCDEC_MARKS, isSensorAvailable);
+              sensor->consumption.source = checkIncDec(event, sensor->consumption.source, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS,
+                                                       isSensorAvailable);
             }
             break;
           }
@@ -468,17 +534,17 @@ bool menuModelSensor(event_t event)
         else {
           if (sensor->unit == UNIT_RPMS) {
             lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_BLADES));
-            if (attr) sensor->custom.ratio = checkIncDec(event, sensor->custom.ratio, 1, 30000, EE_MODEL|NO_INCDEC_MARKS|INCDEC_REP10);
-            lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.ratio, LEFT|attr);
+            if (attr) sensor->custom.ratio = checkIncDec(event, sensor->custom.ratio, 1, 30000, EE_MODEL | NO_INCDEC_MARKS | INCDEC_REP10);
+            lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.ratio, LEFT | attr);
             break;
           }
           else {
             lcdDrawText(MENUS_MARGIN_LEFT, y, STR_RATIO);
-            if (attr) sensor->custom.ratio = checkIncDec(event, sensor->custom.ratio, 0, 30000, EE_MODEL|NO_INCDEC_MARKS|INCDEC_REP10);
+            if (attr) sensor->custom.ratio = checkIncDec(event, sensor->custom.ratio, 0, 30000, EE_MODEL | NO_INCDEC_MARKS | INCDEC_REP10);
             if (sensor->custom.ratio == 0)
               lcdDrawText(SENSOR_2ND_COLUMN, y, "-", attr);
             else
-              lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.ratio, LEFT|attr|PREC1);
+              lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.ratio, LEFT | attr | PREC1);
             break;
           }
         }
@@ -493,24 +559,24 @@ bool menuModelSensor(event_t event)
           }
           else if (sensor->formula == TELEM_FORMULA_DIST) {
             lcdDrawText(MENUS_MARGIN_LEFT, y, STR_ALTSENSOR);
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->dist.alt ? MIXSRC_FIRST_TELEM+3*(sensor->dist.alt-1) : 0, attr);
+            drawSource(SENSOR_2ND_COLUMN, y, sensor->dist.alt ? MIXSRC_FIRST_TELEM + 3 * (sensor->dist.alt - 1) : 0, attr);
             if (attr) {
-              sensor->dist.alt = checkIncDec(event, sensor->dist.alt, 0, MAX_TELEMETRY_SENSORS, EE_MODEL|NO_INCDEC_MARKS, isAltSensor);
+              sensor->dist.alt = checkIncDec(event, sensor->dist.alt, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS, isAltSensor);
             }
             break;
           }
         }
         else if (sensor->unit == UNIT_RPMS) {
           lcdDrawText(MENUS_MARGIN_LEFT, y, STR_MULTIPLIER);
-          if (attr) sensor->custom.offset = checkIncDec(event, sensor->custom.offset, 1, 30000, EE_MODEL|NO_INCDEC_MARKS|INCDEC_REP10);
-          lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.offset, LEFT|attr);
+          if (attr) sensor->custom.offset = checkIncDec(event, sensor->custom.offset, 1, 30000, EE_MODEL | NO_INCDEC_MARKS | INCDEC_REP10);
+          lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.offset, LEFT | attr);
           break;
         }
         else {
           lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_OFFSET));
-          if (attr) sensor->custom.offset = checkIncDec(event, sensor->custom.offset, -30000, +30000, EE_MODEL|NO_INCDEC_MARKS|INCDEC_REP10);
+          if (attr) sensor->custom.offset = checkIncDec(event, sensor->custom.offset, -30000, +30000, EE_MODEL | NO_INCDEC_MARKS | INCDEC_REP10);
           if (sensor->prec > 0) attr |= (sensor->prec == 2 ? PREC2 : PREC1);
-          lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.offset, LEFT|attr);
+          lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.offset, LEFT | attr);
           break;
         }
         // no break
@@ -518,19 +584,18 @@ bool menuModelSensor(event_t event)
       case SENSOR_FIELD_PARAM3:
         // no break
 
-      case SENSOR_FIELD_PARAM4:
-      {
-        drawStringWithIndex(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_SOURCE), k-SENSOR_FIELD_PARAM1+1);
-        int8_t & source = sensor->calc.sources[k-SENSOR_FIELD_PARAM1];
+      case SENSOR_FIELD_PARAM4: {
+        drawStringWithIndex(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_SOURCE), k - SENSOR_FIELD_PARAM1 + 1);
+        int8_t &source = sensor->calc.sources[k - SENSOR_FIELD_PARAM1];
         if (attr) {
-          source = checkIncDec(event, source, -MAX_TELEMETRY_SENSORS, MAX_TELEMETRY_SENSORS, EE_MODEL|NO_INCDEC_MARKS, isSensorAvailable);
+          source = checkIncDec(event, source, -MAX_TELEMETRY_SENSORS, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS, isSensorAvailable);
         }
         if (source < 0) {
           lcdDrawText(SENSOR_2ND_COLUMN, y, "-", attr);
-          drawSource(SENSOR_2ND_COLUMN+5, y, MIXSRC_FIRST_TELEM+3*(-1-source), attr);
+          drawSource(SENSOR_2ND_COLUMN + 5, y, MIXSRC_FIRST_TELEM + 3 * (-1 - source), attr);
         }
         else {
-          drawSource(SENSOR_2ND_COLUMN, y, source ? MIXSRC_FIRST_TELEM+3*(source-1) : 0, attr);
+          drawSource(SENSOR_2ND_COLUMN, y, source ? MIXSRC_FIRST_TELEM + 3 * (source - 1) : 0, attr);
         }
         break;
       }
@@ -581,7 +646,7 @@ void onSensorMenu(const char * result)
     else if (result == STR_DELETE) {
       delTelemetryIndex(index);
       index += 1;
-      if (index<MAX_TELEMETRY_SENSORS && isTelemetryFieldAvailable(index))
+      if (index < MAX_TELEMETRY_SENSORS && isTelemetryFieldAvailable(index))
         menuVerticalPosition += 1;
       else
         menuVerticalPosition = ITEM_TELEMETRY_NEW_SENSOR;
@@ -590,11 +655,11 @@ void onSensorMenu(const char * result)
       int newIndex = availableTelemetryIndex();
 
       if (newIndex >= 0) {
-        TelemetrySensor & sourceSensor = g_model.telemetrySensors[index];
-        TelemetrySensor & newSensor = g_model.telemetrySensors[newIndex];
+        TelemetrySensor &sourceSensor = g_model.telemetrySensors[index];
+        TelemetrySensor &newSensor = g_model.telemetrySensors[newIndex];
         newSensor = sourceSensor;
-        TelemetryItem & sourceItem = telemetryItems[index];
-        TelemetryItem & newItem = telemetryItems[newIndex];
+        TelemetryItem &sourceItem = telemetryItems[index];
+        TelemetryItem &newItem = telemetryItems[newIndex];
         newItem = sourceItem;
         storageDirty(EE_MODEL);
       }
@@ -609,42 +674,48 @@ bool menuModelTelemetryFrsky(event_t event)
 {
 
 
-  MENU(STR_MENUTELEMETRY, MODEL_ICONS, menuTabModel, MENU_MODEL_TELEMETRY_FRSKY, ITEM_TELEMETRY_MAX, { TELEMETRY_TYPE_ROWS RSSI_ROWS SENSORS_ROWS VARIO_ROWS });
+  MENU(STR_MENUTELEMETRY, MODEL_ICONS, menuTabModel, MENU_MODEL_TELEMETRY_FRSKY, ITEM_TELEMETRY_MAX, {
+    TELEMETRY_TYPE_ROWS
+    RSSI_ROWS
+    SENSORS_ROWS
+    VARIO_ROWS
+  });
 
-  for (uint8_t i=0; i<NUM_BODY_LINES; i++) {
-    coord_t y = MENU_CONTENT_TOP + i*FH;
+  for (uint8_t i = 0; i < NUM_BODY_LINES; i++) {
+    coord_t y = MENU_CONTENT_TOP + i * FH;
     int k = i + menuVerticalOffset;
-    for (int j=0; j<=k; j++) {
+    for (int j = 0; j <= k; j++) {
       if (mstate_tab[j] == HIDDEN_ROW)
         k++;
     }
 
-    LcdFlags blink = ((s_editMode>0) ? BLINK|INVERS : INVERS);
+    LcdFlags blink = ((s_editMode > 0) ? BLINK | INVERS : INVERS);
     LcdFlags attr = (menuVerticalPosition == k ? blink : 0);
 
-    if (k>=ITEM_TELEMETRY_SENSOR1 && k<ITEM_TELEMETRY_SENSOR1+MAX_TELEMETRY_SENSORS) {
-      int index = k-ITEM_TELEMETRY_SENSOR1;
-      lcdDrawNumber(MENUS_MARGIN_LEFT+INDENT_WIDTH, y, index+1, LEFT|attr, 0, NULL, ":");
+    if (k >= ITEM_TELEMETRY_SENSOR1 && k < ITEM_TELEMETRY_SENSOR1 + MAX_TELEMETRY_SENSORS) {
+      int index = k - ITEM_TELEMETRY_SENSOR1;
+      lcdDrawNumber(MENUS_MARGIN_LEFT + INDENT_WIDTH, y, index + 1, LEFT | attr, 0, NULL, ":");
       lcdDrawSizedText(60, y, g_model.telemetrySensors[index].label, TELEM_LABEL_LEN, ZCHAR);
-      TelemetryItem & telemetryItem = telemetryItems[index];
+      TelemetryItem &telemetryItem = telemetryItems[index];
       if (telemetryItem.isFresh()) {
         lcdDrawText(130, y, "*");
       }
       if (telemetryItem.isAvailable()) {
         LcdFlags color = telemetryItem.isOld() ? ALARM_COLOR : TEXT_COLOR;
-        drawSensorCustomValue(TELEM_COL2, y, index, getValue(MIXSRC_FIRST_TELEM+3*index), LEFT|color);
+        drawSensorCustomValue(TELEM_COL2, y, index, getValue(MIXSRC_FIRST_TELEM + 3 * index), LEFT | color);
       }
       else {
         lcdDrawText(TELEM_COL2, y, "---"); // TODO shortcut
       }
-      TelemetrySensor * sensor = & g_model.telemetrySensors[index];
+      TelemetrySensor * sensor = &g_model.telemetrySensors[index];
 #if defined(MULTIMODULE)
       if (IS_SPEKTRUM_PROTOCOL()) {
-          // Spektrum does not (yet?) really support multiple sensor of the same type. But a lot of
-          // different sensor display the same information (e.g. voltage, capacity). Show the id
-          // of the sensor in the overview to ease figuring out what sensors belong together
-          lcdDrawHexNumber(TELEM_COL5, y, sensor->id, LEFT);
-        } else
+        // Spektrum does not (yet?) really support multiple sensor of the same type. But a lot of
+        // different sensor display the same information (e.g. voltage, capacity). Show the id
+        // of the sensor in the overview to ease figuring out what sensors belong together
+        lcdDrawHexNumber(TELEM_COL5, y, sensor->id, LEFT);
+      }
+      else
 #endif
       if (sensor->type == TELEM_TYPE_CUSTOM && !g_model.ignoreSensorIds) {
         lcdDrawNumber(TELEM_COL5, y, sensor->instance, LEFT);
@@ -666,49 +737,50 @@ bool menuModelTelemetryFrsky(event_t event)
     }
     else
 
-    switch (k) {
-      case ITEM_TELEMETRY_PROTOCOL_TYPE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_TELEMETRY_TYPE);
-        lcdDrawTextAtIndex(TELEM_COL2, y, STR_TELEMETRY_PROTOCOLS, g_model.telemetryProtocol, attr);
-        g_model.telemetryProtocol = checkIncDec(event, g_model.telemetryProtocol, PROTOCOL_TELEMETRY_FIRST, PROTOCOL_TELEMETRY_LAST, EE_MODEL, isTelemetryProtocolAvailable);
-        break;
+      switch (k) {
+        case ITEM_TELEMETRY_PROTOCOL_TYPE:
+          lcdDrawText(MENUS_MARGIN_LEFT, y, STR_TELEMETRY_TYPE);
+          lcdDrawTextAtIndex(TELEM_COL2, y, STR_TELEMETRY_PROTOCOLS, g_model.telemetryProtocol, attr);
+          g_model.telemetryProtocol = checkIncDec(event, g_model.telemetryProtocol, PROTOCOL_TELEMETRY_FIRST, PROTOCOL_TELEMETRY_LAST, EE_MODEL,
+                                                  isTelemetryProtocolAvailable);
+          break;
 
 
-      case ITEM_TELEMETRY_DISCOVER_SENSORS:
-        lcdDrawText(MENUS_MARGIN_LEFT+INDENT_WIDTH, y, allowNewSensors ? NO_INDENT(STR_STOP_DISCOVER_SENSORS) : NO_INDENT(STR_DISCOVER_SENSORS), attr);
-        if (attr && event==EVT_KEY_BREAK(KEY_ENTER)) {
-          s_editMode = 0;
-          allowNewSensors = !allowNewSensors;
-        }
-        break;
-
-      case ITEM_TELEMETRY_NEW_SENSOR:
-        lcdDrawText(MENUS_MARGIN_LEFT+INDENT_WIDTH, y, NO_INDENT(STR_TELEMETRY_NEWSENSOR), attr);
-        if (attr && event==EVT_KEY_BREAK(KEY_ENTER)) {
-          s_editMode = 0;
-          int res = availableTelemetryIndex();
-          if (res >= 0) {
-            s_currIdx = res;
-            pushMenu(menuModelSensor);
+        case ITEM_TELEMETRY_DISCOVER_SENSORS:
+          lcdDrawText(MENUS_MARGIN_LEFT + INDENT_WIDTH, y, allowNewSensors ? NO_INDENT(STR_STOP_DISCOVER_SENSORS) : NO_INDENT(STR_DISCOVER_SENSORS), attr);
+          if (attr && event == EVT_KEY_BREAK(KEY_ENTER)) {
+            s_editMode = 0;
+            allowNewSensors = !allowNewSensors;
           }
-          else {
-            POPUP_WARNING(STR_TELEMETRYFULL);
+          break;
+
+        case ITEM_TELEMETRY_NEW_SENSOR:
+          lcdDrawText(MENUS_MARGIN_LEFT + INDENT_WIDTH, y, NO_INDENT(STR_TELEMETRY_NEWSENSOR), attr);
+          if (attr && event == EVT_KEY_BREAK(KEY_ENTER)) {
+            s_editMode = 0;
+            int res = availableTelemetryIndex();
+            if (res >= 0) {
+              s_currIdx = res;
+              pushMenu(menuModelSensor);
+            }
+            else {
+              POPUP_WARNING(STR_TELEMETRYFULL);
+            }
           }
-        }
-        break;
+          break;
 
 
 #if defined(VARIO)
 
-      case ITEM_TELEMETRY_VARIO_SOURCE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_SOURCE);
-        drawSource(TELEM_COL2, y, g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM+3*(g_model.frsky.varioSource-1) : 0, attr);
-        if (attr) {
-          g_model.frsky.varioSource = checkIncDec(event, g_model.frsky.varioSource, 0, MAX_TELEMETRY_SENSORS, EE_MODEL|NO_INCDEC_MARKS, isSensorAvailable);
-        }
-        break;
+        case ITEM_TELEMETRY_VARIO_SOURCE:
+          lcdDrawText(MENUS_MARGIN_LEFT, y, STR_SOURCE);
+          drawSource(TELEM_COL2, y, g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM + 3 * (g_model.frsky.varioSource - 1) : 0, attr);
+          if (attr) {
+            g_model.frsky.varioSource = checkIncDec(event, g_model.frsky.varioSource, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS, isSensorAvailable);
+          }
+          break;
 #endif
-    }
+      }
   }
   return true;
 }
