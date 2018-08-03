@@ -30,8 +30,8 @@ class Slider : public Window {
       Window(parent, rect),
       vmin(vmin),
       vmax(vmax),
-      getValue(getValue),
-      setValue(setValue)
+      getValue(std::move(getValue)),
+      setValue(std::move(setValue))
     {
     }
 
