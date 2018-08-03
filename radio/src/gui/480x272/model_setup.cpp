@@ -409,7 +409,7 @@ void ModelSetupPage::updateInternalModuleWindow()
     auto channelEndEdit = new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 1),
                                          1 + g_model.moduleData[INTERNAL_MODULE].channelsStart,
                                          min<int8_t>(
-                                           1 + g_model.moduleData[INTERNAL_MODULE].channelsStart + MAX_CHANNELS(0) + 8,
+                                           1 + g_model.moduleData[INTERNAL_MODULE].channelsStart + MAX_CHANNELS_M8(0) + 8,
                                            1 + 32),
                                          GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].channelsCount + 8 +
                                                      g_model.moduleData[INTERNAL_MODULE].channelsStart),
@@ -417,7 +417,7 @@ void ModelSetupPage::updateInternalModuleWindow()
                                                    newValue - 8 - g_model.moduleData[INTERNAL_MODULE].channelsStart));
     channelEndEdit->setPrefix(STR_CH);
     // Channel start
-    auto channelStartEdit = new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS(0),
+    auto channelStartEdit = new NumberEdit(internalModuleWindow, grid.getFieldSlot(2, 0), 1, MAX_CHANNELS_M8(0),
                                            GET_DEFAULT(1 + g_model.moduleData[INTERNAL_MODULE].channelsStart),
                                            [=](int8_t newValue) {
                                              g_model.moduleData[INTERNAL_MODULE].channelsStart = newValue - 1;
@@ -508,9 +508,8 @@ void ModelSetupPage::updateExternalModuleWindow()
 
   if (g_model.moduleData[EXTERNAL_MODULE].type != MODULE_TYPE_NONE && !IS_MODULE_MULTIMODULE(EXTERNAL_MODULE)) {
     if (IS_MODULE_XJT(EXTERNAL_MODULE)) {
-      Choice * xjtChoice = new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, RF_PROTO_OFF,
-                                      RF_PROTO_LAST,
-                                      GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
+      auto xjtChoice = new Choice(externalModuleWindow, grid.getFieldSlot(2, 1), STR_XJT_PROTOCOLS, RF_PROTO_OFF, RF_PROTO_LAST,
+                                  GET_SET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].rfProtocol));
       xjtChoice->setAvailableHandler([](int index) {
         return index != RF_PROTO_OFF;
       });
@@ -533,49 +532,42 @@ void ModelSetupPage::updateExternalModuleWindow()
 
     // Channel Range
     new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_CHANNELRANGE);
-
     if (IS_MODULE_CROSSFIRE(EXTERNAL_MODULE)) { // CRSF has a fixed 16ch span
-      // Channel end (defined after channel start to allow refresh on channel start change)
-      auto channelEnd = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
-                                       0, 32,
+      auto channelStart = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1, 17,
+                                         GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart));
+      auto channelEnd = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1), 0, 32,
                                        GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 16),
                                        SET_VALUE(g_model.moduleData[EXTERNAL_MODULE].channelsCount, 8));
-      channelEnd->setPrefix(STR_CH);
-      // Channel start
-      auto channelStart = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0),
-                                         1, 17,
-                                         GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
-                                         [=](int32_t newValue) {
-                                           g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
-                                           SET_DIRTY();
-                                           channelEnd->invalidate();
-                                         });
       channelStart->setPrefix(STR_CH);
+      channelEnd->setPrefix(STR_CH);
+      channelStart->setSetValueHandler([=](int32_t newValue) {
+        g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
+        SET_DIRTY();
+        channelEnd->invalidate();
+      });
     }
     else {
-      // Channel end (defined after channel start to allow refresh on channel start change)
+      auto channelStart = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1,
+                                         MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount - 7,
+                                         GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart));
       auto channelEnd = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 1),
                                        g_model.moduleData[EXTERNAL_MODULE].channelsStart + 1,
-                                       g_model.moduleData[EXTERNAL_MODULE].channelsStart +
-                                       MAX_CHANNELS(EXTERNAL_MODULE),
-                                       GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 8 +
-                                                   g_model.moduleData[EXTERNAL_MODULE].channelsCount),
-                                       [=](int8_t newValue) {
-                                         g_model.moduleData[EXTERNAL_MODULE].channelsCount =
-                                           newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
-                                         SET_DIRTY();
-                                       });
-      channelEnd->setPrefix(STR_CH);
-      // Channel start
-      auto channelStart = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 1,
-                                         MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount,
-                                         GET_DEFAULT(1 + g_model.moduleData[EXTERNAL_MODULE].channelsStart),
-                                         [=](int32_t newValue) {
-                                           g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
-                                           SET_DIRTY();
-                                           channelEnd->invalidate();
-                                         });
+                                       g_model.moduleData[EXTERNAL_MODULE].channelsStart + MAX_EXTERNAL_MODULE_CHANNELS_M8() + 8,
+                                       GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 8 + g_model.moduleData[EXTERNAL_MODULE].channelsCount));
       channelStart->setPrefix(STR_CH);
+      channelEnd->setPrefix(STR_CH);
+      channelStart->setSetValueHandler([=](int32_t newValue) {
+        g_model.moduleData[EXTERNAL_MODULE].channelsStart = newValue - 1;
+        SET_DIRTY();
+        channelEnd->setMin(g_model.moduleData[EXTERNAL_MODULE].channelsStart + 1);
+        channelEnd->setMax(g_model.moduleData[EXTERNAL_MODULE].channelsStart + MAX_EXTERNAL_MODULE_CHANNELS_M8() + 8);
+        channelEnd->invalidate();
+      });
+      channelEnd->setSetValueHandler([=](int32_t newValue) {
+        g_model.moduleData[EXTERNAL_MODULE].channelsCount = newValue - g_model.moduleData[EXTERNAL_MODULE].channelsStart - 8;
+        SET_DIRTY();
+        channelStart->setMax(MAX_OUTPUT_CHANNELS - g_model.moduleData[EXTERNAL_MODULE].channelsCount - 7);
+      });
     }
     grid.nextLine();
 
@@ -584,6 +576,7 @@ void ModelSetupPage::updateExternalModuleWindow()
       SET_DEFAULT_PPM_FRAME_LENGTH(EXTERNAL_MODULE);
       // PPM frame
       new StaticText(externalModuleWindow, grid.getLabelSlot(true), STR_PPMFRAME);
+
       // PPM frame length
       edit = new NumberEdit(externalModuleWindow, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225,
                             GET_DEFAULT(g_model.moduleData[EXTERNAL_MODULE].ppm.frameLength * 5 + 225),
@@ -905,7 +898,7 @@ case ITEM_MODEL_EXTERNAL_MODULE_MODE:
         if (checkIncDec_Ret) {
           g_model.moduleData[EXTERNAL_MODULE].channelsStart = 0;
           g_model.moduleData[EXTERNAL_MODULE].channelsCount = DEFAULT_CHANNELS(EXTERNAL_MODULE);
-          g_model.moduleData[EXTERNAL_MODULE].channelsCount = MAX_EXTERNAL_MODULE_CHANNELS();
+          g_model.moduleData[EXTERNAL_MODULE].channelsCount = MAX_EXTERNAL_MODULE_CHANNELS_M8();
         }
         break;
 #if defined(MULTIMODULE)
@@ -997,7 +990,7 @@ case ITEM_MODEL_EXTERNAL_MODULE_CHANNELS:
           CHECK_INCDEC_MODELVAR_ZERO(event, moduleData.channelsStart, 32-8-moduleData.channelsCount);
           break;
         case 1:
-          CHECK_INCDEC_MODELVAR(event, moduleData.channelsCount, -4, min<int8_t>(MAX_CHANNELS(moduleIdx), 32-8-moduleData.channelsStart));
+          CHECK_INCDEC_MODELVAR(event, moduleData.channelsCount, -4, min<int8_t>(MAX_CHANNELS_M8(moduleIdx), 32-8-moduleData.channelsStart));
           if ((i == ITEM_MODEL_EXTERNAL_MODULE_CHANNELS && g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_PPM)
               || (i == ITEM_MODEL_TRAINER_LINE1)
               )

@@ -460,36 +460,14 @@ enum SwashType {
 
 enum Protocols {
   PROTO_PPM,
-#if !defined(CPUARM)
-  PROTO_PPM16,
-  PROTO_PPMSIM,
-#endif
-#if defined(PXX) || defined(DSM2) || defined(IRPROTOS)
   PROTO_PXX,
-#endif
-#if defined(PCBFLYSKY)
   PROTO_FLYSKY,
-#endif
-#if defined(DSM2) || defined(IRPROTOS)
   PROTO_DSM2_LP45,
   PROTO_DSM2_DSM2,
   PROTO_DSM2_DSMX,
-#endif
-#if defined(CPUARM)
   PROTO_CROSSFIRE,
-#endif
-#if defined(IRPROTOS)
-  // only used on AVR
-  // we will need 4 bits for proto :(
-  PROTO_SILV,
-  PROTO_TRAC09,
-  PROTO_PICZ,
-  PROTO_SWIFT,
-#endif
-#if defined(CPUARM)
   PROTO_MULTIMODULE,
   PROTO_SBUS,
-#endif
   PROTO_MAX,
   PROTO_NONE
 };
