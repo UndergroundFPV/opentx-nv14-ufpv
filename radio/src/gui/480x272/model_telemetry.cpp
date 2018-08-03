@@ -180,6 +180,8 @@ class SensorEditWindow : public Page {
       sensorOneWindow = new Window(window, {0, grid.getWindowHeight(), LCD_W, 0});
       updateSensorOneWindow();
       grid.addWindow(sensorOneWindow);
+
+      window->setInnerHeight(grid.getWindowHeight());
     }
 };
 

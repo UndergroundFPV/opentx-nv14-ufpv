@@ -22,10 +22,10 @@
 #define _MENUTOOLBAR_H_
 
 #include "button.h"
-int getFirstAvailable(int min, int max, std::function<bool(int)>isValueAvailable);
+#include "menu.h"
 
+int getFirstAvailable(int min, int max, std::function<bool(int)>isValueAvailable);
 uint8_t getFontHeight(LcdFlags flags);
-class Menu;
 
 class MenuToolbarButton: public Button {
   public:
@@ -74,7 +74,7 @@ class MenuToolbar: public Window {
     {
     }
 
-    ~MenuToolbar()
+    ~MenuToolbar() override
     {
       deleteChildren();
     }
