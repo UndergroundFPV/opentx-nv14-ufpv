@@ -25,8 +25,8 @@
 #define SET_DIRTY()     storageDirty(functions == g_model.customFn ? EE_MODEL : EE_GENERAL)
 
 class SpecialFunctionEditWindow : public Page {
-public:
-    SpecialFunctionEditWindow(CustomFunctionData * functions, uint8_t index):
+  public:
+    SpecialFunctionEditWindow(CustomFunctionData * functions, uint8_t index) :
       Page(),
       functions(functions),
       index(index)
@@ -35,7 +35,7 @@ public:
       buildHeader(&header);
     }
 
-protected:
+  protected:
     CustomFunctionData * functions;
     uint8_t index;
     Window * specialFunctionOneWindow = nullptr;
@@ -56,7 +56,7 @@ protected:
       uint8_t func = CFN_FUNC(cfn);
 
       // Func param
-      switch(func) {
+      switch (func) {
         case FUNC_OVERRIDE_CHANNEL:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_CH);
           new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS - 1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
@@ -108,16 +108,17 @@ protected:
         case FUNC_PLAY_SCRIPT:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
           new FileChoice(specialFunctionOneWindow, grid.getFieldSlot(),
-            func == FUNC_PLAY_SCRIPT ? SCRIPTS_FUNCS_PATH : std::string(SOUNDS_PATH, SOUNDS_PATH_LNG_OFS) + std::string(currentLanguagePack->id, 2),
-            func == FUNC_PLAY_SCRIPT ? SCRIPTS_EXT : SOUNDS_EXT,
-            sizeof(cfn->play.name),
-            [=]() {
-              return std::string(cfn->play.name, ZLEN(cfn->play.name));
-            },
-            [=](std::string newValue) {
-              strncpy(cfn->play.name, newValue.c_str(), sizeof(cfn->play.name));
-              SET_DIRTY();
-            });
+                         func == FUNC_PLAY_SCRIPT ? SCRIPTS_FUNCS_PATH : std::string(SOUNDS_PATH, SOUNDS_PATH_LNG_OFS) +
+                                                                         std::string(currentLanguagePack->id, 2),
+                         func == FUNC_PLAY_SCRIPT ? SCRIPTS_EXT : SOUNDS_EXT,
+                         sizeof(cfn->play.name),
+                         [=]() {
+                           return std::string(cfn->play.name, ZLEN(cfn->play.name));
+                         },
+                         [=](std::string newValue) {
+                           strncpy(cfn->play.name, newValue.c_str(), sizeof(cfn->play.name));
+                           SET_DIRTY();
+                         });
           grid.nextLine();
           break;
 
@@ -135,11 +136,11 @@ protected:
           break;
         }
 
-       case FUNC_SET_FAILSAFE:
-         new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_MODULE);
-         new Choice(specialFunctionOneWindow, grid.getFieldSlot(), "\004Int.Ext.", 0, NUM_MODULES - 1, GET_SET_DEFAULT(CFN_PARAM(cfn)));
-         grid.nextLine();
-         break;
+        case FUNC_SET_FAILSAFE:
+          new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_MODULE);
+          new Choice(specialFunctionOneWindow, grid.getFieldSlot(), "\004Int.Ext.", 0, NUM_MODULES - 1, GET_SET_DEFAULT(CFN_PARAM(cfn)));
+          grid.nextLine();
+          break;
 
         case FUNC_PLAY_VALUE:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
@@ -153,8 +154,7 @@ protected:
           grid.nextLine();
           break;
 
-        case FUNC_LOGS:
-        {
+        case FUNC_LOGS: {
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
           auto edit = new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), 0, 255, GET_SET_DEFAULT(CFN_PARAM(cfn)));
           edit->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
@@ -171,14 +171,14 @@ protected:
       }
       else if (HAS_REPEAT_PARAM(func)) { // !1x 1x 1s 2s 3s ...
         new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_REPEAT);
-        auto repeat = new Choice(specialFunctionOneWindow, grid.getFieldSlot(), nullptr, -1,  60/CFN_PLAY_REPEAT_MUL, GET_SET_DEFAULT(CFN_PLAY_REPEAT(cfn)));
-        repeat->setTextHandler([](int32_t value) -> std::string {
+        auto repeat = new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(2, 1), -1, 60/CFN_PLAY_REPEAT_MUL, GET_SET_DEFAULT(CFN_PLAY_REPEAT(cfn)));
+        repeat->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
           if (value == 0)
-            return "1x";
+            lcdDrawText(2, 2, "1x", flags);
           else if (value == CFN_PLAY_REPEAT_NOSTART)
-            return "!1x";
+            lcdDrawText(2, 2, "!1x", flags);
           else
-            return std::to_string(value * CFN_PLAY_REPEAT_MUL) + "s";
+            drawNumber(dc, 2, 2, value * CFN_PLAY_REPEAT_MUL, flags, 0, nullptr, "s");
         });
       }
     }
@@ -195,25 +195,26 @@ protected:
       new StaticText(window, grid.getLabelSlot(), STR_SWITCH);
       auto swicthchoice = new SwitchChoice(window, grid.getFieldSlot(), SWSRC_FIRST, SWSRC_LAST, GET_SET_DEFAULT(CFN_SWITCH(cfn)));
       swicthchoice->setAvailableHandler([=](int value) {
-        return (functions == g_model.customFn ? isSwitchAvailable(value, ModelCustomFunctionsContext) : isSwitchAvailable(value, GeneralCustomFunctionsContext));
+        return (functions == g_model.customFn ? isSwitchAvailable(value, ModelCustomFunctionsContext) : isSwitchAvailable(value,
+                                                                                                                          GeneralCustomFunctionsContext));
       });
       grid.nextLine();
 
       // Function
       new StaticText(window, grid.getLabelSlot(), STR_FUNC);
-      auto choice = new Choice(window, grid.getFieldSlot(), STR_VFSWFUNC, 0, FUNC_MAX-1, GET_DEFAULT(CFN_FUNC(cfn)),
+      auto choice = new Choice(window, grid.getFieldSlot(), STR_VFSWFUNC, 0, FUNC_MAX - 1, GET_DEFAULT(CFN_FUNC(cfn)),
                                [=](int32_t newValue) {
-                                   CFN_FUNC(cfn) = newValue;
-                                   CFN_RESET(cfn);
-                                   SET_DIRTY();
-                                   updateSpecialFunctionOneWindow();
+                                 CFN_FUNC(cfn) = newValue;
+                                 CFN_RESET(cfn);
+                                 SET_DIRTY();
+                                 updateSpecialFunctionOneWindow();
                                });
       choice->setAvailableHandler([=](int value) {
         return isAssignableFunctionAvailable(value, functions);
       });
       grid.nextLine();
 
-      specialFunctionOneWindow = new Window(window, { 0, grid.getWindowHeight(), LCD_W, 0 });
+      specialFunctionOneWindow = new Window(window, {0, grid.getWindowHeight(), LCD_W, 0});
       updateSpecialFunctionOneWindow();
       grid.addWindow(specialFunctionOneWindow);
     }
@@ -225,16 +226,17 @@ static constexpr coord_t col1 = 20;
 static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
 static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1 + 20;
 
-class SpecialFunctionButton: public Button {
+class SpecialFunctionButton : public Button {
   public:
-    SpecialFunctionButton(Window * parent, const rect_t & rect, CustomFunctionData * functions, uint8_t index):
+    SpecialFunctionButton(Window * parent, const rect_t &rect, CustomFunctionData * functions, uint8_t index) :
       Button(parent, rect),
       functions(functions),
       index(index)
     {
       const CustomFunctionData * cfn = &functions[index];
       uint8_t func = CFN_FUNC(cfn);
-      if (!CFN_EMPTY(cfn) && (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func) || (func == FUNC_PLAY_TRACK || func == FUNC_BACKGND_MUSIC || func == FUNC_PLAY_SCRIPT))) {
+      if (!CFN_EMPTY(cfn) &&
+          (HAS_ENABLE_PARAM(func) || HAS_REPEAT_PARAM(func) || (func == FUNC_PLAY_TRACK || func == FUNC_BACKGND_MUSIC || func == FUNC_PLAY_SCRIPT))) {
         setHeight(getHeight() + 20);
       }
     }
@@ -258,11 +260,11 @@ class SpecialFunctionButton: public Button {
       // SF.all
       const CustomFunctionData * cfn = &functions[index];
       if (functions[index].func == FUNC_OVERRIDE_CHANNEL && functions != g_model.customFn) {
-        functions[index].func = FUNC_OVERRIDE_CHANNEL+1;
+        functions[index].func = FUNC_OVERRIDE_CHANNEL + 1;
       }
       uint8_t func = CFN_FUNC(cfn);
 
-      drawSwitch(col1, line1, CFN_SWITCH(cfn), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index)) ? BOLD : 0));
+      drawSwitch(col1, line1, CFN_SWITCH(cfn), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE) 1 << index)) ? BOLD : 0));
       if (CFN_EMPTY(cfn))
         return;
 
@@ -270,23 +272,23 @@ class SpecialFunctionButton: public Button {
       int16_t val_min = 0;
       int16_t val_max = 255;
 
-      switch(func) {
+      switch (func) {
         case FUNC_OVERRIDE_CHANNEL:
-          putsChn(col1, line2, CFN_CH_INDEX(cfn)+1, 0);
+          putsChn(col1, line2, CFN_CH_INDEX(cfn) + 1, 0);
           getMixSrcRange(MIXSRC_FIRST_CH, val_min, val_max);
           lcdDrawNumber(col2, line2, CFN_PARAM(cfn));
           break;
 
         case FUNC_TRAINER:
-          drawSource(col1, line2, CFN_CH_INDEX(cfn)==0 ? 0 : MIXSRC_Rud+CFN_CH_INDEX(cfn)-1);
+          drawSource(col1, line2, CFN_CH_INDEX(cfn) == 0 ? 0 : MIXSRC_Rud + CFN_CH_INDEX(cfn) - 1);
           break;
 
         case FUNC_RESET:
-          if(CFN_PARAM(cfn) < FUNC_RESET_PARAM_FIRST_TELEM) {
+          if (CFN_PARAM(cfn) < FUNC_RESET_PARAM_FIRST_TELEM) {
             lcdDrawTextAtIndex(col1, line2, STR_VFSWRESET, CFN_PARAM(cfn));
           }
           else {
-            TelemetrySensor * sensor = & g_model.telemetrySensors[CFN_PARAM(cfn)-FUNC_RESET_PARAM_FIRST_TELEM];
+            TelemetrySensor * sensor = &g_model.telemetrySensors[CFN_PARAM(cfn) - FUNC_RESET_PARAM_FIRST_TELEM];
             lcdDrawSizedText(col1, line2, sensor->label, TELEM_LABEL_LEN, ZCHAR);
           }
           break;
@@ -309,7 +311,7 @@ class SpecialFunctionButton: public Button {
           break;
 
         case FUNC_SET_TIMER:
-          drawStringWithIndex(col1, line2, STR_TIMER, CFN_TIMER_INDEX(cfn)+1, 0);
+          drawStringWithIndex(col1, line2, STR_TIMER, CFN_TIMER_INDEX(cfn) + 1, 0);
           break;
 
         case FUNC_SET_FAILSAFE:
@@ -339,7 +341,7 @@ class SpecialFunctionButton: public Button {
           lcdDrawText(col3, line2, "!1x", 0);
         }
         else {
-          lcdDrawNumber(col3+12, line2, CFN_PLAY_REPEAT(cfn)*CFN_PLAY_REPEAT_MUL, 0|RIGHT, 0, NULL, "s");
+          lcdDrawNumber(col3 + 12, line2, CFN_PLAY_REPEAT(cfn) * CFN_PLAY_REPEAT_MUL, 0 | RIGHT, 0, NULL, "s");
         }
       }
     }
@@ -352,14 +354,15 @@ class SpecialFunctionButton: public Button {
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
     }
 
-protected:
+  protected:
     CustomFunctionData * functions;
     uint8_t index;
     bool active = false;
 };
 
-SpecialFunctionsPage::SpecialFunctionsPage(CustomFunctionData * functions):
-  PageTab(functions == g_model.customFn ? STR_MENUCUSTOMFUNC : STR_MENUSPECIALFUNCS, functions == g_model.customFn ? ICON_MODEL_SPECIAL_FUNCTIONS : ICON_RADIO_GLOBAL_FUNCTIONS),
+SpecialFunctionsPage::SpecialFunctionsPage(CustomFunctionData * functions) :
+  PageTab(functions == g_model.customFn ? STR_MENUCUSTOMFUNC : STR_MENUSPECIALFUNCS,
+          functions == g_model.customFn ? ICON_MODEL_SPECIAL_FUNCTIONS : ICON_RADIO_GLOBAL_FUNCTIONS),
   functions(functions)
 {
 }
@@ -387,9 +390,9 @@ void SpecialFunctionsPage::build(Window * window, int8_t focusIndex)
   grid.setLabelWidth(66);
 
   Window::clearFocus();
-  char s[5]="SF";
+  char s[5] = "SF";
 
-  for(uint8_t  i=0; i < MAX_SPECIAL_FUNCTIONS; i++) {
+  for (uint8_t i = 0; i < MAX_SPECIAL_FUNCTIONS; i++) {
     CustomFunctionData * cfn = &functions[i];
 
     strAppendUnsigned(&s[2], i);
@@ -398,50 +401,50 @@ void SpecialFunctionsPage::build(Window * window, int8_t focusIndex)
     if (focusIndex == i)
       button->setFocus();
     button->setPressHandler([=]() -> uint8_t {
-        button->bringToTop();
-        Menu * menu = new Menu();
-        menu->addLine(STR_EDIT, [=]() {
-            editSpecialFunction(window, i);
+      button->bringToTop();
+      Menu * menu = new Menu();
+      menu->addLine(STR_EDIT, [=]() {
+        editSpecialFunction(window, i);
+      });
+      if (!CFN_EMPTY(cfn)) {
+        menu->addLine(STR_COPY, [=]() {
+          clipboard.type = CLIPBOARD_TYPE_CUSTOM_FUNCTION;
+          clipboard.data.cfn = *cfn;
         });
-        if (!CFN_EMPTY(cfn)) {
-          menu->addLine(STR_COPY, [=]() {
-              clipboard.type = CLIPBOARD_TYPE_CUSTOM_FUNCTION;
-              clipboard.data.cfn = *cfn;
+      }
+      if (clipboard.type == CLIPBOARD_TYPE_CUSTOM_FUNCTION) {
+        menu->addLine(STR_PASTE, [=]() {
+          *cfn = clipboard.data.cfn;
+          SET_DIRTY();
+          rebuild(window, i);
+        });
+      }
+      if (!CFN_EMPTY(cfn) && CFN_EMPTY(&functions[MAX_SPECIAL_FUNCTIONS - 1])) {
+        menu->addLine(STR_INSERT, [=]() {
+          memmove(cfn + 1, cfn, (MAX_SPECIAL_FUNCTIONS - menuVerticalPosition - 1) * sizeof(CustomFunctionData));
+          memset(cfn, 0, sizeof(CustomFunctionData));
+          SET_DIRTY();
+          rebuild(window, i);
+        });
+      }
+      if (!CFN_EMPTY(cfn)) {
+        menu->addLine(STR_CLEAR, [=]() {
+          memset(cfn, 0, sizeof(CustomFunctionData));
+          SET_DIRTY();
+        });
+      }
+      for (int j = i; j < MAX_SPECIAL_FUNCTIONS; j++) {
+        if (!CFN_EMPTY(&functions[j])) {
+          menu->addLine(STR_DELETE, [=]() {
+            memmove(cfn, cfn + 1, (MAX_SPECIAL_FUNCTIONS - i - 1) * sizeof(CustomFunctionData));
+            memset(&functions[MAX_SPECIAL_FUNCTIONS - 1], 0, sizeof(CustomFunctionData));
+            SET_DIRTY();
+            rebuild(window, i);
           });
+          break;
         }
-        if (clipboard.type == CLIPBOARD_TYPE_CUSTOM_FUNCTION) {
-          menu->addLine(STR_PASTE, [=]() {
-              *cfn = clipboard.data.cfn;
-              SET_DIRTY();
-              rebuild(window, i);
-          });
-        }
-        if (!CFN_EMPTY(cfn) && CFN_EMPTY(&functions[MAX_SPECIAL_FUNCTIONS-1])) {
-          menu->addLine(STR_INSERT, [=]() {
-              memmove(cfn+1, cfn, (MAX_SPECIAL_FUNCTIONS-menuVerticalPosition-1)*sizeof(CustomFunctionData));
-              memset(cfn, 0, sizeof(CustomFunctionData));
-              SET_DIRTY();
-              rebuild(window, i);
-          });
-        }
-        if (!CFN_EMPTY(cfn)) {
-          menu->addLine(STR_CLEAR, [=]() {
-              memset(cfn, 0, sizeof(CustomFunctionData));
-              SET_DIRTY();
-          });
-        }
-        for (int j=i; j<MAX_SPECIAL_FUNCTIONS; j++) {
-          if (!CFN_EMPTY(&functions[j])) {
-            menu->addLine(STR_DELETE, [=]() {
-                memmove(cfn, cfn+1, (MAX_SPECIAL_FUNCTIONS-i-1)*sizeof(CustomFunctionData));
-                memset(&functions[MAX_SPECIAL_FUNCTIONS-1], 0, sizeof(CustomFunctionData));
-                SET_DIRTY();
-                rebuild(window, i);
-            });
-            break;
-          }
-        }
-        return 0;
+      }
+      return 0;
     });
 
     grid.spacer(button->height() + 5);
