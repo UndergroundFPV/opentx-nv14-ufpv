@@ -44,6 +44,65 @@ class SensorSourceChoice : public SourceChoice {
     }
 };
 
+class SensorButton : public Button {
+  public:
+    SensorButton(Window * parent, const rect_t &rect, uint8_t index) :
+      Button(parent, rect),
+      index(index)
+    {
+    }
+
+    static constexpr coord_t line1 = 1;
+    static constexpr coord_t line2 = 22;
+    static constexpr coord_t col1 = 60;
+    static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
+    static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1 + 20;
+
+    bool isActive()
+    {
+      // TODO
+      return false;
+    }
+
+    void checkEvents() override
+    {
+      if (active != isActive()) {
+        invalidate();
+        active = !active;
+      }
+    }
+
+    void paintSpecialFunctionLine(BitmapBuffer * dc)
+    {
+      lcdDrawNumber(2, 1, index + 1, LEFT, 0, NULL, ":");
+      lcdDrawSizedText(col1, line1, g_model.telemetrySensors[index].label, TELEM_LABEL_LEN, ZCHAR);
+      TelemetryItem &telemetryItem = telemetryItems[index];
+      if (telemetryItem.isFresh()) {
+        lcdDrawText(col2, line1, "*");
+      }
+      if (telemetryItem.isAvailable()) {
+        LcdFlags color = telemetryItem.isOld() ? ALARM_COLOR : TEXT_COLOR;
+        drawSensorCustomValue(col3, line1, index, getValue(MIXSRC_FIRST_TELEM + 3 * index), LEFT | color);
+      }
+      else {
+        lcdDrawText(col3, line1, "---");
+      }
+    }
+
+
+    virtual void paint(BitmapBuffer * dc) override
+    {
+      if (active)
+        dc->drawSolidFilledRect(2, 2, rect.w - 4, rect.h - 4, WARNING_COLOR);
+      paintSpecialFunctionLine(dc);
+      drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
+    }
+
+  protected:
+    uint8_t index;
+    bool active = false;
+};
+
 class SensorEditWindow : public Page {
   public:
     SensorEditWindow(uint8_t index) :
@@ -347,6 +406,40 @@ void ModelTelemetryPage::build(Window * window)
     new StaticText(window, grid.getFieldSlot(2, 1), STR_ID);
   grid.nextLine();
 
+  for (uint8_t idx; idx < availableTelemetryIndex(); idx++) {
+    Button * button = new SensorButton(window, grid.getLineSlot(), idx);
+    button->setPressHandler([=]() -> uint8_t {
+      button->bringToTop();
+      Menu * menu = new Menu();
+      menu->addLine(STR_EDIT, [=]() {
+        editSensor(window, idx);
+      });
+      menu->addLine(STR_COPY, [=]() {
+        int newIndex = availableTelemetryIndex();
+        if (newIndex >= 0) {
+          TelemetrySensor &sourceSensor = g_model.telemetrySensors[idx];
+          TelemetrySensor &newSensor = g_model.telemetrySensors[newIndex];
+          newSensor = sourceSensor;
+          TelemetryItem &sourceItem = telemetryItems[idx];
+          TelemetryItem &newItem = telemetryItems[newIndex];
+          newItem = sourceItem;
+          SET_DIRTY();
+          rebuild(window);
+        }
+        else {
+          new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL, nullptr);
+        }
+      });
+      menu->addLine(STR_DELETE, [=]() {
+        delTelemetryIndex(idx);
+        SET_DIRTY();
+        rebuild(window);
+      });
+      return 0;
+    });
+    grid.nextLine();
+  }
+
   new TextButton(window, grid.getLineSlot(), STR_DISCOVER_SENSORS,
                  []() -> uint8_t {
                    //TODO bistable triggering disco
@@ -356,7 +449,11 @@ void ModelTelemetryPage::build(Window * window)
 
   new TextButton(window, grid.getLineSlot(), STR_TELEMETRY_NEWSENSOR,
                  [=]() -> uint8_t {
-                   editSensor(window, 0);
+                   int res = availableTelemetryIndex();
+                   if (res >= 0)
+                     editSensor(window, res);
+                   else
+                     new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL, nullptr);
                    return 0;
                  });
   grid.nextLine();
