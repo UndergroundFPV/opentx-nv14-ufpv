@@ -36,7 +36,9 @@ class Confirmation : public Window {
 
     void paint(BitmapBuffer * dc) override;
 
-    bool onTouchEnd(coord_t x, coord_t y) override {
+    bool onTouchEnd(coord_t x, coord_t y) override
+    {
+      Window::onTouchEnd(x, y);
       deleteLater();
       return true;
     }
@@ -45,7 +47,6 @@ class Confirmation : public Window {
     uint8_t type;
     std::string title;
     std::string message;
-    // std::function<uint8_t(void)> onConfirm;
 };
 
 #endif // _CONFIRMATION_H_
