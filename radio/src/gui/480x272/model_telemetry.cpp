@@ -24,9 +24,9 @@
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
 
-class SensorSourceChoice: public SourceChoice {
+class SensorSourceChoice : public SourceChoice {
   public:
-    SensorSourceChoice(Window * window, const rect_t & rect, uint8_t * source, IsValueAvailable isValueAvailable):
+    SensorSourceChoice(Window * window, const rect_t &rect, uint8_t * source, IsValueAvailable isValueAvailable) :
       SourceChoice(window, rect, MIXSRC_NONE, MIXSRC_LAST_TELEM,
                    GET_DEFAULT(*source ? MIXSRC_FIRST_TELEM + 3 * (*source - 1) : MIXSRC_NONE),
                    [=](uint8_t newValue) {
@@ -127,21 +127,120 @@ class SensorEditWindow : public Page {
         grid.nextLine();
       }
 
-      // Sensor custom parameters
-      if (sensor->type == TELEM_TYPE_CALCULATED) {
-        if (sensor->formula == TELEM_FORMULA_CELL) {
-          new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CELLSENSOR);
-          new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->cell.source, isCellsSensor);
+      // PARAM1
+      if (sensor->unit < UNIT_FIRST_VIRTUAL) {
+        if (sensor->type == TELEM_TYPE_CALCULATED) {
+          if (sensor->formula == TELEM_FORMULA_CELL) {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CELLSENSOR);
+            new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->cell.source, isCellsSensor);
+          }
+          else if (sensor->formula == TELEM_FORMULA_DIST) {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_GPSSENSOR);
+            new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->dist.gps, isGPSSensor);
+          }
+          else if (sensor->formula == TELEM_FORMULA_CONSUMPTION) {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CURRENTSENSOR);
+            new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->consumption.source, isSensorAvailable);
+          }
+          else if (sensor->formula == TELEM_FORMULA_TOTALIZE) {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_SOURCE);
+            new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->consumption.source, isSensorAvailable);
+          }
+          else {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_SOURCE + std::to_string(1));
+            new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), (uint8_t *) &sensor->calc.sources[0], isSensorAvailable);
+          }
         }
-        else if (sensor->formula == TELEM_FORMULA_DIST) {
-          new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_GPSSENSOR);
-          new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->dist.gps, isGPSSensor);
+        else {
+          if (sensor->unit == UNIT_RPMS) {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_BLADES);
+            new NumberEdit(sensorOneWindow, grid.getFieldSlot(), 1, 30000, GET_SET_DEFAULT(sensor->custom.ratio));
+          }
+          else {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_RATIO);
+            auto edit = new NumberEdit(sensorOneWindow, grid.getFieldSlot(), 0, 30000, GET_SET_DEFAULT(sensor->custom.ratio));
+            edit->setZeroText("-");
+          }
         }
-        else if (sensor->formula == TELEM_FORMULA_CONSUMPTION) {
-          new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CURRENTSENSOR);
-          new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->consumption.source, isSensorAvailable);
-        }
+        grid.nextLine();
       }
+
+      //PARAM2
+      if (!(sensor->unit == UNIT_GPS || sensor->unit == UNIT_DATETIME || sensor->unit == UNIT_CELLS ||
+            (sensor->type == TELEM_TYPE_CALCULATED && (sensor->formula == TELEM_FORMULA_CONSUMPTION || sensor->formula == TELEM_FORMULA_TOTALIZE)))) {
+        if (sensor->type == TELEM_TYPE_CALCULATED) {
+          if (sensor->formula == TELEM_FORMULA_CELL) {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CELLINDEX);
+            new Choice(sensorOneWindow, grid.getFieldSlot(), STR_VCELLINDEX, 0, 8, GET_SET_DEFAULT(sensor->cell.index));
+          }
+          else if (sensor->formula == TELEM_FORMULA_DIST) {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_ALTSENSOR);
+            new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->dist.alt, isAltSensor);
+          }
+          else {
+            new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_SOURCE + std::to_string(2));
+            new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), (uint8_t *) &sensor->calc.sources[1], isSensorAvailable);
+          }
+        }
+        else if (sensor->unit == UNIT_RPMS) {
+          new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_MULTIPLIER);
+          new NumberEdit(sensorOneWindow, grid.getFieldSlot(), 1, 30000, GET_SET_DEFAULT(sensor->custom.offset));
+        }
+        else {
+          new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_OFFSET);
+          new NumberEdit(sensorOneWindow, grid.getFieldSlot(), -30000, 30000, GET_SET_DEFAULT(sensor->custom.offset),
+                         (sensor->prec > 0) ? (sensor->prec == 2 ? PREC2 : PREC1) : 0);
+        }
+        grid.nextLine();
+      }
+
+      //PARAM 3 and 4
+      if ((sensor->type == TELEM_TYPE_CALCULATED && sensor->formula < TELEM_FORMULA_MULTIPLY)) {
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_SOURCE + std::to_string(3));
+        new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), (uint8_t *) &sensor->calc.sources[2], isSensorAvailable);
+        grid.nextLine();
+
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_SOURCE + std::to_string(4));
+        new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), (uint8_t *) &sensor->calc.sources[3], isSensorAvailable);
+        grid.nextLine();
+      }
+
+      // Auto Offset
+      if (sensor->unit != UNIT_RPMS && sensor->isConfigurable()) {
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_AUTOOFFSET);
+        new CheckBox(sensorOneWindow, grid.getFieldSlot(), GET_SET_DEFAULT(sensor->autoOffset));
+        grid.nextLine();
+      }
+
+      if (sensor->isConfigurable()) {
+        // Only positive
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_ONLYPOSITIVE);
+        new CheckBox(sensorOneWindow, grid.getFieldSlot(), GET_SET_DEFAULT(sensor->onlyPositive));
+        grid.nextLine();
+
+        // Filter
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_FILTER);
+        new CheckBox(sensorOneWindow, grid.getFieldSlot(), GET_SET_DEFAULT(sensor->filter));
+        grid.nextLine();
+      }
+
+      if (sensor->type == TELEM_TYPE_CALCULATED) {
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_PERSISTENT);
+        new CheckBox(sensorOneWindow, grid.getFieldSlot(), GET_DEFAULT(sensor->persistent), [=](int32_t newValue) {
+          sensor->persistent = newValue;
+          if (!sensor->persistent)
+            sensor->persistentValue = 0;
+          SET_DIRTY();
+        });
+        grid.nextLine();
+      }
+
+      new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_LOGS);
+      new CheckBox(sensorOneWindow, grid.getFieldSlot(), GET_DEFAULT(sensor->logs), [=](int32_t newValue) {
+        sensor->logs = newValue;
+        logsClose();
+        SET_DIRTY();
+      });
 
       coord_t delta = sensorOneWindow->adjustHeight();
       Window * parent = sensorOneWindow->getParent();
@@ -308,6 +407,7 @@ void ModelTelemetryPage::build(Window * window)
   window->setInnerHeight(grid.getWindowHeight());
 }
 
+#if 0
 enum MenuModelTelemetryFrskyItems {
   ITEM_TELEMETRY_PROTOCOL_TYPE,
   ITEM_TELEMETRY_RSSI_LABEL,
@@ -441,186 +541,6 @@ bool menuModelSensor(event_t event)
     switch (k) {
 
 
-      case SENSOR_FIELD_ID:
-        if (sensor->type == TELEM_TYPE_CUSTOM) {
-          lcdDrawText(MENUS_MARGIN_LEFT, y, STR_ID);
-          lcdDrawHexNumber(SENSOR_2ND_COLUMN, y, sensor->id, LEFT | (menuHorizontalPosition == 0 ? attr : 0));
-          lcdDrawNumber(SENSOR_3RD_COLUMN, y, sensor->instance, LEFT | (menuHorizontalPosition == 1 ? attr : 0));
-          if (attr) {
-            switch (menuHorizontalPosition) {
-              case 0:
-                sensor->id = checkIncDec(event, sensor->id, 0x0000, 0xffff, INCDEC_REP10 | NO_INCDEC_MARKS);
-                break;
-
-              case 1:
-                CHECK_INCDEC_MODELVAR_ZERO(event, sensor->instance, 0xff);
-                break;
-            }
-          }
-        }
-
-        break;
-
-      case SENSOR_FIELD_UNIT:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_UNIT);
-        // TODO flash saving with editChoice where I copied those 2 lines?
-        lcdDrawTextAtIndex(SENSOR_2ND_COLUMN, y, STR_VTELEMUNIT, sensor->unit, attr);
-        if (attr) {
-          CHECK_INCDEC_MODELVAR_ZERO(event, sensor->unit, UNIT_MAX);
-          if (checkIncDec_Ret) {
-            if (sensor->unit == UNIT_FAHRENHEIT) {
-              sensor->prec = 0;
-            }
-            telemetryItems[s_currIdx].clear();
-          }
-        }
-        break;
-
-      case SENSOR_FIELD_PRECISION:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_PRECISION);
-        sensor->prec = editChoice(SENSOR_2ND_COLUMN, y, STR_VPREC, sensor->prec, 0, 2, attr, event);
-        if (attr && checkIncDec_Ret) {
-          telemetryItems[s_currIdx].clear();
-        }
-        break;
-
-      case SENSOR_FIELD_PARAM1:
-        if (sensor->type == TELEM_TYPE_CALCULATED) {
-          if (sensor->formula == TELEM_FORMULA_CELL) {
-            lcdDrawText(MENUS_MARGIN_LEFT, y, STR_CELLSENSOR);
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->cell.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->cell.source - 1) : 0, attr);
-            if (attr) {
-              sensor->cell.source = checkIncDec(event, sensor->cell.source, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS, isCellsSensor);
-            }
-            break;
-          }
-          else if (sensor->formula == TELEM_FORMULA_DIST) {
-            lcdDrawText(MENUS_MARGIN_LEFT, y, STR_GPSSENSOR);
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->dist.gps ? MIXSRC_FIRST_TELEM + 3 * (sensor->dist.gps - 1) : 0, attr);
-            if (attr) {
-              sensor->dist.gps = checkIncDec(event, sensor->dist.gps, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS, isGPSSensor);
-            }
-            break;
-          }
-          else if (sensor->formula == TELEM_FORMULA_CONSUMPTION) {
-            lcdDrawText(MENUS_MARGIN_LEFT, y, STR_CURRENTSENSOR);
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->consumption.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->consumption.source - 1) : 0, attr);
-            if (attr) {
-              sensor->consumption.source = checkIncDec(event, sensor->consumption.source, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS,
-                                                       isSensorAvailable);
-            }
-            break;
-          }
-          else if (sensor->formula == TELEM_FORMULA_TOTALIZE) {
-            lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_SOURCE));
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->consumption.source ? MIXSRC_FIRST_TELEM + 3 * (sensor->consumption.source - 1) : 0, attr);
-            if (attr) {
-              sensor->consumption.source = checkIncDec(event, sensor->consumption.source, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS,
-                                                       isSensorAvailable);
-            }
-            break;
-          }
-        }
-        else {
-          if (sensor->unit == UNIT_RPMS) {
-            lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_BLADES));
-            if (attr) sensor->custom.ratio = checkIncDec(event, sensor->custom.ratio, 1, 30000, EE_MODEL | NO_INCDEC_MARKS | INCDEC_REP10);
-            lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.ratio, LEFT | attr);
-            break;
-          }
-          else {
-            lcdDrawText(MENUS_MARGIN_LEFT, y, STR_RATIO);
-            if (attr) sensor->custom.ratio = checkIncDec(event, sensor->custom.ratio, 0, 30000, EE_MODEL | NO_INCDEC_MARKS | INCDEC_REP10);
-            if (sensor->custom.ratio == 0)
-              lcdDrawText(SENSOR_2ND_COLUMN, y, "-", attr);
-            else
-              lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.ratio, LEFT | attr | PREC1);
-            break;
-          }
-        }
-        // no break
-
-      case SENSOR_FIELD_PARAM2:
-        if (sensor->type == TELEM_TYPE_CALCULATED) {
-          if (sensor->formula == TELEM_FORMULA_CELL) {
-            lcdDrawText(MENUS_MARGIN_LEFT, y, STR_CELLINDEX);
-            sensor->cell.index = editChoice(SENSOR_2ND_COLUMN, y, STR_VCELLINDEX, sensor->cell.index, 0, 8, attr, event);
-            break;
-          }
-          else if (sensor->formula == TELEM_FORMULA_DIST) {
-            lcdDrawText(MENUS_MARGIN_LEFT, y, STR_ALTSENSOR);
-            drawSource(SENSOR_2ND_COLUMN, y, sensor->dist.alt ? MIXSRC_FIRST_TELEM + 3 * (sensor->dist.alt - 1) : 0, attr);
-            if (attr) {
-              sensor->dist.alt = checkIncDec(event, sensor->dist.alt, 0, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS, isAltSensor);
-            }
-            break;
-          }
-        }
-        else if (sensor->unit == UNIT_RPMS) {
-          lcdDrawText(MENUS_MARGIN_LEFT, y, STR_MULTIPLIER);
-          if (attr) sensor->custom.offset = checkIncDec(event, sensor->custom.offset, 1, 30000, EE_MODEL | NO_INCDEC_MARKS | INCDEC_REP10);
-          lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.offset, LEFT | attr);
-          break;
-        }
-        else {
-          lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_OFFSET));
-          if (attr) sensor->custom.offset = checkIncDec(event, sensor->custom.offset, -30000, +30000, EE_MODEL | NO_INCDEC_MARKS | INCDEC_REP10);
-          if (sensor->prec > 0) attr |= (sensor->prec == 2 ? PREC2 : PREC1);
-          lcdDrawNumber(SENSOR_2ND_COLUMN, y, sensor->custom.offset, LEFT | attr);
-          break;
-        }
-        // no break
-
-      case SENSOR_FIELD_PARAM3:
-        // no break
-
-      case SENSOR_FIELD_PARAM4: {
-        drawStringWithIndex(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_SOURCE), k - SENSOR_FIELD_PARAM1 + 1);
-        int8_t &source = sensor->calc.sources[k - SENSOR_FIELD_PARAM1];
-        if (attr) {
-          source = checkIncDec(event, source, -MAX_TELEMETRY_SENSORS, MAX_TELEMETRY_SENSORS, EE_MODEL | NO_INCDEC_MARKS, isSensorAvailable);
-        }
-        if (source < 0) {
-          lcdDrawText(SENSOR_2ND_COLUMN, y, "-", attr);
-          drawSource(SENSOR_2ND_COLUMN + 5, y, MIXSRC_FIRST_TELEM + 3 * (-1 - source), attr);
-        }
-        else {
-          drawSource(SENSOR_2ND_COLUMN, y, source ? MIXSRC_FIRST_TELEM + 3 * (source - 1) : 0, attr);
-        }
-        break;
-      }
-
-      case SENSOR_FIELD_AUTOOFFSET:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_AUTOOFFSET);
-        sensor->autoOffset = editCheckBox(sensor->autoOffset, SENSOR_2ND_COLUMN, y, attr, event);
-        break;
-
-      case SENSOR_FIELD_ONLYPOSITIVE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_ONLYPOSITIVE);
-        sensor->onlyPositive = editCheckBox(sensor->onlyPositive, SENSOR_2ND_COLUMN, y, attr, event);
-        break;
-
-      case SENSOR_FIELD_FILTER:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_FILTER);
-        sensor->filter = editCheckBox(sensor->filter, SENSOR_2ND_COLUMN, y, attr, event);
-        break;
-
-      case SENSOR_FIELD_PERSISTENT:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_PERSISTENT));
-        sensor->persistent = editCheckBox(sensor->persistent, SENSOR_2ND_COLUMN, y, attr, event);
-        if (checkIncDec_Ret && !sensor->persistent) {
-          sensor->persistentValue = 0;
-        }
-        break;
-
-      case SENSOR_FIELD_LOGS:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_LOGS);
-        sensor->logs = editCheckBox(sensor->logs, SENSOR_2ND_COLUMN, y, attr, event);
-        if (attr && checkIncDec_Ret) {
-          logsClose();
-        }
-        break;
-    }
   }
   return true;
 }
@@ -666,9 +586,9 @@ bool menuModelTelemetryFrsky(event_t event)
 
   MENU(STR_MENUTELEMETRY, MODEL_ICONS, menuTabModel, MENU_MODEL_TELEMETRY_FRSKY, ITEM_TELEMETRY_MAX, {
     TELEMETRY_TYPE_ROWS
-    RSSI_ROWS
+      RSSI_ROWS
     SENSORS_ROWS
-    VARIO_ROWS
+      VARIO_ROWS
   });
 
   for (uint8_t i = 0; i < NUM_BODY_LINES; i++) {
@@ -774,3 +694,4 @@ bool menuModelTelemetryFrsky(event_t event)
   }
   return true;
 }
+#endif
