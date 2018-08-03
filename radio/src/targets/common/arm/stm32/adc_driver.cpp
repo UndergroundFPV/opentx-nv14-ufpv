@@ -52,19 +52,19 @@
 
 #if NUM_PWMSTICKS > 0
   #define FIRST_ANALOG_ADC             (STICKS_PWM_ENABLED() ? NUM_PWMSTICKS : 0)
-  #define NUM_ANALOGS_ADC              (STICKS_PWM_ENABLED() ? (NUM_ANALOGS - NUM_PWMSTICKS) : NUM_ANALOGS)
+  #define NUM_MAIN_ANALOGS_ADC              (STICKS_PWM_ENABLED() ? (NUM_MAIN_ANALOGS - NUM_PWMSTICKS) : NUM_MAIN_ANALOGS)
 #elif defined(PCBX9E)
   #define FIRST_ANALOG_ADC             0
-  #define NUM_ANALOGS_ADC              10
-  #define NUM_ANALOGS_ADC_EXT          (NUM_ANALOGS - 10)
+  #define NUM_MAIN_ANALOGS_ADC              10
+  #define NUM_MAIN_ANALOGS_ADC_EXT          (NUM_MAIN_ANALOGS - 10)
 #else
   #define FIRST_ANALOG_ADC             0
   #define FIRST_SUB_ANALOG_ADC         0
-  #define NUM_ANALOGS_ADC              NUM_ANALOGS
+  #define NUM_MAIN_ANALOGS_ADC         NUM_MAIN_ANALOGS
   #define NUM_SUB_ANALOGS_ADC          NUM_SUB_ANALOGS
 #endif
 
-uint16_t adcValues[NUM_ANALOGS] __DMA;
+uint16_t adcValues[NUM_MAIN_ANALOGS] __DMA;
 uint16_t subAdcValues[NUM_SUB_ANALOGS] __DMA;
 
 void adcInit()
@@ -97,11 +97,11 @@ void adcInit()
 
   ADC_MAIN->CR1 = ADC_CR1_SCAN;
   ADC_MAIN->CR2 = ADC_CR2_ADON | ADC_CR2_DMA | ADC_CR2_DDS;
-  ADC_MAIN->SQR1 = (NUM_ANALOGS_ADC-1) << 20; // bits 23:20 = number of conversions
+  ADC_MAIN->SQR1 = (NUM_MAIN_ANALOGS_ADC-1) << 20; // bits 23:20 = number of conversions
 #if defined(PCBNV14)
   ADC_SUB->CR1 = ADC_CR1_SCAN;
   ADC_SUB->CR2 = ADC_CR2_ADON | ADC_CR2_DMA | ADC_CR2_DDS;
-  ADC_SUB->SQR1 = (NUM_ANALOGS_ADC-1) << 20; // bits 23:20 = number of conversions
+  ADC_SUB->SQR1 = (NUM_SUB_ANALOGS_ADC-1) << 20; // bits 23:20 = number of conversions
 #endif
 #if defined(PCBX10)
   if (STICKS_PWM_ENABLED()) {
@@ -132,10 +132,10 @@ void adcInit()
   ADC_MAIN->SQR2 = (ADC_CHANNEL_SWE<<0) + (ADC_CHANNEL_SWF<<5) + (ADC_CHANNEL_LIBATT<<10) + (ADC_CHANNEL_DRYBATT<<15); // conversions 7 and more
   ADC_MAIN->SQR3 = (ADC_CHANNEL_POT1<<0) + (ADC_CHANNEL_POT2<<5) + (ADC_CHANNEL_SWA<<10) + (ADC_CHANNEL_SWB<<15) + (ADC_CHANNEL_SWC<<20) + (ADC_CHANNEL_SWD<<25); // conversions 1 to 6
 #elif defined(PCBNV14)
-  ADC_MAIN->SQR2 = (ADC_CHANNEL_BATT<<0); // conversions 7 and more
+  ADC_MAIN->SQR1 |= (ADC_CHANNEL_BATT <<0 );
+  ADC_MAIN->SQR2 = (ADC_CHANNEL_SWA << 0) + (ADC_CHANNEL_SWC << 5) + (ADC_CHANNEL_SWE << 10) + (ADC_CHANNEL_SWF << 15) + (ADC_CHANNEL_SWG << 20) + (ADC_CHANNEL_SWH << 25); // conversions 7 and more
   ADC_MAIN->SQR3 = (ADC_CHANNEL_STICK_LH<<0) + (ADC_CHANNEL_STICK_LV<<5) + (ADC_CHANNEL_STICK_RV<<10) + (ADC_CHANNEL_STICK_RH<<15) + (ADC_CHANNEL_POT1<<20) + (ADC_CHANNEL_POT2<<25); // conversions 1 to 6
-  ADC_SUB->SQR2 = (ADC_CHANNEL_BATT<<0); // conversions 7 and more
-  ADC_SUB->SQR3 = (ADC_CHANNEL_STICK_LH<<0) + (ADC_CHANNEL_STICK_LV<<5) + (ADC_CHANNEL_STICK_RV<<10) + (ADC_CHANNEL_STICK_RH<<15) + (ADC_CHANNEL_POT1<<20) + (ADC_CHANNEL_POT2<<25); // conversions 1 to 6
+  ADC_SUB->SQR3 = (ADC_CHANNEL_SWB<<0) + (ADC_CHANNEL_SWD<<5); // conversions 1 to 2
 
 #else
   ADC_MAIN->SQR2 = (ADC_CHANNEL_POT3<<0) + (ADC_CHANNEL_SLIDER1<<5) + (ADC_CHANNEL_SLIDER2<<10) + (ADC_CHANNEL_BATT<<15); // conversions 7 and more
@@ -147,18 +147,19 @@ void adcInit()
 
   ADC->CCR = 0;
 
-  ADC_MAIN_DMA_Stream->CR = DMA_SxCR_PL | ADC_DMA_SxCR_CHSEL | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;
+  ADC_MAIN_DMA_Stream->CR = DMA_SxCR_PL | ADC_MAIN_DMA_SxCR_CHSEL | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;
   ADC_MAIN_DMA_Stream->PAR = CONVERT_PTR_UINT(&ADC_MAIN->DR);
   ADC_MAIN_DMA_Stream->M0AR = CONVERT_PTR_UINT(&adcValues[FIRST_ANALOG_ADC]);
-  ADC_MAIN_DMA_Stream->NDTR = NUM_ANALOGS_ADC;
+  ADC_MAIN_DMA_Stream->NDTR = NUM_MAIN_ANALOGS_ADC;
   ADC_MAIN_DMA_Stream->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0;
+
 #if defined(PCBNV14)
   ADC_SUB->SMPR1 = ADC_SAMPTIME + (ADC_SAMPTIME<<3) + (ADC_SAMPTIME<<6) + (ADC_SAMPTIME<<9) + (ADC_SAMPTIME<<12) + (ADC_SAMPTIME<<15) + (ADC_SAMPTIME<<18) + (ADC_SAMPTIME<<21) + (ADC_SAMPTIME<<24);
   ADC_SUB->SMPR2 = ADC_SAMPTIME + (ADC_SAMPTIME<<3) + (ADC_SAMPTIME<<6) + (ADC_SAMPTIME<<9) + (ADC_SAMPTIME<<12) + (ADC_SAMPTIME<<15) + (ADC_SAMPTIME<<18) + (ADC_SAMPTIME<<21) + (ADC_SAMPTIME<<24) + (ADC_SAMPTIME<<27);
 
   ADC->CCR = 0;
 
-  ADC_SUB_DMA_Stream->CR = DMA_SxCR_PL | ADC_DMA_SxCR_CHSEL | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;
+  ADC_SUB_DMA_Stream->CR = DMA_SxCR_PL | ADC_SUB_DMA_SxCR_CHSEL | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;
   ADC_SUB_DMA_Stream->PAR = CONVERT_PTR_UINT(&ADC_SUB->DR);
   ADC_SUB_DMA_Stream->M0AR = CONVERT_PTR_UINT(&subAdcValues[FIRST_SUB_ANALOG_ADC]);
   ADC_SUB_DMA_Stream->NDTR = NUM_SUB_ANALOGS_ADC;
@@ -167,7 +168,7 @@ void adcInit()
 #if defined(PCBX9E)
   ADC_EXT->CR1 = ADC_CR1_SCAN;
   ADC_EXT->CR2 = ADC_CR2_ADON | ADC_CR2_DMA | ADC_CR2_DDS;
-  ADC_EXT->SQR1 = (NUM_ANALOGS_ADC_EXT-1) << 20;
+  ADC_EXT->SQR1 = (NUM_MAIN_ANALOGS_ADC_EXT-1) << 20;
   ADC_EXT->SQR2 = 0;
   ADC_EXT->SQR3 = (ADC_CHANNEL_POT1<<0) + (ADC_CHANNEL_SLIDER1<<5) + (ADC_CHANNEL_SLIDER2<<10); // conversions 1 to 3
   ADC_EXT->SMPR1 = 0;
@@ -175,8 +176,8 @@ void adcInit()
 
   ADC_EXT_DMA_Stream->CR = DMA_SxCR_PL | DMA_SxCR_CHSEL_1 | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;
   ADC_EXT_DMA_Stream->PAR = CONVERT_PTR_UINT(&ADC_EXT->DR);
-  ADC_EXT_DMA_Stream->M0AR = CONVERT_PTR_UINT(adcValues + NUM_ANALOGS_ADC);
-  ADC_EXT_DMA_Stream->NDTR = NUM_ANALOGS_ADC_EXT;
+  ADC_EXT_DMA_Stream->M0AR = CONVERT_PTR_UINT(adcValues + NUM_MAIN_ANALOGS_ADC);
+  ADC_EXT_DMA_Stream->NDTR = NUM_MAIN_ANALOGS_ADC_EXT;
   ADC_EXT_DMA_Stream->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0;
 #endif
 
@@ -220,7 +221,7 @@ void adcSingleRead()
 #else
   for (unsigned int i = 0; i < 10000; i++) {
 #if defined(PCBNV14)
-    if (ADC_MAIN_TRANSFER_COMPLETE() && ADC_MAIN_TRANSFER_COMPLETE())
+    if (ADC_MAIN_TRANSFER_COMPLETE() && ADC_SUB_TRANSFER_COMPLETE())
     {
       break;
     }
@@ -241,22 +242,34 @@ void adcSingleRead()
 
 void adcRead()
 {
+  int i, j, k;
+
   uint16_t temp[NUM_ANALOGS] = { 0 };
 
-  for (int i=0; i<4; i++) {
+  for (i = 0; i < 4; i++)
+  {
     adcSingleRead();
-    for (uint8_t x=FIRST_ANALOG_ADC; x<NUM_ANALOGS; x++) {
-      uint16_t val = adcValues[x];
+
+    for (j = FIRST_ANALOG_ADC; j < NUM_MAIN_ANALOGS; j++)
+    {
+      uint16_t val = adcValues[j];
 #if defined(JITTER_MEASURE)
       if (JITTER_MEASURE_ACTIVE()) {
-        rawJitter[x].measure(val);
+        rawJitter[j].measure(val);
       }
 #endif
-      temp[x] += val;
+      temp[j] += val;
+    }
+
+    for (k = FIRST_ANALOG_ADC; k < NUM_SUB_ANALOGS; k++, j++)
+    {
+      uint16_t val = subAdcValues[k];
+      temp[j] += val;
     }
   }
 
-  for (uint8_t x=FIRST_ANALOG_ADC; x<NUM_ANALOGS; x++) {
+  for (uint8_t x = FIRST_ANALOG_ADC; x < NUM_ANALOGS; x++)
+  {
     adcValues[x] = temp[x] >> 2;
   }
 
