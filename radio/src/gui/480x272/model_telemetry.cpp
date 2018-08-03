@@ -24,6 +24,26 @@
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
 
+class SensorSourceChoice: public SourceChoice {
+  public:
+    SensorSourceChoice(Window * window, const rect_t & rect, uint8_t * source, IsValueAvailable isValueAvailable):
+      SourceChoice(window, rect, MIXSRC_NONE, MIXSRC_LAST_TELEM,
+                   GET_DEFAULT(*source ? MIXSRC_FIRST_TELEM + 3 * (*source - 1) : MIXSRC_NONE),
+                   [=](uint8_t newValue) {
+                     *source = newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1;
+                   })
+    {
+      setAvailableHandler([=](int16_t value) {
+        if (value == MIXSRC_NONE)
+          return true;
+        if (value < MIXSRC_FIRST_TELEM)
+          return false;
+        auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
+        return qr.rem == 0 && isValueAvailable(qr.quot + 1);
+      });
+    }
+};
+
 class SensorEditWindow : public Page {
   public:
     SensorEditWindow(uint8_t index) :
@@ -43,24 +63,6 @@ class SensorEditWindow : public Page {
       new StaticText(window, {70, 4, 200, 20}, STR_SENSOR + std::to_string(index + 1), MENU_TITLE_COLOR);
       // dynamic display of sensor value ?
       //new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
-    }
-
-    SourceChoice * buildSensorSource(Window * window, const rect_t & rect, uint8_t * source, IsValueAvailable isValueAvailable)
-    {
-      auto choice = new SourceChoice(window, rect, MIXSRC_NONE, MIXSRC_LAST_TELEM,
-                                     GET_DEFAULT(*source ? MIXSRC_FIRST_TELEM + 3 * (*source - 1) : MIXSRC_NONE),
-                                     [=](uint8_t newValue) {
-                                       *source = newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1;
-                                     });
-      choice->setAvailableHandler([=](int16_t value) {
-        if (value == MIXSRC_NONE)
-          return true;
-        if (value < MIXSRC_FIRST_TELEM)
-          return false;
-        auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
-        return qr.rem == 0 && isValueAvailable(qr.quot + 1);
-      });
-      return choice;
     }
 
     void updateSensorOneWindow()
@@ -129,15 +131,15 @@ class SensorEditWindow : public Page {
       if (sensor->type == TELEM_TYPE_CALCULATED) {
         if (sensor->formula == TELEM_FORMULA_CELL) {
           new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CELLSENSOR);
-          buildSensorSource(sensorOneWindow, grid.getFieldSlot(), &sensor->cell.source, isCellsSensor);
+          new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->cell.source, isCellsSensor);
         }
         else if (sensor->formula == TELEM_FORMULA_DIST) {
           new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_GPSSENSOR);
-          buildSensorSource(sensorOneWindow, grid.getFieldSlot(), &sensor->dist.gps, isGPSSensor);
+          new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->dist.gps, isGPSSensor);
         }
         else if (sensor->formula == TELEM_FORMULA_CONSUMPTION) {
           new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_CURRENTSENSOR);
-          buildSensorSource(sensorOneWindow, grid.getFieldSlot(), &sensor->consumption.source, isSensorAvailable);
+          new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), &sensor->consumption.source, isSensorAvailable);
         }
       }
 

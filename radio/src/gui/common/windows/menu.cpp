@@ -55,7 +55,7 @@ void MenuWindow::paint(BitmapBuffer * dc)
 
 void Menu::updatePosition()
 {
-  if (children.size() == 1) {
+  if (!toolbar) {
     // there is no navigation bar at the left, we may center the window on screen
     int count = min<int>(8, menuWindow.lines.size());
     coord_t h = count * MenuWindow::lineHeight;

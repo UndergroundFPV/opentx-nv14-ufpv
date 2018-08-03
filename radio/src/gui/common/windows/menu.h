@@ -28,7 +28,6 @@
 #include "mainwindow.h"
 #include <string>
 
-
 class Menu;
 
 class MenuWindow: public Window {
@@ -88,6 +87,11 @@ class Menu : public Window {
     {
     }
 
+    ~Menu()
+    {
+      delete toolbar;
+    }
+
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
@@ -97,6 +101,7 @@ class Menu : public Window {
 
     void setToolbar(Window * window)
     {
+      toolbar = window;
       menuWindow.setLeft(window->right());
       menuWindow.setTop(window->top());
       menuWindow.setHeight(window->height());
@@ -122,6 +127,7 @@ class Menu : public Window {
 
   protected:
     MenuWindow menuWindow;
+    Window * toolbar = nullptr;
     void updatePosition();
 };
 

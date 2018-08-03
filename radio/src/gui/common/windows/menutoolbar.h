@@ -74,6 +74,11 @@ class MenuToolbar: public Window {
     {
     }
 
+    ~MenuToolbar()
+    {
+      deleteChildren();
+    }
+
     void paint(BitmapBuffer * dc) override
     {
       dc->clear(CURVE_AXIS_COLOR);
