@@ -343,6 +343,8 @@ int8_t navigate(event_t event, int count, int rows, int columns, bool loop)
 
 bool check(event_t event, uint8_t curr, const MenuHandlerFunc * menuTab, uint8_t menuTabSize, const pm_uint8_t * horTab, uint8_t horTabMax, int rowcount, uint8_t flags)
 {
+#if 0
+
   uint8_t maxcol = MAXCOL(menuVerticalPosition);
 
   if (menuTab == menuTabModel && event == EVT_KEY_FIRST(KEY_MODEL)) {
@@ -552,6 +554,7 @@ bool check(event_t event, uint8_t curr, const MenuHandlerFunc * menuTab, uint8_t
     }
   }
 
+#endif
   return true;
 }
 

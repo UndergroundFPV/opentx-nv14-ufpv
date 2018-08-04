@@ -83,54 +83,10 @@ void telemetryPortInit(uint32_t baudrate, uint8_t mode)
   USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
   USART_Init(TELEMETRY_USART, &USART_InitStructure);
 
-#if defined(PCBX12S)
-  telemetryFifoMode = mode;
-  
-  DMA_Cmd(TELEMETRY_DMA_Stream_RX, DISABLE);
-  USART_DMACmd(TELEMETRY_USART, USART_DMAReq_Rx, DISABLE);
-  DMA_DeInit(TELEMETRY_DMA_Stream_RX);
-
-  if (mode & TELEMETRY_SERIAL_WITHOUT_DMA) {
-    USART_Cmd(TELEMETRY_USART, ENABLE);
-    USART_ITConfig(TELEMETRY_USART, USART_IT_RXNE, ENABLE);
-    NVIC_SetPriority(TELEMETRY_USART_IRQn, 6);
-    NVIC_EnableIRQ(TELEMETRY_USART_IRQn);
-  }
-  else {
-    DMA_InitTypeDef DMA_InitStructure;
-    telemetryDMAFifo.clear();
-  
-    USART_ITConfig(TELEMETRY_USART, USART_IT_RXNE, DISABLE);
-    USART_ITConfig(TELEMETRY_USART, USART_IT_TXE, DISABLE);
-    NVIC_SetPriority(TELEMETRY_USART_IRQn, 6);
-    NVIC_EnableIRQ(TELEMETRY_USART_IRQn);
-  
-    DMA_InitStructure.DMA_Channel = TELEMETRY_DMA_Channel_RX;
-    DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&TELEMETRY_USART->DR);
-    DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(telemetryDMAFifo.buffer());
-    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
-    DMA_InitStructure.DMA_BufferSize = telemetryDMAFifo.size();
-    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-    DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
-    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
-    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
-    DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-    DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-    DMA_Init(TELEMETRY_DMA_Stream_RX, &DMA_InitStructure);
-    USART_DMACmd(TELEMETRY_USART, USART_DMAReq_Rx, ENABLE);
-    USART_Cmd(TELEMETRY_USART, ENABLE);
-    DMA_Cmd(TELEMETRY_DMA_Stream_RX, ENABLE);
-  }
-#else
   USART_Cmd(TELEMETRY_USART, ENABLE);
   USART_ITConfig(TELEMETRY_USART, USART_IT_RXNE, ENABLE);
   NVIC_SetPriority(TELEMETRY_USART_IRQn, 6);
   NVIC_EnableIRQ(TELEMETRY_USART_IRQn);
-#endif
 }
 
 void telemetryPortSetDirectionOutput()

@@ -168,22 +168,16 @@ class Window {
 
     void setInnerWidth(coord_t w)
     {
-      if (w > width()) {
-        innerWidth = w;
-      }
-      else {
-        innerWidth = width();
+      innerWidth = w;
+      if (width() >= w) {
         scrollPositionX = 0;
       }
     }
 
     void setInnerHeight(coord_t h)
     {
-      if (h > height()) {
-        innerHeight = h;
-      }
-      else {
-        innerHeight = height();
+      innerHeight = h;
+      if (height() >= h) {
         scrollPositionY = 0;
       }
     }

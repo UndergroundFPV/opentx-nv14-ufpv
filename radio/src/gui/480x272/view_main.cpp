@@ -19,8 +19,9 @@
  */
 
 #include "view_main.h"
-#include "menu_radio.h"
 #include "menu_model.h"
+#include "menu_radio.h"
+#include "menu_screens.h"
 #include "model_select.h"
 #include "view_channels.h"
 #include "opentx.h"
@@ -105,9 +106,6 @@ void onMainViewMenu(const char *result)
   else if (result == STR_STATISTICS) {
     pushMenu(menuTabStats[0]);
   }
-  else if (result == STR_SETUP_SCREENS) {
-    pushMenu(menuTabScreensSetup[1]);
-  }
   else if (result == STR_ABOUT_US) {
     chainMenu(menuAboutView);
   }
@@ -143,7 +141,7 @@ ViewMain::ViewMain():
 
   new FabIconButton(this, LCD_W-50, 100, ICON_THEME,
                     [=]() -> uint8_t {
-                      // new ModelMenu();
+                      new ScreensMenu();
                       return 0;
                     });
 }

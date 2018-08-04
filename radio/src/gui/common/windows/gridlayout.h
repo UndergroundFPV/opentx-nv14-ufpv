@@ -66,11 +66,6 @@ class GridLayout {
       return {left, currentY, width, lineHeight};
     }
 
-    void nextLine()
-    {
-      currentY += lineHeight + lineSpacing;
-    }
-
     void addWindow(Window * window)
     {
       window->adjustHeight();
@@ -80,6 +75,11 @@ class GridLayout {
     void spacer(coord_t height=lineSpacing)
     {
       currentY += height;
+    }
+
+    void nextLine(coord_t height=lineHeight)
+    {
+      spacer(height + lineSpacing);
     }
 
     coord_t getWindowHeight() const

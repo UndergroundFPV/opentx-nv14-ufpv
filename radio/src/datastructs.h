@@ -780,6 +780,7 @@ typedef uint8_t swarnenable_t;
 #if defined(COLORLCD)
 #include "gui/480x272/layout.h"
 #include "gui/480x272/topbar.h"
+#define LAYOUT_NAME_LEN 10
 PACK(struct CustomScreenData {
   char layoutName[10];
   Layout::PersistentData layoutData;

@@ -350,7 +350,7 @@
 #define INTMODULE_TIMER_IRQn            TIM1_CC_IRQn
 #define INTMODULE_TIMER_IRQHandler      TIM1_CC_IRQHandler
 #define INTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
-  
+
 // External Module
 #define EXTMODULE
 #define EXTMODULE_PULSES

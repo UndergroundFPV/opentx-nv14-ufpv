@@ -100,6 +100,15 @@ void TabsGroup::addTab(PageTab * page)
   header.carousel.updateInnerWidth();
 }
 
+void TabsGroup::removeTab(unsigned index)
+{
+  if (currentTab == tabs[index]) {
+    setCurrentTab(max<unsigned>(0, index - 1));
+  }
+
+  tabs.erase(tabs.begin() + index);
+}
+
 void TabsGroup::setCurrentTab(PageTab * tab)
 {
   if (tab != currentTab) {
@@ -108,7 +117,7 @@ void TabsGroup::setCurrentTab(PageTab * tab)
     NumberKeyboard::instance()->disable();
     currentTab = tab;
     tab->build(&body);
-    header.setTitle(tab->title);
+    header.setTitle(tab->title.c_str());
     invalidate();
   }
 }
