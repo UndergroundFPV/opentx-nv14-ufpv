@@ -432,7 +432,7 @@ void telemetryPortInit()
 {
 }
 
-display_t simuLcdBackupBuf[DISPLAY_BUFFER_SIZE];
+display_t simuLcdBackupBuf[DISPLAY_PIXELS_COUNT];
 void lcdStoreBackupBuffer()
 {
   memcpy(simuLcdBackupBuf, displayBuf, sizeof(simuLcdBackupBuf));

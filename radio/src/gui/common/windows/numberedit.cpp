@@ -30,11 +30,14 @@ NumberEdit::NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32
 void NumberEdit::paint(BitmapBuffer * dc)
 {
   bool hasFocus = this->hasFocus();
-  LcdFlags textColor = 0;
+  LcdFlags textColor = CURVE_AXIS_COLOR;
   LcdFlags lineColor = CURVE_AXIS_COLOR;
   if (hasFocus) {
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
+  }
+  else if (enabled) {
+    textColor = TEXT_COLOR;
   }
   int32_t value = _getValue();
   if (displayFunction) {
@@ -51,6 +54,10 @@ void NumberEdit::paint(BitmapBuffer * dc)
 
 bool NumberEdit::onTouchEnd(coord_t x, coord_t y)
 {
+  if (!enabled) {
+    return true;
+  }
+
   if (!hasFocus()) {
     setFocus();
   }

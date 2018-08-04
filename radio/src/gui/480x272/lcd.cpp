@@ -24,7 +24,7 @@
 #include "strhelpers.h"
 
 #if defined(SIMU)
-display_t displayBuf[DISPLAY_BUFFER_SIZE];
+display_t displayBuf[DISPLAY_PIXELS_COUNT];
 #endif
 
 uint16_t lcdColorTable[LCD_COLOR_COUNT];

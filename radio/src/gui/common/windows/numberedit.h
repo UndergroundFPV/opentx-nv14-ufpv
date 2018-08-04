@@ -37,6 +37,11 @@ class NumberEdit : public BaseNumberEdit {
 
     void paint(BitmapBuffer * dc) override;
 
+    void enable(bool enabled)
+    {
+      this->enabled = enabled;
+    }
+
     void setPrefix(const char * value)
     {
       prefix = value;
@@ -66,6 +71,7 @@ class NumberEdit : public BaseNumberEdit {
     const char * prefix = nullptr;
     const char * suffix = nullptr;
     const char * zeroText = nullptr;
+    bool enabled = true;
 };
 
 #endif // _NUMBEREDIT_H_

@@ -28,10 +28,10 @@
 #include "draw_functions.h"
 
 #define DISPLAY_PIXELS_COUNT           (LCD_W*LCD_H)
-#define DISPLAY_BUFFER_SIZE            (sizeof(display_t)*DISPLAY_PIXELS_COUNT)
+#define DISPLAY_BUFFER_SIZE            (sizeof(display_t) * DISPLAY_PIXELS_COUNT)
 
 #if defined(SIMU)
-extern display_t displayBuf[DISPLAY_BUFFER_SIZE];
+extern display_t displayBuf[DISPLAY_PIXELS_COUNT];
 #else
 #define displayBuf                     lcd->getData()
 #endif

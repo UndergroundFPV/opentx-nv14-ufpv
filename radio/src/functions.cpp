@@ -382,7 +382,7 @@ void evalFunctions()
             unsigned int moduleIndex = CFN_PARAM(cfn);
             if (moduleIndex < NUM_MODULES) {
               for (int ch=0; ch<MAX_OUTPUT_CHANNELS; ch++) {
-                if (ch < g_model.moduleData[moduleIndex].channelsStart || ch >= NUM_CHANNELS(moduleIndex) + g_model.moduleData[moduleIndex].channelsStart) {
+                if (ch < g_model.moduleData[moduleIndex].channelsStart || ch >= sentModuleChannels(moduleIndex) + g_model.moduleData[moduleIndex].channelsStart) {
                   g_model.moduleData[moduleIndex].failsafeChannels[ch] = 0;
                 }
                 else if (g_model.moduleData[moduleIndex].failsafeChannels[ch] < FAILSAFE_CHANNEL_HOLD) {
