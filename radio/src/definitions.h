@@ -24,14 +24,14 @@
 #include <inttypes.h>
 
 #if defined(SIMU) &&  __GNUC__
-  #define __ALIGNED           __attribute__((aligned(32)))
+  #define __ALIGNED(x)        __attribute__((aligned(x)))
   #define __SECTION_USED(s)   __attribute__((used))
 #elif defined(SIMU)
-  #define  __ALIGNED
+  #define __ALIGNED(x)        __declspec(align(x))
   #define __SECTION_USED(s)
 #else
-  #define __ALIGNED          __attribute__((aligned(32)))
-  #define __SECTION_USED(s)  __attribute__ ((section(s), used))
+  #define __ALIGNED(x)        __attribute__((aligned(8*x)))
+  #define __SECTION_USED(s)   __attribute__((section(s), used))
 #endif
 
 #if defined(SIMU)
@@ -39,11 +39,11 @@
 #elif (defined(STM32F4) && !defined(BOOT)) || defined(PCBHORUS) || defined(PCBNV14)
   #define __DMA __attribute__((section(".ram"), aligned(32)))
 #else
-  #define __DMA __ALIGNED
+  #define __DMA __ALIGNED(4)
 #endif
 
 #if (defined(PCBHORUS) || defined(PCBNV14)) && !defined(SIMU)
-  #define __SDRAM   __attribute__((section(".sdram"), aligned(32)))
+  #define __SDRAM   __attribute__((section(".sdram"), aligned(4)))
   #define __NOINIT  __attribute__((section(".noinit")))
 #else
   #define __SDRAM   __DMA
