@@ -426,39 +426,41 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
   grid.nextLine();
 
   for (uint8_t idx = 0; idx < MAX_TELEMETRY_SENSORS; idx++) {
-    Button * button = new SensorButton(window, grid.getLineSlot(), idx);
-    button->setPressHandler([=]() -> uint8_t {
-      button->bringToTop();
-      Menu * menu = new Menu();
-      menu->addLine(STR_EDIT, [=]() {
-        editSensor(window, idx);
+    if (g_model.telemetrySensors[idx].isAvailable()) {
+      Button * button = new SensorButton(window, grid.getLineSlot(), idx);
+      button->setPressHandler([=]() -> uint8_t {
+        button->bringToTop();
+        Menu * menu = new Menu();
+        menu->addLine(STR_EDIT, [=]() {
+          editSensor(window, idx);
+        });
+        menu->addLine(STR_COPY, [=]() {
+          auto newIndex = availableTelemetryIndex();
+          if (newIndex >= 0) {
+            TelemetrySensor &sourceSensor = g_model.telemetrySensors[idx];
+            TelemetrySensor &newSensor = g_model.telemetrySensors[newIndex];
+            newSensor = sourceSensor;
+            TelemetryItem &sourceItem = telemetryItems[idx];
+            TelemetryItem &newItem = telemetryItems[newIndex];
+            newItem = sourceItem;
+            SET_DIRTY();
+            rebuild(window, newIndex);
+          }
+          else {
+            new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL, nullptr);
+          }
+        });
+        menu->addLine(STR_DELETE, [=]() {
+          delTelemetryIndex(idx); // calls setDirty internally
+          rebuild(window);
+        });
+        return 0;
       });
-      menu->addLine(STR_COPY, [=]() {
-        auto newIndex = availableTelemetryIndex();
-        if (newIndex >= 0) {
-          TelemetrySensor &sourceSensor = g_model.telemetrySensors[idx];
-          TelemetrySensor &newSensor = g_model.telemetrySensors[newIndex];
-          newSensor = sourceSensor;
-          TelemetryItem &sourceItem = telemetryItems[idx];
-          TelemetryItem &newItem = telemetryItems[newIndex];
-          newItem = sourceItem;
-          SET_DIRTY();
-          rebuild(window, newIndex);
-        }
-        else {
-          new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL, nullptr);
-        }
-      });
-      menu->addLine(STR_DELETE, [=]() {
-        delTelemetryIndex(idx); // calls setDirty internally
-        rebuild(window);
-      });
-      return 0;
-    });
-    if (focusSensorIndex == idx) {
-      button->setFocus();
+      if (focusSensorIndex == idx) {
+        button->setFocus();
+      }
+      grid.nextLine();
     }
-    grid.nextLine();
   }
 
   // Autodiscover button
