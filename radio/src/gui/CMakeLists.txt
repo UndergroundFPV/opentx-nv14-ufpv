@@ -23,6 +23,7 @@ set(GUI_SRC
   screen_setup.cpp
   view_main.cpp
   view_statistics.cpp
+  widgets_setup.cpp
   )
 
 if(HELI)

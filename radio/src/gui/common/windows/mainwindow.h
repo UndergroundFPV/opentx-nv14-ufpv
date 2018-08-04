@@ -42,6 +42,11 @@ class MainWindow: public Window {
 
     void checkEvents() override;
 
+    void invalidate()
+    {
+      invalidate({0, 0, rect.w, rect.h});
+    }
+
     void invalidate(const rect_t & rect) override;
 
     bool refresh();

@@ -125,26 +125,28 @@ int getMainViewsCount()
   return MAX_CUSTOM_SCREENS;
 }
 
-ViewMain::ViewMain():
+ViewMain::ViewMain(bool icons):
   Window(&mainWindow, { 0, 0, LCD_W, LCD_H })
 {
-  new FabIconButton(this, 50, 100, ICON_MODEL,
-                    [=]() -> uint8_t {
-                      new ModelMenu();
-                      return 0;
-                    });
+  if (icons) {
+    new FabIconButton(this, 50, 100, ICON_MODEL,
+                      [=]() -> uint8_t {
+                        new ModelMenu();
+                        return 0;
+                      });
 
-  new FabIconButton(this, LCD_W/2, 100, ICON_RADIO,
-                    [=]() -> uint8_t {
-                      new RadioMenu();
-                      return 0;
-                    });
+    new FabIconButton(this, LCD_W / 2, 100, ICON_RADIO,
+                      [=]() -> uint8_t {
+                        new RadioMenu();
+                        return 0;
+                      });
 
-  new FabIconButton(this, LCD_W-50, 100, ICON_THEME,
-                    [=]() -> uint8_t {
-                      new ScreensMenu();
-                      return 0;
-                    });
+    new FabIconButton(this, LCD_W - 50, 100, ICON_THEME,
+                      [=]() -> uint8_t {
+                        new ScreensMenu();
+                        return 0;
+                      });
+  }
 }
 
 ViewMain::~ViewMain()

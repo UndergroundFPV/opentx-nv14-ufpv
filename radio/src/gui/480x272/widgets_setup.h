@@ -18,21 +18,36 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _VIEW_MAIN_H_
-#define _VIEW_MAIN_H_
+#ifndef _WIDGETS_SETUP_H_
+#define _WIDGETS_SETUP_H_
 
-#include "window.h"
+#include "view_main.h"
 
-class ViewMain: public Window {
+class WidgetsSetupPage: public ViewMain {
   public:
-    ViewMain(bool icons=true);
+    WidgetsSetupPage(uint8_t index);
 
-    ~ViewMain() override;
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "WidgetsSetupPage";
+    }
+#endif
+
+    bool onTouchStart(coord_t x, coord_t y) override
+    {
+      Window::onTouchStart(x, y);
+      return true;
+    }
 
     bool onTouchEnd(coord_t x, coord_t y) override;
 
+    bool onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, coord_t slideX, coord_t slideY) override;
+
     void paint(BitmapBuffer * dc) override;
+
+  protected:
+    uint8_t index;
 };
 
-#endif // _VIEW_MAIN_H_
-
+#endif // _WIDGETS_SETUP_H_

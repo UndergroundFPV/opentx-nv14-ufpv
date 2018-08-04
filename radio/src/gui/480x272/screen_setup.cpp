@@ -19,6 +19,7 @@
  */
 
 #include "screen_setup.h"
+#include "widgets_setup.h"
 #include "opentx.h"
 #include "libwindows.h"
 
@@ -82,8 +83,8 @@ void ScreenSetupPage::build(Window * window)
 
   // Setup widgets button
   new TextButton(window, grid.getFieldSlot(), STR_SETUP_WIDGETS,
-                 []() -> uint8_t {
-                   // pushMenu(menuWidgetsSetup);
+                 [=]() -> uint8_t {
+                   // TODO new WidgetsSetupPage(index); (no way to get out of it right now!)
                    return 0;
                  });
   grid.nextLine();

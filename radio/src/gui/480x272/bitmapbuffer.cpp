@@ -163,6 +163,28 @@ void BitmapBuffer::drawSolidFilledRect(coord_t x, coord_t y, coord_t w, coord_t 
 
 void BitmapBuffer::drawFilledRect(coord_t x, coord_t y, coord_t w, coord_t h, uint8_t pat, LcdFlags att)
 {
+  APPLY_OFFSET();
+
+  if (x >= xmax || y >= ymax)
+    return;
+
+  if (h < 0) {
+    y += h;
+    h = -h;
+  }
+  if (y < ymin) {
+    h += y-ymin;
+    y = ymin;
+  }
+  if (x < xmin) {
+    w += x - xmin;
+    x = xmin;
+  }
+  if (y + h > ymax)
+    h = ymax - y;
+  if (x + w > xmax)
+    w = xmax - x;
+
   for (coord_t i=y; i<y+h; i++) {
     if ((att & ROUND) && (i==y || i==y+h-1))
       drawHorizontalLine(x+1, i, w-2, pat, att);

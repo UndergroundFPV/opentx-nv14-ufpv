@@ -87,7 +87,6 @@ bool MainWindow::refresh()
     lcd->setOffset(0, 0);
     lcd->setClippingRect(invalidatedRect.left(), invalidatedRect.right(), invalidatedRect.top(), invalidatedRect.bottom());
     fullPaint(lcd);
-    lcd->clearClippingRect();
     invalidatedRect.w = 0;
     return true;
   }
