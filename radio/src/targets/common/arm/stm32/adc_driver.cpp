@@ -24,6 +24,11 @@
   // not needed
 #elif defined(PCBNV14)
   const int8_t ana_direction[NUM_ANALOGS] = { 0 };
+  const uint8_t ana_mapping[NUM_ANALOGS] = { 0 /*STICK1*/, 1 /*STICK2*/, 2 /*STICK3*/, 3 /*STICK4*/,
+                                             4 /*POT1*/, 5 /*POT2*/, 6 /*SWA*/, 13 /*SWB*/,
+                                             7 /*SWC*/,  14 /*SWD*/, 8 /*SWE*/, 9 /*SWF*/,
+                                             10 /*SWG*/, 11 /*SWH*/,
+                                             12 /*TX_VOLTAGE*/ };
 #elif defined(PCBX10)
   const int8_t ana_direction[NUM_ANALOGS] = {1,-1,1,-1,  -1,1,-1, 1,-1, 1, 1,1};
 #elif defined(PCBX9E)
@@ -295,6 +300,9 @@ uint16_t getAnalogValue(uint8_t index)
     return 0;
   }
 #if defined(PCBX9E)
+  index = ana_mapping[index];
+#endif
+#if defined(PCBNV14)
   index = ana_mapping[index];
 #endif
   if (ana_direction[index] < 0)

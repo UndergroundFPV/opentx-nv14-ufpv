@@ -526,7 +526,7 @@ static uint32_t set_loop_cnt = 0;
 void setFlySkyChannelData(int channel, int16_t steroValue)
 {
     if(channel < NUM_OF_NV14_CHANNELS && VALID_CH_DATA(steroValue)) {
-        rx_info.stero_value[channel] = steroValue;
+        rx_info.stero_value[channel] = (1000 * (steroValue + 1024) / 2048) + 1000;
     }
 
     if((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY) && (set_loop_cnt++ % 1000 ==0)) {
