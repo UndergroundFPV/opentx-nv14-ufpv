@@ -18,8 +18,115 @@
  * GNU General Public License for more details.
  */
 
+#include "view_statistics.h"
 #include "opentx.h"
 #include "stamp.h"
+#include "libwindows.h"
+
+#define MENU_STATS_COLUMN1    (MENUS_MARGIN_LEFT + 120)
+
+class StatisticsBody: public Window {
+  public:
+    StatisticsBody(Window * parent, const rect_t & rect):
+      Window(parent, rect)
+    {
+      setInnerHeight(100); // TODO
+    }
+
+    void checkEvents() override
+    {
+      // will always force a full monitor window refresh
+      invalidate();
+    }
+
+    void paint(BitmapBuffer * dc) override
+    {
+      lcdDrawText(MENUS_MARGIN_LEFT, 0, "Session");
+      drawTimer(MENU_STATS_COLUMN1, 0, sessionTimer, TIMEHOUR);
+      lcdDrawText(MENUS_MARGIN_LEFT, FH, "Battery");
+      drawTimer(MENU_STATS_COLUMN1, FH, g_eeGeneral.globalTimer + sessionTimer, TIMEHOUR);
+
+      lcdDrawText(MENUS_MARGIN_LEFT, 2 * FH, "Throttle");
+      drawTimer(MENU_STATS_COLUMN1, 2 * FH, s_timeCumThr, TIMEHOUR);
+      lcdDrawText(MENUS_MARGIN_LEFT, 3 * FH, "Throttle %", TIMEHOUR);
+      drawTimer(MENU_STATS_COLUMN1, 3 * FH, s_timeCum16ThrP / 16, TIMEHOUR);
+
+      for (uint idx = 0; idx < TIMERS; idx++) {
+        drawStringWithIndex(MENUS_MARGIN_LEFT, (4 + idx) * FH, "Timer", idx);
+        drawTimer(MENU_STATS_COLUMN1, (4 + idx) * FH, timersStates[idx].val, TIMEHOUR);
+      }
+
+      const coord_t x = 10;
+      const coord_t y = 240;
+      lcdDrawHorizontalLine(x-3, y, MAXTRACE+3+3, SOLID, TEXT_COLOR);
+      lcdDrawVerticalLine(x, y-96, 96+3, SOLID, TEXT_COLOR);
+      for (coord_t i=0; i<MAXTRACE; i+=6) {
+        lcdDrawVerticalLine(x+i, y-1, 3, SOLID, TEXT_COLOR);
+      }
+
+      uint16_t traceRd = s_traceWr > MAXTRACE ? s_traceWr - MAXTRACE : 0;
+      coord_t prev_yv = (coord_t)-1;
+      for (coord_t i=1; i<=MAXTRACE && traceRd<s_traceWr; i++, traceRd++) {
+        uint8_t h = s_traceBuf[traceRd % MAXTRACE];
+        coord_t yv = y - 2 - 3*h;
+        if (prev_yv != (coord_t)-1) {
+          if (prev_yv < yv) {
+            for (int y=prev_yv; y<=yv; y++) {
+              lcdDrawBitmapPattern(x + i - 3, y, LBM_POINT, TEXT_COLOR);
+            }
+          }
+          else {
+            for (int y=yv; y<=prev_yv; y++) {
+              lcdDrawBitmapPattern(x + i - 3, y, LBM_POINT, TEXT_COLOR);
+            }
+          }
+        }
+        else {
+          lcdDrawBitmapPattern(x + i - 3, yv, LBM_POINT, TEXT_COLOR);
+        }
+        prev_yv = yv;
+      }
+
+      lcdDrawText(LCD_W/2, MENU_FOOTER_TOP, STR_MENUTORESET, MENU_TITLE_COLOR | CENTERED);
+    }
+};
+
+class StatisticsFooter: public Window {
+  public:
+    StatisticsFooter(Window * parent, const rect_t & rect):
+      Window(parent, rect)
+    {
+    }
+
+    virtual void paint(BitmapBuffer * dc) override {
+
+    }
+};
+
+class StatisticsPage: public PageTab {
+  public:
+    StatisticsPage() :
+      PageTab(STR_STATISTICS, ICON_STATS_THROTTLE_GRAPH)
+    {
+    }
+
+    virtual void build(Window * window) override
+    {
+      new StatisticsBody(window, {0, 0, LCD_W, window->height() - footerHeight});
+      new StatisticsFooter(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
+    }
+
+  protected:
+    static constexpr coord_t footerHeight = 30;
+};
+
+StatisticsMenu::StatisticsMenu():
+  TabsGroup()
+{
+  addTab(new StatisticsPage());
+  // TODO addTab(new DebugPage());
+  // TODO addTab(analogsPage());
+}
 
 #define MENU_STATS_COLUMN1    (MENUS_MARGIN_LEFT + 120)
 #define MENU_STATS_COLUMN2    (LCD_W/2)

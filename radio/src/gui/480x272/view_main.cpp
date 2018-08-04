@@ -23,6 +23,7 @@
 #include "menu_model.h"
 #include "model_select.h"
 #include "view_channels.h"
+#include "view_statistics.h"
 #include "opentx.h"
 #include "libwindows.h"
 
@@ -190,7 +191,7 @@ bool ViewMain::onTouchEnd(coord_t x, coord_t y)
       });
     });
     menu->addLine(STR_STATISTICS, [=]() {
-      // TODO
+      new StatisticsMenu();
     });
     menu->addLine(STR_ABOUT_US, [=]() {
       // TODO
