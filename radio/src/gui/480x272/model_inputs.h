@@ -24,14 +24,15 @@
 #include "tabsgroup.h"
 
 class ModelInputsPage: public PageTab {
-public:
+  public:
     ModelInputsPage();
 
-    virtual void build(Window * window) override {
+    virtual void build(Window * window) override
+    {
       build(window, -1);
     }
 
-protected:
+  protected:
     void build(Window * window, int8_t focusIndex);
     void rebuild(Window * window, int8_t focusIndex);
     void editInput(Window * window, uint8_t channel, uint8_t index);

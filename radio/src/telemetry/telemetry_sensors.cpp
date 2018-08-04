@@ -412,9 +412,9 @@ void delTelemetryIndex(uint8_t index)
   storageDirty(EE_MODEL);
 }
 
-int availableTelemetryIndex()
+int8_t availableTelemetryIndex()
 {
-  for (int index=0; index<MAX_TELEMETRY_SENSORS; index++) {
+  for (int8_t index=0; index<MAX_TELEMETRY_SENSORS; index++) {
     TelemetrySensor & telemetrySensor = g_model.telemetrySensors[index];
     if (!telemetrySensor.isAvailable()) {
       return index;
