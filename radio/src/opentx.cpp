@@ -19,6 +19,7 @@
  */
 
 #include "opentx.h"
+#include "libwindows.h"
 #include "shutdown_animation.h"
 
 RadioData  g_eeGeneral;
@@ -1102,15 +1103,12 @@ void checkAll()
   checkLowEEPROM();
 #endif
 
-#if defined(MODULE_ALWAYS_SEND_PULSES)
-  startupWarningState = STARTUP_WARNING_THROTTLE;
-#else
   if (g_eeGeneral.chkSum == evalChkSum()) {
     checkTHR();
   }
   checkSwitches();
   checkFailsafe();
-#endif
+
 #if defined(CPUARM)
   checkRSSIAlarmsDisabled();
 #endif
@@ -1181,63 +1179,29 @@ bool isThrottleWarningAlertNeeded()
 
   evalInputs(e_perout_mode_notrainer); // let do evalInputs do the job
 
-  int16_t v = calibratedAnalogs[thrchn];
-  if (v <= THRCHK_DEADBAND-1024) {
-    return false;
-  }
-
-  return true;
+  return calibratedAnalogs[thrchn] > THRCHK_DEADBAND - 1024;
 }
 
 #if defined(COLORLCD)
-#include "dialog.h"
-class ThrottleAlert: public Dialog {
-  public:
-    ThrottleAlert():
-      Dialog(WARNING_TYPE_ALERT, STR_THROTTLEWARN, STR_THROTTLENOTIDLE)
-    {
-    }
-
-  protected:
-    void checkEvents() override
-    {
-      if (!isThrottleWarningAlertNeeded()) {
-        deleteLater();
-      }
-    }
-};
-
 void checkTHR()
 {
   if (isThrottleWarningAlertNeeded()) {
-    new ThrottleAlert();
+    auto dialog = new Dialog(WARNING_TYPE_ALERT, STR_THROTTLEWARN, STR_THROTTLENOTIDLE);
+    dialog->setCloseCondition([]() {
+      return !isThrottleWarningAlertNeeded();
+    });
+    dialog->runForever();
   }
 }
-
 #else
 void checkTHR()
 {
-
   // throttle channel is either the stick according stick mode (already handled in evalInputs)
   // or P1 to P3;
   // in case an output channel is choosen as throttle source (thrTraceSrc>NUM_POTS+NUM_SLIDERS) we assume the throttle stick is the input
   // no other information available at the moment, and good enough to my option (otherwise too much exceptions...)
 
-#if defined(MODULE_ALWAYS_SEND_PULSES)
-  int16_t v = calibratedAnalogs[thrchn];
-  if (v<=THRCHK_DEADBAND-1024 || g_model.disableThrottleWarning || pwrCheck()==e_power_off || keyDown()) {
-    startupWarningState = STARTUP_WARNING_THROTTLE+1;
-  }
-  else {
-    calibratedAnalogs[thrchn] = -1024;
-#if !defined(VIRTUAL_INPUTS)
-    if (thrchn < NUM_STICKS) {
-      rawAnas[thrchn] = anas[thrchn] = calibratedAnalogs[thrchn];
-    }
-#endif
-    RAISE_ALERT(STR_THROTTLEWARN, STR_THROTTLENOTIDLE, STR_PRESSANYKEYTOSKIP, AU_THROTTLE_ALERT);
-  }
-#else
+
   if (!isThrottleWarningAlertNeeded()) {
     return;
   }
@@ -1251,7 +1215,6 @@ void checkTHR()
 #endif
 
   while (!getEvent()) {
-
     if (!isThrottleWarningAlertNeeded()) {
       return;
     }
@@ -1284,7 +1247,6 @@ void checkTHR()
 #endif
 
   }
-#endif
 
   LED_ERROR_END();
 }
@@ -2512,33 +2474,6 @@ void moveTrimsToOffsets() // copy state of 3 primary to subtrim
 
 #if defined(CPUARM) && defined(ROTARY_ENCODER_NAVIGATION)
 uint8_t rotencSpeed;
-#endif
-
-#if !defined(CPUARM) && !defined(SIMU)
-extern unsigned char __bss_end ;
-#define STACKPTR     _SFR_IO16(0x3D)
-void stackPaint()
-{
-  // Init Stack while interrupts are disabled
-  unsigned char *p ;
-  unsigned char *q ;
-
-  p = (unsigned char *) STACKPTR ;
-  q = &__bss_end ;
-  p -= 2 ;
-  while ( p > q ) {
-    *p-- = 0x55 ;
-  }
-}
-
-uint16_t stackAvailable()
-{
-  unsigned char *p ;
-
-  p = &__bss_end + 1 ;
-  while ( *p++ == 0x55 );
-  return p - &__bss_end ;
-}
 #endif
 
 #if defined(CPUM2560)

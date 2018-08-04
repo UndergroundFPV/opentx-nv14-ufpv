@@ -45,6 +45,11 @@ Dialog::Dialog(uint8_t type, std::string title, std::string message, std::functi
                     });
 }
 
+Dialog::~Dialog()
+{
+  deleteChildren();
+}
+
 void Dialog::paint(BitmapBuffer * dc)
 {
   theme->drawBackground();
@@ -75,7 +80,7 @@ void Dialog::paint(BitmapBuffer * dc)
 
 #if 0
   if (action) {
-   // TODO remove action? dc->drawText(ALERT_FRAME_PADDING+5, ALERT_ACTION_TOP, action);
+   // dc->drawText(ALERT_FRAME_PADDING+5, ALERT_ACTION_TOP, action);
   }
 #endif
 }
@@ -87,6 +92,40 @@ bool Dialog::onTouchEnd(coord_t x, coord_t y)
   return true;
 }
 
+void Dialog::checkEvents()
+{
+  Window::checkEvents();
+  if (closeCondition && closeCondition())
+    deleteLater();
+}
+
+void Dialog::deleteLater()
+{
+  if (running)
+    running = false;
+  else
+    Window::deleteLater();
+}
+
+void Dialog::runForever()
+{
+  running = true;
+
+  while (running) {
+    if (pwrCheck() == e_power_off) {
+      boardOff();
+    }
+
+    checkBacklight();
+    wdt_reset();
+
+    CoTickDelay(10); // TODO RTOS_WAIT_MS(20);
+
+    mainWindow.run();
+  }
+
+  Window::deleteLater();
+}
 
 void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound)
 {

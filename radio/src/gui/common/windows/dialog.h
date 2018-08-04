@@ -21,17 +21,21 @@
 #ifndef _DIALOG_H_
 #define _DIALOG_H_
 
-#define WARNING_TYPE_ALERT     0
-#define WARNING_TYPE_ASTERISK  1
-#define WARNING_TYPE_CONFIRM   2
-#define WARNING_TYPE_INPUT     3
-#define WARNING_TYPE_INFO      4
-
 #include "button.h"
+
+enum DialogType {
+  WARNING_TYPE_ALERT,
+  WARNING_TYPE_ASTERISK,
+  WARNING_TYPE_CONFIRM,
+  WARNING_TYPE_INPUT,
+  WARNING_TYPE_INFO
+};
 
 class Dialog : public Window {
   public:
     Dialog(uint8_t type, std::string title, std::string message="", std::function<void(void)> onConfirm=nullptr);
+
+    ~Dialog() override;
 
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
@@ -40,19 +44,27 @@ class Dialog : public Window {
     }
 #endif
 
-    ~Dialog()
-    {
-      deleteChildren();
-    }
-
     void paint(BitmapBuffer * dc) override;
 
     bool onTouchEnd(coord_t x, coord_t y) override;
+
+    void deleteLater();
+
+    void checkEvents() override;
+
+    void setCloseCondition(std::function<bool(void)> handler)
+    {
+      closeCondition = std::move(handler);
+    }
+
+    void runForever();
 
   protected:
     uint8_t type;
     std::string title;
     std::string message;
+    bool running = false;
+    std::function<bool(void)> closeCondition;
 };
 
 #endif // _CONFIRMATION_H_
