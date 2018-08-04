@@ -112,6 +112,7 @@ class SensorEditWindow : public Page {
 
   protected:
     uint8_t index;
+    int lastKnowIndex;
     Window * sensorOneWindow = nullptr;
 
     void buildHeader(Window * window)
@@ -352,6 +353,15 @@ ModelTelemetryPage::ModelTelemetryPage() :
 {
 }
 
+
+void ModelTelemetryPage::checkEvents()
+{
+  if (lastKnowIndex != availableTelemetryIndex()) {
+    lastKnowIndex = availableTelemetryIndex();
+    rebuild(window);
+  }
+}
+
 void ModelTelemetryPage::rebuild(Window * window)
 {
   coord_t scrollPosition = window->getScrollPositionY();
@@ -371,6 +381,8 @@ void ModelTelemetryPage::editSensor(Window * window, uint8_t index)
 
 void ModelTelemetryPage::build(Window * window)
 {
+  window = this->window;
+
   GridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(180);

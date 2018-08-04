@@ -28,10 +28,13 @@ public:
     ModelTelemetryPage();
 
     virtual void build(Window * window) override;
+    virtual void checkEvents();
 
   protected:
+    Window * window;
     void editSensor(Window * window, uint8_t index);
     void rebuild(Window * window);
+    int lastKnowIndex = 0;
 };
 
 #endif //_MODEL_TELEMETRY_H
