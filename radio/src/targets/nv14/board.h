@@ -323,7 +323,6 @@ void watchdogInit(unsigned int duration);
 #define NUM_XPOTS                       0 // NUM_POTS
 #define NUM_SLIDERS                     0
 #define NUM_PWMANALOGS                  0
-#define NUM_ANALOGS                     (NUM_MAIN_ANALOGS + NUM_SUB_ANALOGS)
 
 enum Analogs {
   STICK1,
@@ -335,19 +334,16 @@ enum Analogs {
   POT2,
   POT_LAST = POT2,
   SWA,
+  SWB,
   SWC,
+  SWD,
   SWE,
   SWF,
   SWG,
   SWH,
+  SUB_ANALOG_POS = SWH,
   TX_VOLTAGE,
-  NUM_MAIN_ANALOGS
-};
-
-enum subAnalogs {
-  SWB,
-  SWD,
-  NUM_SUB_ANALOGS
+  NUM_ANALOGS
 };
 
 
@@ -372,8 +368,7 @@ enum CalibratedAnalogs {
 #define IS_POT(x)                       ((x)>=POT_FIRST && (x)<=POT_LAST)
 #define IS_SLIDER(x)                    (false)
 
-extern uint16_t adcValues[NUM_MAIN_ANALOGS];
-extern uint16_t subAdcValues[NUM_SUB_ANALOGS];
+extern uint16_t adcValues[NUM_ANALOGS];
 
 void adcInit(void);
 void adcRead(void);

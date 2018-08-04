@@ -65,12 +65,11 @@
 #else
   #define FIRST_ANALOG_ADC             0
   #define FIRST_SUB_ANALOG_ADC         0
-  #define NUM_MAIN_ANALOGS_ADC         NUM_MAIN_ANALOGS
-  #define NUM_SUB_ANALOGS_ADC          NUM_SUB_ANALOGS
+  #define NUM_MAIN_ANALOGS_ADC         (SUB_ANALOG_POS)
+  #define NUM_SUB_ANALOGS_ADC          (NUM_ANALOGS - SUB_ANALOG_POS)
 #endif
 
-uint16_t adcValues[NUM_MAIN_ANALOGS] __DMA;
-uint16_t subAdcValues[NUM_SUB_ANALOGS] __DMA;
+uint16_t adcValues[NUM_ANALOGS] __DMA;
 
 void adcInit()
 {
@@ -166,7 +165,7 @@ void adcInit()
 
   ADC_SUB_DMA_Stream->CR = DMA_SxCR_PL | ADC_SUB_DMA_SxCR_CHSEL | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0 | DMA_SxCR_MINC;
   ADC_SUB_DMA_Stream->PAR = CONVERT_PTR_UINT(&ADC_SUB->DR);
-  ADC_SUB_DMA_Stream->M0AR = CONVERT_PTR_UINT(&subAdcValues[FIRST_SUB_ANALOG_ADC]);
+  ADC_SUB_DMA_Stream->M0AR = CONVERT_PTR_UINT(&adcValues[SUB_ANALOG_POS]);
   ADC_SUB_DMA_Stream->NDTR = NUM_SUB_ANALOGS_ADC;
   ADC_SUB_DMA_Stream->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0;
 #endif
@@ -255,7 +254,7 @@ void adcRead()
   {
     adcSingleRead();
 
-    for (j = FIRST_ANALOG_ADC; j < NUM_MAIN_ANALOGS; j++)
+    for (j = FIRST_ANALOG_ADC; j < NUM_ANALOGS; j++)
     {
       uint16_t val = adcValues[j];
 #if defined(JITTER_MEASURE)
@@ -263,12 +262,6 @@ void adcRead()
         rawJitter[j].measure(val);
       }
 #endif
-      temp[j] += val;
-    }
-
-    for (k = FIRST_ANALOG_ADC; k < NUM_SUB_ANALOGS; k++, j++)
-    {
-      uint16_t val = subAdcValues[k];
       temp[j] += val;
     }
   }
