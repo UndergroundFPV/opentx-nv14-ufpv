@@ -21,11 +21,7 @@
 #ifndef _TASKS_ARM_H_
 #define _TASKS_ARM_H_
 
-#if !defined(SIMU)
-extern "C" {
-#include <CoOS.h>
-}
-#endif
+#include "rtos.h"
 
 // stack sizes should be in multiples of 8 for better alignment
 #define MENUS_STACK_SIZE       2000
@@ -40,52 +36,25 @@ extern "C" {
 #define CLI_TASK_PRIO          10
 #define TOUCH_TASK_PRIO        12   // lower prio than GUI! otherwise may block (runs at 1 tick)
 
-#if defined(_MSC_VER)
-  #define _ALIGNED(x) __declspec(align(x))
-#elif defined(__GNUC__)
-  #define _ALIGNED(x) __attribute__ ((aligned(x)))
-#elif !defined(_ALIGNED)
-  #define _ALIGNED(x)
-#endif
+extern RTOS_TASK_HANDLE menusTaskId;
+extern RTOS_DEFINE_STACK(menusStack, MENUS_STACK_SIZE);
 
-uint16_t getStackAvailable(void * address, uint16_t size);
+extern RTOS_TASK_HANDLE mixerTaskId;
+extern RTOS_DEFINE_STACK(mixerStack, MIXER_STACK_SIZE);
 
-template<int SIZE>
-class TaskStack
-{
-  public:
-    TaskStack() { }
-    void paint();
-    uint16_t size()
-    {
-      return SIZE * 4;
-    }
-    uint16_t available()
-    {
-      return getStackAvailable(stack, SIZE);
-    }
-    OS_STK stack[SIZE];
-};
+extern RTOS_TASK_HANDLE audioTaskId;
+extern RTOS_DEFINE_STACK(audioStack, AUDIO_STACK_SIZE);
+
+extern RTOS_FLAG_HANDLE openTxInitCompleteFlag;
 
 void stackPaint();
-uint16_t stackSize();
-uint16_t stackAvailable();
-
-extern OS_TID menusTaskId;
-// menus stack must be aligned to 8 bytes otherwise printf for %f does not work!
-extern TaskStack<MENUS_STACK_SIZE> _ALIGNED(8) menusStack;
-
-extern OS_TID mixerTaskId;
-extern TaskStack<MIXER_STACK_SIZE> mixerStack;
-
-extern OS_TID audioTaskId;
-extern TaskStack<AUDIO_STACK_SIZE> audioStack;
-
-extern OS_FlagID openTxInitCompleteFlag;
-
 void tasksStart();
 
 extern volatile uint16_t timeForcePowerOffPressed;
 inline void resetForcePowerOffRequest() {timeForcePowerOffPressed = 0; }
+
+extern RTOS_MUTEX_HANDLE mixerMutex;
+inline void pauseMixerCalculations() { RTOS_LOCK_MUTEX(mixerMutex); }
+inline void resumeMixerCalculations() { RTOS_UNLOCK_MUTEX(mixerMutex); }
 
 #endif // _TASKS_ARM_H_

@@ -780,9 +780,6 @@ extern uint16_t lastMixerDuration;
   uint16_t getTmr16KHz();
 #endif
 
-#if !defined(CPUARM)
-  uint16_t stackAvailable();
-#endif
 
 #if defined(SPLASH)
   void doSplash();
@@ -826,65 +823,13 @@ void doLoopCommonActions();
 #endif
 
 // OS abstraction layer (tasks, semaphores, mutexes, etc)
-#if defined(CPUARM) && !defined(BOOT)
-  #include "tasks_arm.h"
-
-  extern OS_MutexID mixerMutex;
-  inline void pauseMixerCalculations() { CoEnterMutexSection(mixerMutex); }
-  inline void resumeMixerCalculations() { CoLeaveMutexSection(mixerMutex); }
-
-  inline OS_MutexID createMutex(void) { return CoCreateMutex(); }
-  inline StatusType enterMutexSection(OS_MutexID mutexId) { return CoEnterMutexSection(mutexId); }
-  inline StatusType leaveMutexSection(OS_MutexID mutexId) { return CoLeaveMutexSection(mutexId); }
-
-  inline StatusType postSemaphore(OS_EventID id)                   { return CoPostSem(id); }
-  inline StatusType postSemaphore_isr(OS_EventID id)               { return isr_PostSem(id); }
-  inline StatusType pendSemaphore(OS_EventID id, uint32_t timeout) { return CoPendSem(id, timeout); }
-  inline StatusType acceptSemaphore(OS_EventID id)                 { return CoAcceptSem(id);}
-  inline StatusType deleteSemaphore(OS_EventID id, uint8_t opt)    { return CoDelSem(id, opt); }
-  inline OS_EventID createSemaphore(uint16_t initCnt, uint16_t maxCnt, uint8_t sortType) { return CoCreateSem(initCnt, maxCnt, sortType); }
-#elif defined(CPUARM)  // defined(CPUARM) && !defined(BOOT)
-  typedef uint8_t OS_MutexID;
-  typedef uint8_t OS_EventID;
-  typedef uint8_t StatusType;
-
-  #define pauseMixerCalculations()
-  #define resumeMixerCalculations()
-
-  inline OS_MutexID createMutex(void) {
-    static OS_MutexID mtxId = 0;
-    return (++mtxId);
-  }
-  #define enterMutexSection(...)   (0)
-  #define leaveMutexSection(...)   (0)
-  #define postSemaphore(...)       (0)
-  #define postSemaphore_isr(...)   (0)
-  #define pendSemaphore(...)       (0)
-  #define acceptSemaphore(...)     (0)
-  #define deleteSemaphore(...)     (0)
-  #define createSemaphore(...)     createMutex()
-#else  // AVR
-  #define pauseMixerCalculations()
-  #define resumeMixerCalculations()
-#endif  // defined(CPUARM) && !defined(BOOT)
+#include "tasks_arm.h"
 
 void generalDefault();
 void modelDefault(uint8_t id);
 
-#if defined(CPUARM)
-  #include "otx_math.h"
-  void checkModelIdUnique(uint8_t index, uint8_t module);
-#else
-  // in avr_maths.cpp
-  extern int16_t calc100to256_16Bits(int16_t x); // @@@2 open.20.fsguruh: return x*2.56
-  extern int16_t calc100to256(int8_t x); // @@@2 open.20.fsguruh: return x*2.56
-  extern int16_t calc100toRESX_16Bits(int16_t x); // @@@ open.20.fsguruh
-  extern int16_t calc100toRESX(int8_t x);
-  extern int16_t calc1000toRESX(int16_t x);
-  extern int16_t calcRESXto1000(int16_t x);
-  extern int8_t  calcRESXto100(int16_t x);
-  extern uint16_t isqrt32(uint32_t n);
-#endif
+#include "otx_math.h"
+void checkModelIdUnique(uint8_t index, uint8_t module);
 
 extern const char vers_stamp[];
 #if defined(COLORLCD)

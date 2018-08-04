@@ -499,6 +499,7 @@ if(NOT MSVC)
       add_definitions(-DSEMIHOSTING)
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=rdimon.specs")
     endif()
+
     # Use newlib nano, which saves a few kilobytes.
     if(NOT NANO STREQUAL NO)
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=nano.specs")
@@ -511,6 +512,7 @@ if(NOT MSVC)
       set(SRC ${SRC} bin_allocator.cpp)
     endif()
 
+    add_definitions(-DRTOS_COOS)
 
     if((PCB STREQUAL XLITE OR PCB STREQUAL X9D OR PCB STREQUAL X9D+ OR PCB STREQUAL X9E OR PCB STREQUAL X7 OR PCB STREQUAL X10 OR PCB STREQUAL X12S OR PCB STREQUAL I8 OR PCB STREQUAL NV14) AND BOOTLOADER)
       add_subdirectory(targets/common/arm/stm32/bootloader)

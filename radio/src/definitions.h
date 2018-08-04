@@ -30,7 +30,7 @@
   #define __ALIGNED(x)        __declspec(align(x))
   #define __SECTION_USED(s)
 #else
-  #define __ALIGNED(x)        __attribute__((aligned(8*x)))
+  #define __ALIGNED(x)        __attribute__((aligned(x)))
   #define __SECTION_USED(s)   __attribute__((section(s), used))
 #endif
 

@@ -23,7 +23,7 @@
 
 OS_TID menusTaskId;
 // menus stack must be aligned to 8 bytes otherwise printf for %f does not work!
-TaskStack<MENUS_STACK_SIZE> _ALIGNED(8) menusStack;
+TaskStack<MENUS_STACK_SIZE> __ALIGNED(8) menusStack;
 
 OS_TID mixerTaskId;
 TaskStack<MIXER_STACK_SIZE> mixerStack;
@@ -47,24 +47,6 @@ enum TaskIndex {
   MAIN_TASK_INDEX = 255
 };
 
-template<int SIZE>
-void TaskStack<SIZE>::paint()
-{
-  for (uint32_t i=0; i<SIZE; i++) {
-    stack[i] = 0x55555555;
-  }
-}
-
-uint16_t getStackAvailable(void * address, uint16_t size)
-{
-  uint32_t * array = (uint32_t *)address;
-  uint16_t i = 0;
-  while (i < size && array[i] == 0x55555555) {
-    i++;
-  }
-  return i*4;
-}
-
 void stackPaint()
 {
   menusStack.paint();
@@ -77,18 +59,6 @@ void stackPaint()
   TouchManager::taskStack().paint();
 #endif
 }
-
-#if defined(STM32) && !defined(SIMU)
-uint16_t stackSize()
-{
-  return ((unsigned char *)&_estack - (unsigned char *)&_main_stack_start) / 4;
-}
-
-uint16_t stackAvailable()
-{
-  return getStackAvailable(&_main_stack_start, stackSize());
-}
-#endif
 
 volatile uint16_t timeForcePowerOffPressed = 0;
 
