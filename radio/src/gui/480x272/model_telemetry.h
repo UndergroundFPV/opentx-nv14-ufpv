@@ -27,14 +27,14 @@ class ModelTelemetryPage: public PageTab {
 public:
     ModelTelemetryPage();
 
-    virtual void build(Window * window) override;
-    virtual void checkEvents();
+    void build(Window * window) override;
+    void checkEvents() override;
 
   protected:
-    Window * window;
+    Window * window = nullptr;
     void editSensor(Window * window, uint8_t index);
     void rebuild(Window * window);
-    int lastKnowIndex = 0;
+    int lastKnownIndex = 0;
 };
 
 #endif //_MODEL_TELEMETRY_H
