@@ -82,6 +82,7 @@ TabsGroup::TabsGroup():
   header(this),
   body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
 {
+  body.deleteChildren();
 }
 
 TabsGroup::~TabsGroup()

@@ -110,6 +110,11 @@ class SensorEditWindow : public Page {
       buildHeader(&header);
     }
 
+    ~SensorEditWindow()
+    {
+      body.deleteChildren();
+    }
+
   protected:
     uint8_t index;
     Window * sensorOneWindow = nullptr;
@@ -420,7 +425,7 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
     new StaticText(window, {SENSOR_COL3, grid.getWindowHeight() + 3, LCD_W - SENSOR_COL3, lineHeight}, STR_ID, SMLSIZE | TEXT_DISABLE_COLOR);
   grid.nextLine();
 
-  for (uint8_t idx = 0; idx < availableTelemetryIndex(); idx++) {
+  for (uint8_t idx = 0; idx < MAX_TELEMETRY_SENSORS; idx++) {
     Button * button = new SensorButton(window, grid.getLineSlot(), idx);
     button->setPressHandler([=]() -> uint8_t {
       button->bringToTop();
@@ -445,8 +450,7 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
         }
       });
       menu->addLine(STR_DELETE, [=]() {
-        delTelemetryIndex(idx);
-        SET_DIRTY();
+        delTelemetryIndex(idx); // calls setDirty internally
         rebuild(window);
       });
       return 0;
