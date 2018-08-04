@@ -20,6 +20,7 @@
 
 #include "opentx.h"
 
+#if 0
 void editGVarValue(coord_t x, coord_t y, event_t event, uint8_t gvar, uint8_t flightMode, LcdFlags flags)
 {
   FlightModeData * fm = &g_model.flightModeData[flightMode];
@@ -182,3 +183,4 @@ bool menuModelGVars(event_t event)
 
   return true;
 }
+#endif

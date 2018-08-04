@@ -721,6 +721,7 @@ const mm_protocol_definition *getMultiProtocolDefinition (uint8_t protocol)
 }
 #endif
 
+#if 0
 void editStickHardwareSettings(coord_t x, coord_t y, int idx, event_t event, LcdFlags flags)
 {
   lcdDrawTextAtIndex(INDENT_WIDTH, y, STR_VSRCRAW, idx+1, 0);
@@ -729,3 +730,4 @@ void editStickHardwareSettings(coord_t x, coord_t y, int idx, event_t event, Lcd
   else
     lcdDrawMMM(x, y, flags);
 }
+#endif

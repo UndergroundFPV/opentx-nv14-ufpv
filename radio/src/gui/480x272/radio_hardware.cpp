@@ -46,7 +46,7 @@ void RadioHardwarePage::build(Window * window)
     grid.nextLine();
   }
 
-    //Pots
+  // Pots
   new Subtitle(window, grid.getLineSlot(), STR_POTS);
   grid.nextLine();
   for(int i=0; i < NUM_POTS; i++){
@@ -56,7 +56,7 @@ void RadioHardwarePage::build(Window * window)
     grid.nextLine();
   }
 
-  //Switches
+  // Switches
   new Subtitle(window, grid.getLineSlot(), STR_SWITCHES);
   grid.nextLine();
   for(int i=0; i < NUM_SWITCHES; i++) {
@@ -79,7 +79,7 @@ void RadioHardwarePage::build(Window * window)
   new StaticText(window, grid.getLabelSlot(), STR_BATT_CALIB);
   auto batCal = new NumberEdit(window, grid.getFieldSlot(), -127, 127, GET_SET_DEFAULT(g_eeGeneral.txVoltageCalibration));
   batCal->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-      drawNumber(dc, 2, 2, getBatteryVoltage(), flags | PREC2, 0, nullptr, "V");
+    drawNumber(dc, 2, 2, getBatteryVoltage(), flags | PREC2, 0, nullptr, "V");
   });
   grid.nextLine();
 

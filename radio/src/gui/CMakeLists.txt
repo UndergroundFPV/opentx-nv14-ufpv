@@ -18,6 +18,9 @@ set(GUI_SRC
   radio_trainer.cpp
   radio_version.cpp
   radio_calibration.cpp
+  menu_screens.cpp
+  screen_theme.cpp
+  screen_setup.cpp
   view_main.cpp
   view_statistics.cpp
   )

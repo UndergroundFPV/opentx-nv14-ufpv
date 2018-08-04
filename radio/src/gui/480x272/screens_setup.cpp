@@ -46,135 +46,7 @@ int updateMainviewsMenu();
 bool menuScreenAdd(event_t event);
 void onScreenSetupMenu(const char * result);
 
-void onZoneOptionFileSelectionMenu(const char * result)
-{
-  if (result == STR_UPDATE_LIST) {
-    if (!sdListFiles(BITMAPS_PATH, BITMAPS_EXT, LEN_ZONE_OPTION_STRING, NULL)) {
-      POPUP_WARNING(STR_NO_BITMAPS_ON_SD);
-    }
-  }
-  else {
-    fileSelectionDone = true;
-    memcpy(fileSelection, result, sizeof(fileSelection));
-  }
-}
-
-uint8_t getZoneOptionColumns(const ZoneOption * option)
-{
-  if (option->type == ZoneOption::Color) {
-    return uint8_t(2 | NAVIGATION_LINE_BY_LINE);
-  }
-  else {
-    return 0;
-  }
-}
-
-uint8_t editColorPart(coord_t x, coord_t y, event_t event, uint8_t part, uint8_t value, LcdFlags attr, uint32_t i_flags)
-{
-  const char * STR_COLOR_PARTS = "\002" "R:" "G:" "B:";
-  uint8_t PART_BITS[] = { 5, 6, 5 };
-  lcdDrawTextAtIndex(x, y, STR_COLOR_PARTS, part, (attr && menuHorizontalPosition < 0) ? TEXT_INVERTED_COLOR : TEXT_COLOR);
-  lcdDrawNumber(x + 20, y, value << (8-PART_BITS[part]), LEFT|TEXT_COLOR|((attr && (menuHorizontalPosition < 0 || menuHorizontalPosition == part)) ? attr : TEXT_COLOR));
-  if (attr && menuHorizontalPosition == part) {
-    value = checkIncDec(event, value, 0, (1 << PART_BITS[part])-1, i_flags);
-  }
-  return value;
-}
-
-bool editZoneOption(coord_t y, const ZoneOption * option, ZoneOptionValue * value, LcdFlags attr, uint32_t i_flags, event_t event)
-{
-  lcdDrawText(MENUS_MARGIN_LEFT, y, option->name);
-
-  if (option->type == ZoneOption::Bool) {
-    value->boolValue = editCheckBox(value->boolValue, SCREENS_SETUP_2ND_COLUMN, y, attr, event); // TODO always does storageDirty(EE_MODEL)
-  }
-  else if (option->type == ZoneOption::Integer) {
-    lcdDrawNumber(SCREENS_SETUP_2ND_COLUMN, y, value->signedValue, attr | LEFT);
-    if (attr) {
-      CHECK_INCDEC_MODELVAR(event, value->signedValue, option->min.signedValue, option->max.signedValue); // TODO i_flags
-    }
-  }
-  else if (option->type == ZoneOption::String) {
-    editName(SCREENS_SETUP_2ND_COLUMN, y, value->stringValue, sizeof(value->stringValue), event, attr); // TODO i_flags?
-  }
-  else if (option->type == ZoneOption::File) {
-    if (ZEXIST(value->stringValue))
-      lcdDrawSizedText(SCREENS_SETUP_2ND_COLUMN, y, value->stringValue, sizeof(value->stringValue), attr);
-    else
-      lcdDrawTextAtIndex(SCREENS_SETUP_2ND_COLUMN, y, STR_VCSWFUNC, 0, attr); // TODO define
-    if (attr) {
-      if (event==EVT_KEY_FIRST(KEY_ENTER)) {
-        s_editMode = 0;
-        if (sdListFiles(BITMAPS_PATH, BITMAPS_EXT, sizeof(value->stringValue), value->stringValue, LIST_NONE_SD_FILE)) {
-          fileSelectionDone = false;
-          POPUP_MENU_START(onZoneOptionFileSelectionMenu);
-        }
-        else {
-          POPUP_WARNING(STR_NO_BITMAPS_ON_SD);
-        }
-      }
-      else if (fileSelectionDone) {
-        memcpy(value->stringValue, fileSelection, sizeof(fileSelection));
-        fileSelectionDone = false;
-        storageDirty(i_flags);
-      }
-    }
-  }
-  else if (option->type == ZoneOption::TextSize) {
-    lcdDrawTextAtIndex(SCREENS_SETUP_2ND_COLUMN, y, "\010StandardTiny\0   Small\0  Mid\0    Double", value->unsignedValue, attr);
-    if (attr) {
-      value->unsignedValue = checkIncDec(event, value->unsignedValue, 0, 4, i_flags);
-    }
-  }
-  else if (option->type == ZoneOption::Timer) {
-    drawStringWithIndex(SCREENS_SETUP_2ND_COLUMN, y, STR_TIMER, value->unsignedValue + 1, attr);
-    if (attr) {
-      value->unsignedValue = checkIncDec(event, value->unsignedValue, 0, MAX_TIMERS - 1, i_flags);
-    }
-  }
-  else if (option->type == ZoneOption::Source) {
-    drawSource(SCREENS_SETUP_2ND_COLUMN, y, value->unsignedValue, attr);
-    if (attr) {
-      CHECK_INCDEC_MODELSOURCE(event, value->unsignedValue, 1, MIXSRC_LAST_TELEM);
-    }
-  }
-  else if (option->type == ZoneOption::Color) {
-    RGB_SPLIT(value->unsignedValue, r, g, b);
-
-    if (attr && menuHorizontalPosition < 0) {
-      lcdDrawSolidFilledRect(SCREENS_SETUP_2ND_COLUMN-3, y-1, 230, FH+1, TEXT_INVERTED_BGCOLOR);
-    }
-
-    lcdSetColor(value->unsignedValue);
-    lcdDrawSolidFilledRect(SCREENS_SETUP_2ND_COLUMN-1, y+1, 42, 17, TEXT_COLOR);
-    lcdDrawSolidFilledRect(SCREENS_SETUP_2ND_COLUMN, y+2, 40, 15, CUSTOM_COLOR);
-
-    r = editColorPart(SCREENS_SETUP_2ND_COLUMN + 50, y, event, 0, r, attr, i_flags);
-    g = editColorPart(SCREENS_SETUP_2ND_COLUMN + 110, y, event, 1, g, attr, i_flags);
-    b = editColorPart(SCREENS_SETUP_2ND_COLUMN + 170, y, event, 2, b, attr, i_flags);
-
-    if (attr && checkIncDec_Ret) {
-      value->unsignedValue = RGB_JOIN(r, g, b);
-    }
-  }
-
-  return (attr && checkIncDec_Ret);
-}
-
-int getOptionsCount(const ZoneOption * options)
-{
-  if (options == NULL) {
-    return 0;
-  }
-  else {
-    int count = 0;
-    for (const ZoneOption * option = options; option->name; option++) {
-      count++;
-    }
-    return count;
-  }
-}
-
+#if 0
 template <class T>
 bool menuSettings(const char * title, T * object, uint32_t i_flags, event_t event)
 {
@@ -467,86 +339,12 @@ T * editThemeChoice(coord_t x, coord_t y, std::list<T *> & elList, T * current, 
   return NULL;
 }
 
-enum menuScreensThemeItems {
-  ITEM_SCREEN_SETUP_THEME,
-  ITEM_SCREEN_SETUP_THEME_OPTION1 = ITEM_SCREEN_SETUP_THEME+2
-};
-
-bool menuScreensTheme(event_t event)
-{
-  bool needsOffsetCheck = (menuVerticalPosition != 0 || menuHorizontalPosition < 0);
-  const ZoneOption * options = theme->getOptions();
-  int optionsCount = getOptionsCount(options);
-  linesCount = ITEM_SCREEN_SETUP_THEME_OPTION1 + optionsCount + 1;
-
-  menuPageCount = updateMainviewsMenu();
-  uint8_t mstate_tab[2 + MAX_THEME_OPTIONS + 1] = { uint8_t(NAVIGATION_LINE_BY_LINE | uint8_t(getRegisteredThemes().size()-1)), ORPHAN_ROW };
-  for (int i=0; i<optionsCount; i++) {
-    mstate_tab[2+i] = getZoneOptionColumns(&options[i]);
-  }
-  mstate_tab[2+optionsCount] = 0; // The button for the Topbar setup
-  CUSTOM_MENU_WITH_OPTIONS(STR_USER_INTERFACE, THEME_ICONS, menuTabScreensSetup, menuPageCount, 0, linesCount);
-
-  for (int i=0; i<NUM_BODY_LINES; i++) {
-    coord_t y = MENU_CONTENT_TOP + i * FH;
-    int k = i + menuVerticalOffset;
-    LcdFlags blink = ((s_editMode > 0) ? BLINK | INVERS : INVERS);
-    LcdFlags attr = (menuVerticalPosition == k ? blink : 0);
-    switch (k) {
-      case ITEM_SCREEN_SETUP_THEME: {
-        lcdDrawText(MENUS_MARGIN_LEFT, y + FH / 2, STR_THEME);
-        Theme * new_theme = editThemeChoice<Theme>(SCREENS_SETUP_2ND_COLUMN, y, getRegisteredThemes(), theme, needsOffsetCheck, attr, event);
-        if (new_theme) {
-          new_theme->init();
-          loadTheme(new_theme);
-          strncpy(g_eeGeneral.themeName, new_theme->getName(), sizeof(g_eeGeneral.themeName));
-          killEvents(KEY_ENTER);
-          storageDirty(EE_GENERAL);
-        }
-        break;
-      }
-
-      case ITEM_SCREEN_SETUP_THEME+1:
-        break;
-
-      default:
-      {
-        uint8_t index = k - ITEM_SCREEN_SETUP_THEME_OPTION1;
-        if (index < optionsCount) {
-          const ZoneOption * option = &options[index];
-          ZoneOptionValue * value = theme->getOptionValue(index);
-          bool ret = editZoneOption(y, option, value, attr, EE_GENERAL, event);
-          if (option->type == ZoneOption::Color) {
-            if (attr && event == EVT_KEY_FIRST(KEY_EXIT)) {
-              theme->update();
-            }
-          }
-          else if (ret) {
-            theme->update();
-          }
-        }
-        else if (index == optionsCount) {
-          lcdDrawText(MENUS_MARGIN_LEFT, y, STR_TOP_BAR);
-          drawButton(SCREENS_SETUP_2ND_COLUMN, y, STR_SETUP, attr);
-          if (attr && event == EVT_KEY_FIRST(KEY_ENTER)) {
-            currentScreen = customScreens[0];
-            currentContainer = topbar;
-            pushMenu(menuWidgetsSetup);
-          }
-        }
-        break;
-      }
-    }
-  }
-
-  return true;
-}
-
 enum MenuScreenSetupItems {
   ITEM_SCREEN_SETUP_LAYOUT,
   ITEM_SCREEN_SETUP_WIDGETS_SETUP = ITEM_SCREEN_SETUP_LAYOUT+2,
   ITEM_SCREEN_SETUP_LAYOUT_OPTION1,
 };
+
 
 bool menuScreenSetup(int index, event_t event)
 {
@@ -647,7 +445,6 @@ bool menuCustomScreenSetup(event_t event)
 }
 
 const MenuHandlerFunc menuTabScreensSetup[1+MAX_CUSTOM_SCREENS] = {
-  menuScreensTheme,
   menuCustomScreenSetup<0>,
   menuCustomScreenSetup<1>,
   menuCustomScreenSetup<2>,
@@ -669,21 +466,5 @@ int updateMainviewsMenu()
   return 1+MAX_CUSTOM_SCREENS;
 }
 
-bool menuScreenAdd(event_t event)
-{
-  menuPageCount = updateMainviewsMenu();
 
-  if (event == EVT_KEY_FIRST(KEY_ENTER) && getRegisteredLayouts().size()) {
-    const LayoutFactory * lf = getRegisteredLayouts().front();
-    customScreens[menuPageCount-2] = lf->create(&g_model.screenData[menuPageCount-2].layoutData);
-    strncpy(g_model.screenData[menuPageCount-2].layoutName, lf->getName(), sizeof(g_model.screenData[menuPageCount-2].layoutName));
-    s_editMode = 0;
-    menuHorizontalPosition = -1;
-    killEvents(KEY_ENTER);
-    storageDirty(EE_MODEL);
-    return false;
-  }
-
-  SIMPLE_MENU_WITH_OPTIONS(STR_ADDMAINVIEW, THEME_ICONS, menuTabScreensSetup, menuPageCount, menuPageCount-1, 0);
-  return true;
-}
+#endif

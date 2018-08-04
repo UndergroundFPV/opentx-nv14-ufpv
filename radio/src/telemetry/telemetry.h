@@ -113,7 +113,7 @@ PACK(struct CellValue
 
 int setTelemetryValue(TelemetryProtocol protocol, uint16_t id, uint8_t subId, uint8_t instance, int32_t value, uint32_t unit, uint32_t prec);
 void delTelemetryIndex(uint8_t index);
-int availableTelemetryIndex();
+int8_t availableTelemetryIndex();
 int lastUsedTelemetryIndex();
 
 int32_t getTelemetryValue(uint8_t index, uint8_t & prec);

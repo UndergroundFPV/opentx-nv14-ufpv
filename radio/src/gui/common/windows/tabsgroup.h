@@ -32,9 +32,13 @@ class PageTab {
   friend class TabsGroup;
 
   public:
-    PageTab(const char * title, unsigned icon):
-      title(title),
+    PageTab(std::string title, unsigned icon):
+      title(std::move(title)),
       icon(icon)
+    {
+    }
+
+    virtual ~PageTab()
     {
     }
 
@@ -44,9 +48,23 @@ class PageTab {
     {
     }
 
+    void destroy()
+    {
+      if (onPageDestroyed) {
+        onPageDestroyed();
+      }
+      delete this;
+    }
+
+    void setOnPageDestroyedHandler(std::function<void()> handler)
+    {
+      onPageDestroyed = std::move(handler);
+    }
+
   protected:
-    const char * title;
+    std::string title;
     unsigned icon;
+    std::function<void()> onPageDestroyed;
 };
 
 class TabsCarousel: public Window {
@@ -114,6 +132,8 @@ class TabsGroup: public Window {
 #endif
 
     void addTab(PageTab * page);
+
+    void removeTab(unsigned index);
 
     void setCurrentTab(PageTab * tab);
 

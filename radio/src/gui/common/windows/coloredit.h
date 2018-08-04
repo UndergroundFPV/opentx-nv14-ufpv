@@ -18,28 +18,27 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _MODEL_TELEMETRY_H
-#define _MODEL_TELEMETRY_H
+#ifndef _COLOREDIT_H_
+#define _COLOREDIT_H_
 
-#include "tabsgroup.h"
+#include "basenumberedit.h"
 
-class ModelTelemetryPage: public PageTab {
+class ColorEdit : public BaseNumberEdit {
   public:
-    ModelTelemetryPage();
+    ColorEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue = nullptr, LcdFlags flags = 0);
 
-    virtual void build(Window * window) override
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
     {
-      build(window, -1);
+      return "ColorEdit";
     }
+#endif
 
-    void checkEvents() override;
+    void paint(BitmapBuffer * dc) override;
 
-  protected:
-    Window * window = nullptr;
-    void editSensor(Window * window, uint8_t index);
-    int lastKnownIndex = 0;
-    void build(Window * window, int8_t focusSensorIndex=-1);
-    void rebuild(Window * window, int8_t focusSensorIndex=-1);
+    bool onTouchEnd(coord_t x, coord_t y) override;
+
+    void onFocusLost() override;
 };
 
-#endif //_MODEL_TELEMETRY_H
+#endif // _COLOREDIT_H_

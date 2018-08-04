@@ -360,11 +360,11 @@ void ModelTelemetryPage::checkEvents()
   }
 }
 
-void ModelTelemetryPage::rebuild(Window * window)
+void ModelTelemetryPage::rebuild(Window * window, int8_t focusSensorIndex)
 {
   coord_t scrollPosition = window->getScrollPositionY();
   window->clear();
-  build(window);
+  build(window, focusSensorIndex);
   window->setScrollPositionY(scrollPosition);
 }
 
@@ -373,11 +373,11 @@ void ModelTelemetryPage::editSensor(Window * window, uint8_t index)
 {
   Window * editWindow = new SensorEditWindow(index);
   editWindow->setCloseHandler([=]() {
-    rebuild(window);
+    rebuild(window, index);
   });
 }
 
-void ModelTelemetryPage::build(Window * window)
+void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
 {
   GridLayout grid;
   grid.spacer(8);
@@ -420,8 +420,7 @@ void ModelTelemetryPage::build(Window * window)
     new StaticText(window, {SENSOR_COL3, grid.getWindowHeight() + 3, LCD_W - SENSOR_COL3, lineHeight}, STR_ID, SMLSIZE | TEXT_DISABLE_COLOR);
   grid.nextLine();
 
-  grid.setLabelWidth(180);
-  for (uint8_t idx; idx < availableTelemetryIndex(); idx++) {
+  for (uint8_t idx = 0; idx < availableTelemetryIndex(); idx++) {
     Button * button = new SensorButton(window, grid.getLineSlot(), idx);
     button->setPressHandler([=]() -> uint8_t {
       button->bringToTop();
@@ -430,7 +429,7 @@ void ModelTelemetryPage::build(Window * window)
         editSensor(window, idx);
       });
       menu->addLine(STR_COPY, [=]() {
-        int newIndex = availableTelemetryIndex();
+        auto newIndex = availableTelemetryIndex();
         if (newIndex >= 0) {
           TelemetrySensor &sourceSensor = g_model.telemetrySensors[idx];
           TelemetrySensor &newSensor = g_model.telemetrySensors[newIndex];
@@ -439,7 +438,7 @@ void ModelTelemetryPage::build(Window * window)
           TelemetryItem &newItem = telemetryItems[newIndex];
           newItem = sourceItem;
           SET_DIRTY();
-          rebuild(window);
+          rebuild(window, newIndex);
         }
         else {
           new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL, nullptr);
@@ -452,11 +451,15 @@ void ModelTelemetryPage::build(Window * window)
       });
       return 0;
     });
+    if (focusSensorIndex == idx) {
+      button->setFocus();
+    }
     grid.nextLine();
   }
 
+  // Autodiscover button
   auto discover = new TextButton(window, grid.getLineSlot(), STR_DISCOVER_SENSORS);
-  discover->setPressHandler([=]() -> uint8_t {
+  discover->setPressHandler([=]() {
     allowNewSensors = !allowNewSensors;
     if (allowNewSensors) {
       discover->setText(STR_STOP_DISCOVER_SENSORS);
@@ -469,6 +472,7 @@ void ModelTelemetryPage::build(Window * window)
   });
   grid.nextLine();
 
+  // New sensor button
   new TextButton(window, grid.getLineSlot(), STR_TELEMETRY_NEWSENSOR,
                  [=]() -> uint8_t {
                    int res = availableTelemetryIndex();
@@ -480,6 +484,7 @@ void ModelTelemetryPage::build(Window * window)
                  });
   grid.nextLine();
 
+  // Delete all sensors button
   new TextButton(window, grid.getLineSlot(), STR_DELETE_ALL_SENSORS,
                  []() -> uint8_t {
                    new Dialog(WARNING_TYPE_CONFIRM, STR_CONFIRMDELETE, "", [=]() {
@@ -491,7 +496,7 @@ void ModelTelemetryPage::build(Window * window)
                  });
   grid.nextLine();
 
-
+  // Ignore instance button
   new StaticText(window, grid.getLabelSlot(true), STR_IGNORE_INSTANCE);
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.ignoreSensorIds));
   grid.nextLine();

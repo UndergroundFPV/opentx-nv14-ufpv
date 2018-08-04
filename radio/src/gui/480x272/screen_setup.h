@@ -18,28 +18,24 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _MODEL_TELEMETRY_H
-#define _MODEL_TELEMETRY_H
+#ifndef _SCREEN_SETUP_H_
+#define _SCREEN_SETUP_H_
 
 #include "tabsgroup.h"
 
-class ModelTelemetryPage: public PageTab {
+class Layout;
+class NumberEdit;
+
+class ScreenSetupPage: public PageTab {
   public:
-    ModelTelemetryPage();
+    ScreenSetupPage(uint8_t index);
 
-    virtual void build(Window * window) override
-    {
-      build(window, -1);
-    }
-
-    void checkEvents() override;
+    void build(Window * window) override;
 
   protected:
-    Window * window = nullptr;
-    void editSensor(Window * window, uint8_t index);
-    int lastKnownIndex = 0;
-    void build(Window * window, int8_t focusSensorIndex=-1);
-    void rebuild(Window * window, int8_t focusSensorIndex=-1);
+    uint8_t index;
+    NumberEdit * layoutChoice;
+    void rebuild(Window * window);
 };
 
-#endif //_MODEL_TELEMETRY_H
+#endif //_SCREEN_SETUP_H_
