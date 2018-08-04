@@ -27,12 +27,12 @@ class BaseNumberEdit : public Window {
   public:
     BaseNumberEdit(Window * parent, const rect_t &rect, int32_t vmin, int32_t vmax,
                    std::function<int32_t()> getValue, std::function<void(int32_t)> setValue = nullptr, LcdFlags flags = 0):
-    Window(parent, rect),
-    vmin(vmin),
-    vmax(vmax),
-    _getValue(getValue),
-    _setValue(setValue),
-    flags(flags)
+      Window(parent, rect),
+      vmin(vmin),
+      vmax(vmax),
+      _getValue(std::move(getValue)),
+      _setValue(std::move(setValue)),
+      flags(flags)
     {
     }
 
