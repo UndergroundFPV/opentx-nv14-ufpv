@@ -40,7 +40,7 @@ class Page: public Window {
   public:
     Page();
 
-    virtual ~Page();
+    ~Page() override;
 
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
@@ -63,7 +63,7 @@ class Page: public Window {
       return true;
     }
 
-    virtual void paint(BitmapBuffer * dc) override;
+    void paint(BitmapBuffer * dc) override;
 
   protected:
     PageHeader header;

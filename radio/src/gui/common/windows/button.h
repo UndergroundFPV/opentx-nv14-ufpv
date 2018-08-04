@@ -54,6 +54,7 @@ class Button : public Window {
         flags &= ~BUTTON_DISABLED;
       else
         flags |= BUTTON_DISABLED;
+      invalidate();
     }
 
     void disable()
@@ -67,6 +68,7 @@ class Button : public Window {
         flags |= BUTTON_CHECKED;
       else
         flags &= ~BUTTON_CHECKED;
+      invalidate();
     }
 
     bool enabled()
@@ -121,6 +123,7 @@ class TextButton : public Button {
     void setText(std::string value)
     {
       text = std::move(value);
+      invalidate();
     }
 
     void paint(BitmapBuffer * dc) override;
