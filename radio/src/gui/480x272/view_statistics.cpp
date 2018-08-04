@@ -35,8 +35,10 @@ class StatisticsBody: public Window {
 
     void checkEvents() override
     {
-      // will always force a full monitor window refresh
-      invalidate();
+      if (get_tmr10ms() - lastRefresh > 100) {
+        invalidate();
+        lastRefresh = get_tmr10ms();
+      }
     }
 
     void paint(BitmapBuffer * dc) override
@@ -57,7 +59,7 @@ class StatisticsBody: public Window {
       }
 
       const coord_t x = 10;
-      const coord_t y = 240;
+      const coord_t y = 270;
       lcdDrawHorizontalLine(x-3, y, MAXTRACE+3+3, SOLID, TEXT_COLOR);
       lcdDrawVerticalLine(x, y-96, 96+3, SOLID, TEXT_COLOR);
       for (coord_t i=0; i<MAXTRACE; i+=6) {
@@ -87,8 +89,17 @@ class StatisticsBody: public Window {
         prev_yv = yv;
       }
 
-      lcdDrawText(LCD_W/2, MENU_FOOTER_TOP, STR_MENUTORESET, MENU_TITLE_COLOR | CENTERED);
+      auto reset = new TextButton(this, {10, 320, LCD_W - 20, lineHeight}, "Push to reset");
+      reset->setPressHandler([=]() {
+        g_eeGeneral.globalTimer = 0;
+        storageDirty(EE_GENERAL);
+        sessionTimer = 0;
+        return 0;
+      });
     }
+
+  protected:
+    tmr10ms_t lastRefresh = 0;
 };
 
 class StatisticsFooter: public Window {
