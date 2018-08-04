@@ -98,7 +98,7 @@ class StatisticsFooter: public Window {
     {
     }
 
-    virtual void paint(BitmapBuffer * dc) override {
+    void paint(BitmapBuffer * dc) override {
 
     }
 };
@@ -110,7 +110,7 @@ class StatisticsPage: public PageTab {
     {
     }
 
-    virtual void build(Window * window) override
+    void build(Window * window) override
     {
       new StatisticsBody(window, {0, 0, LCD_W, window->height() - footerHeight});
       new StatisticsFooter(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
