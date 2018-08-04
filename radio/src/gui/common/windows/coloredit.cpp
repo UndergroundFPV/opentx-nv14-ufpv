@@ -18,78 +18,63 @@
  * GNU General Public License for more details.
  */
 
-#include "timeedit.h"
-#include "keyboard_number.h"
-#include "draw_functions.h"
-#include "strhelpers.h"
+#include "coloredit.h"
+#include "numberedit.h"
+#include "bitfield.h"
+#include "lcd.h"
 
-#if 0
-RGB_SPLIT(value->unsignedValue, r, g, b);
+constexpr uint8_t PART_BITS[3][2] = { {0, 5}, {5, 6}, {11, 5} };
 
-if (attr && menuHorizontalPosition < 0) {
-lcdDrawSolidFilledRect(SCREENS_SETUP_2ND_COLUMN - 3, y - 1, 230, FH + 1, TEXT_INVERTED_BGCOLOR);
-}
+class ColorBox: public Window {
+  public:
+    ColorBox(Window * parent, const rect_t & rect, LcdFlags color):
+      Window(parent, rect),
+      color(color)
+    {
+    }
 
-lcdSetColor(value->unsignedValue);
-lcdDrawSolidFilledRect(SCREENS_SETUP_2ND_COLUMN - 1, y + 1, 42, 17, TEXT_COLOR);
-lcdDrawSolidFilledRect(SCREENS_SETUP_2ND_COLUMN, y + 2, 40, 15, CUSTOM_COLOR);
+    void paint(BitmapBuffer * dc) override
+    {
+      lcdSetColor(color);
+      dc->drawSolidFilledRect(0, 0, width(), height(), TEXT_COLOR);
+      dc->drawSolidFilledRect(1, 1, width() - 2, height() - 2, CUSTOM_COLOR);
+    }
 
-r = editColorPart(SCREENS_SETUP_2ND_COLUMN + 50, y, event, 0, r, attr, i_flags);
-g = editColorPart(SCREENS_SETUP_2ND_COLUMN + 110, y, event, 1, g, attr, i_flags);
-b = editColorPart(SCREENS_SETUP_2ND_COLUMN + 170, y, event, 2, b, attr, i_flags);
+    void setColor(LcdFlags value)
+    {
+      color = value;
+      invalidate();
+    }
 
-if (attr && checkIncDec_Ret) {
-value->unsignedValue = RGB_JOIN(r, g, b);
-}
+  protected:
+    LcdFlags color;
+};
 
-uint8_t editColorPart(coord_t x, coord_t y, event_t event, uint8_t part, uint8_t value, LcdFlags attr, uint32_t i_flags)
+ColorEdit::ColorEdit(Window * parent, const rect_t & rect, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue):
+  Window(parent, rect)
 {
-  const char * STR_COLOR_PARTS = "\002" "R:" "G:" "B:";
-  uint8_t PART_BITS[] = { 5, 6, 5 };
-  lcdDrawTextAtIndex(x, y, STR_COLOR_PARTS, part, (attr && menuHorizontalPosition < 0) ? TEXT_INVERTED_COLOR : TEXT_COLOR);
-  lcdDrawNumber(x + 20, y, value << (8-PART_BITS[part]), LEFT|TEXT_COLOR|((attr && (menuHorizontalPosition < 0 || menuHorizontalPosition == part)) ? attr : TEXT_COLOR));
-  if (attr && menuHorizontalPosition == part) {
-    value = checkIncDec(event, value, 0, (1 << PART_BITS[part])-1, i_flags);
-  }
-  return value;
-}
-#endif
+  auto width = rect.w / 4 - 5;
 
-ColorEdit::ColorEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags):
-  BaseNumberEdit(parent, rect, vmin, vmax, getValue, setValue, flags)
-{
-}
+  // The color box
+  auto box = new ColorBox(this, {0, 0, rect.w - 3 * width, rect.h}, getValue());
 
-void ColorEdit::paint(BitmapBuffer * dc)
-{
-  bool hasFocus = this->hasFocus();
-  LcdFlags textColor = 0;
-  LcdFlags lineColor = CURVE_AXIS_COLOR;
-  if (hasFocus) {
-    textColor = TEXT_INVERTED_BGCOLOR;
-    lineColor = TEXT_INVERTED_BGCOLOR;
-  }
-
-  dc->drawText(3, 2, getTimerString(_getValue(), (flags & TIMEHOUR) != 0), textColor);
-
-  drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
-}
-
-bool ColorEdit::onTouchEnd(coord_t x, coord_t y)
-{
-  if (!hasFocus()) {
-    setFocus();
+  // The 3 parts of RGB
+  for (uint8_t part = 0; part < 3; part++) {
+    new NumberEdit(this, {rect.w - (3 - part) * width + 5, 0, width - 5, rect.h}, 0, (1 << PART_BITS[part][1]) - 1,
+                   [=]() {
+                     return BF_GET(getValue(), PART_BITS[part][0], PART_BITS[part][1]);
+                   },
+                   [=](uint8_t newValue) {
+                     uint16_t value = getValue();
+                     BF_SET(value, newValue, PART_BITS[part][0], PART_BITS[part][1]);
+                     setValue(value);
+                     box->setColor(value);
+                   });
   }
 
-  NumberKeyboard * keyboard = NumberKeyboard::instance();
-  if (keyboard->getField() != this) {
-    keyboard->setField(this);
-  }
-
-  return true;
 }
 
-void ColorEdit::onFocusLost()
+ColorEdit::~ColorEdit()
 {
-  NumberKeyboard::instance()->disable();
+  deleteChildren();
 }

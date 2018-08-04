@@ -21,11 +21,11 @@
 #ifndef _COLOREDIT_H_
 #define _COLOREDIT_H_
 
-#include "basenumberedit.h"
+#include "window.h"
 
-class ColorEdit : public BaseNumberEdit {
+class ColorEdit : public Window {
   public:
-    ColorEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue = nullptr, LcdFlags flags = 0);
+    ColorEdit(Window * parent, const rect_t & rect, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue = nullptr);
 
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
@@ -34,11 +34,7 @@ class ColorEdit : public BaseNumberEdit {
     }
 #endif
 
-    void paint(BitmapBuffer * dc) override;
-
-    bool onTouchEnd(coord_t x, coord_t y) override;
-
-    void onFocusLost() override;
+    ~ColorEdit() override;
 };
 
 #endif // _COLOREDIT_H_

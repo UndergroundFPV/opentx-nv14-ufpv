@@ -44,5 +44,6 @@
 #include "gridlayout.h"
 #include "helpers.h"
 #include "curveedit.h"
+#include "coloredit.h"
 
 #endif // _LIBWINDOWS_H_

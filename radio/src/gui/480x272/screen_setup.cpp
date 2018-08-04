@@ -43,6 +43,7 @@ void ScreenSetupPage::build(Window * window)
 {
   Layout * layout = customScreens[index];
   GridLayout grid;
+  grid.setLabelWidth(100);
   grid.spacer(8);
 
   // Layout choice

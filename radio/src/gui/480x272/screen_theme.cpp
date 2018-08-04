@@ -78,7 +78,7 @@ Window * createOptionEdit(Window * parent, const rect_t &rect, const ZoneOption 
     return new SourceChoice(parent, rect, 1, MIXSRC_LAST_TELEM, GET_SET_DEFAULT(value->unsignedValue));
   }
   else if (option->type == ZoneOption::Color) {
-    // TODO return new ColorEdit(parent, rect, GET_SET_DEFAULT(value->unsignedValue));
+    return new ColorEdit(parent, rect, GET_SET_DEFAULT(value->unsignedValue));
   }
 
   return nullptr;
@@ -87,6 +87,7 @@ Window * createOptionEdit(Window * parent, const rect_t &rect, const ZoneOption 
 void ScreenThemePage::build(Window * window)
 {
   GridLayout grid;
+  grid.setLabelWidth(100);
   grid.spacer(8);
 
 #if 0

@@ -24,4 +24,5 @@ set(SRC
     ${WINDOWS_DIRECTORY}/dialog.cpp
     ${WINDOWS_DIRECTORY}/curve.cpp
     ${WINDOWS_DIRECTORY}/curveedit.cpp
+    ${WINDOWS_DIRECTORY}/coloredit.cpp
     )
