@@ -190,7 +190,7 @@ void boardInit()
 
   init2MhzTimer();
   init1msTimer();
-  // usbInit();
+  usbInit();
   hapticInit();
 
   TouchInit();

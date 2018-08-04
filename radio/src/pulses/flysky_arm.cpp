@@ -777,7 +777,7 @@ void putFlySkySendChannelData(uint8_t port)
   uint8_t channels_count = rf_info.num_of_channel;
   putFlySkyFrameByte(port, channels_count);
   for (uint8_t channel=0; channel<channels_count; channel++) {
-    uint16_t value = rx_info.stero_value[channel];
+    uint16_t value = /*rx_info.stero_value[channel];*/channelOutputs[channel] + 2*PPM_CH_CENTER(channel) - 2*PPM_CENTER; // TBD
     putFlySkyFrameByte(port, value & 0xff);
     putFlySkyFrameByte(port, value >> 8);
   }

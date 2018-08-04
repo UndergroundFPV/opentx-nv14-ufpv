@@ -28,7 +28,12 @@
 void serialPutc(char c) {
 #if !defined(BOOT)
   if (getSelectedUsbMode() == USB_SERIAL_MODE)
-    usbSerialPutc(c);
+  {
+#if defined(PCBFLYSKY) && !defined(FLYSKY_USB_SERIAL)
+      if (false)
+#endif
+      usbSerialPutc(c);
+  }
 #endif
 #if defined(AUX_SERIAL)
   if (auxSerialTracesEnabled())
