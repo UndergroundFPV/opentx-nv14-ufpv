@@ -19,6 +19,7 @@
  */
 
 #include "opentx.h"
+#include "shutdown_animation.h"
 
 OS_TID menusTaskId;
 // menus stack must be aligned to 8 bytes otherwise printf for %f does not work!

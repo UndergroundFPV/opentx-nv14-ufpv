@@ -1,5 +1,3 @@
-#include <utility>
-
 /*
  * Copyright (C) OpenTX
  *
@@ -20,44 +18,12 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _MAINWINDOW_H_
-#define _MAINWINDOW_H_
+#ifndef _SHUTDOWN_ANIMATION_H_
+#define _SHUTDOWN_ANIMATION_H_
 
-#include "window.h"
+#include <inttypes.h>
 
-class MainWindow: public Window {
-  public:
-    MainWindow():
-      Window(nullptr, {0, 0, LCD_W, LCD_H}),
-      invalidatedRect(rect)
-    {
-    }
+void drawShutdownAnimation(uint32_t index, const char * message);
+void drawSleepBitmap();
 
-#if defined(DEBUG_WINDOWS)
-    std::string getName() override
-    {
-      return "MainWindow";
-    }
-#endif
-
-    void checkEvents() override;
-
-    void invalidate()
-    {
-      invalidate({0, 0, rect.w, rect.h});
-    }
-
-    void invalidate(const rect_t & rect) override;
-
-    bool refresh();
-
-    void run();
-
-  protected:
-    void emptyTrash();
-    rect_t invalidatedRect;
-};
-
-extern MainWindow mainWindow;
-
-#endif // _MAINWINDOW_H_
+#endif //_SHUTDOWN_ANIMATION_H_

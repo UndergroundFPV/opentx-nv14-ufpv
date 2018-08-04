@@ -19,6 +19,7 @@
  */
 
 #include "opentx.h"
+#include "shutdown_animation.h"
 
 RadioData  g_eeGeneral;
 ModelData  g_model;

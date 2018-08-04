@@ -79,6 +79,7 @@ set(GUI_SRC
   view_about.cpp
   view_text.cpp
   screens_setup.cpp
+  shutdown_animation.cpp
   theme.cpp
   topbar.cpp
   layout.cpp

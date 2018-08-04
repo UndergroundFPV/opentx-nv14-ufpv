@@ -94,3 +94,11 @@ bool MainWindow::refresh()
     return false;
   }
 }
+
+void MainWindow::run()
+{
+  checkEvents();
+  if (refresh()) {
+    lcdRefresh();
+  }
+}

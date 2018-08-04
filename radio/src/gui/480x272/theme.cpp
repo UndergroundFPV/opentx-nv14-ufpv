@@ -90,38 +90,7 @@ void Theme::drawBackground() const
 
 void Theme::drawMessageBox(const char * title, const char * text, const char * action, uint32_t type) const
 {
-  //if (flags & MESSAGEBOX_TYPE_ALERT) {
-    drawBackground();
-    lcdDrawFilledRect(0, POPUP_Y, LCD_W, POPUP_H, SOLID, TEXT_INVERTED_COLOR | OPACITY(8));
-  //}
 
-  if (type == WARNING_TYPE_ALERT || type == WARNING_TYPE_ASTERISK)
-    lcd->drawBitmap(POPUP_X-80, POPUP_Y+12, asterisk);
-  else if (type == WARNING_TYPE_INFO)
-    lcd->drawBitmap(POPUP_X-80, POPUP_Y+12, busy);
-  else
-    lcd->drawBitmap(POPUP_X-80, POPUP_Y+12, question);
-
-  if (type == WARNING_TYPE_ALERT) {
-#if defined(TRANSLATIONS_FR) || defined(TRANSLATIONS_IT) || defined(TRANSLATIONS_CZ)
-    lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y, STR_WARNING, ALARM_COLOR|DBLSIZE);
-    lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y+28, title, ALARM_COLOR|DBLSIZE);
-#else
-    lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y, title, ALARM_COLOR|DBLSIZE);
-    lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y+28, STR_WARNING, ALARM_COLOR|DBLSIZE);
-#endif
-  }
-  else if (title) {
-    lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y, title, ALARM_COLOR|DBLSIZE);
-  }
-
-  if (text) {
-    lcdDrawText(WARNING_LINE_X, WARNING_INFOLINE_Y, text);
-  }
-
-  if (action) {
-    lcdDrawText(WARNING_LINE_X, WARNING_INFOLINE_Y+24, action);
-  }
 }
 
 Theme * getTheme(const char * name)

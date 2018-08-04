@@ -21,6 +21,12 @@
 #ifndef _DIALOG_H_
 #define _DIALOG_H_
 
+#define WARNING_TYPE_ALERT     0
+#define WARNING_TYPE_ASTERISK  1
+#define WARNING_TYPE_CONFIRM   2
+#define WARNING_TYPE_INPUT     3
+#define WARNING_TYPE_INFO      4
+
 #include "button.h"
 
 class Dialog : public Window {

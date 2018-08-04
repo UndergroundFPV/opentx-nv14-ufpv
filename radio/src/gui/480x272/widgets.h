@@ -75,8 +75,6 @@ int16_t editGVarFieldValue(coord_t x, coord_t y, int16_t value, int16_t min, int
 // Screen templates
 int drawMenuTemplate(const char * title, uint8_t icon, const uint8_t * icons=NULL, uint32_t options=0);
 void drawSplash();
-void drawSleepBitmap();
-void drawShutdownAnimation(uint32_t index, const char * message);
 
 // Main view standard widgets
 void drawTopBar();

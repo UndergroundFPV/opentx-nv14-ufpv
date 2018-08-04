@@ -91,7 +91,7 @@ class Button : public Window {
 
     void setCheckHandler(std::function<void(void)> handler)
     {
-      onCheck = handler;
+      onCheck = std::move(handler);
     }
 
     bool onTouchEnd(coord_t x, coord_t y) override;
