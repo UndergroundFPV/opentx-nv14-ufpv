@@ -112,7 +112,6 @@ class SensorEditWindow : public Page {
 
   protected:
     uint8_t index;
-    int lastKnowIndex;
     Window * sensorOneWindow = nullptr;
 
     void buildHeader(Window * window)
@@ -353,11 +352,10 @@ ModelTelemetryPage::ModelTelemetryPage() :
 {
 }
 
-
 void ModelTelemetryPage::checkEvents()
 {
-  if (lastKnowIndex != availableTelemetryIndex()) {
-    lastKnowIndex = availableTelemetryIndex();
+  if (lastKnownIndex != availableTelemetryIndex()) {
+    lastKnownIndex = availableTelemetryIndex();
     rebuild(window);
   }
 }
@@ -381,11 +379,11 @@ void ModelTelemetryPage::editSensor(Window * window, uint8_t index)
 
 void ModelTelemetryPage::build(Window * window)
 {
-  window = this->window;
-
   GridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(180);
+
+  this->window = window;
 
   // RSSI
   if (g_model.moduleData[INTERNAL_MODULE].rfProtocol == RF_PROTO_OFF &&
