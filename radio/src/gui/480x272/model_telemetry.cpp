@@ -25,8 +25,8 @@
 #define SET_DIRTY() storageDirty(EE_MODEL)
 
 static constexpr coord_t SENSOR_COL1 = 30;
-static constexpr coord_t SENSOR_COL2 = SENSOR_COL1 + (LCD_W - 30) / 3;
-static constexpr coord_t SENSOR_COL3 = SENSOR_COL2 + (LCD_W - 30) / 3;
+static constexpr coord_t SENSOR_COL2 = SENSOR_COL1 + 70;
+static constexpr coord_t SENSOR_COL3 = LCD_W - 50;
 
 class SensorSourceChoice : public SourceChoice {
   public:
@@ -83,9 +83,16 @@ class SensorButton : public Button {
         drawSensorCustomValue(SENSOR_COL2, line1, index, getValue(MIXSRC_FIRST_TELEM + 3 * index), LEFT | color);
       }
       else {
-        lcdDrawText(SENSOR_COL2, line1, "---", TEXT_DISABLE_COLOR);
+        lcdDrawText(SENSOR_COL2, line1, "---", CURVE_COLOR);
       }
 
+      TelemetrySensor * sensor = & g_model.telemetrySensors[index];
+      if (IS_SPEKTRUM_PROTOCOL()) {
+        lcdDrawHexNumber(SENSOR_COL3, line1, sensor->id, LEFT);
+      }
+      else if (sensor->type == TELEM_TYPE_CUSTOM && !g_model.ignoreSensorIds) {
+        lcdDrawNumber(SENSOR_COL3, line1, sensor->instance, LEFT);
+      }
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
     }
 
@@ -144,6 +151,15 @@ class SensorEditWindow : public Page {
                      telemetryItems[index].clear();
                      updateSensorOneWindow();
                    });
+        grid.nextLine();
+      }
+      else {
+        new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_ID);
+        auto hex = new NumberEdit(sensorOneWindow, grid.getFieldSlot(2, 0), 0, 0xffff, GET_SET_DEFAULT(sensor->id));
+        hex->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+          lcdDrawHexNumber(2, 2, value, 0);
+        });
+        new NumberEdit(sensorOneWindow, grid.getFieldSlot(2, 1), 0, 0xff, GET_SET_DEFAULT(sensor->instance));
         grid.nextLine();
       }
 
@@ -387,12 +403,14 @@ void ModelTelemetryPage::build(Window * window)
   grid.nextLine();
 
   // Sensors
+  grid.setLabelWidth(140);
   new Subtitle(window, grid.getLineSlot(), STR_TELEMETRY_SENSORS);
   new StaticText(window, {SENSOR_COL2, grid.getWindowHeight() + 3, SENSOR_COL3 - SENSOR_COL2, lineHeight}, STR_VALUE, SMLSIZE | TEXT_DISABLE_COLOR);
   if (!g_model.ignoreSensorIds && !IS_SPEKTRUM_PROTOCOL())
     new StaticText(window, {SENSOR_COL3, grid.getWindowHeight() + 3, LCD_W - SENSOR_COL3, lineHeight}, STR_ID, SMLSIZE | TEXT_DISABLE_COLOR);
   grid.nextLine();
 
+  grid.setLabelWidth(180);
   for (uint8_t idx; idx < availableTelemetryIndex(); idx++) {
     Button * button = new SensorButton(window, grid.getLineSlot(), idx);
     button->setPressHandler([=]() -> uint8_t {
