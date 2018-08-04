@@ -53,54 +53,42 @@ class SensorButton : public Button {
     }
 
     static constexpr coord_t line1 = 1;
-    static constexpr coord_t line2 = 22;
     static constexpr coord_t col1 = 60;
     static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
     static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1 + 20;
 
-    bool isActive()
-    {
-      // TODO
-      return false;
-    }
-
     void checkEvents() override
     {
-      if (active != isActive()) {
+      TelemetryItem &telemetryItem = telemetryItems[index];
+      if (telemetryItem.isFresh()) {
         invalidate();
-        active = !active;
       }
     }
 
-    void paintSpecialFunctionLine(BitmapBuffer * dc)
+    void paint(BitmapBuffer * dc) override
     {
+      TelemetryItem &telemetryItem = telemetryItems[index];
+
+      if (telemetryItem.isFresh()) {
+        dc->drawSolidFilledRect(2, 2, rect.w - 4, rect.h - 4, WARNING_COLOR);
+      }
+
       lcdDrawNumber(2, 1, index + 1, LEFT, 0, NULL, ":");
       lcdDrawSizedText(col1, line1, g_model.telemetrySensors[index].label, TELEM_LABEL_LEN, ZCHAR);
-      TelemetryItem &telemetryItem = telemetryItems[index];
-      if (telemetryItem.isFresh()) {
-        lcdDrawText(col2, line1, "*");
-      }
+
       if (telemetryItem.isAvailable()) {
         LcdFlags color = telemetryItem.isOld() ? ALARM_COLOR : TEXT_COLOR;
         drawSensorCustomValue(col3, line1, index, getValue(MIXSRC_FIRST_TELEM + 3 * index), LEFT | color);
       }
       else {
-        lcdDrawText(col3, line1, "---");
+        lcdDrawText(col3, line1, "---", CURVE_COLOR);
       }
-    }
 
-
-    virtual void paint(BitmapBuffer * dc) override
-    {
-      if (active)
-        dc->drawSolidFilledRect(2, 2, rect.w - 4, rect.h - 4, WARNING_COLOR);
-      paintSpecialFunctionLine(dc);
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
     }
 
   protected:
     uint8_t index;
-    bool active = false;
 };
 
 class SensorEditWindow : public Page {
@@ -186,7 +174,7 @@ class SensorEditWindow : public Page {
         grid.nextLine();
       }
 
-      // PARAM1
+      // Params
       if (sensor->unit < UNIT_FIRST_VIRTUAL) {
         if (sensor->type == TELEM_TYPE_CALCULATED) {
           if (sensor->formula == TELEM_FORMULA_CELL) {
@@ -224,7 +212,6 @@ class SensorEditWindow : public Page {
         grid.nextLine();
       }
 
-      //PARAM2
       if (!(sensor->unit == UNIT_GPS || sensor->unit == UNIT_DATETIME || sensor->unit == UNIT_CELLS ||
             (sensor->type == TELEM_TYPE_CALCULATED && (sensor->formula == TELEM_FORMULA_CONSUMPTION || sensor->formula == TELEM_FORMULA_TOTALIZE)))) {
         if (sensor->type == TELEM_TYPE_CALCULATED) {
@@ -253,7 +240,6 @@ class SensorEditWindow : public Page {
         grid.nextLine();
       }
 
-      //PARAM 3 and 4
       if ((sensor->type == TELEM_TYPE_CALCULATED && sensor->formula < TELEM_FORMULA_MULTIPLY)) {
         new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_SOURCE + std::to_string(3));
         new SensorSourceChoice(sensorOneWindow, grid.getFieldSlot(), (uint8_t *) &sensor->calc.sources[2], isSensorAvailable);
@@ -401,9 +387,9 @@ void ModelTelemetryPage::build(Window * window)
 
   // Sensors
   new Subtitle(window, grid.getLineSlot(), STR_TELEMETRY_SENSORS);
-  new StaticText(window, grid.getFieldSlot(2, 0), STR_VALUE);
+  new StaticText(window, grid.getFieldSlot(2, 0), STR_VALUE, SMLSIZE | TEXT_DISABLE_COLOR);
   if (!g_model.ignoreSensorIds && !IS_SPEKTRUM_PROTOCOL())
-    new StaticText(window, grid.getFieldSlot(2, 1), STR_ID);
+    new StaticText(window, grid.getFieldSlot(2, 1), STR_ID, SMLSIZE | TEXT_DISABLE_COLOR);
   grid.nextLine();
 
   for (uint8_t idx; idx < availableTelemetryIndex(); idx++) {
