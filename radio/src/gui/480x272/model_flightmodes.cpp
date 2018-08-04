@@ -52,7 +52,7 @@ bool isTrimModeAvailable(int mode)
 void ModelFlightModesPage::build(Window * window)
 {
   NumberEdit * edit;
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer();
 
   for (int i = 0; i < MAX_FLIGHT_MODES; i++) {

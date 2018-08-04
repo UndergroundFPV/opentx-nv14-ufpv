@@ -69,7 +69,7 @@ class LogicalSwitchEditWindow: public Page {
 
     void updateLogicalSwitchOneWindow()
     {
-      GridLayout grid(*logicalSwitchOneWindow);
+      GridLayout grid;
       logicalSwitchOneWindow->clear();
 
       LogicalSwitchData * cs = lswAddress(ls);
@@ -190,7 +190,7 @@ class LogicalSwitchEditWindow: public Page {
     void buildBody(Window * window) {
       LogicalSwitchData * cs = lswAddress(ls);
 
-      GridLayout grid(*window);
+      GridLayout grid;
       grid.spacer(10);
 
       // LS Func
@@ -332,7 +332,7 @@ void ModelLogicalSwitchesPage::editLogicalSwitch(Window * window, uint8_t lsInde
 
 void ModelLogicalSwitchesPage::build(Window * window, int8_t focusIndex)
 {
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(70);
 

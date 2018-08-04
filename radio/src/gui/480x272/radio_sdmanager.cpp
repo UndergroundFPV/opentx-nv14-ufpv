@@ -58,7 +58,7 @@ char * getFullPath(const std::string & filename)
 
 void RadioSdManagerPage::build(Window * window)
 {
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer(8);
 
   FILINFO fno;

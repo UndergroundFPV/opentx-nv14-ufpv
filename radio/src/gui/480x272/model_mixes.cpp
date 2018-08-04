@@ -73,7 +73,7 @@ class MixEditWindow : public Page {
 
     void updateCurves()
     {
-      GridLayout grid(*updateCurvesWindow);
+      GridLayout grid;
       updateCurvesWindow->clear();
 
       MixData * line = mixAddress(mixIndex);
@@ -109,7 +109,7 @@ class MixEditWindow : public Page {
 
     void buildBody(Window * window)
     {
-      GridLayout grid(*window);
+      GridLayout grid;
       grid.spacer(8);
 
       MixData * mix = mixAddress(mixIndex);
@@ -355,7 +355,7 @@ void ModelMixesPage::editMix(Window * window, uint8_t channel, uint8_t mixIndex)
 
 void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
 {
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(66);
 

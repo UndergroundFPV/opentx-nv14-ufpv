@@ -29,7 +29,7 @@ RadioVersionPage::RadioVersionPage():
 
 void RadioVersionPage::build(Window * window)
 {
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer(8);
 
   new StaticText(window, grid.getLabelSlot(), "FW Version");

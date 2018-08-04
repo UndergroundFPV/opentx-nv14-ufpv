@@ -33,7 +33,7 @@ RadioSetupPage::RadioSetupPage():
 
 void RadioSetupPage::build(Window * window)
 {
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer(8);
 
   // Date

@@ -60,7 +60,7 @@ class CurveEditWindow : public Page {
 
     void buildBody(Window * window)
     {
-      GridLayout grid(*window);
+      GridLayout grid;
       grid.setMarginLeft(20);
       grid.setMarginRight(20);
       grid.setLabelWidth(100);
@@ -192,7 +192,7 @@ void ModelCurvesPage::editCurve(Window * window, uint8_t curve)
 
 void ModelCurvesPage::build(Window * window, int8_t focusIndex)
 {
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(70);
 

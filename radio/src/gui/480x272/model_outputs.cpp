@@ -45,7 +45,7 @@ class OutputEditWindow : public Page {
 
     void buildBody(Window * window)
     {
-      GridLayout grid(*window);
+      GridLayout grid;
       grid.spacer(8);
 
       int limit = (g_model.extendedLimits ? LIMIT_EXT_MAX : 1000);
@@ -166,7 +166,7 @@ void ModelOutputsPage::rebuild(Window * window, int8_t focusChannel)
 
 void ModelOutputsPage::build(Window * window, int8_t focusChannel)
 {
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(66);
 

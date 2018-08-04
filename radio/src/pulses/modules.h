@@ -149,8 +149,8 @@ inline bool isModuleDSM2(uint8_t idx)
 #endif
 
 // order is the same as in enum Protocols in myeeprom.h (none, ppm, pxx, flysky, dsm, crossfire, multi, r9m, sbus)
-static const int8_t maxChannelsModules[] = { 0, 8, 8, 8, -2, 8, 4, 8, 8}; // relative to 8!
-static const int8_t maxChannelsXJT[] = { 0, 8, 0, 4 }; // relative to 8!
+static const int8_t maxChannelsModules_M8[] = {0, 8, 8, 8, -2, 8, 4, 8, 8}; // relative to 8!
+static const int8_t maxChannelsXJT[] = {0, 8, 0, 4}; // relative to 8!
 
 constexpr int8_t MAX_TRAINER_CHANNELS_M8 = MAX_TRAINER_CHANNELS - 8;
 constexpr int8_t MAX_EXTRA_MODULE_CHANNELS_M8 = 8; // only 16ch PPM
@@ -164,7 +164,7 @@ inline int8_t maxModuleChannels_M8(uint8_t idx)
   else if (isModuleXJT(idx))
     return maxChannelsXJT[1 + g_model.moduleData[idx].rfProtocol];
   else
-    return maxChannelsModules[g_model.moduleData[idx].type];
+    return maxChannelsModules_M8[g_model.moduleData[idx].type];
 }
 
 inline int8_t maxModuleChannels(uint8_t idx)
@@ -217,6 +217,21 @@ inline bool isModuleTypeAllowed(uint8_t idx, uint8_t type)
 #endif
 
   return true;
+}
+
+inline bool isModuleNeedingReceiverNumber(uint8_t idx)
+{
+  return isModulePXX(idx) || isModuleDSM2(idx) || isModuleMultimodule(idx);
+}
+
+inline bool isModuleNeedingBindRangeButtons(uint8_t idx)
+{
+  return isModulePXX(idx) || isModuleDSM2(idx) || isModuleMultimodule(idx) || isModuleFlysky(idx);
+}
+
+inline bool isModuleNeedingFailsafeButton(uint8_t idx)
+{
+  return isModulePXX(idx) || isModuleR9M(idx);
 }
 
 #endif // _MODULES_H_

@@ -24,6 +24,10 @@
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
 
+static constexpr coord_t SENSOR_COL1 = 30;
+static constexpr coord_t SENSOR_COL2 = SENSOR_COL1 + (LCD_W - 30) / 3;
+static constexpr coord_t SENSOR_COL3 = SENSOR_COL2 + (LCD_W - 30) / 3;
+
 class SensorSourceChoice : public SourceChoice {
   public:
     SensorSourceChoice(Window * window, const rect_t &rect, uint8_t * source, IsValueAvailable isValueAvailable) :
@@ -53,9 +57,6 @@ class SensorButton : public Button {
     }
 
     static constexpr coord_t line1 = 1;
-    static constexpr coord_t col1 = 60;
-    static constexpr coord_t col2 = (LCD_W - 100) / 3 + col1;
-    static constexpr coord_t col3 = ((LCD_W - 100) / 3) * 2 + col1 + 20;
 
     void checkEvents() override
     {
@@ -74,14 +75,15 @@ class SensorButton : public Button {
       }
 
       lcdDrawNumber(2, 1, index + 1, LEFT, 0, NULL, ":");
-      lcdDrawSizedText(col1, line1, g_model.telemetrySensors[index].label, TELEM_LABEL_LEN, ZCHAR);
+
+      lcdDrawSizedText(SENSOR_COL1, line1, g_model.telemetrySensors[index].label, TELEM_LABEL_LEN, ZCHAR);
 
       if (telemetryItem.isAvailable()) {
         LcdFlags color = telemetryItem.isOld() ? ALARM_COLOR : TEXT_COLOR;
-        drawSensorCustomValue(col3, line1, index, getValue(MIXSRC_FIRST_TELEM + 3 * index), LEFT | color);
+        drawSensorCustomValue(SENSOR_COL2, line1, index, getValue(MIXSRC_FIRST_TELEM + 3 * index), LEFT | color);
       }
       else {
-        lcdDrawText(col3, line1, "---", CURVE_COLOR);
+        lcdDrawText(SENSOR_COL2, line1, "---", TEXT_DISABLE_COLOR);
       }
 
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
@@ -115,7 +117,7 @@ class SensorEditWindow : public Page {
     void updateSensorOneWindow()
     {
       // Sensor variable part
-      GridLayout grid(*sensorOneWindow);
+      GridLayout grid;
       sensorOneWindow->clear();
       TelemetrySensor * sensor = &g_model.telemetrySensors[index];
 
@@ -295,7 +297,7 @@ class SensorEditWindow : public Page {
     void buildBody(Window * window)
     {
       // Sensor one
-      GridLayout grid(*window);
+      GridLayout grid;
       grid.spacer(8);
 
       TelemetrySensor * sensor = &g_model.telemetrySensors[index];
@@ -353,10 +355,9 @@ void ModelTelemetryPage::editSensor(Window * window, uint8_t index)
 
 void ModelTelemetryPage::build(Window * window)
 {
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(180);
-
 
   // RSSI
   if (g_model.moduleData[INTERNAL_MODULE].rfProtocol == RF_PROTO_OFF &&
@@ -387,9 +388,9 @@ void ModelTelemetryPage::build(Window * window)
 
   // Sensors
   new Subtitle(window, grid.getLineSlot(), STR_TELEMETRY_SENSORS);
-  new StaticText(window, grid.getFieldSlot(2, 0), STR_VALUE, SMLSIZE | TEXT_DISABLE_COLOR);
+  new StaticText(window, {SENSOR_COL2, grid.getWindowHeight() + 3, SENSOR_COL3 - SENSOR_COL2, lineHeight}, STR_VALUE, SMLSIZE | TEXT_DISABLE_COLOR);
   if (!g_model.ignoreSensorIds && !IS_SPEKTRUM_PROTOCOL())
-    new StaticText(window, grid.getFieldSlot(2, 1), STR_ID, SMLSIZE | TEXT_DISABLE_COLOR);
+    new StaticText(window, {SENSOR_COL3, grid.getWindowHeight() + 3, LCD_W - SENSOR_COL3, lineHeight}, STR_ID, SMLSIZE | TEXT_DISABLE_COLOR);
   grid.nextLine();
 
   for (uint8_t idx; idx < availableTelemetryIndex(); idx++) {

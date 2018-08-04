@@ -79,7 +79,7 @@ class ModuleWindow : public Window {
 
     void update()
     {
-      GridLayout grid(*this);
+      GridLayout grid;
       uint8_t moduleType = g_model.moduleData[moduleIndex].type;
 
       clear();
@@ -188,14 +188,15 @@ class ModuleWindow : public Window {
         grid.nextLine();
       }
 
-      if (isModulePXX(moduleIndex) || isModuleDSM2(moduleIndex) || isModuleMultimodule(moduleIndex) || isModuleFlysky(moduleIndex)) {
-        // Receiver number
+      // Receiver number
+      if (isModuleNeedingReceiverNumber(moduleIndex)) {
         new StaticText(this, grid.getLabelSlot(true), STR_RECEIVER_NUM);
-        new NumberEdit(this, grid.getFieldSlot(2, 0), 0, MAX_RX_NUM(moduleIndex),
-                       GET_SET_DEFAULT(g_model.header.modelId[moduleIndex]));
+        new NumberEdit(this, grid.getFieldSlot(2, 0), 0, MAX_RX_NUM(moduleIndex), GET_SET_DEFAULT(g_model.header.modelId[moduleIndex]));
         grid.nextLine();
+      }
 
-        // Bind button
+      // Bind and Range buttons
+      if (isModuleNeedingBindRangeButtons(moduleIndex)) {
         bindButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_MODULE_BIND);
         bindButton->setPressHandler([=]() -> uint8_t {
           if (moduleFlag[moduleIndex] == MODULE_RANGECHECK) {
@@ -227,7 +228,6 @@ class ModuleWindow : public Window {
 #endif
         });
 
-        // Range button
         rangeButton = new TextButton(this, grid.getFieldSlot(2, 1), STR_MODULE_RANGE);
         rangeButton->setPressHandler([=]() -> uint8_t {
           if (moduleFlag[moduleIndex] == MODULE_BIND) {
@@ -252,7 +252,7 @@ class ModuleWindow : public Window {
       }
 
       // Failsafe
-      if (isModulePXX(moduleIndex) || isModuleR9M(moduleIndex)) {
+      if (isModuleNeedingFailsafeButton(moduleIndex)) {
         new StaticText(this, grid.getLabelSlot(true), STR_FAILSAFE);
         failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
                                     GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
@@ -399,7 +399,7 @@ void editTimerMode(int timerIdx, coord_t y, LcdFlags attr, event_t event)
 
 void ModelSetupPage::build(Window * window)
 {
-  GridLayout grid(*window);
+  GridLayout grid;
   grid.spacer(8);
 
   // Model name

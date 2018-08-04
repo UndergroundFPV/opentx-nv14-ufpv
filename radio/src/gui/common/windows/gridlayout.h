@@ -23,21 +23,19 @@
 
 #include "window.h"
 
+static constexpr uint8_t lineSpacing = 6;
+static constexpr uint8_t lineHeight = 26;
+static constexpr uint8_t indentWidth = 10;
+
 class GridLayout {
   public:
-    GridLayout(Window & window) :
-      window(window)
+    GridLayout()
     {
     }
 
     void setLabelWidth(coord_t value)
     {
       labelWidth = value;
-    }
-
-    void setLabelPaddingRight(coord_t value)
-    {
-      labelPaddingRight = value;
     }
 
     void setMarginLeft(coord_t value)
@@ -55,13 +53,13 @@ class GridLayout {
       return { lineMarginLeft, currentY, LCD_W - lineMarginRight - lineMarginLeft, lineHeight };
     }
 
-    rect_t getLabelSlot(bool indent = false)
+    rect_t getLabelSlot(bool indent = false) const
     {
       coord_t left = indent ? lineMarginLeft + indentWidth : lineMarginLeft;
-      return { left, currentY, labelWidth - labelPaddingRight - left, lineHeight };
+      return { left, currentY, labelWidth - left, lineHeight };
     }
 
-    rect_t getFieldSlot(uint8_t count = 1, uint8_t index = 0)
+    rect_t getFieldSlot(uint8_t count = 1, uint8_t index = 0) const
     {
       coord_t width = (LCD_W - labelWidth - lineMarginRight - (count - 1) * lineSpacing) / count;
       coord_t left = labelWidth + (width + lineSpacing) * index;
@@ -90,15 +88,10 @@ class GridLayout {
     }
 
   protected:
-    Window &window;
     coord_t currentY = 0;
     coord_t labelWidth = 140;
-    coord_t labelPaddingRight = 0;
     coord_t lineMarginLeft = 6;
     coord_t lineMarginRight = 10;
-    static constexpr uint8_t lineSpacing = 6;
-    static constexpr uint8_t lineHeight = 26;
-    static constexpr uint8_t indentWidth = 10;
 };
 
 #endif
