@@ -155,20 +155,19 @@ class AnalogsBody: public Window {
         lcdDrawHexNumber(x + 40, y, anaIn(i));
 #if defined(JITTER_MEASURE)
         lcdDrawNumber(x+100, y, rawJitter[i].get());
-    lcdDrawNumber(x+140, y, avgJitter[i].get());
-    lcdDrawNumber(x+180, y, (int16_t)calibratedAnalogs[CONVERT_MODE(i)]*250/256, PREC1);
+        lcdDrawNumber(x+140, y, avgJitter[i].get());
+        lcdDrawNumber(x+180, y, (int16_t)calibratedAnalogs[CONVERT_MODE(i)]*250/256, PREC1);
 #else
         if (i < NUM_STICKS + NUM_POTS + NUM_SLIDERS)
           lcdDrawNumber(x + 100, y, (int16_t) calibratedAnalogs[CONVERT_MODE(i)] * 25 / 256);
 #if defined(PCBHORUS)
         else if (i >= MOUSE1)
-      lcdDrawNumber(x+100, y, (int16_t)calibratedAnalogs[CALIBRATED_MOUSE1+i-MOUSE1]*25/256);
+          lcdDrawNumber(x+100, y, (int16_t)calibratedAnalogs[CALIBRATED_MOUSE1+i-MOUSE1]*25/256);
 #endif
 #endif
       }
     }
   protected:
-    tmr10ms_t lastRefresh = 0;
 };
 
 class AnalogsFooter: public Window {
