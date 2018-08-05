@@ -21,20 +21,19 @@
 #include "opentx.h"
 #include "shutdown_animation.h"
 
-OS_TID menusTaskId;
-// menus stack must be aligned to 8 bytes otherwise printf for %f does not work!
-TaskStack<MENUS_STACK_SIZE> __ALIGNED(8) menusStack;
+RTOS_TASK_HANDLE menusTaskId;
+RTOS_DEFINE_STACK(menusStack, MENUS_STACK_SIZE);
 
-OS_TID mixerTaskId;
-TaskStack<MIXER_STACK_SIZE> mixerStack;
+RTOS_TASK_HANDLE mixerTaskId;
+RTOS_DEFINE_STACK(mixerStack, MIXER_STACK_SIZE);
 
-OS_TID audioTaskId;
-TaskStack<AUDIO_STACK_SIZE> audioStack;
+RTOS_TASK_HANDLE audioTaskId;
+RTOS_DEFINE_STACK(audioStack, AUDIO_STACK_SIZE);
 
-OS_MutexID audioMutex;
-OS_MutexID mixerMutex;
+RTOS_MUTEX_HANDLE audioMutex;
+RTOS_MUTEX_HANDLE mixerMutex;
 
-OS_FlagID openTxInitCompleteFlag;
+RTOS_FLAG_HANDLE openTxInitCompleteFlag;
 
 enum TaskIndex {
   MENU_TASK_INDEX,
@@ -83,7 +82,7 @@ bool isForcePowerOffRequested()
 
 uint32_t nextMixerTime[NUM_MODULES];
 
-void mixerTask(void * pdata)
+TASK_FUNCTION(mixerTask)
 {
   static uint32_t lastRunTime;
   s_pulses_paused = true;
@@ -92,7 +91,7 @@ void mixerTask(void * pdata)
 
 #if defined(SIMU)
     if (main_thread_running == 0)
-      return;
+      TASK_RETURN();
 #endif
 
 #if defined(SBUS)
@@ -105,7 +104,7 @@ void mixerTask(void * pdata)
       pwrOff();
     }
 
-    uint32_t now = CoGetOSTime();
+    uint32_t now = RTOS_GET_TIME();
     bool run = false;
 #if !defined(SIMU) && defined(STM32)
     if ((now - lastRunTime) >= (usbStarted() ? 5 : 10)) {     // run at least every 20ms (every 10ms if USB is active)
@@ -132,11 +131,11 @@ void mixerTask(void * pdata)
       uint16_t t0 = getTmr2MHz();
 
       DEBUG_TIMER_START(debugTimerMixer);
-      CoEnterMutexSection(mixerMutex);
+      RTOS_LOCK_MUTEX(mixerMutex);
       doMixerCalculations();
       DEBUG_TIMER_START(debugTimerMixerCalcToUsage);
       DEBUG_TIMER_SAMPLE(debugTimerMixerIterval);
-      CoLeaveMutexSection(mixerMutex);
+      RTOS_UNLOCK_MUTEX(mixerMutex);
       DEBUG_TIMER_STOP(debugTimerMixer);
 
 #if defined(STM32) && !defined(SIMU)
@@ -170,7 +169,7 @@ void scheduleNextMixerCalculation(uint8_t module, uint16_t delay)
 {
   // Schedule next mixer calculation time,
   // for now assume mixer calculation takes 2 ms.
-  nextMixerTime[module] = (uint32_t)CoGetOSTime() + (delay)/2 - 1/*2ms*/;
+  nextMixerTime[module] = (uint32_t)RTOS_GET_TIME() + (delay)/2 - 1/*2ms*/;
   DEBUG_TIMER_STOP(debugTimerMixerCalcToUsage);
 }
 
@@ -180,7 +179,7 @@ void scheduleNextMixerCalculation(uint8_t module, uint16_t delay)
 bool perMainEnabled = true;
 #endif
 
-void menusTask(void * pdata)
+TASK_FUNCTION(menusTask)
 {
   opentxInit();
 
@@ -197,7 +196,7 @@ void menusTask(void * pdata)
 #else
   while (pwrCheck() != e_power_off) {
 #endif
-    uint32_t start = (uint32_t)CoGetOSTime();
+    uint32_t start = (uint32_t)RTOS_GET_TIME();
     DEBUG_TIMER_START(debugTimerPerMain);
 #if defined(COLORLCD) && defined(CLI)
     if (perMainEnabled) {
@@ -208,7 +207,7 @@ void menusTask(void * pdata)
 #endif
     DEBUG_TIMER_STOP(debugTimerPerMain);
     // TODO remove completely massstorage from sky9x firmware
-    uint32_t runtime = ((uint32_t)CoGetOSTime() - start);
+    uint32_t runtime = ((uint32_t)RTOS_GET_TIME() - start);
     // deduct the thread run-time from the wait, if run-time was more than
     // desired period, then skip the wait all together
     if (runtime < MENU_TASK_PERIOD_TICKS) {
@@ -234,33 +233,33 @@ void menusTask(void * pdata)
   drawSleepBitmap();
   opentxClose();
   boardOff(); // Only turn power off if necessary
+
+  TASK_RETURN();
 }
 
 void tasksStart()
 {
-  CoInitOS();
+  RTOS_INIT();
 
 #if defined(CLI)
   cliStart();
 #endif
 
-
-  mixerTaskId = CoCreateTask(mixerTask, NULL, MIXER_TASK_PRIO, &mixerStack.stack[MIXER_STACK_SIZE-1], MIXER_STACK_SIZE);
-  menusTaskId = CoCreateTask(menusTask, NULL, MENUS_TASK_PRIO, &menusStack.stack[MENUS_STACK_SIZE-1], MENUS_STACK_SIZE);
+  RTOS_CREATE_TASK(mixerTaskId, mixerTask, "Mixer", mixerStack, MIXER_STACK_SIZE, MIXER_TASK_PRIO);
+  RTOS_CREATE_TASK(menusTaskId, menusTask, "Menus", mixerStack,  MENUS_STACK_SIZE, MENUS_TASK_PRIO);
 
 #if !defined(SIMU)
-  // TODO move the SIMU audio in this task
-  audioTaskId = CoCreateTask(audioTask, NULL, AUDIO_TASK_PRIO, &audioStack.stack[AUDIO_STACK_SIZE-1], AUDIO_STACK_SIZE);
+  RTOS_CREATE_TASK(audioTaskId, audioTask, "Audio", audioStack, AUDIO_STACK_SIZE, AUDIO_TASK_PRIO);
 #endif
 
 #if IS_TOUCH_ENABLED()
   TouchManager::instance()->init();  // init touch task
 #endif
 
-  audioMutex = CoCreateMutex();
-  mixerMutex = CoCreateMutex();
+  RTOS_CREATE_MUTEX(audioMutex);
+  RTOS_CREATE_MUTEX(mixerMutex);
 
-  openTxInitCompleteFlag = CoCreateFlag(false, false);
+  RTOS_CREATE_FLAG(openTxInitCompleteFlag);
 
-  CoStartOS();
+  RTOS_START();
 }
