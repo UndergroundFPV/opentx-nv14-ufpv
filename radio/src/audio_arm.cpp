@@ -250,6 +250,7 @@ void getSystemAudioFile(char * filename, int index)
 
 void referenceSystemAudioFiles()
 {
+  TRACE("referenceSystemAudioFiles");
   static_assert(sizeof(audioFilenames)==AU_SPECIAL_SOUND_FIRST*sizeof(char *), "Invalid audioFilenames size");
   char path[AUDIO_FILENAME_MAXLEN+1];
   FILINFO fno;
@@ -274,12 +275,14 @@ void referenceSystemAudioFiles()
         getSystemAudioFile(path, i);
         if (!strcasecmp(filename, fno.fname)) {
           sdAvailableSystemAudioFiles.setBit(i);
+          //TRACE("referenceSystemAudioFiles: Found %s", filename);
           break;
         }
       }
     }
     f_closedir(&dir);
   }
+  TRACE("referenceSystemAudioFiles done");
 }
 
 const char * const suffixes[] = { "-off", "-on" };
@@ -356,6 +359,8 @@ void getLogicalSwitchAudioFile(char * filename, int index, unsigned int event)
 
 void referenceModelAudioFiles()
 {
+  TRACE("referenceModelAudioFiles");
+  
   char path[AUDIO_FILENAME_MAXLEN+1];
   FILINFO fno;
   DIR dir;
@@ -420,6 +425,7 @@ void referenceModelAudioFiles()
     }
     f_closedir(&dir);
   }
+  TRACE("referenceModelAudioFiles done");
 }
 
 bool isAudioFileReferenced(uint32_t i, char * filename)

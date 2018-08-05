@@ -403,5 +403,9 @@ extern const char * const debugTimerNames[DEBUG_TIMERS_COUNT];
 
 #endif // #if defined(__cplusplus)
 
+#if !defined(SIMU)
+extern uint32_t debugCounter1ms;
+#endif
+
 #endif // _DEBUG_H_
 

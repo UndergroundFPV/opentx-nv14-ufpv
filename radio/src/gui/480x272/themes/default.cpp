@@ -104,6 +104,7 @@ class DefaultTheme: public Theme
 
     void loadIcons() const
     {
+      TRACE("Theme default -> loadIcons");
 #if defined(LOG_TELEMETRY) || defined(WATCHDOG_DISABLED)
       loadMenuIcon(ICON_OPENTX, "mask_opentx_testmode.png", TEXT_COLOR);
 #else
@@ -180,6 +181,7 @@ class DefaultTheme: public Theme
 
     void loadThemeBitmaps() const
     {
+      TRACE("Theme default -> loadThemeBitmaps");
       // Calibration screen
       // TODO delete calibStick;
       calibStick = BitmapBuffer::load(getThemePath("stick_pointer.png"));
@@ -279,9 +281,11 @@ class DefaultTheme: public Theme
 
     virtual void load() const
     {
+      TRACE("Theme default -> load");
       loadColors();
       Theme::load();
       if (!backgroundBitmap) {
+        TRACE("Theme default -> load backgroundBitmap");
         backgroundBitmap = BitmapBuffer::load(getThemePath("background.png"));
       }
       update();
@@ -310,7 +314,6 @@ class DefaultTheme: public Theme
 #endif
       loadIcons();
       loadThemeBitmaps();
-      loadFontCache();
     }
 
     virtual void drawBackground() const

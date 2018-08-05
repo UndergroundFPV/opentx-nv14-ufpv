@@ -80,6 +80,7 @@ class DarkblueTheme: public Theme
 
     void loadMenusIcons() const
     {
+      TRACE("Theme darkblue -> loadMenusIcons");
       loadMenuIcon(ICON_OPENTX, "mask_opentx.png");
       loadMenuIcon(ICON_RADIO, "mask_menu_radio.png");
       loadMenuIcon(ICON_RADIO_SETUP, "mask_radio_setup.png");
@@ -124,6 +125,7 @@ class DarkblueTheme: public Theme
 
     void loadThemeBitmaps() const
     {
+      TRACE("Theme darkblue -> loadThemeBitmaps");
       // Calibration screen
       delete calibStick;
       calibStick = BitmapBuffer::load(getThemePath("stick_pointer.png"));
@@ -227,7 +229,6 @@ class DarkblueTheme: public Theme
       loadColors();
       loadMenusIcons();
       loadThemeBitmaps();
-      loadFontCache();
     }
 
     bool drawTopbarBackground(uint32_t options) const
