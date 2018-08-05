@@ -220,12 +220,10 @@ class ModuleWindow : public Window {
           }
         });
         bindButton->setCheckHandler([=]() {
-#if 0
-          if (condition) {
-            bindButton->setText(...);
-            bindButton->check(...);
+          if (moduleFlag[moduleIndex] != MODULE_BIND) {
+            bindButton->setText(STR_MODULE_BIND);
+            bindButton->check(false);
           }
-#endif
         });
 
         rangeButton = new TextButton(this, grid.getFieldSlot(2, 1), STR_MODULE_RANGE);
