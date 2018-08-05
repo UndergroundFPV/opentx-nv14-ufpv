@@ -131,12 +131,82 @@ class StatisticsPage: public PageTab {
     static constexpr coord_t footerHeight = 30;
 };
 
+
+class AnalogsBody: public Window {
+  public:
+    AnalogsBody(Window * parent, const rect_t & rect):
+      Window(parent, rect)
+    {
+      setInnerHeight(100); // TODO
+    }
+
+    void checkEvents() override
+    {
+      // Perma refresh this page
+      invalidate();
+    }
+
+    void paint(BitmapBuffer * dc) override
+    {
+      for (uint8_t i=0; i<NUM_ANALOGS; i++) {
+        coord_t y = MENU_CONTENT_TOP + (i / 2) * FH;
+        coord_t x = MENUS_MARGIN_LEFT + (i & 1 ? LCD_W / 2 : 0);
+        lcdDrawNumber(x, y, i + 1, LEADING0 | LEFT, 2, NULL, ":");
+        lcdDrawHexNumber(x + 40, y, anaIn(i));
+#if defined(JITTER_MEASURE)
+        lcdDrawNumber(x+100, y, rawJitter[i].get());
+    lcdDrawNumber(x+140, y, avgJitter[i].get());
+    lcdDrawNumber(x+180, y, (int16_t)calibratedAnalogs[CONVERT_MODE(i)]*250/256, PREC1);
+#else
+        if (i < NUM_STICKS + NUM_POTS + NUM_SLIDERS)
+          lcdDrawNumber(x + 100, y, (int16_t) calibratedAnalogs[CONVERT_MODE(i)] * 25 / 256);
+#if defined(PCBHORUS)
+        else if (i >= MOUSE1)
+      lcdDrawNumber(x+100, y, (int16_t)calibratedAnalogs[CALIBRATED_MOUSE1+i-MOUSE1]*25/256);
+#endif
+#endif
+      }
+    }
+  protected:
+    tmr10ms_t lastRefresh = 0;
+};
+
+class AnalogsFooter: public Window {
+  public:
+    AnalogsFooter(Window * parent, const rect_t & rect):
+      Window(parent, rect)
+    {
+    }
+
+    void paint(BitmapBuffer * dc) override {
+
+    }
+};
+
+class AnalogsPage: public PageTab {
+  public:
+    AnalogsPage() :
+      PageTab("Analogs", ICON_STATS_ANALOGS)
+    {
+    }
+
+    void build(Window * window) override
+    {
+      new AnalogsBody(window, {0, 0, LCD_W, window->height() - footerHeight});
+      new AnalogsFooter(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
+    }
+
+  protected:
+    static constexpr coord_t footerHeight = 30;
+};
+
+
 StatisticsMenu::StatisticsMenu():
   TabsGroup()
 {
   addTab(new StatisticsPage());
   // TODO addTab(new DebugPage());
-  // TODO addTab(analogsPage());
+  addTab(new AnalogsPage());
 }
 
 #define MENU_STATS_COLUMN1    (MENUS_MARGIN_LEFT + 120)
