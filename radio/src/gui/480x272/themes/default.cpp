@@ -314,7 +314,6 @@ class DefaultTheme: public Theme
 #endif
       loadIcons();
       loadThemeBitmaps();
-      loadFontCache();
     }
 
     virtual void drawBackground() const
