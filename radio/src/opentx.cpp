@@ -1186,6 +1186,7 @@ bool isThrottleWarningAlertNeeded()
 void checkTHR()
 {
   if (isThrottleWarningAlertNeeded()) {
+    AUDIO_ERROR_MESSAGE(AU_THROTTLE_ALERT);
     auto dialog = new Dialog(WARNING_TYPE_ALERT, STR_THROTTLEWARN, STR_THROTTLENOTIDLE);
     dialog->setCloseCondition([]() {
       return !isThrottleWarningAlertNeeded();
