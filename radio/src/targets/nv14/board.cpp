@@ -67,6 +67,10 @@ void interrupt1ms()
   static uint8_t pre_scale;       // Used to get 10 Hz counter
 
   ++pre_scale;
+  
+#if defined(DEBUG) && !defined(SIMU)
+  debugCounter1ms++;
+#endif
 
 #if defined(HAPTIC)
   if (pre_scale == 5 || pre_scale == 10) {
