@@ -447,7 +447,7 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
             rebuild(window, newIndex);
           }
           else {
-            new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL, nullptr);
+            new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL);
           }
         });
         menu->addLine(STR_DELETE, [=]() {
@@ -485,7 +485,7 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
                    if (res >= 0)
                      editSensor(window, res);
                    else
-                     new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL, nullptr);
+                     new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL);
                    return 0;
                  });
   grid.nextLine();

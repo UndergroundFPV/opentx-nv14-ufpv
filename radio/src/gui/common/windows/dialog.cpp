@@ -129,5 +129,6 @@ void Dialog::runForever()
 
 void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound)
 {
-  new Dialog(WARNING_TYPE_ALERT, title, msg);
+  auto dialog = new Dialog(WARNING_TYPE_ALERT, title, msg);
+  dialog->runForever();
 }
