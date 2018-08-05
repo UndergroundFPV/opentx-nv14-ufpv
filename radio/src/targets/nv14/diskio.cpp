@@ -46,13 +46,14 @@ int ff_cre_syncobj (BYTE vol, _SYNC_t *mutex)
 int ff_req_grant (_SYNC_t mutex)
 {
   ioMutexReq += 1;
-  return CoEnterMutexSection(mutex) == E_OK;
+  RTOS_LOCK_MUTEX(mutex);
+  return 1;
 }
 
 void ff_rel_grant (_SYNC_t mutex)
 {
   ioMutexRel += 1;
-  CoLeaveMutexSection(mutex);
+  RTOS_UNLOCK_MUTEX(mutex);
 }
 
 int ff_del_syncobj (_SYNC_t mutex)

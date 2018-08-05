@@ -2594,7 +2594,7 @@ void opentxInit(OPENTX_INIT_ARGS)
   audioQueue.start();
   BACKLIGHT_ENABLE();
 
-  (void)CoSetFlag(openTxInitCompleteFlag);  // notify other threads, all critical startup should be done, and before openTxStart().
+  RTOS_SET_FLAG(openTxInitCompleteFlag); // notify other threads, all critical startup should be done, and before openTxStart().
 #endif
 
 #if defined(PCBSKY9X)

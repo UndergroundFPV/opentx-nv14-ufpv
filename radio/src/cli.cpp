@@ -27,8 +27,8 @@
 #define CLI_COMMAND_MAX_ARGS           8
 #define CLI_COMMAND_MAX_LEN            256
 
-OS_TID cliTaskId;
-TaskStack<CLI_STACK_SIZE> _ALIGNED(8) cliStack; // stack must be aligned to 8 bytes otherwise printf for %f does not work!
+RTOS_TASK_HANDLE cliTaskId;
+TaskStack<CLI_STACK_SIZE> __ALIGNED(8) cliStack; // stack must be aligned to 8 bytes otherwise printf for %f does not work!
 Fifo<uint8_t, 256> cliRxFifo;
 uint8_t cliTracesEnabled = true;
 char cliLastLine[CLI_COMMAND_MAX_LEN+1];

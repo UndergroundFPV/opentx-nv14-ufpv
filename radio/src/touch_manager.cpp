@@ -32,8 +32,8 @@
 
 #define TOUCH_TASK_PERIOD   TIME_TO_TICKS(2)    // 2ms (= 1 systick)
 
-OS_TID TouchManager::m_taskId;
-TaskStack<TOUCH_STACK_SIZE> _ALIGNED(8) TouchManager::m_taskStack;
+RTOS_TASK_HANDLE TouchManager::m_taskId;
+TaskStack<TOUCH_STACK_SIZE> __ALIGNED(8) TouchManager::m_taskStack;
 
 using namespace Touch;
 
@@ -361,11 +361,11 @@ void TouchManager::generateEvent(uint8_t numPoints)
 
 void TouchManager::enqueue(const Event & ev)
 {
-  CoEnterMutexSection(m_eventQueMtxId);
+  RTOS_LOCK_MUTEX(m_eventQueMtxId);
   if (m_eventQue.isFull())
     m_eventQue.pop();
   m_eventQue.push(ev);
-  CoLeaveMutexSection(m_eventQueMtxId);
+  RTOS_UNLOCK_MUTEX(m_eventQueMtxId);
 }
 
 void TouchManager::processQueue(eventCallback_t cb)
@@ -378,17 +378,17 @@ void TouchManager::processQueue(eventCallback_t cb)
   tTime_t now = getTime();
   Fifo<Touch::Event, TOUCH_MAX_QUEUE_LEN> tempQ;
 
-  CoEnterMutexSection(m_eventQueMtxId);  // lock while copy
+  RTOS_LOCK_MUTEX(m_eventQueMtxId);  // lock while copy
   while (m_eventQue.pop(ev))
     tempQ.push(ev);
-  CoLeaveMutexSection(m_eventQueMtxId);
+  RTOS_UNLOCK_MUTEX(m_eventQueMtxId);
 
   while (tempQ.pop(ev)) {
     if (!ev.pointCount)
       continue;
-    CoEnterMutexSection(m_callbackMtxId);  // current callback has priority
+    RTOS_LOCK_MUTEX(m_callbackMtxId);  // current callback has priority
     const bool ret = cb(ev);
-    CoLeaveMutexSection(m_callbackMtxId);
+    RTOS_UNLOCK_MUTEX(m_callbackMtxId);
     if (!ret && (now - ev.timestamp) < TOUCH_MAX_QUEUE_TIME)
       enqueue(ev);   // if callback doesn't handle event and it is not too old, add it back to queue
   }
@@ -396,9 +396,9 @@ void TouchManager::processQueue(eventCallback_t cb)
 
 void TouchManager::clearQueue()
 {
-  CoEnterMutexSection(m_eventQueMtxId);
+  RTOS_LOCK_MUTEX(m_eventQueMtxId);
   m_eventQue.clear();
-  CoLeaveMutexSection(m_eventQueMtxId);
+  RTOS_UNLOCK_MUTEX(m_eventQueMtxId);
 }
 
 

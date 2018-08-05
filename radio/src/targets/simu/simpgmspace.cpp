@@ -114,7 +114,7 @@ uint64_t simuTimerMicros(void)
 #else  // GNUC
 
   auto now = std::chrono::steady_clock::now();
-  return (U64) std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+  return (uint64_t) std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
 
 #endif
 }
@@ -127,12 +127,6 @@ uint16_t getTmr16KHz()
 uint16_t getTmr2MHz()
 {
   return simuTimerMicros() * 2;
-}
-
-// return 2ms resolution to match CoOS settings
-U64 CoGetOSTime(void)
-{
-  return simuTimerMicros() / 2000;
 }
 
 void simuInit()
@@ -385,11 +379,6 @@ void StopAudioThread()
 }
 #endif // #if defined(SIMU_AUDIO) && defined(CPUARM)
 
-uint16_t stackAvailable()
-{
-  return 500;
-}
-
 bool simuLcdRefresh = true;
 display_t simuLcdBuf[DISPLAY_BUFFER_SIZE];
 
@@ -599,13 +588,6 @@ void * start_routine(void * attr)
   FUNCPtr task = (FUNCPtr)attr;
   task(NULL);
   return NULL;
-}
-
-OS_TID CoCreateTask(FUNCPtr task, void *argv, uint32_t parameter, void * stk, uint32_t stksize)
-{
-  pthread_t tid;
-  pthread_create(&tid, NULL, start_routine, (void *)task);
-  return tid;
 }
 
 void DMACopy(void * src, void * dest, unsigned size)

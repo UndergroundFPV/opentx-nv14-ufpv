@@ -392,72 +392,7 @@ void StopEepromThread();
 void * simuMain(void * args = NULL);
 extern uint8_t MCUCSR, MCUSR, MCUCR;
 
-// simulate CoOS
-
-#if defined(STM32F4)
-#define CFG_CPU_FREQ            (168000000)
-#elif defined(STM32)
-#define CFG_CPU_FREQ            (120000000)
-#else
-#define CFG_CPU_FREQ            (36000000)
-#endif
-#define CFG_SYSTICK_FREQ        (500)
-
-#define OS_MutexID pthread_mutex_t
-extern OS_MutexID audioMutex;
-#define OS_FlagID uint32_t
-#define OS_TID pthread_t
-#define OS_TCID uint32_t
-#define OS_STK uint32_t
-#define OS_EventID sem_t *
-
-typedef unsigned char      U8;
-typedef unsigned int       U32;
-typedef unsigned long long U64;
 typedef void               (*FUNCPtr)(void*);
-typedef U8                 StatusType;
-
-#define E_OK           (0)
-#define E_CREATE_FAIL  (StatusType)-1
-
-#define CoInitOS(...)
-#define CoStartOS(...)
-
-OS_TID CoCreateTask(FUNCPtr task, void *argv, uint32_t parameter, void * stk, uint32_t stksize);
-U64 CoGetOSTime(void);
-//#define CoCreateTaskEx(...)            0
-
-#define CoCreateMutex(...)             PTHREAD_MUTEX_INITIALIZER
-#define CoEnterMutexSection(m)         pthread_mutex_lock(&(m))
-#define CoLeaveMutexSection(m)         pthread_mutex_unlock(&(m))
-
-inline OS_EventID CoCreateSem(uint16_t initCnt, uint16_t maxCnt, uint8_t /*sortType*/)
-{
-  OS_EventID semaphore = (OS_EventID)malloc(sizeof(sem_t));
-  sem_init(semaphore, maxCnt, initCnt);
-  return semaphore;
-}
-inline int CoDelSem(OS_EventID id, uint8_t /*opt*/)
-{
-  int ret = sem_destroy(id);
-  free(id);
-  return ret;
-}
-#define CoPostSem(__sem)               sem_post((__sem))
-#define isr_PostSem(__sem)             sem_post((__sem))
-#define CoPendSem(__sem, __to)         sem_wait((__sem))
-#define CoAcceptSem(__sem)             sem_trywait((__sem))
-
-// TODO: real flags (use semaphores?)
-#define CoCreateFlag(...)              E_OK
-#define CoSetFlag(...)                 E_OK
-#define CoClearFlag(...)               E_OK
-#define CoWaitForSingleFlag(...)       E_OK
-#define CoSetTmrCnt(...)
-#define CoEnterISR(...)
-#define CoExitISR(...)
-#define CoStartTmr(...)
-#define CoTickDelay(x)                 sleep(2*(x))
 
 #define UART_Stop(...)
 #define UART3_Stop(...)

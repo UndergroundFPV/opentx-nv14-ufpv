@@ -311,7 +311,7 @@ class TouchManager
     static Touch::tTime_t getTime();
 
     // These functions are used by the main task management system to get process and stack info.
-    static OS_TID taskId() { return m_taskId; }
+    static RTOS_TASK_HANDLE taskId() { return m_taskId; }
     static TaskStack<TOUCH_STACK_SIZE> & taskStack() { return m_taskStack; }
     //! TouchManager task code. Do not call this directly, it's only public because it needs to be for task manager.
     void run(void * /*pdata*/);
@@ -373,8 +373,8 @@ class TouchManager
 
     OS_MutexID m_eventQueMtxId;
     OS_MutexID m_callbackMtxId;
-    static OS_TID m_taskId;
-    static TaskStack<TOUCH_STACK_SIZE> _ALIGNED(8) m_taskStack;
+    static RTOS_TASK_HANDLE m_taskId;
+    static TaskStack<TOUCH_STACK_SIZE> __ALIGNED(8) m_taskStack;
 };
 
 
