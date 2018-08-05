@@ -2048,7 +2048,6 @@ void opentxResume()
 
 #if defined(COLORLCD)
   loadTheme();
-  loadFontCache();
 #endif
 
   opentxStart(false);
@@ -2608,7 +2607,6 @@ void opentxInit(OPENTX_INIT_ARGS)
 
 #if defined(COLORLCD)
   loadTheme();
-  loadFontCache();
 #endif
 
   if (g_eeGeneral.backlightMode != e_backlight_mode_off) {
