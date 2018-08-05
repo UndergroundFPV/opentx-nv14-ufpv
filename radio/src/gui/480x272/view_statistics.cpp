@@ -30,8 +30,21 @@ class StatisticsBody: public Window {
     StatisticsBody(Window * parent, const rect_t & rect):
       Window(parent, rect)
     {
-      setInnerHeight(100); // TODO
+      auto reset = new TextButton(this, {10, 320, LCD_W - 20, lineHeight}, "Push to reset");
+      reset->setPressHandler([=]() {
+        g_eeGeneral.globalTimer = 0;
+        storageDirty(EE_GENERAL);
+        sessionTimer = 0;
+        return 0;
+      });
     }
+
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "StatisticsBody";
+    }
+#endif
 
     void checkEvents() override
     {
@@ -88,14 +101,6 @@ class StatisticsBody: public Window {
         }
         prev_yv = yv;
       }
-
-      auto reset = new TextButton(this, {10, 320, LCD_W - 20, lineHeight}, "Push to reset");
-      reset->setPressHandler([=]() {
-        g_eeGeneral.globalTimer = 0;
-        storageDirty(EE_GENERAL);
-        sessionTimer = 0;
-        return 0;
-      });
     }
 
   protected:
