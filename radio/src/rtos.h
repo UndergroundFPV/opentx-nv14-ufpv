@@ -99,8 +99,8 @@
   #define RTOS_WAIT_MS(x)               CoTickDelay((x)/2)
   #define RTOS_WAIT_TICKS(x)            CoTickDelay(x)
   #define RTOS_START()                  CoStartOS()
-  #define RTOS_CREATE_TASK(taskId, task, name, stackStruct, stackSize, priority) \
-                                        CoCreateTask(task, NULL, priority, &stackStruct.stack[stackSize-1], stackSize)
+  #define RTOS_CREATE_TASK(taskId, task, name, stackStruct, stackSize, priority)   \
+                                        taskId = CoCreateTask(task, NULL, priority, &stackStruct.stack[stackSize-1], stackSize)
   #define RTOS_TASK_HANDLE              OS_TID
   #define RTOS_MUTEX_HANDLE             OS_MutexID
   #define RTOS_FLAG_HANDLE              OS_FlagID
