@@ -50,6 +50,7 @@ void Theme::init() const
 
 void Theme::load() const
 {
+  TRACE("Theme::load");
   if (!asterisk) asterisk = BitmapBuffer::load(getThemePath("asterisk.bmp"));
   if (!question) question = BitmapBuffer::load(getThemePath("question.bmp"));
   if (!busy) busy = BitmapBuffer::load(getThemePath("busy.bmp"));

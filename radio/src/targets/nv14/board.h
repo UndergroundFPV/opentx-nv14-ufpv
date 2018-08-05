@@ -443,7 +443,7 @@ void usbJoystickUpdate();
 #define USBD_MANUFACTURER_STRING        "FlySky"
 #define USB_NAME                        "FlySky NV14"
 #define USB_MANUFACTURER                'F', 'l', 'y', 'S', 'k', 'y', ' ', ' '  /* 8 bytes */
-#define USB_PRODUCT                     'M', 'T', '6', 'S', ' ', ' ', ' ', ' '  /* 8 Bytes */
+#define USB_PRODUCT                     'N', 'V', '1', '4', ' ', ' ', ' ', ' '  /* 8 Bytes */
 
 #if defined(__cplusplus) && !defined(SIMU)
 }

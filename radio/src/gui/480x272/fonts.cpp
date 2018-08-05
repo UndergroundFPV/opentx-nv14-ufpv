@@ -99,6 +99,7 @@ BitmapBuffer * fontCache[2] = { NULL, NULL };
 
 BitmapBuffer * createFontCache(const uint8_t * font, LcdFlags fg, LcdFlags bg)
 {
+  TRACE("createFontCache %d, fgFlags = 0x%X, bgFlags = 0x%X", *font, fg, bg);
   coord_t width = *((uint16_t *)font);
   coord_t height = *(((uint16_t *)font)+1);
 
@@ -112,6 +113,7 @@ BitmapBuffer * createFontCache(const uint8_t * font, LcdFlags fg, LcdFlags bg)
 
 void loadFontCache()
 {
+  TRACE("loadFontCache");
   delete fontCache[0];
   delete fontCache[1];
   fontCache[0] = createFontCache(fontsTable[0], TEXT_COLOR, TEXT_BGCOLOR);

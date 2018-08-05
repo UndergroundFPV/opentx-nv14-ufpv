@@ -250,6 +250,7 @@ void getSystemAudioFile(char * filename, int index)
 
 void referenceSystemAudioFiles()
 {
+  TRACE("referenceSystemAudioFiles");
   static_assert(sizeof(audioFilenames)==AU_SPECIAL_SOUND_FIRST*sizeof(char *), "Invalid audioFilenames size");
   char path[AUDIO_FILENAME_MAXLEN+1];
   FILINFO fno;
