@@ -46,7 +46,7 @@ void serialPrintf(const char * format, ...)
   va_list arglist;
   char tmp[PRINTF_BUFFER_SIZE+1];
 
-  snprintf(tmp, PRINTF_BUFFER_SIZE, "+%05dms: ", debugCounter1ms);
+  snprintf(tmp, PRINTF_BUFFER_SIZE, "+%05lums: ", debugCounter1ms);
   va_start(arglist, format);
   vsnprintf(tmp+strlen(tmp), PRINTF_BUFFER_SIZE-strlen(tmp), format, arglist);
   tmp[PRINTF_BUFFER_SIZE] = '\0';
