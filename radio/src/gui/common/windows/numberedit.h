@@ -22,6 +22,7 @@
 #define _NUMBEREDIT_H_
 
 #include "basenumberedit.h"
+#include <string>
 
 class NumberEdit : public BaseNumberEdit {
   public:
