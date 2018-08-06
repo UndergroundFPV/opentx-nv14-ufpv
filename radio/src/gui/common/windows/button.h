@@ -50,11 +50,10 @@ class Button : public Window {
 
     void enable(bool enabled=true)
     {
-      if (enabled)
-        flags &= ~BUTTON_DISABLED;
-      else
-        flags |= BUTTON_DISABLED;
-      invalidate();
+      if (!enabled != bool(flags & BUTTON_DISABLED)) {
+        flags ^= BUTTON_DISABLED;
+        invalidate();
+      }
     }
 
     void disable()
@@ -64,11 +63,10 @@ class Button : public Window {
 
     void check(bool checked=true)
     {
-      if (checked)
-        flags |= BUTTON_CHECKED;
-      else
-        flags &= ~BUTTON_CHECKED;
-      invalidate();
+      if (checked != bool(flags & BUTTON_CHECKED)) {
+        flags ^= BUTTON_CHECKED;
+        invalidate();
+      }
     }
 
     bool enabled()
@@ -122,8 +120,10 @@ class TextButton : public Button {
 
     void setText(std::string value)
     {
-      text = std::move(value);
-      invalidate();
+      if (value != text) {
+        text = std::move(value);
+        invalidate();
+      }
     }
 
     void paint(BitmapBuffer * dc) override;
