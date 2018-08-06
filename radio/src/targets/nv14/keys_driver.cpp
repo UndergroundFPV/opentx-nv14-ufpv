@@ -29,7 +29,7 @@ uint32_t readTrims()
 {
   uint32_t result = 0;
 
-/*  if (TRIMS_GPIO_REG_LHL & TRIMS_GPIO_PIN_LHL)
+  if (TRIMS_GPIO_REG_LHL & TRIMS_GPIO_PIN_LHL)
     result |= 0x01;
   if (TRIMS_GPIO_REG_LHR & TRIMS_GPIO_PIN_LHR)
     result |= 0x02;
@@ -45,7 +45,7 @@ uint32_t readTrims()
     result |= 0x40;
   if (TRIMS_GPIO_REG_RHR & TRIMS_GPIO_PIN_RHR)
     result |= 0x80;
-*/
+
   // TRACE("readTrims(): result=0x%02x", result);
 
   return result;
@@ -123,9 +123,6 @@ void keysInit()
 
   GPIO_InitStructure.GPIO_Pin = KEYS_GPIOD_PINS;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin = KEYS_GPIOF_PINS;
-  GPIO_Init(GPIOF, &GPIO_InitStructure);
 
   GPIO_InitStructure.GPIO_Pin = KEYS_GPIOG_PINS;
   GPIO_Init(GPIOG, &GPIO_InitStructure);
