@@ -202,6 +202,12 @@ bool ViewMain::onTouchEnd(coord_t x, coord_t y)
   return false;
 }
 
+void ViewMain::checkEvents()
+{
+  // temporary for refreshing the trims
+  invalidate();
+}
+
 void ViewMain::paint(BitmapBuffer * dc)
 {
   theme->drawBackground();

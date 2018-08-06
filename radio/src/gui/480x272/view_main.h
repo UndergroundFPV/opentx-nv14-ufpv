@@ -32,6 +32,8 @@ class ViewMain: public Window {
     bool onTouchEnd(coord_t x, coord_t y) override;
 
     void paint(BitmapBuffer * dc) override;
+
+    void checkEvents() override;
 };
 
 #endif // _VIEW_MAIN_H_
