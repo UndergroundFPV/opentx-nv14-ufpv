@@ -26,16 +26,14 @@
 bool Button::onTouchEnd(coord_t x, coord_t y)
 {
   if (enabled()) {
-    uint8_t check = (onPress && onPress());
-    if (check)
-      flags |= BUTTON_CHECKED;
-    else
-      flags &= ~BUTTON_CHECKED;
-
-    if (!(flags & BUTTON_NOFOCUS))
+    bool check = (onPress && onPress());
+    if (check != bool(flags & BUTTON_CHECKED)) {
+      flags ^= BUTTON_CHECKED;
+      invalidate();
+    }
+    if (!(flags & BUTTON_NOFOCUS)) {
       setFocus();
-
-    invalidate();
+    }
   }
   return true;
 }

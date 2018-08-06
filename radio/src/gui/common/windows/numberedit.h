@@ -42,19 +42,19 @@ class NumberEdit : public BaseNumberEdit {
       this->enabled = enabled;
     }
 
-    void setPrefix(const char * value)
+    void setPrefix(std::string value)
     {
-      prefix = value;
+      prefix = std::move(value);
     }
 
-    void setSuffix(const char * value)
+    void setSuffix(std::string value)
     {
-      suffix = value;
+      suffix = std::move(value);
     }
 
-    void setZeroText(const char * text)
+    void setZeroText(std::string value)
     {
-      zeroText = text;
+      zeroText = std::move(value);
     }
 
     void setDisplayHandler(std::function<void(BitmapBuffer *, LcdFlags, int32_t)> function)
@@ -68,9 +68,9 @@ class NumberEdit : public BaseNumberEdit {
 
   protected:
     std::function<void(BitmapBuffer *, LcdFlags, int32_t)> displayFunction;
-    const char * prefix = nullptr;
-    const char * suffix = nullptr;
-    const char * zeroText = nullptr;
+    std::string prefix;
+    std::string suffix;
+    std::string zeroText;
     bool enabled = true;
 };
 

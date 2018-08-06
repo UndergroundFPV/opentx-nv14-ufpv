@@ -23,7 +23,7 @@
 #include "keyboard_number.h"
 
 NumberEdit::NumberEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags):
-  BaseNumberEdit(parent, rect, vmin, vmax, getValue, setValue, flags)
+  BaseNumberEdit(parent, rect, vmin, vmax, std::move(getValue), std::move(setValue), flags)
 {
 }
 
@@ -43,16 +43,16 @@ void NumberEdit::paint(BitmapBuffer * dc)
   if (displayFunction) {
     displayFunction(dc, textColor, value);
   }
-  else if (value == 0 && zeroText) {
-    dc->drawText(3, 2, zeroText, textColor | flags);
+  else if (value == 0 && !zeroText.empty()) {
+    dc->drawText(3, 2, zeroText.c_str(), textColor | flags);
   }
   else {
-    drawNumber(dc, 3, 2, value, textColor | flags, 0, prefix, suffix);
+    drawNumber(dc, 3, 2, value, textColor | flags, 0, prefix.c_str(), suffix.c_str());
   }
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 }
 
-bool NumberEdit::onTouchEnd(coord_t x, coord_t y)
+bool NumberEdit::onTouchEnd(coord_t, coord_t)
 {
   if (!enabled) {
     return true;

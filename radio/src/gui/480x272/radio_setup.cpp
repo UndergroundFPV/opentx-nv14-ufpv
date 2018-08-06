@@ -359,6 +359,12 @@ void RadioSetupPage::build(Window * window)
   grid.nextLine();
 #endif
 
+  // Switches delay
+  new StaticText(window, grid.getLabelSlot(), STR_SWITCHES_DELAY, true);
+  edit = new NumberEdit(window, grid.getFieldSlot(2, 0), -15, 100 - 15, GET_SET_VALUE_WITH_OFFSET(g_eeGeneral.switchesDelay, 15));
+  edit->setSuffix(std::string("0") + STR_MS);
+  grid.nextLine();
+
 #if 0
       case ITEM_SETUP_SWITCHES_DELAY:
         lcdDrawText(MENUS_MARGIN_LEFT, y, STR_SWITCHES_DELAY);

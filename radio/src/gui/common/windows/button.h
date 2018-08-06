@@ -86,7 +86,7 @@ class Button : public Window {
 
     void setPressHandler(std::function<uint8_t(void)> handler)
     {
-      onPress = handler;
+      onPress = std::move(handler);
     }
 
     void setCheckHandler(std::function<void(void)> handler)

@@ -42,7 +42,7 @@
 #include "menu.h"
 #include "dialog.h"
 #include "gridlayout.h"
-#include "helpers.h"
+#include "getset_helpers.h"
 #include "curveedit.h"
 #include "coloredit.h"
 
