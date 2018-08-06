@@ -139,37 +139,37 @@ void RadioSetupPage::build(Window * window)
   grid.nextLine();
 
   // Beeps mode
-  new StaticText(window, grid.getLabelSlot(), STR_SPEAKER, true);
+  new StaticText(window, grid.getLabelSlot(true), STR_SPEAKER);
   new Choice(window, grid.getFieldSlot(), STR_VBEEPMODE, -2, 1, GET_SET_DEFAULT(g_eeGeneral.beepMode));
   grid.nextLine();
 
   // Main volume
-  new StaticText(window, grid.getLabelSlot(), STR_SPEAKER_VOLUME, true);
+  new StaticText(window, grid.getLabelSlot(true), STR_SPEAKER_VOLUME);
   new Slider(window, grid.getFieldSlot(), -VOLUME_LEVEL_DEF, VOLUME_LEVEL_MAX-VOLUME_LEVEL_DEF, GET_SET_DEFAULT(g_eeGeneral.speakerVolume));
   grid.nextLine();
 
   // Beeps volume
-  new StaticText(window, grid.getLabelSlot(), STR_BEEP_VOLUME, true);
+  new StaticText(window, grid.getLabelSlot(true), STR_BEEP_VOLUME);
   new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.beepVolume));
   grid.nextLine();
 
   // Wav volume
-  new StaticText(window, grid.getLabelSlot(), STR_WAV_VOLUME, true);
+  new StaticText(window, grid.getLabelSlot(true), STR_WAV_VOLUME);
   new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.wavVolume));
   grid.nextLine();
 
   // Background volume
-  new StaticText(window, grid.getLabelSlot(), STR_BG_VOLUME, true);
+  new StaticText(window, grid.getLabelSlot(true), STR_BG_VOLUME);
   new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.backgroundVolume));
   grid.nextLine();
 
   // Beeps length
-  new StaticText(window, grid.getLabelSlot(), STR_BEEP_LENGTH, true);
+  new StaticText(window, grid.getLabelSlot(true), STR_BEEP_LENGTH);
   new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.beepLength));
   grid.nextLine();
 
   // Beeps pitch
-  new StaticText(window, grid.getLabelSlot(), STR_SPKRPITCH, true);
+  new StaticText(window, grid.getLabelSlot(true), STR_SPKRPITCH);
   auto edit = new NumberEdit(window, grid.getFieldSlot(), 0, 300,
                              GET_DEFAULT(15 * g_eeGeneral.speakerPitch),
                              [=](int32_t newValue) {
@@ -186,32 +186,30 @@ void RadioSetupPage::build(Window * window)
   grid.nextLine();
 
   // Vario volume
-  new StaticText(window, grid.getLabelSlot(), TR_SPEAKER_VOLUME, true);
+  new StaticText(window, grid.getLabelSlot(true), TR_SPEAKER_VOLUME);
   new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.varioVolume));
   grid.nextLine();
 
-  new StaticText(window, grid.getLabelSlot(), STR_PITCH_AT_ZERO, true);
+  new StaticText(window, grid.getLabelSlot(true), STR_PITCH_AT_ZERO);
   edit = new NumberEdit(window, grid.getFieldSlot(), VARIO_FREQUENCY_ZERO-400, VARIO_FREQUENCY_ZERO+400,
                  GET_DEFAULT(VARIO_FREQUENCY_ZERO+(g_eeGeneral.varioPitch*10)),
-                 [=](int8_t newValue) {
-                   g_eeGeneral.varioPitch = (newValue - VARIO_FREQUENCY_ZERO) / 10;
-                   SET_DIRTY();
-                 });
+                 SET_VALUE(g_eeGeneral.varioPitch, (newValue - VARIO_FREQUENCY_ZERO) / 10));
   edit->setStep(10);
   edit->setSuffix("Hz");
   grid.nextLine();
 
 /*
-      case ITEM_SETUP_VARIO_RANGE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_PITCH_AT_MAX);
-        lcdDrawNumber(RADIO_SETUP_2ND_COLUMN, y, VARIO_FREQUENCY_ZERO+(g_eeGeneral.varioPitch*10)+VARIO_FREQUENCY_RANGE+(g_eeGeneral.varioRange*10), attr|LEFT, 0, NULL, "Hz");
-        if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.varioRange, -80, 80);
-        break;
-      case ITEM_SETUP_VARIO_REPEAT:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_REPEAT_AT_ZERO);
-        lcdDrawNumber(RADIO_SETUP_2ND_COLUMN, y, VARIO_REPEAT_ZERO+(g_eeGeneral.varioRepeat*10), attr|LEFT, 0, NULL, STR_MS);
-        if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.varioRepeat, -30, 50);
-        break;*/
+  case ITEM_SETUP_VARIO_RANGE:
+    lcdDrawText(MENUS_MARGIN_LEFT, y, STR_PITCH_AT_MAX);
+    lcdDrawNumber(RADIO_SETUP_2ND_COLUMN, y, VARIO_FREQUENCY_ZERO+(g_eeGeneral.varioPitch*10)+VARIO_FREQUENCY_RANGE+(g_eeGeneral.varioRange*10), attr|LEFT, 0, NULL, "Hz");
+    if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.varioRange, -80, 80);
+    break;
+  case ITEM_SETUP_VARIO_REPEAT:
+    lcdDrawText(MENUS_MARGIN_LEFT, y, STR_REPEAT_AT_ZERO);
+    lcdDrawNumber(RADIO_SETUP_2ND_COLUMN, y, VARIO_REPEAT_ZERO+(g_eeGeneral.varioRepeat*10), attr|LEFT, 0, NULL, STR_MS);
+    if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.varioRepeat, -30, 50);
+    break;
+*/
 #endif
 
 #if defined(HAPTIC)
@@ -220,17 +218,17 @@ void RadioSetupPage::build(Window * window)
     grid.nextLine();
 
     // Haptic mode
-    new StaticText(window, grid.getLabelSlot(), STR_MODE);
+    new StaticText(window, grid.getLabelSlot(true), STR_MODE);
     new Choice(window, grid.getFieldSlot(), STR_VBEEPMODE, -2, 1, GET_SET_DEFAULT(g_eeGeneral.hapticMode));
     grid.nextLine();
 
     // Haptic duration
-    new StaticText(window, grid.getLabelSlot(), STR_LENGTH);
+    new StaticText(window, grid.getLabelSlot(true), STR_LENGTH);
     new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.hapticLength));
     grid.nextLine();
 
     // Haptic strength
-    new StaticText(window, grid.getLabelSlot(), STR_HAPTICSTRENGTH);
+    new StaticText(window, grid.getLabelSlot(true), STR_HAPTICSTRENGTH);
     new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.hapticStrength));
     grid.nextLine();
   }
@@ -241,76 +239,80 @@ void RadioSetupPage::build(Window * window)
     grid.nextLine();
 
     // Battery warning
-    new StaticText(window, grid.getLabelSlot(), STR_BATTERYWARNING);
+    new StaticText(window, grid.getLabelSlot(true), STR_BATTERYWARNING);
     edit = new NumberEdit(window, grid.getFieldSlot(), 40, 120, GET_SET_DEFAULT(g_eeGeneral.vBatWarn), PREC1);
     edit->setSuffix("v");
     grid.nextLine();
 
     // Alarms warning
-    new StaticText(window, grid.getLabelSlot(), STR_ALARMWARNING);
+    new StaticText(window, grid.getLabelSlot(true), STR_ALARMWARNING);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_eeGeneral.disableAlarmWarning));
     grid.nextLine();
 
     // RSSI shutdown alarm
-    new StaticText(window, grid.getLabelSlot(), STR_RSSISHUTDOWNALARM);
+    new StaticText(window, grid.getLabelSlot(true), STR_RSSISHUTDOWNALARM);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_eeGeneral.disableRssiPoweroffAlarm));
     grid.nextLine();
 
     // Inactivity alarm
-    new StaticText(window, grid.getLabelSlot(), STR_INACTIVITYALARM);
+    new StaticText(window, grid.getLabelSlot(true), STR_INACTIVITYALARM);
     edit = new NumberEdit(window, grid.getFieldSlot(), 0, 250, GET_SET_DEFAULT(g_eeGeneral.inactivityTimer));
     edit->setSuffix("minutes");
     grid.nextLine();
   }
 
-  new Subtitle(window, grid.getLabelSlot(), STR_BACKLIGHT_LABEL);
-  grid.nextLine();
+  {
+    new Subtitle(window, grid.getLabelSlot(), STR_BACKLIGHT_LABEL);
+    grid.nextLine();
 
-  // Backlight mode
-  new StaticText(window, grid.getLabelSlot(), STR_MODE);
-  new Choice(window, grid.getFieldSlot(), STR_VBLMODE, e_backlight_mode_off, e_backlight_mode_on, GET_SET_DEFAULT(g_eeGeneral.backlightMode));
-  grid.nextLine();
+    // Backlight mode
+    new StaticText(window, grid.getLabelSlot(true), STR_MODE);
+    new Choice(window, grid.getFieldSlot(), STR_VBLMODE, e_backlight_mode_off, e_backlight_mode_on, GET_SET_DEFAULT(g_eeGeneral.backlightMode));
+    grid.nextLine();
 
-  // Flash beep
-  new StaticText(window, grid.getLabelSlot(), STR_ALARM);
-  new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_eeGeneral.alarmsFlash));
-  grid.nextLine();
+    // Flash beep
+    new StaticText(window, grid.getLabelSlot(true), STR_ALARM);
+    new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_eeGeneral.alarmsFlash));
+    grid.nextLine();
 
 #if 0
-      case ITEM_SETUP_BACKLIGHT_DELAY:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLDELAY);
-        lcdDrawNumber(RADIO_SETUP_2ND_COLUMN, y, g_eeGeneral.lightAutoOff*5, attr|LEFT, 0, NULL, "s");
-        if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.lightAutoOff, 0, 600/5);
-        break;
+    case ITEM_SETUP_BACKLIGHT_DELAY:
+      lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLDELAY);
+      lcdDrawNumber(RADIO_SETUP_2ND_COLUMN, y, g_eeGeneral.lightAutoOff*5, attr|LEFT, 0, NULL, "s");
+      if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.lightAutoOff, 0, 600/5);
+      break;
 
-      case ITEM_SETUP_BRIGHTNESS:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLONBRIGHTNESS);
-        g_eeGeneral.backlightBright = BACKLIGHT_LEVEL_MAX - editSlider(RADIO_SETUP_2ND_COLUMN, y, event, BACKLIGHT_LEVEL_MAX - g_eeGeneral.backlightBright, BACKLIGHT_LEVEL_MIN, BACKLIGHT_LEVEL_MAX, attr);
-        break;
+    case ITEM_SETUP_BRIGHTNESS:
+      lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLONBRIGHTNESS);
+      g_eeGeneral.backlightBright = BACKLIGHT_LEVEL_MAX - editSlider(RADIO_SETUP_2ND_COLUMN, y, event, BACKLIGHT_LEVEL_MAX - g_eeGeneral.backlightBright, BACKLIGHT_LEVEL_MIN, BACKLIGHT_LEVEL_MAX, attr);
+      break;
 
-      case ITEM_SETUP_DIM_LEVEL:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLOFFBRIGHTNESS);
-        g_eeGeneral.blOffBright = editSlider(RADIO_SETUP_2ND_COLUMN, y, event, g_eeGeneral.blOffBright, BACKLIGHT_LEVEL_MIN, BACKLIGHT_LEVEL_MAX, attr);
-        break;
+    case ITEM_SETUP_DIM_LEVEL:
+      lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLOFFBRIGHTNESS);
+      g_eeGeneral.blOffBright = editSlider(RADIO_SETUP_2ND_COLUMN, y, event, g_eeGeneral.blOffBright, BACKLIGHT_LEVEL_MIN, BACKLIGHT_LEVEL_MAX, attr);
+      break;
 #endif
+  }
 
-  new Subtitle(window, grid.getLabelSlot(), STR_GPS);
-  grid.nextLine();
+  {
+    new Subtitle(window, grid.getLabelSlot(), STR_GPS);
+    grid.nextLine();
 
-  // Timezone
-  new StaticText(window, grid.getLabelSlot(), STR_TIMEZONE);
-  new NumberEdit(window, grid.getFieldSlot(2, 0), -12, 12, GET_SET_DEFAULT(g_eeGeneral.timezone));
-  grid.nextLine();
+    // Timezone
+    new StaticText(window, grid.getLabelSlot(true), STR_TIMEZONE);
+    new NumberEdit(window, grid.getFieldSlot(2, 0), -12, 12, GET_SET_DEFAULT(g_eeGeneral.timezone));
+    grid.nextLine();
 
-  // Adjust RTC (from telemetry)
-  new StaticText(window, grid.getLabelSlot(), STR_ADJUST_RTC);
-  new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_eeGeneral.adjustRTC));
-  grid.nextLine();
+    // Adjust RTC (from telemetry)
+    new StaticText(window, grid.getLabelSlot(true), STR_ADJUST_RTC);
+    new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_eeGeneral.adjustRTC));
+    grid.nextLine();
 
-  // GPS format
-  new StaticText(window, grid.getLabelSlot(), STR_GPSCOORD);
-  new Choice(window, grid.getFieldSlot(), STR_GPSFORMAT, 0, 1, GET_SET_DEFAULT(g_eeGeneral.gpsFormat));
-  grid.nextLine();
+    // GPS format
+    new StaticText(window, grid.getLabelSlot(true), STR_GPSCOORD);
+    new Choice(window, grid.getFieldSlot(), STR_GPSFORMAT, 0, 1, GET_SET_DEFAULT(g_eeGeneral.gpsFormat));
+    grid.nextLine();
+  }
 
   // Country code
   new StaticText(window, grid.getLabelSlot(), STR_COUNTRYCODE);
@@ -330,40 +332,25 @@ void RadioSetupPage::build(Window * window)
   });
   grid.nextLine();
 
-
-#if 0
-      case ITEM_SETUP_LANGUAGE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_VOICELANG);
-        lcdDrawText(RADIO_SETUP_2ND_COLUMN, y, currentLanguagePack->name, attr);
-        if (attr) {
-          currentLanguagePackIdx = checkIncDec(event, currentLanguagePackIdx, 0, DIM(languagePacks)-2, EE_GENERAL);
-          if (checkIncDec_Ret) {
-            currentLanguagePack = languagePacks[currentLanguagePackIdx];
-            strncpy(g_eeGeneral.ttsLanguage, currentLanguagePack->id, 2);
-          }
-        }
-        break;
-#endif
-
   // Imperial units
   new StaticText(window, grid.getLabelSlot(), STR_UNITSSYSTEM);
   new Choice(window, grid.getFieldSlot(), STR_VUNITSSYSTEM, 0, 1, GET_SET_DEFAULT(g_eeGeneral.imperial));
   grid.nextLine();
 
 #if defined(FAI_CHOICE)
-      case ITEM_SETUP_FAI:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, PSTR("FAI Mode"));
-        if (g_eeGeneral.fai) {
-          lcdDrawText(RADIO_SETUP_2ND_COLUMN, y, PSTR("Locked in FAI Mode"));
-        }
-        else {
-          g_eeGeneral.fai = editCheckBox(g_eeGeneral.fai, RADIO_SETUP_2ND_COLUMN, y, attr, event);
-          if (attr && checkIncDec_Ret) {
-              g_eeGeneral.fai = false;
-              POPUP_CONFIRMATION(PSTR("FAI mode?"));
-          }
-        }
-        break;
+  case ITEM_SETUP_FAI:
+    lcdDrawText(MENUS_MARGIN_LEFT, y, PSTR("FAI Mode"));
+    if (g_eeGeneral.fai) {
+      lcdDrawText(RADIO_SETUP_2ND_COLUMN, y, PSTR("Locked in FAI Mode"));
+    }
+    else {
+      g_eeGeneral.fai = editCheckBox(g_eeGeneral.fai, RADIO_SETUP_2ND_COLUMN, y, attr, event);
+      if (attr && checkIncDec_Ret) {
+          g_eeGeneral.fai = false;
+          POPUP_CONFIRMATION(PSTR("FAI mode?"));
+      }
+    }
+    break;
 #endif
 
 #if defined(TELEMETRY_MAVLINK)
