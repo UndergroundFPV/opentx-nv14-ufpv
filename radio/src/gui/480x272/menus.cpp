@@ -46,7 +46,7 @@ void pushMenu(MenuHandlerFunc newMenu)
 {
 
 }
-
+/*
 bool menuModelNotes(event_t event)
 {
   if (event == EVT_ENTRY) {
@@ -65,3 +65,4 @@ void pushModelNotes()
 {
   pushMenu(menuModelNotes);
 }
+*/

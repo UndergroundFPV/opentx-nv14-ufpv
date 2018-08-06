@@ -26,7 +26,7 @@
 
 class StaticText : public Window {
   public:
-    StaticText(Window * parent, const rect_t & rect, std::string text, LcdFlags flags = 0) :
+    StaticText(Window * parent, const rect_t & rect, std::string text = "", LcdFlags flags = 0) :
       Window(parent, rect),
       text(std::move(text)),
       flags(flags)
@@ -48,7 +48,16 @@ class StaticText : public Window {
 
     void paint(BitmapBuffer * dc)
     {
-      dc->drawText(0, 3, text.c_str(), flags);
+      if (flags & CENTERED)
+        dc->drawText(rect.w / 2, 3, text.c_str(), flags);
+      else
+        dc->drawText(0, 3, text.c_str(), flags);
+    }
+
+    void setText(std::string value)
+    {
+      text = std::move(value);
+      invalidate();
     }
 
   protected:

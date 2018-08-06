@@ -559,6 +559,11 @@ char * getSwitchString(swsrc_t idx)
   return getSwitchString(tmpHelpersString, idx);
 }
 
+char * getSwitchWarningString(swsrc_t idx)
+{
+  return getSwitchWarningString(tmpHelpersString, idx);
+}
+
 char * getSourceString(mixsrc_t idx)
 {
   return getSourceString(tmpHelpersString, idx);

@@ -27,7 +27,7 @@ class ModelInputsPage: public PageTab {
   public:
     ModelInputsPage();
 
-    virtual void build(Window * window) override
+    void build(Window * window) override
     {
       build(window, -1);
     }

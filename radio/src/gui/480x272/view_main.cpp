@@ -101,7 +101,7 @@ void drawTrims(uint8_t flightMode)
 
 void onMainViewMenu(const char *result)
 {
-  if (result == STR_VIEW_NOTES) {
+  /*if (result == STR_VIEW_NOTES) {
     pushModelNotes();
   }
   else if (result == STR_STATISTICS) {
@@ -112,7 +112,7 @@ void onMainViewMenu(const char *result)
   }
   else if (result == STR_MONITOR_SCREENS) {
     pushMenu(menuTabMonitors[lastMonitorPage]);
-  }
+  }*/
 }
 
 int getMainViewsCount()

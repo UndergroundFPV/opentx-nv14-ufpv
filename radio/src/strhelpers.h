@@ -47,6 +47,7 @@ char * getSourceString(char * dest, mixsrc_t idx);
 
 char * getSourceString(mixsrc_t idx);
 char * getSwitchString(swsrc_t idx);
+char * getSwitchWarningString(swsrc_t idx);
 char * getCurveString(int idx);
 char * getTimerString(putstime_t tme, uint8_t hours);
 

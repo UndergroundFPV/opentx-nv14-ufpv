@@ -158,18 +158,9 @@ class AnalogsBody: public Window {
         coord_t x = MENUS_MARGIN_LEFT + (i & 1 ? LCD_W / 2 : 0);
         lcdDrawNumber(x, y, i + 1, LEADING0 | LEFT, 2, NULL, ":");
         lcdDrawHexNumber(x + 40, y, anaIn(i));
-#if defined(JITTER_MEASURE)
-        lcdDrawNumber(x+100, y, rawJitter[i].get());
-        lcdDrawNumber(x+140, y, avgJitter[i].get());
-        lcdDrawNumber(x+180, y, (int16_t)calibratedAnalogs[CONVERT_MODE(i)]*250/256, PREC1);
-#else
-        if (i < NUM_STICKS + NUM_POTS + NUM_SLIDERS)
+        if (i < NUM_STICKS + NUM_POTS + NUM_SLIDERS) {
           lcdDrawNumber(x + 100, y, (int16_t) calibratedAnalogs[CONVERT_MODE(i)] * 25 / 256);
-#if defined(PCBHORUS)
-        else if (i >= MOUSE1)
-          lcdDrawNumber(x+100, y, (int16_t)calibratedAnalogs[CALIBRATED_MOUSE1+i-MOUSE1]*25/256);
-#endif
-#endif
+        }
       }
     }
   protected:
@@ -213,6 +204,7 @@ StatisticsMenu::StatisticsMenu():
   addTab(new AnalogsPage());
 }
 
+#if 0
 #define MENU_STATS_COLUMN1    (MENUS_MARGIN_LEFT + 120)
 #define MENU_STATS_COLUMN2    (LCD_W/2)
 #define MENU_STATS_COLUMN3    (LCD_W/2 + 120)
@@ -434,3 +426,4 @@ bool menuStatsTraces(event_t event)
   return true;
 }
 #endif // defined(DEBUG_TRACE_BUFFER)
+#endif

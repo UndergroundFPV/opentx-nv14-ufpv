@@ -921,7 +921,7 @@ PACK(struct TrainerData {
     CustomFunctionData customFn[MAX_SPECIAL_FUNCTIONS];
 #endif
 
-#if defined(PCBHORUS)  || defined(PCBNV14)
+#if defined(PCBHORUS) || defined(PCBNV14)
   #define EXTRA_GENERAL_FIELDS \
     EXTRA_GENERAL_FIELDS_ARM \
     NOBACKUP(uint8_t  auxSerialMode:4); \

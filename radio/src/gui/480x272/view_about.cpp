@@ -37,7 +37,7 @@ enum AboutScreens {
 
 #define ABOUT_X      62
 #define ABOUT_INDENT 16
-
+#if 0
 bool menuAboutView(event_t event)
 {
   static uint8_t screenIndex = 0;
@@ -151,3 +151,4 @@ bool menuAboutView(event_t event)
 
   return true;
 }
+#endif

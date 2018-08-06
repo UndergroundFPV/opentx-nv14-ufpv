@@ -22,19 +22,14 @@
 
 uint32_t readKeys()
 {
-  uint32_t result = 0;
-
-  // if (result != 0) TRACE("readKeys(): result=0x%02x", result);
-
-  return result;
+  return 0;
 }
 
 uint32_t readTrims()
 {
   uint32_t result = 0;
 
-// TODO: Reenable once touch is there
-  if (TRIMS_GPIO_REG_LHL & TRIMS_GPIO_PIN_LHL)
+/*  if (TRIMS_GPIO_REG_LHL & TRIMS_GPIO_PIN_LHL)
     result |= 0x01;
   if (TRIMS_GPIO_REG_LHR & TRIMS_GPIO_PIN_LHR)
     result |= 0x02;
@@ -50,7 +45,7 @@ uint32_t readTrims()
     result |= 0x40;
   if (TRIMS_GPIO_REG_RHR & TRIMS_GPIO_PIN_RHR)
     result |= 0x80;
-
+*/
   // TRACE("readTrims(): result=0x%02x", result);
 
   return result;
@@ -63,13 +58,13 @@ uint8_t trimDown(uint8_t idx)
 
 uint8_t keyDown()
 {
-  return readKeys() || readTrims();
+  return 0;
 }
 
 /* TODO common to ARM */
 void readKeysAndTrims()
 {
-  uint32_t i;
+  int i;
 
   uint8_t index = 0;
   uint32_t in = readKeys();
@@ -83,38 +78,33 @@ void readKeysAndTrims()
   }
 }
 
-uint8_t keyState(uint8_t index)
-{
-  return keys[index].state();
-}
-
 #if !defined(BOOT)
 uint32_t switchState(uint8_t index)
 {
-  uint16_t value = adcValues[SWITCH_FIRST + (index / 3)];
+  uint16_t value = getAnalogValue(SWITCH_FIRST + index / 3);
   uint8_t position;
 
   if (value < 1024)
     position = 0;
-  else if (value > 3*1024)
+  else if (value > 3 * 1024)
     position = 2;
   else
     position = 1;
 
-  return position == index % 3;
+  return position == (index % 3);
 }
 #endif
 
 void monitorInit()
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+  GPIO_InitTypeDef GPIO_InitStructure;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
 
-    GPIO_InitStructure.GPIO_Pin = VBUS_MONITOR_PIN;
-    GPIO_Init(GPIOJ, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Pin = VBUS_MONITOR_PIN;
+  GPIO_Init(GPIOJ, &GPIO_InitStructure);
 }
 
 void keysInit()

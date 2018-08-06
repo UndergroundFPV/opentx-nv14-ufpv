@@ -24,11 +24,12 @@
   // not needed
 #elif defined(PCBNV14)
   const int8_t ana_direction[NUM_ANALOGS] = { 0 };
-  const uint8_t ana_mapping[NUM_ANALOGS] = { 0 /*STICK1*/, 1 /*STICK2*/, 2 /*STICK3*/, 3 /*STICK4*/,
-                                             4 /*POT1*/, 5 /*POT2*/, 6 /*SWA*/, 13 /*SWB*/,
-                                             7 /*SWC*/,  14 /*SWD*/, 8 /*SWE*/, 9 /*SWF*/,
-                                             10 /*SWG*/, 11 /*SWH*/,
-                                             12 /*TX_VOLTAGE*/ };
+  const uint8_t anas_mapping[NUM_ANALOGS] = { 0 /*STICK1*/, 1 /*STICK2*/, 2 /*STICK3*/, 3 /*STICK4*/,
+                                              4 /*POT1*/, 5 /*POT2*/, 6 /*SWA*/, 13 /*SWB*/,
+                                              7 /*SWC*/,  14 /*SWD*/, 8 /*SWE*/, 9 /*SWF*/,
+                                              11 /*SWG*/, 10 /*SWH*/,
+                                              12 /*TX_VOLTAGE*/ };
+  #define ANAS_MAPPING anas_mapping // TODO => hal.h
 #elif defined(PCBX10)
   const int8_t ana_direction[NUM_ANALOGS] = {1,-1,1,-1,  -1,1,-1, 1,-1, 1, 1,1};
 #elif defined(PCBX9E)
@@ -37,10 +38,11 @@
 #else
   const int8_t ana_direction[NUM_ANALOGS] = {1,1,-1,-1,  -1,-1,-1,1, -1,1,-1,-1,  -1};
 #endif
-  const uint8_t ana_mapping[NUM_ANALOGS] = { 0 /*STICK1*/, 1 /*STICK2*/, 2 /*STICK3*/, 3 /*STICK4*/,
-                                             10 /*POT1*/, 4 /*POT2*/, 5 /*POT3*/, 6 /*POT4*/,
-                                             11 /*SLIDER1*/, 12 /*SLIDER2*/, 7 /*SLIDER3*/, 8 /*SLIDER4*/,
-                                             9 /*TX_VOLTAGE*/ };
+  const uint8_t anas_mapping[NUM_ANALOGS] = { 0 /*STICK1*/, 1 /*STICK2*/, 2 /*STICK3*/, 3 /*STICK4*/,
+                                              10 /*POT1*/, 4 /*POT2*/, 5 /*POT3*/, 6 /*POT4*/,
+                                              11 /*SLIDER1*/, 12 /*SLIDER2*/, 7 /*SLIDER3*/, 8 /*SLIDER4*/,
+                                              9 /*TX_VOLTAGE*/ };
+  #define ANAS_MAPPING anas_mapping
 #elif defined(PCBX9DP)
   const int8_t ana_direction[NUM_ANALOGS] = {1,-1,1,-1,  1,1,-1,  1,1,  1};
 #elif defined(PCBX7)
@@ -57,11 +59,11 @@
 
 #if NUM_PWMSTICKS > 0
   #define FIRST_ANALOG_ADC             (STICKS_PWM_ENABLED() ? NUM_PWMSTICKS : 0)
-  #define NUM_MAIN_ANALOGS_ADC              (STICKS_PWM_ENABLED() ? (NUM_MAIN_ANALOGS - NUM_PWMSTICKS) : NUM_MAIN_ANALOGS)
+  #define NUM_MAIN_ANALOGS_ADC         (STICKS_PWM_ENABLED() ? (NUM_MAIN_ANALOGS - NUM_PWMSTICKS) : NUM_MAIN_ANALOGS)
 #elif defined(PCBX9E)
   #define FIRST_ANALOG_ADC             0
-  #define NUM_MAIN_ANALOGS_ADC              10
-  #define NUM_MAIN_ANALOGS_ADC_EXT          (NUM_MAIN_ANALOGS - 10)
+  #define NUM_MAIN_ANALOGS_ADC         10
+  #define NUM_MAIN_ANALOGS_ADC_EXT     (NUM_MAIN_ANALOGS - 10)
 #else
   #define FIRST_ANALOG_ADC             0
   #define FIRST_SUB_ANALOG_ADC         0
@@ -246,7 +248,7 @@ void adcSingleRead()
 
 void adcRead()
 {
-  int i, j, k;
+  int i, j;
 
   uint16_t temp[NUM_ANALOGS] = { 0 };
 
@@ -292,12 +294,11 @@ uint16_t getAnalogValue(uint8_t index)
     // which produces ghost readings on these inputs.
     return 0;
   }
-#if defined(PCBX9E)
-  index = ana_mapping[index];
+
+#if defined(ANAS_MAPPING)
+  index = ANAS_MAPPING[index];
 #endif
-#if defined(PCBNV14)
-  index = ana_mapping[index];
-#endif
+
   if (ana_direction[index] < 0)
     return 4095 - adcValues[index];
   else

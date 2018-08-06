@@ -23,6 +23,7 @@
 
 #include "stddef.h"
 #include "stdbool.h"
+#include "opentx_constants.h"
 
 #if defined(__cplusplus) && !defined(SIMU)
 extern "C" {
@@ -197,19 +198,6 @@ void stop_trainer_capture(void);
 // Keys driver
 enum EnumKeys
 {
-  KEY_PGUP,
-  KEY_PGDN,
-  KEY_ENTER,
-  TOUCH_PRESS,
-  KEY_MODEL,
-  KEY_UP = KEY_MODEL,
-  KEY_EXIT,
-  KEY_DOWN = KEY_EXIT,
-  KEY_TELEM,
-  KEY_RIGHT = KEY_TELEM,
-  KEY_RADIO,
-  KEY_LEFT = KEY_RADIO,
-
   TRM_BASE,
   TRM_LH_DWN = TRM_BASE,
   TRM_LH_UP,
@@ -228,11 +216,6 @@ enum EnumKeys
   NUM_KEYS
 };
 
-#define KEY_MENU  KEY_ENTER
-#define EVT_ROTARY_BREAK  0xfd
-#define EVT_ROTARY_RIGHT  0xfe
-#define EVT_ROTARY_LEFT   0xff
-
 enum EnumSwitches
 {
   SW_SA,
@@ -245,7 +228,8 @@ enum EnumSwitches
   SW_SH,
   NUM_SWITCHES
 };
-#define IS_3POS(x)                      ((x) != SW_SF && (x) != SW_SH)
+
+#define DEFAULT_SWITCH_CONFIG (SWITCH_TOGGLE << 14) + (SWITCH_3POS << 12) + (SWITCH_3POS << 10) + (SWITCH_TOGGLE << 8) + (SWITCH_2POS << 6) + (SWITCH_TOGGLE << 4) + (SWITCH_3POS << 2) + (SWITCH_2POS << 0);
 
 enum EnumSwitchesPositions
 {
@@ -348,6 +332,7 @@ enum Analogs {
   NUM_ANALOGS
 };
 
+#define DEFAULT_POTS_CONFIG (POT_WITHOUT_DETENT << 0) + (POT_WITHOUT_DETENT << 2) // 2 pots without detent
 
 enum CalibratedAnalogs {
   CALIBRATED_STICK1,

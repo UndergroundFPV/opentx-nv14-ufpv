@@ -26,6 +26,50 @@
 
 #define SWITCH_TYPE_MAX(sw)            ((MIXSRC_SF-MIXSRC_FIRST_SWITCH == sw || MIXSRC_SH-MIXSRC_FIRST_SWITCH == sw) ? SWITCH_2POS : SWITCH_3POS)
 
+class SwitchDynamicLabel : public StaticText {
+  public:
+    SwitchDynamicLabel(Window * parent, const rect_t & rect, uint8_t index):
+      StaticText(parent, rect),
+      index(index)
+    {
+      update();
+    }
+
+    std::string label()
+    {
+      return TEXT_AT_INDEX(STR_VSRCRAW, (index + MIXSRC_FIRST_SWITCH - MIXSRC_Rud + 1)) + std::string(&"\300-\301"[lastpos], 1);
+    }
+
+    void update()
+    {
+      uint8_t newpos = position();
+      if (newpos != lastpos) {
+        lastpos = newpos;
+        setText(label());
+      }
+    }
+
+    uint8_t position()
+    {
+      auto value = getValue(MIXSRC_FIRST_SWITCH + index);
+      if (value > 0)
+        return 2;
+      else if (value < 0)
+        return 0;
+      else
+        return 1;
+    }
+
+    void checkEvents() override
+    {
+      update();
+    }
+
+  protected:
+    uint8_t index;
+    uint8_t lastpos = 0xff;
+};
+
 RadioHardwarePage::RadioHardwarePage():
   PageTab(STR_HARDWARE, ICON_RADIO_HARDWARE)
 {
@@ -52,7 +96,7 @@ void RadioHardwarePage::build(Window * window)
   for(int i=0; i < NUM_POTS; i++){
     new StaticText(window, grid.getLabelSlot(true), TEXT_AT_INDEX(STR_VSRCRAW, (i + NUM_STICKS + 1)));
     new TextEdit(window, grid.getFieldSlot(2,0), g_eeGeneral.anaNames[i + NUM_STICKS], LEN_ANA_NAME);
-    new Choice(window, grid.getFieldSlot(2,1), STR_POTTYPES, POT_NONE, POT_WITHOUT_DETENT + 1, GET_SET_BF(g_eeGeneral.potsConfig, 2 * i, 2));
+    new Choice(window, grid.getFieldSlot(2,1), STR_POTTYPES, POT_NONE, POT_WITHOUT_DETENT, GET_SET_BF(g_eeGeneral.potsConfig, 2 * i, 2));
     grid.nextLine();
   }
 
@@ -60,11 +104,9 @@ void RadioHardwarePage::build(Window * window)
   new Subtitle(window, grid.getLineSlot(), STR_SWITCHES);
   grid.nextLine();
   for(int i=0; i < NUM_SWITCHES; i++) {
-    new StaticText(window, grid.getLabelSlot(true),
-                   TEXT_AT_INDEX(STR_VSRCRAW, (i + MIXSRC_FIRST_SWITCH - MIXSRC_Rud + 1)));
-    new TextEdit(window, grid.getFieldSlot(2, 0), g_eeGeneral.anaNames[i + MIXSRC_FIRST_SWITCH - MIXSRC_Rud],
-                 LEN_ANA_NAME);
-    new Choice(window, grid.getFieldSlot(2, 1), STR_SWTYPES, SWITCH_NONE, SWITCH_TYPE_MAX(i) + 1, GET_SET_BF(g_eeGeneral.switchConfig, 2 * i, 2));
+    new SwitchDynamicLabel(window, grid.getLabelSlot(true), i);
+    new TextEdit(window, grid.getFieldSlot(2, 0), g_eeGeneral.switchNames[i], LEN_SWITCH_NAME);
+    new Choice(window, grid.getFieldSlot(2, 1), STR_SWTYPES, SWITCH_NONE, SWITCH_TYPE_MAX(i), GET_SET_BF(g_eeGeneral.switchConfig, 2 * i, 2));
     grid.nextLine();
   }
 
@@ -85,4 +127,3 @@ void RadioHardwarePage::build(Window * window)
 
   window->setInnerHeight(grid.getWindowHeight());
 }
-

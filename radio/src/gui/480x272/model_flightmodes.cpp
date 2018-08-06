@@ -29,21 +29,6 @@ ModelFlightModesPage::ModelFlightModesPage():
 {
 }
 
-FlightModesType editFlightModes(coord_t x, coord_t y, event_t event, FlightModesType value, uint8_t attr)
-{
-  // displayFlightModes(x, y, value, attr);
-
-  if (attr) {
-    if (s_editMode && event==EVT_KEY_BREAK(KEY_ENTER)) {
-      s_editMode = 0;
-      value ^= (1<<menuHorizontalPosition);
-      storageDirty(EE_MODEL);
-    }
-  }
-
-  return value;
-}
-
 bool isTrimModeAvailable(int mode)
 {
   return (mode < 0 || (mode%2) == 0 || (mode/2) != menuVerticalPosition);

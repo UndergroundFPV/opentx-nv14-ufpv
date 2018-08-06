@@ -93,7 +93,7 @@ void readTextFile(int & lines_count)
     lines_count = current_line;
   }
 }
-
+#if 0
 bool menuTextView(event_t event)
 {
   static int lines_count;
@@ -152,3 +152,4 @@ void pushMenuTextView(const char *filename)
     pushMenu(menuTextView);
   }
 }
+#endif

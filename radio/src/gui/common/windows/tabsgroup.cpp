@@ -82,11 +82,16 @@ TabsGroup::TabsGroup():
   header(this),
   body(this, { 0, MENU_BODY_TOP, LCD_W, MENU_BODY_HEIGHT })
 {
-  body.deleteChildren();
 }
 
 TabsGroup::~TabsGroup()
 {
+  for (auto tab: tabs) {
+    delete tab;
+  }
+
+  body.deleteChildren();
+
   TextKeyboard::instance()->disable();
   NumberKeyboard::instance()->disable();
   CurveKeyboard::instance()->disable();

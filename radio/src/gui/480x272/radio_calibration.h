@@ -20,15 +20,21 @@
 
 #include "tabsgroup.h"
 
+class StaticText;
+
 class RadioCalibrationPage: public PageTab {
   public:
-    RadioCalibrationPage();
+    RadioCalibrationPage(bool initial=false);
 
     void build(Window * window) override;
 
     void checkEvents() override;
 
   protected:
+    StaticText * text = nullptr;
     TextButton * button = nullptr;
+    bool initial;
     void nextStep();
 };
+
+void startCalibration();

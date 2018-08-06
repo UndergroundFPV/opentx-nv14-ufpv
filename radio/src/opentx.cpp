@@ -21,6 +21,7 @@
 #include "opentx.h"
 #include "libwindows.h"
 #include "shutdown_animation.h"
+#include "radio_calibration.h"
 
 RadioData  g_eeGeneral;
 ModelData  g_model;
@@ -247,7 +248,10 @@ void memswap(void * a, void * b, uint8_t size)
 
 void generalDefault()
 {
+  TRACE("Reset radio settings");
+
   memclear(&g_eeGeneral, sizeof(g_eeGeneral));
+
   g_eeGeneral.version  = EEPROM_VER;
   g_eeGeneral.variant = EEPROM_VARIANT;
 
@@ -255,34 +259,8 @@ void generalDefault()
   g_eeGeneral.contrast = LCD_CONTRAST_DEFAULT;
 #endif
 
-#if defined(PCBHORUS)
-  #if PCBREV >= 13
-    g_eeGeneral.potsConfig = 0x1B;  // S1 = pot, 6P = multipos, S2 = pot with detent
-  #else
-    g_eeGeneral.potsConfig = 0x19;  // S1 = pot without detent, 6P = multipos, S2 = pot with detent
-  #endif
-  g_eeGeneral.slidersConfig = 0x0f; // 4 sliders
-  g_eeGeneral.blOffBright = 20;
-#elif defined(PCBNV14)
-  g_eeGeneral.potsConfig = (POT_WITHOUT_DETENT << 0) + (POT_WITHOUT_DETENT << 2); // 2 pots without detent
-#elif defined(PCBX7) ||  defined(PCBXLITE)
-  g_eeGeneral.potsConfig = (POT_WITHOUT_DETENT << 0) + (POT_WITH_DETENT << 2); // S1 = pot without detent, S2 = pot with detent
-#elif defined(PCBTARANIS)
-  g_eeGeneral.potsConfig = (POT_WITH_DETENT << 0) + (POT_WITH_DETENT << 2); // S1 and S2 = pots with detent
-  g_eeGeneral.slidersConfig = 0x03; // LS and RS = sliders with detent
-#elif defined(PCBI8)
-  g_eeGeneral.potsConfig = (POT_WITHOUT_DETENT << 0) + (POT_WITHOUT_DETENT << 2); // S1 and S2 = pots without detent
-#endif
-
-#if defined(PCBXLITE)
-  g_eeGeneral.switchConfig = 0x0000000f; // 2x3POS
-#elif defined(PCBX7) || defined(PCBI8)
-  g_eeGeneral.switchConfig = 0x000006ff; // 4x3POS, 1x2POS, 1xTOGGLE
-#elif defined(PCBTARANIS) || defined(PCBHORUS)
-  g_eeGeneral.switchConfig = 0x00007bff; // 6x3POS, 1x2POS, 1xTOGGLE
-#elif defined(PCBNV14)
-  g_eeGeneral.switchConfig = 0x00007bff; // 6x3POS, 1x2POS, 1xTOGGLE
-#endif
+  g_eeGeneral.potsConfig = DEFAULT_POTS_CONFIG;
+  g_eeGeneral.switchConfig = DEFAULT_SWITCH_CONFIG;
 
 // vBatWarn is voltage in 100mV, vBatMin is in 100mV but with -9V offset, vBatMax has a -12V offset
 #if defined(PCBX9E) || defined(PCBX12S)
@@ -1124,7 +1102,7 @@ void checkAll()
 
 #if defined(CPUARM)
   if (g_model.displayChecklist && modelHasNotes()) {
-    pushModelNotes();
+//    pushModelNotes();
   }
 #endif
 
@@ -1181,7 +1159,6 @@ bool isThrottleWarningAlertNeeded()
   uint8_t thrchn = ((g_model.thrTraceSrc==0) || (g_model.thrTraceSrc>NUM_POTS+NUM_SLIDERS)) ? THR_STICK : g_model.thrTraceSrc+NUM_STICKS-1;
 
   GET_ADC_IF_MIXER_NOT_RUNNING();
-
   evalInputs(e_perout_mode_notrainer); // let do evalInputs do the job
 
   return calibratedAnalogs[thrchn] > THRCHK_DEADBAND - 1024;
@@ -1956,15 +1933,13 @@ void opentxStart(OPENTX_START_ARGS)
 #endif
 
 #if defined(NIGHTLY_BUILD_WARNING)
-#  ALERT(STR_NIGHTLY_WARNING, TR_NIGHTLY_NOTSAFE, AU_ERROR);
+  ALERT(STR_NIGHTLY_WARNING, TR_NIGHTLY_NOTSAFE, AU_ERROR);
 #endif
-
-  calibration_needed = 0;
 
 #if defined(GUI)
   if (calibration_needed) {
     if (calibration_needed & 0x1) {
-      pushMenu(menuFirstCalib);
+      startCalibration();
     }
 #if IS_TOUCH_ENABLED()
     if (calibration_needed & 0x2) {

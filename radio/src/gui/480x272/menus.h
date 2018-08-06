@@ -222,12 +222,7 @@ bool menuStatsAnalogs(event_t event);
 bool menuStatsTraces(event_t event);
 
 static const MenuHandlerFunc menuTabStats[] PROGMEM = {
-  menuStatsGraph,
-  menuStatsDebug,
-  menuStatsAnalogs,
-#if defined(DEBUG_TRACE_BUFFER)
-  menuStatsTraces,
-#endif
+
 };
 
 enum EnumTabMonitors

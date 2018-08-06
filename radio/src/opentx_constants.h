@@ -18,15 +18,34 @@
  * GNU General Public License for more details.
  */
 
-#include "tabsgroup.h"
-#include "board.h"
+#ifndef _OPENTX_CONSTANTS_H_
+#define _OPENTX_CONSTANTS_H_
 
-class TextButton;
-class ModuleWindow;
-
-class ModelSetupPage: public PageTab {
-  public:
-    ModelSetupPage();
-
-    void build(Window * window) override;
+enum SwitchConfig {
+  SWITCH_NONE,
+  SWITCH_TOGGLE,
+  SWITCH_2POS,
+  SWITCH_3POS,
 };
+
+enum PotConfig {
+  POT_NONE,
+  POT_WITH_DETENT,
+  POT_MULTIPOS_SWITCH,
+  POT_WITHOUT_DETENT
+};
+
+enum SliderConfig {
+  SLIDER_NONE,
+  SLIDER_WITH_DETENT,
+};
+
+enum CalibrationState {
+  CALIB_START,
+  CALIB_SET_MIDPOINT,
+  CALIB_MOVE_STICKS,
+  CALIB_STORE,
+  CALIB_FINISHED
+};
+
+#endif // _OPENTX_CONSTANTS_H_

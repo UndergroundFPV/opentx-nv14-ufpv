@@ -748,9 +748,9 @@ void displayAcknowledgeLuaError(event_t event)
 {
   warningResult = false;
   displayLuaError(warningText);
-  if (event == EVT_KEY_BREAK(KEY_EXIT)) {
+/*  if (event == EVT_KEY_BREAK(KEY_EXIT)) {
     warningText = NULL;
-  }
+  }*/
 }
 
 void luaError(lua_State * L, uint8_t error, bool acknowledge)
@@ -872,7 +872,7 @@ void luaDoOneRunStandalone(event_t evt)
       luaState = INTERPRETER_RELOAD_PERMANENT_SCRIPTS;
     }
 
-    if (evt == EVT_KEY_LONG(KEY_EXIT)) {
+/*    if (evt == EVT_KEY_LONG(KEY_EXIT)) {
       TRACE("Script force exit");
       killEvents(evt);
       standaloneScript.state = SCRIPT_NOFILE;
@@ -885,6 +885,7 @@ void luaDoOneRunStandalone(event_t evt)
       luaDisplayStatistics = !luaDisplayStatistics;
     }
 #endif
+ */
   }
   else {
     TRACE("Script run method missing");
