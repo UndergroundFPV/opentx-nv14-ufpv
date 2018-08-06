@@ -59,9 +59,14 @@ const pm_uint8_t bchout_ar[] PROGMEM = {
     0x87, 0x8D, 0x93, 0x9C, 0xB1, 0xB4,
     0xC6, 0xC9, 0xD2, 0xD8, 0xE1, 0xE4 };
 
+uint8_t channel_order(uint8_t setup, uint8_t x)
+{
+  return ((*(bchout_ar + setup) >> (6 - (x - 1) * 2)) & 3) + 1;
+}
+
 uint8_t channel_order(uint8_t x)
 {
-  return ( ((pgm_read_byte(bchout_ar + g_eeGeneral.templateSetup) >> (6-(x-1) * 2)) & 3 ) + 1 );
+  return channel_order(g_eeGeneral.templateSetup, x);
 }
 
 /*

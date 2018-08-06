@@ -370,6 +370,19 @@ void RadioSetupPage::build(Window * window)
   new Choice(window, grid.getFieldSlot(), STR_USBMODES, USB_UNSELECTED_MODE, USB_MAX_MODE, GET_SET_DEFAULT(g_eeGeneral.USBMode));
   grid.nextLine();
 
+  // RX channel order
+  new StaticText(window, grid.getLabelSlot(), STR_RXCHANNELORD); // RAET->AETR
+  auto choice = new Choice(window, grid.getFieldSlot(), nullptr, 0, 4*3*2 - 1, GET_SET_DEFAULT(g_eeGeneral.templateSetup));
+  choice->setTextHandler([](uint8_t value) {
+    char s[5];
+    for (uint8_t i=0; i<4; i++) {
+      s[i] = STR_RETA123[channel_order(value, i + 1)];
+    }
+    s[4] = '\0';
+    return std::string(s);
+  });
+  grid.nextLine();
+
 #if 0
       case ITEM_SETUP_RX_CHANNEL_ORD:
       {

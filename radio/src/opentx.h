@@ -448,7 +448,8 @@ extern const pm_uint8_t modn12x3[];
 #define AIL_STICK 3
 #define CONVERT_MODE(x)  (((x)<=AIL_STICK) ? pgm_read_byte(modn12x3 + 4*g_eeGeneral.stickMode + (x)) : (x) )
 
-extern uint8_t channel_order(uint8_t x);
+uint8_t channel_order(uint8_t setup, uint8_t x);
+uint8_t channel_order(uint8_t x);
 
 #define THRCHK_DEADBAND                16
 
