@@ -36,15 +36,9 @@ void RadioSdManagerPage::rebuild(Window * window)
 }
 
 // comparison, not case sensitive.
-bool compare_nocase (const std::string& first, const std::string& second)
+bool compare_nocase(const std::string &first, const std::string &second)
 {
-  for (unsigned i=0; i<first.length() && i<second.length(); i++) {
-    if (tolower(first[i]) < tolower(second[i]))
-      return true;
-    else if (tolower(first[i]) > tolower(second[i]))
-      return false;
-  }
-  return first.length() < second.length();
+  return strcasecmp(first.c_str(), second.c_str()) < 0;
 }
 
 char * getFullPath(const std::string & filename)
