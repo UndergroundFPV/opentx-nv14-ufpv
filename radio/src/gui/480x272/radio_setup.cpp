@@ -317,6 +317,20 @@ void RadioSetupPage::build(Window * window)
   new Choice(window, grid.getFieldSlot(), STR_COUNTRYCODES, 0, 2, GET_SET_DEFAULT(g_eeGeneral.countryCode));
   grid.nextLine();
 
+  // Audio language
+  new StaticText(window, grid.getLabelSlot(), STR_VOICELANG);
+  auto choice = new Choice(window, grid.getFieldSlot(), nullptr, 0, DIM(languagePacks) - 2, GET_VALUE(currentLanguagePackIdx),
+                           [](uint8_t newValue) {
+                             currentLanguagePackIdx = newValue;
+                             currentLanguagePack = languagePacks[currentLanguagePackIdx];
+                             strncpy(g_eeGeneral.ttsLanguage, currentLanguagePack->id, 2);
+                           });
+  choice->setTextHandler([](uint8_t value) {
+    return languagePacks[value]->name;
+  });
+  grid.nextLine();
+
+
 #if 0
       case ITEM_SETUP_LANGUAGE:
         lcdDrawText(MENUS_MARGIN_LEFT, y, STR_VOICELANG);
@@ -372,7 +386,7 @@ void RadioSetupPage::build(Window * window)
 
   // RX channel order
   new StaticText(window, grid.getLabelSlot(), STR_RXCHANNELORD); // RAET->AETR
-  auto choice = new Choice(window, grid.getFieldSlot(), nullptr, 0, 4*3*2 - 1, GET_SET_DEFAULT(g_eeGeneral.templateSetup));
+  choice = new Choice(window, grid.getFieldSlot(), nullptr, 0, 4*3*2 - 1, GET_SET_DEFAULT(g_eeGeneral.templateSetup));
   choice->setTextHandler([](uint8_t value) {
     char s[5];
     for (uint8_t i=0; i<4; i++) {
