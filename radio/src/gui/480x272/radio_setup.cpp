@@ -220,17 +220,17 @@ void RadioSetupPage::build(Window * window)
     grid.nextLine();
 
     // Haptic mode
-    new StaticText(window, grid.getLabelSlot(), STR_MODE, true);
+    new StaticText(window, grid.getLabelSlot(), STR_MODE);
     new Choice(window, grid.getFieldSlot(), STR_VBEEPMODE, -2, 1, GET_SET_DEFAULT(g_eeGeneral.hapticMode));
     grid.nextLine();
 
     // Haptic duration
-    new StaticText(window, grid.getLabelSlot(), STR_LENGTH, true);
+    new StaticText(window, grid.getLabelSlot(), STR_LENGTH);
     new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.hapticLength));
     grid.nextLine();
 
     // Haptic strength
-    new StaticText(window, grid.getLabelSlot(), STR_HAPTICSTRENGTH, true);
+    new StaticText(window, grid.getLabelSlot(), STR_HAPTICSTRENGTH);
     new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.hapticStrength));
     grid.nextLine();
   }
@@ -241,23 +241,23 @@ void RadioSetupPage::build(Window * window)
     grid.nextLine();
 
     // Battery warning
-    new StaticText(window, grid.getLabelSlot(), STR_BATTERYWARNING, true);
+    new StaticText(window, grid.getLabelSlot(), STR_BATTERYWARNING);
     edit = new NumberEdit(window, grid.getFieldSlot(), 40, 120, GET_SET_DEFAULT(g_eeGeneral.vBatWarn), PREC1);
     edit->setSuffix("v");
     grid.nextLine();
 
     // Alarms warning
-    new StaticText(window, grid.getLabelSlot(), STR_ALARMWARNING, true);
+    new StaticText(window, grid.getLabelSlot(), STR_ALARMWARNING);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_eeGeneral.disableAlarmWarning));
     grid.nextLine();
 
     // RSSI shutdown alarm
-    new StaticText(window, grid.getLabelSlot(), STR_RSSISHUTDOWNALARM, true);
+    new StaticText(window, grid.getLabelSlot(), STR_RSSISHUTDOWNALARM);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_INVERTED(g_eeGeneral.disableRssiPoweroffAlarm));
     grid.nextLine();
 
     // Inactivity alarm
-    new StaticText(window, grid.getLabelSlot(), STR_INACTIVITYALARM, true);
+    new StaticText(window, grid.getLabelSlot(), STR_INACTIVITYALARM);
     edit = new NumberEdit(window, grid.getFieldSlot(), 0, 250, GET_SET_DEFAULT(g_eeGeneral.inactivityTimer));
     edit->setSuffix("minutes");
     grid.nextLine();
@@ -267,7 +267,7 @@ void RadioSetupPage::build(Window * window)
   grid.nextLine();
 
   // Backlight mode
-  new StaticText(window, grid.getLabelSlot(), STR_MODE, true);
+  new StaticText(window, grid.getLabelSlot(), STR_MODE);
   new Choice(window, grid.getFieldSlot(), STR_VBLMODE, e_backlight_mode_off, e_backlight_mode_on, GET_SET_DEFAULT(g_eeGeneral.backlightMode));
   grid.nextLine();
 
@@ -298,22 +298,22 @@ void RadioSetupPage::build(Window * window)
   grid.nextLine();
 
   // Timezone
-  new StaticText(window, grid.getLabelSlot(), STR_TIMEZONE, true);
+  new StaticText(window, grid.getLabelSlot(), STR_TIMEZONE);
   new NumberEdit(window, grid.getFieldSlot(2, 0), -12, 12, GET_SET_DEFAULT(g_eeGeneral.timezone));
   grid.nextLine();
 
   // Adjust RTC (from telemetry)
-  new StaticText(window, grid.getLabelSlot(), STR_ADJUST_RTC, true);
+  new StaticText(window, grid.getLabelSlot(), STR_ADJUST_RTC);
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_eeGeneral.adjustRTC));
   grid.nextLine();
 
   // GPS format
-  new StaticText(window, grid.getLabelSlot(), STR_GPSCOORD, true);
+  new StaticText(window, grid.getLabelSlot(), STR_GPSCOORD);
   new Choice(window, grid.getFieldSlot(), STR_GPSFORMAT, 0, 1, GET_SET_DEFAULT(g_eeGeneral.gpsFormat));
   grid.nextLine();
 
   // Country code
-  new StaticText(window, grid.getLabelSlot(), STR_COUNTRYCODE, true);
+  new StaticText(window, grid.getLabelSlot(), STR_COUNTRYCODE);
   new Choice(window, grid.getFieldSlot(), STR_COUNTRYCODES, 0, 2, GET_SET_DEFAULT(g_eeGeneral.countryCode));
   grid.nextLine();
 
@@ -332,7 +332,7 @@ void RadioSetupPage::build(Window * window)
 #endif
 
   // Imperial units
-  new StaticText(window, grid.getLabelSlot(), STR_UNITSSYSTEM, true);
+  new StaticText(window, grid.getLabelSlot(), STR_UNITSSYSTEM);
   new Choice(window, grid.getFieldSlot(), STR_VUNITSSYSTEM, 0, 1, GET_SET_DEFAULT(g_eeGeneral.imperial));
   grid.nextLine();
 
@@ -360,23 +360,17 @@ void RadioSetupPage::build(Window * window)
 #endif
 
   // Switches delay
-  new StaticText(window, grid.getLabelSlot(), STR_SWITCHES_DELAY, true);
+  new StaticText(window, grid.getLabelSlot(), STR_SWITCHES_DELAY);
   edit = new NumberEdit(window, grid.getFieldSlot(2, 0), -15, 100 - 15, GET_SET_VALUE_WITH_OFFSET(g_eeGeneral.switchesDelay, 15));
   edit->setSuffix(std::string("0") + STR_MS);
   grid.nextLine();
 
+  // USB mode
+  new StaticText(window, grid.getLabelSlot(), STR_USBMODE);
+  new Choice(window, grid.getFieldSlot(), STR_USBMODES, USB_UNSELECTED_MODE, USB_MAX_MODE, GET_SET_DEFAULT(g_eeGeneral.USBMode));
+  grid.nextLine();
+
 #if 0
-      case ITEM_SETUP_SWITCHES_DELAY:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_SWITCHES_DELAY);
-        lcdDrawNumber(RADIO_SETUP_2ND_COLUMN, y, 10*SWITCHES_DELAY(), attr|LEFT, 0, NULL, STR_MS);
-        if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.switchesDelay, -15, 100-15);
-        break;
-
-      case ITEM_SETUP_USB_MODE:
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_USBMODE);
-        g_eeGeneral.USBMode = editChoice(RADIO_SETUP_2ND_COLUMN, y, STR_USBMODES, g_eeGeneral.USBMode, USB_UNSELECTED_MODE, USB_MAX_MODE, attr, event);
-        break;
-
       case ITEM_SETUP_RX_CHANNEL_ORD:
       {
         lcdDrawText(MENUS_MARGIN_LEFT, y, STR_RXCHANNELORD); // RAET->AETR
