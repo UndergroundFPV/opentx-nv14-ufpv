@@ -45,28 +45,42 @@
 #define SWITCHES_GPIO_PIN_H             GPIO_Pin_12 // PJ.12
 
 // Trims
+
+/*
+BUTTON1 --> PJ12
+BUTTON2 --> PG11
+BUTTON3 --> PG2
+BUTTON4 --> PH7
+BUTTON5 --> PH2
+
+BUTTON6 --> PB15
+BUTTON7 --> PC13
+BUTTON8 --> PD7
+BUTTON9 --> PJ0
+BUTTON10 --> PG10
+*/
+
 #define TRIMS_GPIO_REG_RHL              GPIOD->IDR
 #define TRIMS_GPIO_PIN_RHL              GPIO_Pin_7  // PD.07
 #define TRIMS_GPIO_REG_RHR              GPIOG->IDR
 #define TRIMS_GPIO_PIN_RHR              GPIO_Pin_10 // PG.10
-#define TRIMS_GPIO_REG_RVD              GPIOJ->IDR
-#define TRIMS_GPIO_PIN_RVD              GPIO_Pin_13 // PJ.13
 #define TRIMS_GPIO_REG_RVU              GPIOJ->IDR
 #define TRIMS_GPIO_PIN_RVU              GPIO_Pin_0  // PJ.00  TODO: Check, on my radio it just powers off...
+#define TRIMS_GPIO_REG_RVD              GPIOB->IDR
+#define TRIMS_GPIO_PIN_RVD              GPIO_Pin_13 // PB.15
 #define TRIMS_GPIO_REG_RPRESS           GPIOC->IDR
 #define TRIMS_GPIO_PIN_RPRESS           GPIO_Pin_13 // PC.13
 
 #define TRIMS_GPIO_REG_LHL              GPIOH->IDR
-#define TRIMS_GPIO_PIN_LHL              GPIO_Pin_2 // PH.02
-#define TRIMS_GPIO_REG_LPRESS           GPIOG->IDR
-#define TRIMS_GPIO_PIN_LPRESS           GPIO_Pin_11 // PG.11
-#define TRIMS_GPIO_REG_LVU              GPIOH->IDR
-#define TRIMS_GPIO_PIN_LVU              GPIO_Pin_7 // PH.07
+#define TRIMS_GPIO_PIN_LHL              GPIO_Pin_2  // PH.02
 #define TRIMS_GPIO_REG_LHR              GPIOG->IDR
 #define TRIMS_GPIO_PIN_LHR              GPIO_Pin_2  // PG.02
-#define TRIMS_GPIO_REG_LVD              GPIOF->IDR
-#define TRIMS_GPIO_PIN_LVD              GPIO_Pin_10 // PF.10
-
+#define TRIMS_GPIO_REG_LVU              GPIOH->IDR
+#define TRIMS_GPIO_PIN_LVU              GPIO_Pin_7  // PH.07
+#define TRIMS_GPIO_REG_LVD              GPIOJ->IDR
+#define TRIMS_GPIO_PIN_LVD              GPIO_Pin_10 // PJ.12
+#define TRIMS_GPIO_REG_LPRESS           GPIOG->IDR
+#define TRIMS_GPIO_PIN_LPRESS           GPIO_Pin_11 // PG.11
 
 //Monitor pin
 #define MONITOR_RCC_AHB1Periph          (RCC_AHB1Periph_GPIOJ)
