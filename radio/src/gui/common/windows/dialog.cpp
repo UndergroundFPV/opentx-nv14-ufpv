@@ -43,6 +43,7 @@ Dialog::Dialog(uint8_t type, std::string title, std::string message, std::functi
                         onConfirm();
                       return 0;
                     });
+  bringToTop();
 }
 
 Dialog::~Dialog()

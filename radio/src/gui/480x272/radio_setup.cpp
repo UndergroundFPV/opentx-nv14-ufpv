@@ -383,41 +383,19 @@ void RadioSetupPage::build(Window * window)
   });
   grid.nextLine();
 
-#if 0
-      case ITEM_SETUP_RX_CHANNEL_ORD:
-      {
-        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_RXCHANNELORD); // RAET->AETR
-        char s[5];
-        for (uint8_t i=0; i<4; i++) {
-          s[i] = STR_RETA123[channel_order(i+1)];
-        }
-        s[4] = '\0';
-        lcdDrawText(RADIO_SETUP_2ND_COLUMN, y, s, attr);
-        if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.templateSetup, 0, 23);
-        break;
-      }
+  // Stick mode
+  new StaticText(window, grid.getLabelSlot(), STR_MODE);
+  choice = new Choice(window, grid.getFieldSlot(), nullptr, 0, 3, GET_DEFAULT(g_eeGeneral.stickMode),
+    [=](uint8_t newValue) {
+      pausePulses();
+      g_eeGeneral.stickMode = newValue;
+      checkTHR();
+      resumePulses();
+    });
+  choice->setTextHandler([](uint8_t value) {
+    return std::to_string(1 + value) + ": left=" + std::string(&getSourceString(MIXSRC_Rud + modn12x3[4 * value])[1]) + "+" + std::string(&getSourceString(MIXSRC_Rud + modn12x3[4 * value + 1])[1]);
+  });
+  grid.nextLine();
 
-      case ITEM_SETUP_STICK_MODE:
-      {
-        lcdDrawText(MENUS_MARGIN_LEFT, y, NO_INDENT(STR_MODE));
-        char s[2] = " ";
-        s[0] = '1'+reusableBuffer.generalSettings.stickMode;
-        lcdDrawText(RADIO_SETUP_2ND_COLUMN, y, s, attr);
-        for (uint8_t i=0; i<4; i++) {
-          drawSource(RADIO_SETUP_2ND_COLUMN + 40 + 50*i, y, MIXSRC_Rud + pgm_read_byte(modn12x3 + 4*reusableBuffer.generalSettings.stickMode + i));
-        }
-        if (attr && s_editMode>0) {
-          CHECK_INCDEC_GENVAR(event, reusableBuffer.generalSettings.stickMode, 0, 3);
-        }
-        else if (reusableBuffer.generalSettings.stickMode != g_eeGeneral.stickMode) {
-          pausePulses();
-          g_eeGeneral.stickMode = reusableBuffer.generalSettings.stickMode;
-          checkTHR();
-          resumePulses();
-          clearKeyEvents();
-        }
-        break;
-
-#endif
   window->setInnerHeight(grid.getWindowHeight());
 }

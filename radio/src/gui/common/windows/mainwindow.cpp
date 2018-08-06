@@ -41,8 +41,8 @@ void MainWindow::checkEvents()
     // touchState.Event = TE_NONE;
   }
   else if (touchState.Event == TE_UP) {
-    onTouchEnd(touchState.startX + scrollPositionX, touchState.startY + scrollPositionY);
     touchState.Event = TE_NONE;
+    onTouchEnd(touchState.startX + scrollPositionX, touchState.startY + scrollPositionY);
   }
   else if (touchState.Event == TE_SLIDE) {
     coord_t x = touchState.X - touchState.lastX;
