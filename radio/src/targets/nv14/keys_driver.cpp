@@ -92,15 +92,17 @@ uint8_t keyState(uint8_t index)
 #if !defined(BOOT)
 uint32_t switchState(uint8_t index)
 {
-  uint32_t xxx = 0;
+  uint16_t value = adcValues[SWITCH_FIRST + (index / 3)];
+  uint8_t position;
 
-  switch (index) {
-    default:
-      break;
-  }
+  if (value < 1024)
+    position = 0;
+  else if (value > 3*1024)
+    position = 2;
+  else
+    position = 1;
 
-  // TRACE("switch %d => %d", index, xxx);
-  return xxx;
+  return position == index % 3;
 }
 #endif
 

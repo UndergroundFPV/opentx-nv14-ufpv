@@ -187,7 +187,11 @@ void applyExpos(int16_t * anas, uint8_t mode APPLY_EXPOS_EXTRA_PARAMS)
 #if defined(BOLD_FONT)
         if (mode==e_perout_mode_normal) swOn[i].activeExpo = true;
 #endif
+
+#if defined(PCBNV14)
+        //extern const uint8_t ana_mapping[NUM_ANALOGS];
         cur_chn = ed->chn;
+#endif
 
         //========== CURVE=================
 #if defined(CPUARM)

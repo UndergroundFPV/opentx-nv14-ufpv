@@ -333,7 +333,8 @@ enum Analogs {
   POT1 = POT_FIRST,
   POT2,
   POT_LAST = POT2,
-  SWA,
+  SWITCH_FIRST,
+  SWA = SWITCH_FIRST,
   SWB,
   SWC,
   SWD,
@@ -342,6 +343,7 @@ enum Analogs {
   SWG,
   SWH,
   SUB_ANALOG_POS = SWH,
+  SWITCH_END = SWH,
   TX_VOLTAGE,
   NUM_ANALOGS
 };
