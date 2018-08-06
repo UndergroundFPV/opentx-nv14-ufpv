@@ -362,6 +362,10 @@ void adcRead(void);
 uint16_t getAnalogValue(uint8_t index);
 uint16_t getBatteryVoltage();   // returns current battery voltage in 10mV steps
 
+#define BATTERY_WARN                  37 // 3.7V
+#define BATTERY_MIN                   35 // 3.5V
+#define BATTERY_MAX                   43 // 4.3V
+
 #if defined(__cplusplus) && !defined(SIMU)
 extern "C" {
 #endif
