@@ -29,6 +29,17 @@
 #include "bitmapbuffer.h"
 #include "debug.h"
 
+//OPAQUE/TRANSPARENT defined in WinGDI
+#ifdef OPAQUE
+ #undef OPAQUE
+#endif
+
+#ifdef TRANSPARENT
+ #undef TRANSPARENT
+#endif
+#define OPAQUE 1
+#define TRANSPARENT 2
+
 class Window {
   friend class GridLayout;
 
@@ -241,11 +252,6 @@ class Window {
     virtual void checkEvents();
 
   protected:
-    enum Attributes {
-      OPAQUE = 1,
-      TRANSPARENT = 2,
-    };
-
     Window * parent;
     std::list<Window *> children;
     rect_t rect;

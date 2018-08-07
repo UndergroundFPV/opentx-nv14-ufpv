@@ -127,7 +127,6 @@ class SimulatorInterface : public QObject
     virtual uint8_t getSensorInstance(uint16_t id, uint8_t defaultValue = 0) = 0;
     virtual uint16_t getSensorRatio(uint16_t id) = 0;
     virtual const int getCapability(Capability cap) = 0;
-
   public slots:
 
     virtual void init() = 0;
@@ -144,6 +143,7 @@ class SimulatorInterface : public QObject
     virtual void setTrainerInput(unsigned int inputNumber, int16_t value) = 0;
     virtual void setInputValue(int type, uint8_t index, int16_t value) = 0;
     virtual void rotaryEncoderEvent(int steps) = 0;
+    virtual void touchEvent(uint32_t x, uint32_t y, uint8_t action) = 0;
     virtual void setTrainerTimeout(uint16_t ms) = 0;
     virtual void sendTelemetry(const QByteArray data) = 0;
     virtual void setLuaStateReloadPermanentScripts() = 0;

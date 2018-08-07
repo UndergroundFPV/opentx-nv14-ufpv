@@ -76,6 +76,8 @@ uint32_t Boards::getFourCC(Type board)
     case BOARD_MEGA2560:
     case BOARD_GRUVIN9X:
       return 0x3178746F;
+    case BOARD_NV14:
+      return 0x3A78746F;
     default:
       return 0;
   }
@@ -102,6 +104,7 @@ const int Boards::getEEpromSize(Board::Type board)
     case BOARD_TARANIS_X9DP:
     case BOARD_TARANIS_X9E:
       return EESIZE_TARANIS;
+    case BOARD_NV14:
     case BOARD_UNKNOWN:
       return EESIZE_MAX;
     default:
@@ -132,6 +135,7 @@ const int Boards::getFlashSize(Type board)
       return FSIZE_TARANIS;
     case BOARD_X12S:
     case BOARD_X10:
+	case BOARD_NV14:
       return FSIZE_HORUS;
     case BOARD_UNKNOWN:
       return FSIZE_MAX;
@@ -160,6 +164,20 @@ const SwitchInfo Boards::getSwitchInfo(Board::Type board, unsigned index)
       {SWITCH_3POS,   "SD"},
       {SWITCH_2POS,   "SF"},
       {SWITCH_TOGGLE, "SH"}
+    };
+    if (index < DIM(switches))
+      return switches[index];
+  }
+  if (IS_NV14(board)) {
+    const Board::SwitchInfo switches[] = {
+      {SWITCH_2POS,   "SA"},
+      {SWITCH_2POS,   "SB"},
+      {SWITCH_2POS,   "SC"},
+      {SWITCH_2POS,   "SD"},
+      {SWITCH_2POS,   "SE"},
+      {SWITCH_3POS,   "SF"},
+      {SWITCH_3POS,   "SH"},
+      {SWITCH_2POS,   "SI"}
     };
     if (index < DIM(switches))
       return switches[index];
@@ -212,7 +230,7 @@ const int Boards::getCapability(Board::Type board, Board::Capability capability)
       return 4;
 
     case Pots:
-      if (IS_TARANIS_SMALL(board))
+      if (IS_TARANIS_SMALL(board) || IS_NV14(board))
         return 2;
       else if (IS_TARANIS_X9E(board))
         return 4;
@@ -255,7 +273,7 @@ const int Boards::getCapability(Board::Type board, Board::Capability capability)
         return 6;
       else if (IS_TARANIS_XLITE(board))
         return 4;
-      else if (IS_HORUS_OR_TARANIS(board))
+      else if (IS_HORUS_OR_TARANIS(board) || IS_NV14(board))
         return 8;
       else
         return 7;
@@ -415,6 +433,8 @@ const QString Boards::getBoardName(Board::Type board)
       return "Horus X12S";
     case BOARD_X10:
       return "Horus X10/X10S";
+	case BOARD_NV14:
+	  return "FlySky NV14";
     default:
       return tr("Unknown");
   }

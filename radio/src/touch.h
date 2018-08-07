@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x
+ *   th9x - http://code.google.com/p/th9x 
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -18,23 +18,30 @@
  * GNU General Public License for more details.
  */
 
-// NOTE: RadioUiAction(NUMBER,...): NUMBER relates to enum EnumKeys in the specific board.h
+#ifndef TOUCH_H
+#define TOUCH_H
 
-#include "simulateduiwidget.h"
-#include "ui_simulateduiwidgetI8.h"
-
-SimulatedUIWidgetI8::SimulatedUIWidgetI8(SimulatorInterface *simulator, QWidget * parent):
-  SimulatedUIWidget(simulator, parent),
-  ui(new Ui::SimulatedUIWidgetI8)
+enum ENUM_TOUCH_EVENT
 {
-  ui->setupUi(this);
+    TE_NONE,
+    TE_DOWN,
+    TE_UP,
+    TE_SLIDE,
+    TE_END
+};
 
-  m_backlightColors << QColor(47, 123, 227);
-
-  setLcd(ui->lcd);
-}
-
-SimulatedUIWidgetI8::~SimulatedUIWidgetI8()
+typedef struct
 {
-  delete ui;
-}
+   unsigned char  Event;
+   short X;
+   short Y;
+   short startX;
+   short startY;
+   short lastX;
+   short lastY;
+   uint32_t Time;
+} STRUCT_TOUCH;
+
+#define SLIDE_RANGE                     ( 6 )
+
+#endif // TOUCH_H

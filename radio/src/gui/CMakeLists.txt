@@ -11,26 +11,26 @@ set(GUI_SRC
   model_select.cpp
   model_setup.cpp
   model_logical_switches.cpp
-  special_functions.cpp
   model_telemetry.cpp
   menu_radio.cpp
   radio_setup.cpp
   radio_trainer.cpp
   radio_version.cpp
   radio_calibration.cpp
-  menu_screens.cpp
-  screen_theme.cpp
-  screen_setup.cpp
   view_main.cpp
   view_statistics.cpp
-  widgets_setup.cpp
   )
 
-if(HELI)
+if(GUI_DIR STREQUAL 480x272)
+  set(GUI_SRC ${GUI_SRC} special_functions.cpp menu_screens.cpp screen_theme.cpp screen_setup.cpp widgets_setup.cpp)
+  if(HELI)
   set(GUI_SRC
     ${GUI_SRC}
     model_heli.cpp
     )
+  endif()
+else()
+  set(GUI_SRC ${GUI_SRC} model_special_functions.cpp)
 endif()
 
 if(GUI_DIR STREQUAL 128x64)

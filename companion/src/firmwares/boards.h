@@ -45,6 +45,7 @@ namespace Board {
     BOARD_TARANIS_X9E,
     BOARD_X12S,
     BOARD_X10,
+	BOARD_NV14,
     BOARD_TARANIS_XLITE,
     BOARD_ENUM_COUNT
   };
@@ -201,8 +202,9 @@ class Boards
 #define IS_HORUS_X10(board)            (board==Board::BOARD_X10)
 #define IS_HORUS(board)                (IS_HORUS_X12S(board) || IS_HORUS_X10(board))
 #define IS_HORUS_OR_TARANIS(board)     (IS_HORUS(board) || IS_TARANIS(board))
+#define IS_NV14(board)				   (board==Board::BOARD_NV14)
 #define IS_STM32(board)                (IS_TARANIS(board) || IS_HORUS(board))
 #define IS_ARM(board)                  (IS_STM32(board) || IS_SKY9X(board))
-#define HAS_LARGE_LCD(board)           (IS_HORUS(board) || IS_TARANIS_X9(board))
+#define HAS_LARGE_LCD(board)           (IS_HORUS(board) || IS_TARANIS_X9(board) || IS_NV14(board))
 
 #endif // _BOARDS_H_

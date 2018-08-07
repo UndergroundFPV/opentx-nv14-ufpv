@@ -17,7 +17,7 @@
 #include "opentxsimulator.h"
 #include "opentx.h"
 #include "simulcd.h"
-
+#include "touch.h"
 #include <QDebug>
 #include <QElapsedTimer>
 
@@ -32,6 +32,8 @@
 #endif
 
 #define OTXS_DBG    qDebug() << "(" << simuTimerMicros() << "us)"
+
+extern STRUCT_TOUCH touchState; //definition in mainwindow.cpp
 
 int16_t g_anas[Analogs::NUM_ANALOGS];
 QVector<QIODevice *> OpenTxSimulator::tracebackDevices;
@@ -272,14 +274,35 @@ void OpenTxSimulator::setInputValue(int type, uint8_t index, int16_t value)
       return;
   }
 }
+void  OpenTxSimulator::touchEvent(uint32_t x, uint32_t y, uint8_t action){
+    if(action == TE_DOWN){
+        touchState.Event = TE_DOWN;
+        touchState.startX = touchState.lastX = touchState.X = x;
+        touchState.startY = touchState.lastY = touchState.Y = y;
+    }
+    else if(action == TE_SLIDE){
+        touchState.Event = TE_SLIDE;
+        touchState.lastX = x;
+        touchState.lastY = y;
+    }
+    else if(action == TE_UP){
+        if(touchState.Event == TE_DOWN){
+            x = touchState.startX;
+            y = touchState.startY;
+        }
+        touchState.Event = TE_UP;
+        touchState.lastX = touchState.X = x;
+        touchState.lastY = touchState.Y = y;;
+    }
+}
 
 void OpenTxSimulator::rotaryEncoderEvent(int steps)
 {
 #if defined(ROTARY_ENCODER_NAVIGATION)
   ROTARY_ENCODER_NAVIGATION_VALUE += steps * ROTARY_ENCODER_GRANULARITY;
-#else
+#elseif defined(KEY_DOWN) || defined(KEY_UP) || defined(KEY_MINUS) || defined(KEY_PLUS)
   // TODO : this should probably be handled in the GUI
-  int key;
+  int key = 0;
 #if defined(PCBXLITE)
   if (steps > 0)
     key = KEY_DOWN;
@@ -294,7 +317,6 @@ void OpenTxSimulator::rotaryEncoderEvent(int steps)
   else
     // Should not happen but Clang complains that key is unset otherwise
     return;
-
   setKey(key, 1);
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
   QTimer::singleShot(10, [this, key]() { setKey(key, 0); });
@@ -624,6 +646,8 @@ class OpenTxSimulatorFactory: public SimulatorFactory
       return Board::BOARD_X12S;
 #elif defined(PCBX10)
       return Board::BOARD_X10;
+#elif defined (PCBNV14)
+      return Board::BOARD_NV14;	
 #elif defined(PCBX7)
       return Board::BOARD_TARANIS_X7;
 #elif defined(PCBTARANIS)

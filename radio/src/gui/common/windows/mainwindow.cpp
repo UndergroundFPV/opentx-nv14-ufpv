@@ -23,7 +23,7 @@
 #include "mainwindow.h"
 
 void DMACopy(void * src, void * dest, unsigned len);
-
+STRUCT_TOUCH touchState;
 MainWindow mainWindow;
 
 void MainWindow::emptyTrash()

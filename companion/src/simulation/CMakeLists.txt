@@ -11,6 +11,7 @@ set(simulation_SRCS
   simulateduiwidgetX9E.cpp
   simulateduiwidgetX10.cpp
   simulateduiwidgetX12.cpp
+  simulateduiwidgetNV14.cpp
   simulatorinterface.cpp
   simulatormainwindow.cpp
   simulatorstartupdialog.cpp
@@ -32,6 +33,8 @@ set(simulation_UIS
   simulateduiwidgetX9E.ui
   simulateduiwidgetX10.ui
   simulateduiwidgetX12.ui
+  simulateduiwidgetI8.ui
+  simulateduiwidgetNV14.ui
   simulatormainwindow.ui
   simulatorstartupdialog.ui
   simulatorwidget.ui
@@ -90,6 +93,7 @@ include_directories(
   ${COMPANION_SRC_DIRECTORY}/simulation
   ${COMPANION_SRC_DIRECTORY}/simulation/widgets
   ${RADIO_SRC_DIRECTORY}/fonts/std
+  ${RADIO_SRC_DIRECTORY}
 )
 
 qt5_wrap_ui(simulation_SRCS ${simulation_UIS})

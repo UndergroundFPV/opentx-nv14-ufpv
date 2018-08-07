@@ -86,7 +86,9 @@ typedef __int24 int24_t;
 #define RESXu      1024u
 #define RESXul     1024ul
 #define RESXl      1024l
-
+#ifdef DIM
+#undef DIM
+#endif
 #define DIM(arr) (sizeof((arr))/sizeof((arr)[0]))
 
 #if defined(__cplusplus)

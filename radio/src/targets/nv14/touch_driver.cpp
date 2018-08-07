@@ -19,9 +19,6 @@
  */
 #include "opentx.h"
 
-#define SLIDE_RANGE                     ( 6 )
-
-
 enum ENUM_TOUCH_STATE
 {
     TOUCH_NONE,
@@ -322,7 +319,7 @@ unsigned char  TouchEvent;
 unsigned char  TouchBuffer[7];
 unsigned short Tx;
 unsigned short Ty;
-STRUCT_TOUCH   touchState;
+extern STRUCT_TOUCH touchState; //definition in mainwindow.cpp
 static unsigned char  TouchCycle = 0;
 static unsigned char  TouchState = TOUCH_NONE;
 static unsigned short Txold;

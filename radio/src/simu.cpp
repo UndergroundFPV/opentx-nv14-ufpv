@@ -41,8 +41,7 @@
 
 #define W2 LCD_W*LCD_ZOOM
 #define H2 LCD_H*LCD_ZOOM
-
-STRUCT_TOUCH touchState;
+extern STRUCT_TOUCH touchState;
 
 const int ID_IMAGEFRAME = FXMainWindow::ID_LAST;
 

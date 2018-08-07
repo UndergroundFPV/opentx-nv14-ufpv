@@ -28,6 +28,7 @@
 #include "definitions.h"
 #include "opentx_types.h"
 #include "bitfield.h"
+#include "touch.h"
 
 
 #if defined(SIMU)
