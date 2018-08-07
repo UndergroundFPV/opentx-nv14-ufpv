@@ -196,6 +196,15 @@ class Window {
 
     void setScrollPositionY(coord_t value);
 
+    bool isChildVisible(Window * window);
+
+    bool isChildFullSize(Window * window);
+
+    bool isVisible()
+    {
+      return parent && parent->isChildVisible(this);
+    }
+
     virtual void paint(BitmapBuffer * dc)
     {
     }

@@ -186,7 +186,7 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
     else if (*key == '\n') {
       if (x <= 80) {
         // enter
-        disable();
+        disable(true);
         return true;
       }
       x -= 80;

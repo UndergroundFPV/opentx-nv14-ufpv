@@ -62,12 +62,23 @@ void Window::detach()
 
 void Window::deleteLater(bool detach)
 {
-  if (detach) {
-    this->detach();
+#if defined(DEBUG_WINDOWS)
+  TRACE("Delete %s", getWindowDebugString().c_str());
+#endif
+
+  if (focusWindow == this) {
+    focusWindow = nullptr;
   }
+
+  if (detach)
+    this->detach();
+  else
+    parent = nullptr;
+
   if (onClose) {
     onClose();
   }
+
   trash.push_back(this);
 }
 
@@ -99,8 +110,10 @@ void Window::clearFocus()
 
 void Window::setFocus()
 {
-  clearFocus();
-  focusWindow = this;
+  if (focusWindow != this) {
+    clearFocus();
+    focusWindow = this;
+  }
   parent->scrollTo(this);
   invalidate();
 }
@@ -150,6 +163,25 @@ void Window::fullPaint(BitmapBuffer * dc)
   paintChildren(dc);
 }
 
+bool Window::isChildFullSize(Window * child)
+{
+  return child->top() == 0 && child->height() == height() && child->left() == 0 && child->width() == width();
+}
+
+bool Window::isChildVisible(Window * window)
+{
+  for (auto rit = children.rbegin(); rit != children.rend(); rit++) {
+    auto child = *rit;
+    if (child == window) {
+      return true;
+    }
+    if ((child->getWindowFlags() & OPAQUE) & isChildFullSize(child)) {
+      return false;
+    }
+  }
+  return false;
+}
+
 void Window::paintChildren(BitmapBuffer * dc)
 {
   coord_t x = dc->getOffsetX();
@@ -157,12 +189,11 @@ void Window::paintChildren(BitmapBuffer * dc)
   coord_t xmin, xmax, ymin, ymax;
   dc->getClippingRect(xmin, xmax, ymin, ymax);
 
-  auto it = children.begin();
+  auto it = children.end();
 
-  for (auto rit=children.rbegin(); rit != children.rend(); rit++) {
-    auto child = *rit;
-    if ((child->windowFlags & OPAQUE) && child->top() == 0 && child->height() == height() && child->left() == 0 && child->width() == width()) {
-      it = (++rit).base();
+  while(it != children.begin()) {
+    auto child = *(--it);
+    if ((child->windowFlags & OPAQUE) && isChildFullSize(child)) {
       break;
     }
   }
@@ -196,6 +227,10 @@ void Window::checkEvents()
 {
   for (auto child: children) {
     child->checkEvents();
+    if (child->getParent() != this) {
+      // the child asked to be deleted, we can't continue, next children will be checked on next round
+      break;
+    }
   }
 }
 
@@ -279,7 +314,7 @@ void Window::moveWindowsTop(coord_t y, coord_t delta)
 
 void Window::invalidate(const rect_t & rect)
 {
-  if (parent) {
+  if (isVisible()) {
     parent->invalidate({this->rect.x + rect.x - parent->scrollPositionX, this->rect.y + rect.y - parent->scrollPositionY, rect.w, rect.h});
   }
 }

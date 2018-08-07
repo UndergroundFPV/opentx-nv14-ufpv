@@ -114,7 +114,7 @@ class TextButton : public Button {
 #if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
-      return "TextButton(" + text + ")";
+      return "TextButton \"" + text + "\"";
     }
 #endif
 

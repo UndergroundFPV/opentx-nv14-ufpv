@@ -34,7 +34,7 @@ class ScreenSetupPage: public PageTab {
 
   protected:
     uint8_t index;
-    NumberEdit * layoutChoice;
+    NumberEdit * layoutChoice = nullptr;
     void rebuild(Window * window);
 };
 

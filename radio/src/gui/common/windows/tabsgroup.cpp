@@ -86,15 +86,17 @@ TabsGroup::TabsGroup():
 
 TabsGroup::~TabsGroup()
 {
+  clearFocus();
+
   for (auto tab: tabs) {
     delete tab;
   }
 
   body.deleteChildren();
 
-  TextKeyboard::instance()->disable();
-  NumberKeyboard::instance()->disable();
-  CurveKeyboard::instance()->disable();
+  TextKeyboard::instance()->disable(false);
+  NumberKeyboard::instance()->disable(false);
+  CurveKeyboard::instance()->disable(false);
 }
 
 void TabsGroup::addTab(PageTab * page)
@@ -118,9 +120,11 @@ void TabsGroup::removeTab(unsigned index)
 void TabsGroup::setCurrentTab(PageTab * tab)
 {
   if (tab != currentTab) {
+    clearFocus();
     body.clear();
-    TextKeyboard::instance()->disable();
-    NumberKeyboard::instance()->disable();
+    TextKeyboard::instance()->disable(false);
+    NumberKeyboard::instance()->disable(false);
+    CurveKeyboard::instance()->disable(false);
     currentTab = tab;
     tab->build(&body);
     header.setTitle(tab->title.c_str());
@@ -144,8 +148,9 @@ bool TabsGroup::onTouchEnd(coord_t x, coord_t y)
 {
   if (Window::onTouchEnd(x, y))
     return true;
-  TextKeyboard::instance()->disable();
-  NumberKeyboard::instance()->disable();
-  CurveKeyboard::instance()->disable();
+
+  TextKeyboard::instance()->disable(true);
+  NumberKeyboard::instance()->disable(true);
+  CurveKeyboard::instance()->disable(true);
   return true;
 }

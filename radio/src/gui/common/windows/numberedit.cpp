@@ -72,5 +72,5 @@ bool NumberEdit::onTouchEnd(coord_t, coord_t)
 
 void NumberEdit::onFocusLost()
 {
-  NumberKeyboard::instance()->disable();
+  NumberKeyboard::instance()->disable(true);
 }

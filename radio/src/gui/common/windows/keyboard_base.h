@@ -45,7 +45,7 @@ class Keyboard: public Window {
       invalidate();
     }
 
-    void disable()
+    void disable(bool resizePage)
     {
       detach();
       if (field) {

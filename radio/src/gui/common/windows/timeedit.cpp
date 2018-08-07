@@ -59,5 +59,5 @@ bool TimeEdit::onTouchEnd(coord_t x, coord_t y)
 
 void TimeEdit::onFocusLost()
 {
-  NumberKeyboard::instance()->disable();
+  NumberKeyboard::instance()->disable(true);
 }

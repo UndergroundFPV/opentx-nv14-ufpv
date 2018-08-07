@@ -78,7 +78,7 @@ bool CurveEdit::onTouchEnd(coord_t x, coord_t y)
 
 void CurveEdit::onFocusLost()
 {
-  CurveKeyboard::instance()->disable();
+  CurveKeyboard::instance()->disable(true);
 }
 
 void CurveEdit::next()

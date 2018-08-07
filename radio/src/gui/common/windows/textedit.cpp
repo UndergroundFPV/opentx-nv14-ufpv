@@ -62,6 +62,6 @@ bool TextEdit::onTouchEnd(coord_t x, coord_t y)
 
 void TextEdit::onFocusLost()
 {
-  TextKeyboard::instance()->disable();
+  TextKeyboard::instance()->disable(true);
 }
 

@@ -33,6 +33,13 @@ class ColorBox: public Window {
     {
     }
 
+#if defined(DEBUG_WINDOWS)
+    std::string getName() override
+    {
+      return "ColorBox";
+    }
+#endif
+
     void paint(BitmapBuffer * dc) override
     {
       lcdSetColor(color);

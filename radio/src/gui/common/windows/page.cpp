@@ -49,9 +49,10 @@ Page::Page():
 
 Page::~Page()
 {
-  TextKeyboard::instance()->disable();
-  NumberKeyboard::instance()->disable();
-  CurveKeyboard::instance()->disable();
+  clearFocus();
+  TextKeyboard::instance()->disable(false);
+  NumberKeyboard::instance()->disable(false);
+  CurveKeyboard::instance()->disable(false);
 }
 
 void Page::paint(BitmapBuffer * dc)
@@ -63,8 +64,9 @@ bool Page::onTouchEnd(coord_t x, coord_t y)
 {
   if (Window::onTouchEnd(x, y))
     return true;
-  TextKeyboard::instance()->disable();
-  NumberKeyboard::instance()->disable();
-  CurveKeyboard::instance()->disable();
+
+  TextKeyboard::instance()->disable(true);
+  NumberKeyboard::instance()->disable(true);
+  CurveKeyboard::instance()->disable(true);
   return true;
 }
