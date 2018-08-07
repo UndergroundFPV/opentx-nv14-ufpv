@@ -43,7 +43,8 @@ option(TEMPLATES "Model templates menu" OFF)
 option(TRACE_SIMPGMSPACE "Turn on traces in simpgmspace.cpp" ON)
 option(TRACE_LUA_INTERNALS "Turn on traces for Lua internals" OFF)
 option(FRSKY_STICKS "Reverse sticks for FrSky sticks" OFF)
-option(FLYSKY_HALL_STICKS "Reverse sticks for FlySky hall sticks" ON)
+option(FLYSKY_HALL_STICKS "sticks for FlySky hall sticks" ON)
+option(FLYSKY_HALL_STICKS_REVERSE "Reverse sticks for FlySky hall sticks" OFF)
 option(FLYSKY_USB_SERIAL "USB as serial output, set OFF for USB download" ON)
 option(NANO "Use nano newlib and binalloc")
 option(NIGHTLY_BUILD_WARNING "Warn this is a nightly build" OFF)
@@ -350,6 +351,10 @@ endif()
 
 if (FLYSKY_HALL_STICKS)
   add_definitions(-DFLYSKY_HALL_STICKS -DFLYSKY_USB_SERIAL)
+endif()
+
+if (FLYSKY_HALL_STICKS_REVERSE)
+ add_definitions(-DFLYSKY_HALL_STICKS_REVERSE)
 endif()
 
 
