@@ -165,6 +165,8 @@ void sendByteSbus(uint8_t byte);
 void onFlySkyBindReceiver(uint8_t port);
 void onFlySkyReceiverSetPulse(uint8_t port, uint8_t mode_and_port);
 void intmoduleSendBufferDMA(uint8_t * data, uint8_t size);
+void onFlySkyUpdateRadioFirmwareStart(uint8_t port);
+void usb_transmit(uint8_t *buffer, uint32_t size);
 
 #if defined(HUBSAN)
 void Hubsan_Init();

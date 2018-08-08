@@ -198,7 +198,9 @@ extern void hall_stick_init(uint32_t baudrate);
 extern void hall_stick_loop( void );
 extern uint16_t get_hall_adc_value(uint8_t ch);
 extern void hallSerialPutc(char c);
-bool is_flysky_update_firmware();
+unsigned short  calc_crc16(void *pBuffer,unsigned char BufferSize);
+void Parse_Character(STRUCT_HALL *hallBuffer, unsigned char ch);
+extern bool isFlySkyUpdateFirmware(void);
 
 #endif
 

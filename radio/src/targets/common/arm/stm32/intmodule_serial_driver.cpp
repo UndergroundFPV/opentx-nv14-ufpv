@@ -190,6 +190,10 @@ void intmoduleSendBufferDMA(uint8_t * data, uint8_t size)
 {
   if (IS_PXX_PROTOCOL(s_current_protocol[INTERNAL_MODULE]) || IS_FLYSKY_PROTOCOL(s_current_protocol[INTERNAL_MODULE])) {
     if (size) {
+      if (data[0] == 0x55 || data[3] == 0x0C) { // Firmware update printf
+          TRACE("TX: %02X %02X %02X ...%02X %02X; CRC:%04X", data[0], data[1], data[2],
+                data[size-2], data[size-1], calc_crc16(data, size - 2));
+      }
       DMA_InitTypeDef DMA_InitStructure;
       DMA_DeInit(INTMODULE_TX_DMA_STREAM);
       DMA_InitStructure.DMA_Channel = INTMODULE_DMA_CHANNEL;
