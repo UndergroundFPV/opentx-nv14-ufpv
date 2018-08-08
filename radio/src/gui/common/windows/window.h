@@ -30,15 +30,10 @@
 #include "debug.h"
 
 //OPAQUE/TRANSPARENT defined in WinGDI
-#ifdef OPAQUE
- #undef OPAQUE
+#ifndef OPAQUE
+ #define OPAQUE 1
+ #define TRANSPARENT 2
 #endif
-
-#ifdef TRANSPARENT
- #undef TRANSPARENT
-#endif
-#define OPAQUE 1
-#define TRANSPARENT 2
 
 class Window {
   friend class GridLayout;
