@@ -65,8 +65,8 @@ void telemetryPortInit(uint32_t baudrate, uint8_t mode)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
   GPIO_Init(TELEMETRY_REV_GPIO, &GPIO_InitStructure);
-  TELEMETRY_TX_POL_NORM();
-  TELEMETRY_RX_POL_NORM();
+  TELEMETRY_TX_POL_INV();
+  TELEMETRY_RX_POL_INV();
 
   USART_InitStructure.USART_BaudRate = baudrate;
   if (mode & TELEMETRY_SERIAL_8E2) {
@@ -91,14 +91,14 @@ void telemetryPortInit(uint32_t baudrate, uint8_t mode)
 
 void telemetryPortSetDirectionOutput()
 {
-//  TELEMETRY_DIR_GPIO->BSRRL = TELEMETRY_DIR_GPIO_PIN;     // output enable
-//  TELEMETRY_USART->CR1 &= ~USART_CR1_RE;                  // turn off receiver
+  TELEMETRY_DIR_OUTPUT();
+  TELEMETRY_USART->CR1 &= ~USART_CR1_RE;                  // turn off receiver
 }
 
 void telemetryPortSetDirectionInput()
 {
-//  TELEMETRY_DIR_GPIO->BSRRH = TELEMETRY_DIR_GPIO_PIN;     // output disable
-//  TELEMETRY_USART->CR1 |= USART_CR1_RE;                   // turn on receiver
+  TELEMETRY_DIR_INPUT();
+  TELEMETRY_USART->CR1 |= USART_CR1_RE;                   // turn on receiver
 }
 
 void sportSendBuffer(uint8_t * buffer, uint32_t count)
