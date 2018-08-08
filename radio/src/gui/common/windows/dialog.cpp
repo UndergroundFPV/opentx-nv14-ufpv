@@ -113,15 +113,19 @@ void Dialog::runForever()
   running = true;
 
   while (running) {
-    if (pwrCheck() == e_power_off) {
+    auto check = pwrCheck();
+    if (check == e_power_off) {
       boardOff();
+    }
+    else if (check == e_power_press) {
+      RTOS_WAIT_MS(20);
+      continue;
     }
 
     checkBacklight();
     wdt_reset();
 
-    CoTickDelay(10); // TODO RTOS_WAIT_MS(20);
-
+    RTOS_WAIT_MS(20);
     mainWindow.run();
   }
 
