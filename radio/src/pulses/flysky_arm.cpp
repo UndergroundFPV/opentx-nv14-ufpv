@@ -957,7 +957,9 @@ void checkFlySkyFeedback(uint8_t port)
     //if ( modulePulsesData[port].flysky.state == FLYSKY_MODULE_STATE_IDLE
     //  && rf_info.fw_state == FLYSKY_MODULE_STATE_UPDATE_RF_FIRMWARE )
     {
+#if !defined(SIMU)
         Parse_Character(&rfProtocolRx, byte );
+#endif
         if ( rfProtocolRx.msg_OK )
         {
             rfRxCount++;
@@ -1140,12 +1142,15 @@ void usb_transmit(uint8_t *buffer, uint32_t size)
 {
     for (int idx = 0; idx < size; idx++)
     {
+#if !defined(SIMU)
         usbSerialPutc(buffer[idx]);
+#endif
     }
 }
 
 void send_to_host(uint8_t *rf_rxdata, uint8_t *payloaderBuf, uint32_t nBytes)
 {
+#if !defined(SIMU)
     uint8_t packageID = 0x0A;
     uint8_t senderID  = 0x03;
     uint8_t receiverID= 0x01;
@@ -1161,6 +1166,7 @@ void send_to_host(uint8_t *rf_rxdata, uint8_t *payloaderBuf, uint32_t nBytes)
     *(uint16_t*)(pt->data+nBytes) = calc_crc16(rf_rxdata, nBytes + 3);
 
     usb_transmit(rf_rxdata, nBytes + 5);
+#endif
 }
 
 // recv_from_host

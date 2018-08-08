@@ -166,8 +166,8 @@ class BitmapBufferBase
     coord_t xmax;
     coord_t ymin;
     coord_t ymax;
-    coord_t offsetX;
-    coord_t offsetY;
+    coord_t offsetX = 0;
+    coord_t offsetY = 0;
     T * data;
     T * data_end;
 };
