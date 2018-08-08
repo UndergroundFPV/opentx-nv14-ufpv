@@ -173,8 +173,8 @@
 #define TELEMETRY_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOJ | RCC_AHB1Periph_DMA1)
 #define TELEMETRY_RCC_APB1Periph        RCC_APB1Periph_USART2
 #define TELEMETRY_REV_GPIO              GPIOJ
-#define TELEMETRY_TX_REV_GPIO_PIN       GPIO_Pin_8  // PJ.08
-#define TELEMETRY_RX_REV_GPIO_PIN       GPIO_Pin_7  // PJ.07
+#define TELEMETRY_RX_REV_GPIO_PIN       GPIO_Pin_8  // PJ.08
+#define TELEMETRY_TX_REV_GPIO_PIN       GPIO_Pin_7  // PJ.07
 #define TELEMETRY_DIR_GPIO              GPIOJ
 #define TELEMETRY_DIR_GPIO_PIN          GPIO_Pin_13 // PJ.13
 #define TELEMETRY_GPIO                  GPIOD
