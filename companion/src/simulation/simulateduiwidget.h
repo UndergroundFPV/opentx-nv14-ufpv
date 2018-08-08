@@ -26,6 +26,7 @@
 #include "radiowidget.h"
 #include "simulator.h"
 #include "simulator_strings.h"
+#include "touch.h"
 
 #include <QWidget>
 #include <QMouseEvent>
@@ -34,7 +35,6 @@ class SimulatorInterface;
 class LcdWidget;
 class RadioKeyWidget;
 class RadioUiAction;
-
 /*
  * This is a base class for the main hardware-specific radio user interface, including LCD screen and navigation buttons/widgets.
  * It is responsible for hanlding all interactions with this part of the simulation (vs. common radio widgets like sticks/switches/knobs).
@@ -64,15 +64,16 @@ class SimulatedUIWidget : public QWidget
 
     void captureScreenshot();
 
-    void wheelEvent(QWheelEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
+    virtual void wheelEvent(QWheelEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseReleaseEvent(QMouseEvent *event);
 
   signals:
 
     void controlValueChange(RadioWidget::RadioWidgetType type, int index, int value);
     void customStyleRequest(const QString & style);
     void simulatorWheelEvent(qint8 steps);
+
 
   protected slots:
 
@@ -110,6 +111,8 @@ namespace Ui {
   class SimulatedUIWidgetX9E;
   class SimulatedUIWidgetX10;
   class SimulatedUIWidgetX12;
+  class SimulatedUIWidgetI8;
+  class SimulatedUIWidgetNV14;
 }
 
 class SimulatedUIWidget9X: public SimulatedUIWidget
@@ -199,5 +202,39 @@ class SimulatedUIWidgetX12: public SimulatedUIWidget
   private:
     Ui::SimulatedUIWidgetX12 * ui;
 };
+
+class SimulatedUIWidgetI8: public SimulatedUIWidget
+{
+  Q_OBJECT
+
+  public:
+    explicit SimulatedUIWidgetI8(SimulatorInterface * simulator, QWidget * parent = NULL);
+    virtual ~SimulatedUIWidgetI8();
+
+  private:
+    Ui::SimulatedUIWidgetI8 * ui;
+};
+
+class SimulatedUIWidgetNV14: public SimulatedUIWidget
+{
+  Q_OBJECT
+
+  public:
+    explicit SimulatedUIWidgetNV14(SimulatorInterface * simulator, QWidget * parent = NULL);
+    virtual ~SimulatedUIWidgetNV14();
+  public slots:
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+  signals:
+    void touch(int x, int y, int);
+  protected:
+    QPoint getLcdPos(QMouseEvent *event);
+
+  private:
+    uint8_t lastTouchEvent;
+    Ui::SimulatedUIWidgetNV14 * ui;
+};
+
 
 #endif // SIMULATEDUIWIDGET_H

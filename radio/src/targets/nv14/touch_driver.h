@@ -21,6 +21,7 @@
 #define __TOUCH_DRIVER_H__
 
 #include "board.h"
+#include "touch.h"
 
 #define PORT_TOUCH_SCL              ( GPIOB )
 #define PIN_TOUCH_SCL               ( GPIO_Pin_8 )
@@ -61,15 +62,6 @@
 
 #define TOUCH_INVALID               ( 250 )
 
-enum ENUM_TOUCH_EVENT
-{
-    TE_NONE,
-    TE_DOWN,
-    TE_UP,
-    TE_SLIDE,
-    TE_END
-};
-
 enum ENUM_IO_SPEED
 {
     IO_SPEED_LOW,
@@ -85,23 +77,6 @@ enum ENUM_IO_MODE
     IO_MODE_ALTERNATE,
     IO_MODE_ANALOG
 };
-
-typedef struct
-{
-   unsigned char  Event;
-   short X;
-   short Y;
-   short startX;
-   short startY;
-   short lastX;
-   short lastY;
-   uint32_t Time;
-} STRUCT_TOUCH;
-
-extern STRUCT_TOUCH   touchState;
-
-
-extern STRUCT_TOUCH Touch;
 
 #define GET_ARRAY_SIZE( ARRAY )              ( ( sizeof( ARRAY ) ) / ( sizeof( ARRAY[0] ) ) )
 

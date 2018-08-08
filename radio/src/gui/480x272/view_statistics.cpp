@@ -66,7 +66,7 @@ class StatisticsBody: public Window {
       lcdDrawText(MENUS_MARGIN_LEFT, 3 * FH, "Throttle %", TIMEHOUR);
       drawTimer(MENU_STATS_COLUMN1, 3 * FH, s_timeCum16ThrP / 16, TIMEHOUR);
 
-      for (uint idx = 0; idx < TIMERS; idx++) {
+      for (uint32_t idx = 0; idx < TIMERS; idx++) {
         drawStringWithIndex(MENUS_MARGIN_LEFT, (4 + idx) * FH, "Timer", idx);
         drawTimer(MENU_STATS_COLUMN1, (4 + idx) * FH, timersStates[idx].val, TIMEHOUR);
       }
