@@ -200,8 +200,8 @@ extern uint16_t get_hall_adc_value(uint8_t ch);
 extern void hallSerialPutc(char c);
 unsigned short  calc_crc16(void *pBuffer,unsigned char BufferSize);
 void Parse_Character(STRUCT_HALL *hallBuffer, unsigned char ch);
-extern bool isFlySkyUpdateFirmware(void);
-
+extern bool isFlySkyUsbDownload(void);
+extern void onFlySkyUsbDownloadStart(uint8_t fw_state);
 #endif
 
 

@@ -494,6 +494,8 @@ void hallStick_GetTxDataFromUSB( void )
                 break;
 
             case TRANSFER_DIR_HALLSTICK:
+                onFlySkyUsbDownloadStart(TRANSFER_DIR_HALLSTICK);
+
                 if ( 0xA2 == HallProtocolTx.hallID.ID )
                 {
                     if ( 0 == HallProtocolTx.length ) // 55 A2 00 BE 02
@@ -511,19 +513,26 @@ void hallStick_GetTxDataFromUSB( void )
                 break;
 
             case TRANSFER_DIR_RFMODULE:
+                onFlySkyUsbDownloadStart(TRANSFER_DIR_RFMODULE);
+
                 if ( 0xAE == HallProtocolTx.hallID.ID && HallProtocolTx.length == 0 )
                 {   // 55 AE 00 D3 47
                     onFlySkyUpdateRadioFirmwareStart(INTERNAL_MODULE);
                     break;
                 }
 
-                if ( isFlySkyUpdateFirmware() )
+                //if ( isFlySkyUsbDownload() )
                 {
                     intmoduleSendBufferDMA( pt, HallProtocolTx.length + 3 + 2 );
                 }
                 break;
             }
         }
+    }
+
+    if ( !usbPlugged() )
+    {
+        onFlySkyUsbDownloadStart(0);
     }
 }
 

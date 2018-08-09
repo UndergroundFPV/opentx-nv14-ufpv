@@ -97,6 +97,7 @@ enum FlySkyModuleState_E {
   FLYSKY_MODULE_STATE_GET_RF_FW_VERSION,
   FLYSKY_MODULE_STATE_UPDATE_RF_FIRMWARE,
   FLYSKY_MODULE_STATE_UPDATE_RX_FIRMWARE,
+  FLYSKY_MODULE_STATE_UPDATE_HALL_FIRMWARE,
   FLYSKY_MODULE_STATE_SET_RX_PWM_PPM,
   FLYSKY_MODULE_STATE_SET_RX_IBUS_SBUS,
   FLYSKY_MODULE_STATE_UPDATE_RF_PROTOCOL,
@@ -490,7 +491,7 @@ bool isRxBindingState(uint8_t port)
     return moduleFlag[port] == MODULE_BIND;
 }
 
-bool isFlySkyUpdateFirmware(void)
+bool isFlySkyUsbDownload(void)
 {
     return rf_info.fw_state != 0;
 }
@@ -533,7 +534,11 @@ void onFlySkyUpdateReceiverFirmwareStart(uint8_t port)
 void onFlySkyUpdateRadioFirmwareStart(uint8_t port)
 {
     modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_UPDATE_RF_FIRMWARE;
-    rf_info.fw_state = 0;
+}
+
+void onFlySkyUsbDownloadStart(uint8_t fw_state)
+{
+    rf_info.fw_state = fw_state;
 }
 
 void onFlySkyUpdateTransmitterProtocol(uint8_t port)
@@ -882,7 +887,7 @@ bool isRfProtocolRxMsgOK(void)
 {
     bool isMsgOK = (0 != rfRxCount);
     rfRxCount = 0;
-    return isMsgOK && isFlySkyUpdateFirmware();
+    return isMsgOK && isFlySkyUsbDownload();
 }
 
 void checkFlySkyFeedback(uint8_t port)
@@ -893,9 +898,7 @@ void checkFlySkyFeedback(uint8_t port)
     //if ( modulePulsesData[port].flysky.state == FLYSKY_MODULE_STATE_IDLE
     //  && rf_info.fw_state == FLYSKY_MODULE_STATE_UPDATE_RF_FIRMWARE )
     {
-#if !defined(SIMU)
         Parse_Character(&rfProtocolRx, byte );
-#endif
         if ( rfProtocolRx.msg_OK )
         {
             rfRxCount++;
