@@ -580,6 +580,8 @@ void ModelSetupPage::build(Window * window)
     grid.addWindow(new ModuleWindow(window, {0, grid.getWindowHeight(), LCD_W, 0}, EXTERNAL_MODULE));
   }
 
+  grid.nextLine();
+
   window->setInnerHeight(grid.getWindowHeight());
 }
 
