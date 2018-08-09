@@ -255,8 +255,121 @@ void checkTrainerSettings()
   }
 }
 
+
+
+#define GET_ARRAY_SIZE( ARRAY )              ( ( sizeof( ARRAY ) ) / ( sizeof( ARRAY[0] ) ) )
+const U16 tTxBatteryLevel[] = { 3600, 3850, 4100, 4300 };
+const U8  TX_BATTERY_LEVEL_NUM = GET_ARRAY_SIZE( tTxBatteryLevel );
+
+
+U8 CalculateBatteryLevel( U16 Value, U8 CurrentLevel, U8 Number, U16 *pLevelTable )
+{
+  U32 Level;
+
+  if( CurrentLevel > Number )
+  {
+      CurrentLevel = Number;
+  }
+
+  for( Level = 0; Level < Number; Level++ )
+  {
+       if( Value < pLevelTable[Level] )
+       {
+           break;
+       }
+  }
+
+  if( Level > CurrentLevel )
+  {
+      return( Level );
+  }
+  else
+  {
+      while( CurrentLevel > 0 )
+      {
+          if( Value < ( pLevelTable[CurrentLevel - 1] - 30 ) )
+          {
+              CurrentLevel--;
+          }
+          else
+          {
+              break;
+          }
+      }
+  }
+
+  return( CurrentLevel );
+}
+
+
+U16  BatteryVoltageMv = 0;
+U8   TxBatteryLevel = 0;
+
+extern uint16_t adcValues[NUM_ANALOGS] __DMA;
+#if 1
+void BatteryVoltageDetection( void )
+{
+  U32 t;
+  static U8  SampleCount = 0;
+  static U8  IsFirstSampleOK = 0;
+  static U16 MaxVoltage;
+  static U16 MinVoltage;
+  static U32 VoltageSum;
+
+  t = getAnalogValue(TX_VOLTAGE);//READ_BATTERY_VOLTAGE_AD();
+  t += g_eeGeneral.txVoltageCalibration;
+
+  if( 0 == SampleCount )
+  {
+      SampleCount = 1;
+      MinVoltage = t;
+      MaxVoltage = t;
+      VoltageSum = t;
+  }
+  else
+  {
+      VoltageSum += t;
+      if( t > MaxVoltage )
+      {
+          MaxVoltage = t;
+      }
+      else if( t < MinVoltage )
+      {
+          MinVoltage = t;
+      }
+      SampleCount++;
+      if( SampleCount >= 8 )
+      {
+          t = VoltageSum - MaxVoltage - MinVoltage;
+          t /= ( SampleCount - 2 );
+          t *= ( 3300 * 20);
+          t /= ( 4095 * 10);
+          t = ( t * 100  + 50 ) / 100;
+
+          if( IsFirstSampleOK )
+          {
+              BatteryVoltageMv = ( t + BatteryVoltageMv +  1 ) / 2;
+          }
+          else
+          {
+              BatteryVoltageMv = t;
+              IsFirstSampleOK = !0;
+          }
+          TxBatteryLevel = CalculateBatteryLevel( BatteryVoltageMv, TxBatteryLevel, GET_ARRAY_SIZE( tTxBatteryLevel ), ( U16 *)tTxBatteryLevel );
+          SampleCount = 0;
+      }
+  }
+}
+#endif
+
 uint16_t getBatteryVoltage()
 {
+#if 0
   int32_t instant_vbat = anaIn(TX_VOLTAGE);  // using filtered ADC value on purpose
   return (uint16_t)((instant_vbat * (1000 + g_eeGeneral.txVoltageCalibration)) / 1629);
+#else
+  BatteryVoltageDetection();
+
+  return BatteryVoltageMv / 10;
+#endif
 }
