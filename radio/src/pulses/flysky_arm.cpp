@@ -75,7 +75,7 @@ enum DEBUG_RF_FRAME_PRINT_E {
 FLYSKY_RF_DATA; // flyskyLocal;
 #define gRomData                        flysky
 #endif
-#define SET_DIRTY()                     storageDirty(EE_MODEL)
+#define SET_DIRTY()                     storageDirty(EE_GENERAL)
 
 enum FlySkySensorType_E {
     FLYSKY_SENSOR_RX_VOLTAGE,
