@@ -108,33 +108,9 @@ class ModuleWindow : public Window {
       // Module parameters
       if (moduleType == MODULE_TYPE_FLYSKY) {
         new Choice(this, grid.getFieldSlot(2, 1), STR_FLYSKY_PROTOCOLS, 0, 3,
-                   GET_DEFAULT(g_model.moduleData[INTERNAL_MODULE].flysky.mode == 0x10 ? 2 :
-                               (g_model.moduleData[INTERNAL_MODULE].flysky.mode == 0x11 ? 3 :
-                                g_model.moduleData[INTERNAL_MODULE].flysky.mode)),
+                   GET_DEFAULT(g_eeGeneral.flysky.mode),
                    [=](int32_t newValue) -> void {
-                     switch (g_model.moduleData[INTERNAL_MODULE].flysky.mode) {
-                       case 0x00: // PWM+iBUS
-                         g_model.moduleData[INTERNAL_MODULE].flysky.pulseMode = 0; // for PWM
-                         g_model.moduleData[INTERNAL_MODULE].flysky.pulsePort = 1; // to sBus
-                         newValue = 0x01;
-                         break;
-                       case 0x01: // PWM+sBUS
-                         g_model.moduleData[INTERNAL_MODULE].flysky.pulseMode = 1; // for PWM
-                         g_model.moduleData[INTERNAL_MODULE].flysky.pulsePort = 0; // to iBus
-                         newValue = 0x10;
-                         break;
-                       case 0x10: // PPM+iBUS
-                         g_model.moduleData[INTERNAL_MODULE].flysky.pulseMode = 1; // to PPM
-                         g_model.moduleData[INTERNAL_MODULE].flysky.pulsePort = 1; // for iBus
-                         newValue = 0x11;
-                         break;
-                       case 0x11: // PPM+sBUS
-                         g_model.moduleData[INTERNAL_MODULE].flysky.pulseMode = 0; // to PWM
-                         g_model.moduleData[INTERNAL_MODULE].flysky.pulsePort = 0; // to iBus
-                         newValue = 0x00;
-                         break;
-                     }
-                     g_model.moduleData[INTERNAL_MODULE].flysky.mode = newValue;
+                     g_eeGeneral.flysky.mode = newValue;
                      SET_DIRTY();
                      onFlySkyReceiverSetPulse(INTERNAL_MODULE, newValue);
                    });

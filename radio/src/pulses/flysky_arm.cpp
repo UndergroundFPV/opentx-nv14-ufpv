@@ -64,10 +64,18 @@ enum DEBUG_RF_FRAME_PRINT_E {
     TX_FRAME_ONLY,
     BOTH_FRAME_PRINT
 };
-#define DEBUG_RF_FRAME_PRINT            FRAME_PRINT_OFF
+#define DEBUG_RF_FRAME_PRINT            BOTH_FRAME_PRINT
 #define FLYSKY_MODULE_TIMEOUT           155 /* ms */
 #define NUM_OF_NV14_CHANNELS            (4) // = FLYSKY_HALL_CHANNEL_COUNT
 #define VALID_CH_DATA(v)                ((v) > 900 && (v) < 2100)
+
+#if defined(PCBNV14)
+#define gRomData                        g_eeGeneral.flysky
+#else
+FLYSKY_RF_DATA; // flyskyLocal;
+#define gRomData                        flysky
+#endif
+#define SET_DIRTY()                     storageDirty(EE_MODEL)
 
 enum FlySkySensorType_E {
     FLYSKY_SENSOR_RX_VOLTAGE,
@@ -330,24 +338,6 @@ uint8_t getFlySkyReceiverPort(uint8_t port, uint8_t *bus_port)
     return rx_info.port;
 }
 
-void getFlySkyReceiverId(uint8_t port, uint32_t *receiver_id)
-{
-    uint8_t *flysky_id = (uint8_t *)receiver_id;
-    flysky_id[0] = rx_info.id[0];
-    flysky_id[1] = rx_info.id[1];
-    flysky_id[2] = rx_info.id[2];
-    flysky_id[3] = rx_info.id[3];
-}
-
-void getFlySkyTransmitterId(uint8_t port, uint32_t *transmitter_id)
-{
-    uint8_t *flysky_id = (uint8_t *)transmitter_id;
-    flysky_id[0] = rf_info.id[0];
-    flysky_id[1] = rf_info.id[1];
-    flysky_id[2] = rf_info.id[2];
-    flysky_id[3] = rf_info.id[3];
-}
-
 void getFlySkyReceiverServoFreq(uint8_t port, uint16_t *frequance)
 {
     uint8_t *flysky_freq = (uint8_t *)frequance;
@@ -482,14 +472,6 @@ void setFlySkyTransmitterProtocol(uint8_t port, uint8_t protocol)
     rf_info.protocol = protocol;
 }
 
-void setFlySkyReceiverId(uint8_t port, uint32_t rx_id)
-{
-    rx_info.id[0] = rx_id & 0xff;
-    rx_info.id[1] = rx_id & 0xff00 >> 8;
-    rx_info.id[2] = rx_id & 0xff0000 >> 16;
-    rx_info.id[3] = rx_id & 0xff000000 >> 24;
-}
-
 void setFlySkyReceiverBindPowerLow(uint8_t port)
 {
     rf_info.bind_power = BIND_LOW_POWER;
@@ -541,7 +523,7 @@ bool isRxBindingState(uint8_t port)
     return moduleFlag[port] == MODULE_BIND;
 }
 
-bool isFirmwareUpdateState(void)
+bool isFlySkyUpdateFirmware(void)
 {
     return rf_info.fw_state != 0;
 }
@@ -567,12 +549,13 @@ void onFlySkyReceiverPulsePort(uint8_t port, uint8_t pulse_port)
 
 void onFlySkyReceiverSetPulse(uint8_t port, uint8_t mode_and_port)
 {
+    if((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY)) TRACE("PulseMode+Port: %0d", mode_and_port);
     switch(mode_and_port)
     {
       case 0x00: rx_info.pulse = FLYSKY_PWM; rx_info.port = FLYSKY_IBUS; break;
       case 0x01: rx_info.pulse = FLYSKY_PWM; rx_info.port = FLYSKY_SBUS; break;
-      case 0x10: rx_info.pulse = FLYSKY_PPM; rx_info.port = FLYSKY_IBUS; break;
-      case 0x11: rx_info.pulse = FLYSKY_PPM; rx_info.port = FLYSKY_SBUS; break;
+      case 0x02: rx_info.pulse = FLYSKY_PPM; rx_info.port = FLYSKY_IBUS; break;
+      case 0x03: rx_info.pulse = FLYSKY_PPM; rx_info.port = FLYSKY_SBUS; break;
       default: return;
     }
 
@@ -693,14 +676,17 @@ void putFlySkySetReceiverID(uint8_t port)
 {
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_ACK);
   putFlySkyFrameByte(port, COMMAND_ID_SET_RECEIVER_ID);
-  putFlySkyFrameByte(port, rx_info.id[0]); // receiver ID (byte 0)
-  putFlySkyFrameByte(port, rx_info.id[1]); // receiver ID (byte 1)
-  putFlySkyFrameByte(port, rx_info.id[2]); // receiver ID (byte 2)
-  putFlySkyFrameByte(port, rx_info.id[3]); // receiver ID (byte 3)
+  putFlySkyFrameByte(port, gRomData.rx_id[0]); // receiver ID (byte 0)
+  putFlySkyFrameByte(port, gRomData.rx_id[1]); // receiver ID (byte 1)
+  putFlySkyFrameByte(port, gRomData.rx_id[2]); // receiver ID (byte 2)
+  putFlySkyFrameByte(port, gRomData.rx_id[3]); // receiver ID (byte 3)
 }
 
 void putFlySkyGetReceiverConfig(uint8_t port)
 {
+  //rx_info.freq[0] = gRomData.rx_freq[0];
+  //rx_info.freq[1] = gRomData.rx_freq[1];
+
   putFlySkyFrameByte(port, FRAME_TYPE_ANSWER);
   putFlySkyFrameByte(port, COMMAND_ID_RF_GET_CONFIG);
   putFlySkyFrameByte(port, rx_info.pulse);  // 00:PWM, 01:PPM
@@ -873,10 +859,12 @@ void parseFlySkyFeedbackFrame(uint8_t port)
           return;
       }
       g_model.header.modelId[port] = ptr[2];
-      rx_info.id[0] = first_para;
-      rx_info.id[1] = *ptr++;
-      rx_info.id[2] = *ptr++;
-      rx_info.id[3] = *ptr++;
+      gRomData.rx_id[0] = first_para;
+      gRomData.rx_id[1] = *ptr++;
+      gRomData.rx_id[2] = *ptr++;
+      gRomData.rx_id[3] = *ptr++;
+      if(DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY) TRACE("New Rx ID: %02X %02X %02X %02X", gRomData.rx_id[0], gRomData.rx_id[1], gRomData.rx_id[2],gRomData.rx_id[3]);
+      SET_DIRTY();
       resetPulsesFlySky(port);
       modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_INIT;
       break;
@@ -941,12 +929,7 @@ bool isRfProtocolRxMsgOK(void)
 {
     bool isMsgOK = (0 != rfRxCount);
     rfRxCount = 0;
-    return isMsgOK && isFirmwareUpdateState();
-}
-
-bool isFlySkyUpdateFirmware( void )
-{
-    return rf_info.fw_state == FLYSKY_MODULE_STATE_UPDATE_RF_FIRMWARE;
+    return isMsgOK && isFlySkyUpdateFirmware();
 }
 
 void checkFlySkyFeedback(uint8_t port)
