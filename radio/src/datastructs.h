@@ -644,13 +644,6 @@ PACK(struct TelemetrySensor {
 });
 #endif
 
-#if defined(PCBNV14)
-  #define FLYSKY_RF_DATA   struct { uint8_t rx_id[4];\
-                                    uint8_t mode;\
-                                    uint8_t tx_power;\
-                                    uint8_t rx_freq[2]; } flysky
-#endif
-
 /*
  * Module structure
  */
@@ -681,6 +674,12 @@ PACK(struct ModuleData {
       uint8_t lowPowerMode:1;
       int8_t optionValue;
     } multi);
+
+    NOBACKUP(struct {
+      uint8_t rx_id[4];
+      uint8_t mode;
+      uint8_t rx_freq[2];
+    } romData);
 
     NOBACKUP(struct {
       uint8_t power:2;                  // 0=10 mW, 1=100 mW, 2=500 mW, 3=1W
@@ -1036,8 +1035,6 @@ PACK(struct RadioData {
   NOBACKUP(int8_t speakerVolume);
   NOBACKUP(int8_t vBatMin);
   NOBACKUP(int8_t vBatMax);
-
-  NOBACKUP(FLYSKY_RF_DATA);
 
   EXTRA_GENERAL_FIELDS
 

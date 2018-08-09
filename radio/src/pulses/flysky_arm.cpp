@@ -69,13 +69,8 @@ enum DEBUG_RF_FRAME_PRINT_E {
 #define NUM_OF_NV14_CHANNELS            (4) // = FLYSKY_HALL_CHANNEL_COUNT
 #define VALID_CH_DATA(v)                ((v) > 900 && (v) < 2100)
 
-#if defined(PCBNV14)
-#define gRomData                        g_eeGeneral.flysky
-#else
-FLYSKY_RF_DATA; // flyskyLocal;
-#define gRomData                        flysky
-#endif
-#define SET_DIRTY()                     storageDirty(EE_GENERAL)
+#define gRomData                        g_model.moduleData[INTERNAL_MODULE].romData
+#define SET_DIRTY()                     storageDirty(EE_MODEL)
 
 enum FlySkySensorType_E {
     FLYSKY_SENSOR_RX_VOLTAGE,
@@ -135,6 +130,13 @@ enum FlySkyChannelDataType_E {
   FLYSKY_CHANNEL_DATA_FAILSAFE
 };
 
+enum FlySkyPulseModeValue_E {
+    PWM_IBUS, PWM_SBUS,
+    PPM_IBUS, PPM_SBUS
+};
+#define GET_FLYSKY_PWM_PPM    (gRomData.mode < 2 ? FLYSKY_PWM: FLYSKY_PPM)
+#define GET_FLYSKY_IBUS_SBUS  (gRomData.mode & 1 ? FLYSKY_SBUS: FLYSKY_IBUS)
+
 typedef struct RX_FLYSKY_IBUS_S{
     uint8_t  id[2];
     uint8_t  channel[2];
@@ -186,10 +188,6 @@ typedef struct RF_INFO_S{
 } rf_info_t;
 
 typedef struct RX_INFO_S {
-    uint8_t   id[4];
-    uint8_t   pulse;
-    uint8_t   port;
-    uint8_t   freq[2];
     int16_t   servo_value[NUM_OF_NV14_CHANNELS];
     rx_ibus_t ibus;
     fw_info_t fw_info;
@@ -209,10 +207,6 @@ static rf_info_t rf_info = {
 };
 
 static rx_info_t rx_info = {
-    .id               = {0,0,1,0},
-    .pulse            = FLYSKY_PWM,
-    .port             = FLYSKY_IBUS,
-    .freq             = {50,0},
     .servo_value      = {1500,1500,1500,1500},
     .ibus             = {{0,0}, {0,0}},
     .fw_info          = {0}
@@ -317,33 +311,6 @@ uint16_t getFlySkyReceiverSensorExtVoltage(uint8_t port, uint16_t *voltage)
     return ptr[1] * 256 + ptr[0];
 }
 
-
-uint8_t getFlySkyReceiverPulseMode(uint8_t port, uint8_t *pulse_mode)
-{
-    if (pulse_mode != NULL)
-    {
-       pulse_mode[0] = rx_info.pulse;
-    }
-
-    return rx_info.pulse;
-}
-
-uint8_t getFlySkyReceiverPort(uint8_t port, uint8_t *bus_port)
-{
-    if (bus_port != NULL)
-    {
-        bus_port[0] = rx_info.port;
-    }
-
-    return rx_info.port;
-}
-
-void getFlySkyReceiverServoFreq(uint8_t port, uint16_t *frequance)
-{
-    uint8_t *flysky_freq = (uint8_t *)frequance;
-    flysky_freq[0] = rx_info.freq[0];
-    flysky_freq[1] = rx_info.freq[1];
-}
 
 void getFlySkyReceiverFirmwareRevision(uint8_t port, uint32_t *revision)
 {
@@ -537,28 +504,17 @@ void onFlySkyBindReceiver(uint8_t port)
 
 void onFlySkyReceiverPulseMode(uint8_t port, uint8_t pulse_mode)
 {
-    rx_info.pulse = pulse_mode == FLYSKY_PWM ? FLYSKY_PWM : FLYSKY_PPM;
     modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_RX_PWM_PPM;
 }
 
 void onFlySkyReceiverPulsePort(uint8_t port, uint8_t pulse_port)
 {
-    rx_info.port = pulse_port == FLYSKY_IBUS ? FLYSKY_IBUS : FLYSKY_SBUS;
     modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_RX_IBUS_SBUS;
 }
 
-void onFlySkyReceiverSetPulse(uint8_t port, uint8_t mode_and_port)
+void onFlySkyReceiverSetPulse(uint8_t port, uint8_t mode_and_port) // mode_and_port = 0,1,2,3
 {
     if((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY)) TRACE("PulseMode+Port: %0d", mode_and_port);
-    switch(mode_and_port)
-    {
-      case 0x00: rx_info.pulse = FLYSKY_PWM; rx_info.port = FLYSKY_IBUS; break;
-      case 0x01: rx_info.pulse = FLYSKY_PWM; rx_info.port = FLYSKY_SBUS; break;
-      case 0x02: rx_info.pulse = FLYSKY_PPM; rx_info.port = FLYSKY_IBUS; break;
-      case 0x03: rx_info.pulse = FLYSKY_PPM; rx_info.port = FLYSKY_SBUS; break;
-      default: return;
-    }
-
     modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_TX_POWER;
 }
 
@@ -684,37 +640,34 @@ void putFlySkySetReceiverID(uint8_t port)
 
 void putFlySkyGetReceiverConfig(uint8_t port)
 {
-  //rx_info.freq[0] = gRomData.rx_freq[0];
-  //rx_info.freq[1] = gRomData.rx_freq[1];
-
   putFlySkyFrameByte(port, FRAME_TYPE_ANSWER);
   putFlySkyFrameByte(port, COMMAND_ID_RF_GET_CONFIG);
-  putFlySkyFrameByte(port, rx_info.pulse);  // 00:PWM, 01:PPM
-  putFlySkyFrameByte(port, rx_info.port);   // 00:I-BUS, 01:S-BUS
-  putFlySkyFrameByte(port, rx_info.freq[0]); // receiver servo freq bit[7:0]
-  putFlySkyFrameByte(port, rx_info.freq[1]); // receiver servo freq bit[15:8]
+  putFlySkyFrameByte(port, GET_FLYSKY_PWM_PPM);  // 00:PWM, 01:PPM
+  putFlySkyFrameByte(port, GET_FLYSKY_IBUS_SBUS);// 00:I-BUS, 01:S-BUS
+  putFlySkyFrameByte(port, gRomData.rx_freq[0] < 50 ? 50 : gRomData.rx_freq[0]); // receiver servo freq bit[7:0]
+  putFlySkyFrameByte(port, gRomData.rx_freq[1]); // receiver servo freq bit[15:8]
 }
 
 void putFlySkySetReceiverPulseMode(uint8_t port)
 {
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_ACK);
   putFlySkyFrameByte(port, COMMAND_ID_SET_RX_PWM_PPM);
-  putFlySkyFrameByte(port, rx_info.pulse); // 00:PWM, 01:PPM
+  putFlySkyFrameByte(port, GET_FLYSKY_PWM_PPM); // 00:PWM, 01:PPM
 }
 
 void putFlySkySetReceiverPort(uint8_t port)
 {
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_ACK);
   putFlySkyFrameByte(port, COMMAND_ID_SET_RX_IBUS_SBUS);
-  putFlySkyFrameByte(port, rx_info.port); // 0x00:I-BUS, 0x01:S-BUS
+  putFlySkyFrameByte(port, GET_FLYSKY_IBUS_SBUS); // 0x00:I-BUS, 0x01:S-BUS
 }
 
 void putFlySkySetReceiverServoFreq(uint8_t port)
 {
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_ACK);
   putFlySkyFrameByte(port, COMMAND_ID_SET_RX_SERVO_FREQ);
-  putFlySkyFrameByte(port, rx_info.freq[0]); // receiver servo freq bit[7:0]
-  putFlySkyFrameByte(port, rx_info.freq[1]); // receiver servo freq bit[15:8]
+  putFlySkyFrameByte(port, gRomData.rx_freq[0]); // receiver servo freq bit[7:0]
+  putFlySkyFrameByte(port, gRomData.rx_freq[1]); // receiver servo freq bit[15:8]
 }
 
 void putFlySkyGetFirmwareInfo(uint8_t port, uint8_t fw_word)
@@ -744,10 +697,10 @@ void putFlySkySendChannelData(uint8_t port)
 {
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_NACK);
   putFlySkyFrameByte(port, COMMAND_ID_SEND_CHANNEL_DATA);
-  putFlySkyFrameByte(port, rf_info.channel_data_type); // TODO = 0x01: failsafe
-  uint8_t channels_count = rf_info.num_of_channel;
+  putFlySkyFrameByte(port, 0x00); // TODO = 0x01: failsafe
+  uint8_t channels_count = NUM_OF_NV14_CHANNELS; // g_model.moduleData[INTERNAL_MODULE].channelsCount);
   putFlySkyFrameByte(port, channels_count);
-  for (uint8_t channel=0; channel<channels_count; channel++) {
+  for (uint8_t channel=0; channel < channels_count; channel++) {
     uint16_t value = value = 850 + ((2150-850) * (channelOutputs[channel] + 1024) / 2048);
     putFlySkyFrameByte(port, value & 0xff);
     putFlySkyFrameByte(port, value >> 8);
@@ -827,7 +780,7 @@ void parseFlySkyFeedbackFrame(uint8_t port)
   switch (command_id) {
     default:
       if ( moduleFlag[port] == MODULE_NORMAL_MODE
-           && modulePulsesData[port].flysky.state != FLYSKY_MODULE_STATE_IDLE) {
+           && modulePulsesData[port].flysky.state > FLYSKY_MODULE_STATE_SET_RECEIVER_ID) {
            modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_DEFAULT;
            if(DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY) TRACE("State back to channel data");
       }
@@ -902,7 +855,7 @@ void parseFlySkyFeedbackFrame(uint8_t port)
       }
 
       if ( moduleFlag[port] == MODULE_NORMAL_MODE
-           && modulePulsesData[port].flysky.state != FLYSKY_MODULE_STATE_IDLE) {
+           && modulePulsesData[port].flysky.state > FLYSKY_MODULE_STATE_SET_RECEIVER_ID) {
         modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_DEFAULT;
       }
       break; }
