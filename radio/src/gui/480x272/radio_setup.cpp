@@ -82,6 +82,26 @@ void RadioSetupPage::build(Window * window)
                  });
   grid.nextLine();
 
+  // Batt meter range - Range 3.0v to 16v
+  new StaticText(window, grid.getLabelSlot(), STR_BATTERY_RANGE);
+  auto batMinEdit = new NumberEdit(window, grid.getFieldSlot(2, 0), -60 + 90, g_eeGeneral.vBatMax + 29 + 90, GET_SET_WITH_OFFSET(g_eeGeneral.vBatMin, 90), PREC1);
+  batMinEdit->setSuffix("V");
+  auto batMaxEdit = new NumberEdit(window, grid.getFieldSlot(2, 1), g_eeGeneral.vBatMin - 29 + 120, 40 + 120, GET_SET_WITH_OFFSET(g_eeGeneral.vBatMax, 120), PREC1);
+  batMaxEdit->setSuffix("V");
+  batMinEdit->setSetValueHandler([=](int32_t newValue) {
+    g_eeGeneral.vBatMin= newValue - 90;
+    SET_DIRTY();
+    batMaxEdit->setMin(g_eeGeneral.vBatMin - 29 + 120);
+    batMaxEdit->invalidate();
+  });
+  batMaxEdit->setSetValueHandler([=](int32_t newValue) {
+    g_eeGeneral.vBatMax= newValue - 120;
+    SET_DIRTY();
+    batMinEdit->setMax(g_eeGeneral.vBatMax + 29 + 90);
+    batMinEdit->invalidate();
+  });
+  grid.nextLine();
+
 #if 0
     case ITEM_SETUP_TIME:
       {
