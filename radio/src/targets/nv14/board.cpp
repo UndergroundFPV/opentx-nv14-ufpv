@@ -370,6 +370,6 @@ uint16_t getBatteryVoltage()
 #else
   BatteryVoltageDetection();
 
-  return BatteryVoltageMv / 10;
+  return BatteryVoltageMv / 100;
 #endif
 }

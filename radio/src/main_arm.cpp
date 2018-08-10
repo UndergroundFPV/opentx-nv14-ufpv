@@ -115,7 +115,7 @@ void checkEeprom()
 void checkBatteryAlarms()
 {
   // TRACE("checkBatteryAlarms()");
-  if (IS_TXBATT_WARNING() && g_vbat100mV>50) {
+  if (IS_TXBATT_WARNING() && g_vbat100mV>30) {
     AUDIO_TX_BATTERY_LOW();
     // TRACE("checkBatteryAlarms(): battery low");
   }
@@ -131,7 +131,9 @@ void checkBatteryAlarms()
 
 void checkBattery()
 {
-#if 0
+#if defined(PCBNV14)
+  g_vbat100mV = getBatteryVoltage();
+#else
   static uint32_t batSum;
   static uint8_t sampleCount;
   // filter battery voltage by averaging it
@@ -150,8 +152,6 @@ void checkBattery()
       // TRACE("checkBattery(): g_vbat100mV = %d", g_vbat100mV);
     }
   }
-#else
-  g_vbat100mV = getBatteryVoltage();
 #endif
 }
 

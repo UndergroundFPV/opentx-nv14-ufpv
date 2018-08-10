@@ -716,7 +716,8 @@ void putFlySkySendChannelData(uint8_t port)
   }
   putFlySkyFrameByte(port, channels_count);
   for (uint8_t channel=channels_start; channel < channels_count; channel++) {
-    uint16_t value = 850 + ((2150-850) * (channelOutputs[channel] + 1024) / 2048);
+    //uint16_t value = 850 + ((2150-850) * (channelOutputs[channel] + 1024) / 2048);
+    uint16_t value = 900 + ((2100-900) * (channelOutputs[channel] + 1024) / 2048);
     putFlySkyFrameByte(port, value & 0xff);
     putFlySkyFrameByte(port, value >> 8);
   }
