@@ -39,6 +39,7 @@ set(TARGET_SRC
 set(FIRMWARE_TARGET_SRC
   ${FIRMWARE_TARGET_SRC}
   hallStick_driver.cpp
+  battery_driver.cpp
   )
 
 set(BITMAPS_TARGET nv14_bitmaps)
