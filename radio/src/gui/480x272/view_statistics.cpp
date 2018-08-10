@@ -25,9 +25,9 @@
 
 #define MENU_STATS_COLUMN1    (MENUS_MARGIN_LEFT + 120)
 
-class StatisticsBody: public Window {
+class StatisticsBody : public Window {
   public:
-    StatisticsBody(Window * parent, const rect_t & rect):
+    StatisticsBody(Window * parent, const rect_t &rect) :
       Window(parent, rect)
     {
       auto reset = new TextButton(this, {10, 320, LCD_W - 20, lineHeight}, "Push to reset");
@@ -73,25 +73,25 @@ class StatisticsBody: public Window {
 
       const coord_t x = 10;
       const coord_t y = 270;
-      lcdDrawHorizontalLine(x-3, y, MAXTRACE+3+3, SOLID, TEXT_COLOR);
-      lcdDrawVerticalLine(x, y-96, 96+3, SOLID, TEXT_COLOR);
-      for (coord_t i=0; i<MAXTRACE; i+=6) {
-        lcdDrawVerticalLine(x+i, y-1, 3, SOLID, TEXT_COLOR);
+      lcdDrawHorizontalLine(x - 3, y, MAXTRACE + 3 + 3, SOLID, TEXT_COLOR);
+      lcdDrawVerticalLine(x, y - 96, 96 + 3, SOLID, TEXT_COLOR);
+      for (coord_t i = 0; i < MAXTRACE; i += 6) {
+        lcdDrawVerticalLine(x + i, y - 1, 3, SOLID, TEXT_COLOR);
       }
 
       uint16_t traceRd = s_traceWr > MAXTRACE ? s_traceWr - MAXTRACE : 0;
-      coord_t prev_yv = (coord_t)-1;
-      for (coord_t i=1; i<=MAXTRACE && traceRd<s_traceWr; i++, traceRd++) {
+      coord_t prev_yv = (coord_t) -1;
+      for (coord_t i = 1; i <= MAXTRACE && traceRd < s_traceWr; i++, traceRd++) {
         uint8_t h = s_traceBuf[traceRd % MAXTRACE];
-        coord_t yv = y - 2 - 3*h;
-        if (prev_yv != (coord_t)-1) {
+        coord_t yv = y - 2 - 3 * h;
+        if (prev_yv != (coord_t) -1) {
           if (prev_yv < yv) {
-            for (int y=prev_yv; y<=yv; y++) {
+            for (int y = prev_yv; y <= yv; y++) {
               lcdDrawBitmapPattern(x + i - 3, y, LBM_POINT, TEXT_COLOR);
             }
           }
           else {
-            for (int y=yv; y<=prev_yv; y++) {
+            for (int y = yv; y <= prev_yv; y++) {
               lcdDrawBitmapPattern(x + i - 3, y, LBM_POINT, TEXT_COLOR);
             }
           }
@@ -107,19 +107,20 @@ class StatisticsBody: public Window {
     tmr10ms_t lastRefresh = 0;
 };
 
-class StatisticsFooter: public Window {
+class StatisticsFooter : public Window {
   public:
-    StatisticsFooter(Window * parent, const rect_t & rect):
+    StatisticsFooter(Window * parent, const rect_t &rect) :
       Window(parent, rect)
     {
     }
 
-    void paint(BitmapBuffer * dc) override {
+    void paint(BitmapBuffer * dc) override
+    {
 
     }
 };
 
-class StatisticsPage: public PageTab {
+class StatisticsPage : public PageTab {
   public:
     StatisticsPage() :
       PageTab(STR_STATISTICS, ICON_STATS_THROTTLE_GRAPH)
@@ -137,9 +138,9 @@ class StatisticsPage: public PageTab {
 };
 
 
-class AnalogsBody: public Window {
+class AnalogsBody : public Window {
   public:
-    AnalogsBody(Window * parent, const rect_t & rect):
+    AnalogsBody(Window * parent, const rect_t &rect) :
       Window(parent, rect)
     {
       setInnerHeight(100); // TODO
@@ -153,7 +154,7 @@ class AnalogsBody: public Window {
 
     void paint(BitmapBuffer * dc) override
     {
-      for (uint8_t i=0; i<NUM_ANALOGS; i++) {
+      for (uint8_t i = 0; i < NUM_ANALOGS; i++) {
         coord_t y = MENU_CONTENT_TOP + (i / 2) * FH;
         coord_t x = MENUS_MARGIN_LEFT + (i & 1 ? LCD_W / 2 : 0);
         lcdDrawNumber(x, y, i + 1, LEADING0 | LEFT, 2, NULL, ":");
@@ -163,22 +164,24 @@ class AnalogsBody: public Window {
         }
       }
     }
+
   protected:
 };
 
-class AnalogsFooter: public Window {
+class AnalogsFooter : public Window {
   public:
-    AnalogsFooter(Window * parent, const rect_t & rect):
+    AnalogsFooter(Window * parent, const rect_t &rect) :
       Window(parent, rect)
     {
     }
 
-    void paint(BitmapBuffer * dc) override {
+    void paint(BitmapBuffer * dc) override
+    {
 
     }
 };
 
-class AnalogsPage: public PageTab {
+class AnalogsPage : public PageTab {
   public:
     AnalogsPage() :
       PageTab("Analogs", ICON_STATS_ANALOGS)
@@ -195,12 +198,107 @@ class AnalogsPage: public PageTab {
     static constexpr coord_t footerHeight = 30;
 };
 
+class DebugBody : public Window {
+  public:
+    DebugBody(Window * parent, const rect_t &rect) :
+      Window(parent, rect)
+    {
+      setInnerHeight(100); // TODO
+    }
 
-StatisticsMenu::StatisticsMenu():
+    void checkEvents() override
+    {
+      // Perma refresh this page
+      invalidate();
+    }
+
+    void paint(BitmapBuffer * dc) override
+    {
+      lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP, "Free Mem");
+      lcdDrawNumber(MENU_STATS_COLUMN1, MENU_CONTENT_TOP, availableMemory(), LEFT, 0, NULL, "b");
+
+      lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP + FH, STR_TMIXMAXMS);
+      lcdDrawNumber(MENU_STATS_COLUMN1, MENU_CONTENT_TOP + FH, DURATION_MS_PREC2(maxMixerDuration), PREC2 | LEFT, 0, NULL, "ms");
+
+      lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP + 2 * FH, STR_FREESTACKMINB);
+      lcdDrawText(MENU_STATS_COLUMN1, MENU_CONTENT_TOP + 2 * FH + 1, "[Menus]", HEADER_COLOR | SMLSIZE);
+      lcdDrawNumber(lcdNextPos + 5, MENU_CONTENT_TOP + 2 * FH, menusStack.available(), LEFT);
+      lcdDrawText(MENU_STATS_COLUMN1, MENU_CONTENT_TOP + 3 * FH + 1, "[Mix]", HEADER_COLOR | SMLSIZE);
+      lcdDrawNumber(lcdNextPos + 5, MENU_CONTENT_TOP + 3 * FH, mixerStack.available(), LEFT);
+      lcdDrawText(MENU_STATS_COLUMN1, MENU_CONTENT_TOP + 4 * FH + 1, "[Audio]", HEADER_COLOR | SMLSIZE);
+      lcdDrawNumber(lcdNextPos + 5, MENU_CONTENT_TOP + 4 * FH, audioStack.available(), LEFT);
+
+      int line = 5;
+
+#if defined(DISK_CACHE)
+      lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP + line * FH, "SD cache hits");
+      lcdDrawNumber(MENU_STATS_COLUMN1, MENU_CONTENT_TOP + line * FH, diskCache.getHitRate(), PREC1 | LEFT, 0, NULL, "%");
+      ++line;
+#endif
+
+#if defined(LUA)
+      lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP+line*FH, "Lua duration");
+      lcdDrawNumber(MENU_STATS_COLUMN1, MENU_CONTENT_TOP+line*FH, 10*maxLuaDuration, LEFT, 0, NULL, "ms");
+      ++line;
+
+      lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP+line*FH, "Lua interval");
+      lcdDrawNumber(MENU_STATS_COLUMN1, MENU_CONTENT_TOP+line*FH, 10*maxLuaInterval, LEFT, 0, NULL, "ms");
+      ++line;
+
+      lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP+line*FH, "Lua memory");
+      lcdDrawText(MENU_STATS_COLUMN1, MENU_CONTENT_TOP+line*FH+1, "[S]", HEADER_COLOR|SMLSIZE);
+      lcdDrawNumber(lcdNextPos+5, MENU_CONTENT_TOP+line*FH, luaGetMemUsed(lsScripts), LEFT);
+      lcdDrawText(lcdNextPos+20, MENU_CONTENT_TOP+line*FH+1, "[W]", HEADER_COLOR|SMLSIZE);
+      lcdDrawNumber(lcdNextPos+5, MENU_CONTENT_TOP+line*FH, luaGetMemUsed(lsWidgets), LEFT);
+      lcdDrawText(lcdNextPos+20, MENU_CONTENT_TOP+line*FH+1, "[B]", HEADER_COLOR|SMLSIZE);
+      lcdDrawNumber(lcdNextPos+5, MENU_CONTENT_TOP+line*FH, luaExtraMemoryUsage, LEFT);
+      ++line;
+#endif
+
+      lcdDrawText(MENUS_MARGIN_LEFT, MENU_CONTENT_TOP + line * FH, "Tlm RX Errs");
+      lcdDrawNumber(MENU_STATS_COLUMN1, MENU_CONTENT_TOP + line * FH, telemetryErrors, LEFT);
+
+      lcdDrawText(LCD_W / 2, MENU_FOOTER_TOP, STR_MENUTORESET, MENU_TITLE_COLOR | CENTERED);
+    }
+
+  protected:
+};
+
+class DebugFooter : public Window {
+  public:
+    DebugFooter(Window * parent, const rect_t &rect) :
+      Window(parent, rect)
+    {
+    }
+
+    void paint(BitmapBuffer * dc) override
+    {
+
+    }
+};
+
+class DebugPage : public PageTab {
+  public:
+    DebugPage() :
+      PageTab("Debug", ICON_STATS_DEBUG)
+    {
+    }
+
+    void build(Window * window) override
+    {
+      new DebugBody(window, {0, 0, LCD_W, window->height() - footerHeight});
+      new DebugFooter(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
+    }
+
+  protected:
+    static constexpr coord_t footerHeight = 30;
+};
+
+StatisticsMenu::StatisticsMenu() :
   TabsGroup()
 {
   addTab(new StatisticsPage());
-  // TODO addTab(new DebugPage());
+  addTab(new DebugPage());
   addTab(new AnalogsPage());
 }
 
