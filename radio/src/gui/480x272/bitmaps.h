@@ -33,6 +33,7 @@ extern const uint8_t LBM_TOPMENU_VOLUME_3[];
 extern const uint8_t LBM_TOPMENU_VOLUME_4[];
 extern const uint8_t LBM_TOPMENU_VOLUME_SCALE[];
 extern const uint8_t LBM_TOPMENU_TXBATT[];
+extern const uint8_t LBM_TOPMENU_TXBATT_CHARGE[];
 extern const uint8_t LBM_HTRIM_FRAME[];
 extern const uint8_t LBM_VTRIM_FRAME[];
 extern const uint8_t LBM_TRIM_SHADOW[];

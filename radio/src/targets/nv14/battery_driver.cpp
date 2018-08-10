@@ -17,41 +17,83 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+#include "opentx.h"
 
-/***************************************************************************************************
-
-***************************************************************************************************/
-#ifndef      __BATTERY_DRIVER_H__
-    #define  __BATTERY_DRIVER_H__
-/***************************************************************************************************
-
-***************************************************************************************************/
-    #ifdef      EXTERN
-        #undef  EXTERN
-    #endif
-
-    #ifdef  __BATTERY_DRIVER_C__
-        #define EXTERN
-    #else
-        #define EXTERN  extern
-    #endif
-
-#include "board.h"
-
-#define GET_ARRAY_SIZE( ARRAY )       ( ( sizeof( ARRAY ) ) / ( sizeof( ARRAY[0] ) ) )
+#define  __BATTERY_DRIVER_C__
 
 
-#define PWR_CHARGE_FINISHED_GPIO                 GPIOB
-#define PWR_CHARGE_FINISHED_GPIO_REG             PWR_CHARGE_FINISHED_GPIO->IDR
-#define PWR_CHARGE_FINISHED_GPIO_PIN             GPIO_Pin_13 // PB.13
+#define GET_ARRAY_SIZE( ARRAY )              ( ( sizeof( ARRAY ) ) / ( sizeof( ARRAY[0] ) ) )
 
-#define PWR_IN_CHARGING_GPIO                     GPIOB
-#define PWR_IN_CHARGING_GPIO_REG                 PWR_IN_CHARGING_GPIO->IDR
-#define PWR_IN_CHARGING_GPIO_PIN                 GPIO_Pin_14 // PB.14
 
-extern uint16_t getBatteryVoltage();   // returns current battery voltage in 10mV steps
+uint16_t  BatteryVoltageMv = 0;
 
+
+uint16_t battery_voltage_mv( void )
+{
+  uint32_t t;
+  static uint8_t  sampleCount = 0;
+  static uint8_t  isFirstSampleOK = 0;
+  static uint16_t maxVoltage;
+  static uint16_t minVoltage;
+  static uint32_t voltageSum;
+
+  t = getAnalogValue(TX_VOLTAGE);
+  t += g_eeGeneral.txVoltageCalibration;
+
+  if( 0 == sampleCount )
+  {
+      sampleCount = 1;
+      minVoltage = t;
+      maxVoltage = t;
+      voltageSum = t;
+  }
+  else
+  {
+      voltageSum += t;
+      if( t > maxVoltage )
+      {
+          maxVoltage = t;
+      }
+      else if( t < minVoltage )
+      {
+          minVoltage = t;
+      }
+      sampleCount++;
+      if( sampleCount >= 8 )
+      {
+          t = voltageSum - maxVoltage - minVoltage;
+          t /= ( sampleCount - 2 );
+          t *= ( 3300 * 20);
+          t /= ( 4095 * 10);
+          t = ( t * 100  + 50 ) / 100;
+
+          if( isFirstSampleOK )
+          {
+              BatteryVoltageMv = ( t + BatteryVoltageMv +  1 ) / 2;
+          }
+          else
+          {
+              BatteryVoltageMv = t;
+              isFirstSampleOK = !0;
+          }
+
+          sampleCount = 0;
+      }
+  }
+
+  return BatteryVoltageMv;
+}
+
+uint16_t getBatteryVoltage()
+{
+#if defined (PCBNV14)
+    return battery_voltage_mv() / 100;
+#else
+    int32_t instant_vbat = anaIn(TX_VOLTAGE);  // using filtered ADC value on purpose
+    return (uint16_t)((instant_vbat * (1000 + g_eeGeneral.txVoltageCalibration)) / 1629);
 #endif
+}
+
 
 
 

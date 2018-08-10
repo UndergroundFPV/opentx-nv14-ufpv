@@ -77,6 +77,7 @@ extern "C" {
 #include "touch_driver.h"
 #include "hallStick_driver.h"
 #include "lcd_driver.h"
+#include "battery_driver.h"
 
 #if defined(__cplusplus) && !defined(SIMU)
 }

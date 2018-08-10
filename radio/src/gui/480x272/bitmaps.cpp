@@ -64,6 +64,10 @@ const uint8_t LBM_TOPMENU_TXBATT[] = {
 #include "mask_txbat.lbm"
 };
 
+const uint8_t LBM_TOPMENU_TXBATT_CHARGE[] = {
+#include "mask_txbat_charge.lbm"
+};
+
 const uint8_t LBM_HTRIM_FRAME[] = {
 #include "mask_htrim_frame.lbm"
 };

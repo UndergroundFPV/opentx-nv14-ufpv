@@ -58,6 +58,7 @@ class DefaultTheme: public Theme
       lcdColorTable[TRIM_SHADOW_COLOR_INDEX] = BLACK;
       lcdColorTable[MAINVIEW_PANES_COLOR_INDEX] = WHITE;
       lcdColorTable[MAINVIEW_GRAPHICS_COLOR_INDEX] = RED;
+      lcdColorTable[BATTERY_CHARGE_COLOR_INDEX] = GREEN;
 
       // The header (top bar)
       lcdColorTable[HEADER_LOGO_BGCOLOR_INDEX] = RGB(0, 71, 157);
