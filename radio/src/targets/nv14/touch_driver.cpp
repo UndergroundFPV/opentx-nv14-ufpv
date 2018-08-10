@@ -93,7 +93,7 @@ Input:
 Output:
 ==================================================================================================*/
 static void TouchDelay( void )
-{ 
+{
   volatile unsigned int i;
 
   for( i = 0; i < 3; i++ )
@@ -127,7 +127,7 @@ Input:
 Output:
 ==================================================================================================*/
 static void TouchStop( void )
-{ 
+{
   CLR_TOUCH_SCL();
   TOUCH_DELAY();
   CLR_TOUCH_SDA();
@@ -143,7 +143,7 @@ Input:
 Output:
 ==================================================================================================*/
 static void  SendAckToTouch( unsigned char Ack )
-{ 
+{
   if( Ack )
   {
       SET_TOUCH_SDA();
@@ -152,7 +152,7 @@ static void  SendAckToTouch( unsigned char Ack )
   {
       CLR_TOUCH_SDA();
   }
-  
+
   SET_TOUCH_SCL();
   TOUCH_DELAY();
   CLR_TOUCH_SCL();
@@ -165,7 +165,7 @@ Input:
 Output:
 ==================================================================================================*/
 static unsigned char GetTouchAck( void )
-{ 
+{
   unsigned char i;
 
   SET_TOUCH_SDA();
@@ -181,7 +181,7 @@ static unsigned char GetTouchAck( void )
   {
       i = 0;
   }
-  
+
   CLR_TOUCH_SCL();
   SET_TOUCH_SDA_OUT();
   return( i );
@@ -225,7 +225,7 @@ Input:
 Output:
 ==================================================================================================*/
 static void SendByteToTouch( unsigned char ucSendData )
-{ 
+{
   unsigned char i;
 
   for( i = 0; i < 8; i++ )
@@ -240,7 +240,7 @@ static void SendByteToTouch( unsigned char ucSendData )
       {
           CLR_TOUCH_SDA();
       }
-      
+
       SET_TOUCH_SCL();
       ucSendData <<= 1;
       TOUCH_DELAY();
@@ -283,7 +283,7 @@ unsigned char ReadTouchData( unsigned char *pData, unsigned char Length )
           {
               break;
           }
-          
+
           while( Length )
           {
               *pData = ReceiveByteFromTouch();
@@ -345,7 +345,7 @@ void TouchDriver( void )
           Ty = TouchBuffer[5] & 0x0f;
           Ty <<= 8;
           Ty |= TouchBuffer[6];
-         
+
           #if defined( LCD_DIRECTION ) && ( LCD_DIRECTION == LCD_VERTICAL )
           Tx=LCD_WIDTH-Tx;
           Ty=LCD_HEIGHT-Ty;
@@ -355,7 +355,7 @@ void TouchDriver( void )
           Tx = x;
           #endif
           if( 2 == TouchEvent )
-          {		
+          {
               touchState.X = Tx;
               touchState.Y = Ty;
 
@@ -363,11 +363,13 @@ void TouchDriver( void )
               {
                   touchState.Event = TE_NONE;
                   TouchState = TOUCH_CLICK;
-                  
+
                   TouchStartX = Tx;
                   TouchStartY = Ty;
+
+                  backlightOn(); // TODO is that the best place ?
               }
-              else 
+              else
               {
 
                   if ( TOUCH_CLICK == TouchState )
@@ -399,7 +401,7 @@ void TouchDriver( void )
               Txold = Tx;
               Tyold = Ty;
           }
-          else 
+          else
           {
               if ( TOUCH_CLICK == TouchState )
               {

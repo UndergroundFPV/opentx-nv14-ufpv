@@ -240,7 +240,7 @@ void RadioSetupPage::build(Window * window)
 
     // Battery warning
     new StaticText(window, grid.getLabelSlot(true), STR_BATTERYWARNING);
-    edit = new NumberEdit(window, grid.getFieldSlot(), 40, 120, GET_SET_DEFAULT(g_eeGeneral.vBatWarn), PREC1);
+    edit = new NumberEdit(window, grid.getFieldSlot(), 30, 120, GET_SET_DEFAULT(g_eeGeneral.vBatWarn), PREC1);
     edit->setSuffix("v");
     grid.nextLine();
 
@@ -268,6 +268,31 @@ void RadioSetupPage::build(Window * window)
     // Backlight mode
     new StaticText(window, grid.getLabelSlot(true), STR_MODE);
     new Choice(window, grid.getFieldSlot(), STR_VBLMODE, e_backlight_mode_off, e_backlight_mode_on, GET_SET_DEFAULT(g_eeGeneral.backlightMode));
+    grid.nextLine();
+
+    // Delay
+    new StaticText(window, grid.getLabelSlot(true), STR_BLDELAY);
+    auto edit = new NumberEdit(window, grid.getFieldSlot(2, 0), 0, 600,
+      GET_DEFAULT(g_eeGeneral.lightAutoOff * 5),
+      SET_VALUE(g_eeGeneral.lightAutoOff, newValue / 5));
+    edit->setStep(5);
+    edit->setSuffix("s");
+    grid.nextLine();
+
+    // BRIGHT
+    new StaticText(window, grid.getLabelSlot(true), STR_BLONBRIGHTNESS);
+    new Slider(window, grid.getFieldSlot(), BACKLIGHT_LEVEL_MIN, BACKLIGHT_LEVEL_MAX,
+               [=]() -> int32_t {
+                 return BACKLIGHT_LEVEL_MAX - g_eeGeneral.backlightBright;
+               },
+               [=](int32_t newValue) {
+                 g_eeGeneral.backlightBright = BACKLIGHT_LEVEL_MAX - newValue;
+               });
+    grid.nextLine();
+
+    // DIM
+    new StaticText(window, grid.getLabelSlot(true), STR_BLOFFBRIGHTNESS);
+    new Slider(window, grid.getFieldSlot(), BACKLIGHT_LEVEL_MIN, BACKLIGHT_LEVEL_MAX, GET_SET_DEFAULT(g_eeGeneral.blOffBright));
     grid.nextLine();
 
     // Flash beep

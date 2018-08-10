@@ -412,18 +412,10 @@ void backlightEnable(uint8_t dutyCycle);
 #endif
 
 #define BACKLIGHT_LEVEL_MAX             100
-#define BACKLIGHT_LEVEL_MIN             46
-
-#if 1
+#define BACKLIGHT_LEVEL_MIN             0
 
 #define BACKLIGHT_ENABLE()              backlightEnable(unexpectedShutdown ? BACKLIGHT_LEVEL_MAX : BACKLIGHT_LEVEL_MAX-g_eeGeneral.backlightBright)
-//#warning "BACKLIGHT will be always ON ..."
-#define BACKLIGHT_DISABLE()             BACKLIGHT_ENABLE() // backlightEnable(unexpectedShutdown ? BACKLIGHT_LEVEL_MAX : g_eeGeneral.blOffBright)
-#else
-#define BACKLIGHT_ENABLE()                backlightEnable(true)
-#define BACKLIGHT_DISABLE()               backlightEnable(false)
-#endif
-
+#define BACKLIGHT_DISABLE()             backlightEnable(unexpectedShutdown ? BACKLIGHT_LEVEL_MAX : ((g_eeGeneral.blOffBright == BACKLIGHT_LEVEL_MIN) && (g_eeGeneral.backlightMode != e_backlight_mode_off)) ? 0 : g_eeGeneral.blOffBright)
 #define isBacklightEnabled()            true
 
 #if !defined(SIMU)
