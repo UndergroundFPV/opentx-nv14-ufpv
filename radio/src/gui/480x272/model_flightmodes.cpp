@@ -117,5 +117,7 @@ void ModelFlightModesPage::build(Window * window)
                    return trimsCheckTimer;
                  });
 
+  grid.nextLine();
+
   window->setInnerHeight(grid.getWindowHeight());
 }

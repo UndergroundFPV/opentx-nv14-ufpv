@@ -411,6 +411,8 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
     focus->bringToTop();
   }
 
+  grid.nextLine();
+
   window->setInnerHeight(grid.getWindowHeight());
 }
 

@@ -449,6 +449,9 @@ void SpecialFunctionsPage::build(Window * window, int8_t focusIndex)
 
     grid.spacer(button->height() + 5);
   }
+
+  grid.nextLine();
+
   window->setInnerHeight(grid.getWindowHeight());
 }
 

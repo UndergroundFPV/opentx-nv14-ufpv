@@ -913,6 +913,7 @@ bool isRfProtocolRxMsgOK(void)
     return isMsgOK && isFlySkyUsbDownload();
 }
 
+#if !defined(SIMU)
 void checkFlySkyFeedback(uint8_t port)
 {
   uint8_t byte;
@@ -972,6 +973,7 @@ void checkFlySkyFeedback(uint8_t port)
     }
   }
 }
+#endif
 
 void resetPulsesFlySky(uint8_t port)
 {
@@ -984,7 +986,9 @@ void resetPulsesFlySky(uint8_t port)
 
 void setupPulsesFlySky(uint8_t port)
 {
+#if !defined(SIMU)
   checkFlySkyFeedback(port);
+#endif
 
   initFlySkyArray(port);
   putFlySkyFrameHead(port);
@@ -1099,6 +1103,7 @@ void setupPulsesFlySky(uint8_t port)
   }
 }
 
+#if !defined(SIMU)
 void usb_transmit(uint8_t *buffer, uint32_t size)
 {
     for (int idx = 0; idx < size; idx++)
@@ -1106,6 +1111,7 @@ void usb_transmit(uint8_t *buffer, uint32_t size)
         usbSerialPutc(buffer[idx]);
     }
 }
+#endif
 
 void send_to_host(uint8_t *rf_rxdata, uint8_t *payloaderBuf, uint32_t nBytes)
 {

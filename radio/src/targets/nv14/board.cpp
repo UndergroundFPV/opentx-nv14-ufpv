@@ -258,13 +258,13 @@ void checkTrainerSettings()
 
 
 #define GET_ARRAY_SIZE( ARRAY )              ( ( sizeof( ARRAY ) ) / ( sizeof( ARRAY[0] ) ) )
-const U16 tTxBatteryLevel[] = { 3600, 3850, 4100, 4300 };
-const U8  TX_BATTERY_LEVEL_NUM = GET_ARRAY_SIZE( tTxBatteryLevel );
+const uint16_t tTxBatteryLevel[] = { 3600, 3850, 4100, 4300 };
+const uint8_t  TX_BATTERY_LEVEL_NUM = GET_ARRAY_SIZE( tTxBatteryLevel );
 
 
-U8 CalculateBatteryLevel( U16 Value, U8 CurrentLevel, U8 Number, U16 *pLevelTable )
+uint8_t CalculateBatteryLevel( uint16_t Value, uint8_t CurrentLevel, uint8_t Number, uint16_t *pLevelTable )
 {
-  U32 Level;
+  uint32_t Level;
 
   if( CurrentLevel > Number )
   {
@@ -302,19 +302,19 @@ U8 CalculateBatteryLevel( U16 Value, U8 CurrentLevel, U8 Number, U16 *pLevelTabl
 }
 
 
-U16  BatteryVoltageMv = 0;
-U8   TxBatteryLevel = 0;
+uint16_t  BatteryVoltageMv = 0;
+uint8_t   TxBatteryLevel = 0;
 
 extern uint16_t adcValues[NUM_ANALOGS] __DMA;
 #if 1
 void BatteryVoltageDetection( void )
 {
-  U32 t;
-  static U8  SampleCount = 0;
-  static U8  IsFirstSampleOK = 0;
-  static U16 MaxVoltage;
-  static U16 MinVoltage;
-  static U32 VoltageSum;
+  uint32_t t;
+  static uint8_t  SampleCount = 0;
+  static uint8_t  IsFirstSampleOK = 0;
+  static uint16_t MaxVoltage;
+  static uint16_t MinVoltage;
+  static uint32_t VoltageSum;
 
   t = getAnalogValue(TX_VOLTAGE);//READ_BATTERY_VOLTAGE_AD();
   t += g_eeGeneral.txVoltageCalibration;
@@ -355,7 +355,7 @@ void BatteryVoltageDetection( void )
               BatteryVoltageMv = t;
               IsFirstSampleOK = !0;
           }
-          TxBatteryLevel = CalculateBatteryLevel( BatteryVoltageMv, TxBatteryLevel, GET_ARRAY_SIZE( tTxBatteryLevel ), ( U16 *)tTxBatteryLevel );
+          TxBatteryLevel = CalculateBatteryLevel( BatteryVoltageMv, TxBatteryLevel, GET_ARRAY_SIZE( tTxBatteryLevel ), ( uint16_t *)tTxBatteryLevel );
           SampleCount = 0;
       }
   }

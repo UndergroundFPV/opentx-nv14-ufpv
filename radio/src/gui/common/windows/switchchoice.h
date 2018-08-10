@@ -52,7 +52,12 @@ class SwitchChoice : public Window {
 
     void setAvailableHandler(std::function<bool(int)> handler)
     {
-        isValueAvailable = std::move(handler);
+      isValueAvailable = std::move(handler);
+    }
+
+    void setTextHandler(std::function<std::string(int32_t)> handler)
+    {
+      textHandler = std::move(handler);
     }
 
   protected:
@@ -61,6 +66,7 @@ class SwitchChoice : public Window {
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
     std::function<bool(int)> isValueAvailable = isSwitchAvailableInMixes;
+    std::function<std::string(int32_t)> textHandler;
     void fillMenu(Menu * menu, std::function<bool(int16_t)> condition=nullptr);
 };
 

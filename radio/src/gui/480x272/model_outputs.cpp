@@ -215,6 +215,8 @@ void ModelOutputsPage::build(Window * window, int8_t focusChannel)
     grid.spacer(button->height() + 5);
   }
 
+  grid.nextLine();
+
   window->setInnerHeight(grid.getWindowHeight());
 }
 

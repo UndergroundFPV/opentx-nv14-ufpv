@@ -534,5 +534,7 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
   new Choice(window, grid.getFieldSlot(3, 2), STR_VVARIOCENTER, 0, 1, GET_SET_DEFAULT(g_model.frsky.varioCenterSilent));
   grid.nextLine();
 
+  grid.nextLine();
+
   window->setInnerHeight(grid.getWindowHeight());
 }
