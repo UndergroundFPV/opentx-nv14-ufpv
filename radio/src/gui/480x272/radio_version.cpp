@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -31,6 +31,8 @@ void RadioVersionPage::build(Window * window)
 {
   GridLayout grid;
   grid.spacer(8);
+
+  getCPUUniqueID(reusableBuffer.version.id);
 
   new StaticText(window, grid.getLabelSlot(), "FW Version");
   new StaticText(window, grid.getFieldSlot(), vers_stamp);
