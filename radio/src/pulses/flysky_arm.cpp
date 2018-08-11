@@ -1029,7 +1029,7 @@ void setupPulsesFlySky(uint8_t port)
           putFlySkyRfInit(port);
           break;
 
-        case FLYSKY_MODULE_STATE_BIND:          
+        case FLYSKY_MODULE_STATE_BIND:
           putFlySkyBindReceiver(port);
           break;
 
@@ -1128,6 +1128,7 @@ void setupPulsesFlySky(uint8_t port)
   }
 }
 
+#if !defined(SIMU)
 void usbDownloadTransmit(uint8_t *buffer, uint32_t size)
 {
     for (int idx = 0; idx < size; idx++)
@@ -1135,3 +1136,4 @@ void usbDownloadTransmit(uint8_t *buffer, uint32_t size)
         usbSerialPutc(buffer[idx]);
     }
 }
+#endif
