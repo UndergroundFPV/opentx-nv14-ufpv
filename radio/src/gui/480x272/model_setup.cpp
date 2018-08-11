@@ -34,9 +34,117 @@ void resetModuleSettings(uint8_t module)
   }
 }
 
+class FailSafeBody : public Window {
+  public:
+    FailSafeBody(Window * parent, const rect_t &rect, uint8_t moduleIndex) :
+      Window(parent, rect),
+      moduleIndex(moduleIndex)
+    {
+      auto out2fail = new TextButton(this, {10, 520, LCD_W - 20, 26 }, STR_OUTPUTS2FAILSAFE);
+      out2fail->setPressHandler([=]() {
+        setCustomFailsafe(moduleIndex);
+        storageDirty(EE_MODEL);
+        return 0;
+      });
+    }
+
+    void checkEvents() override
+    {
+      invalidate();
+    }
+
+    void paint(BitmapBuffer * dc) override
+    {
+      GridLayout grid;
+      grid.setLabelWidth(60);
+
+      coord_t x = 20;
+      coord_t y = 0;
+      const uint8_t SLIDER_W = 128;
+      const int lim = (g_model.extendedLimits ? (512 * LIMIT_EXT_PERCENT / 100) : 512) * 2;
+
+      for (int ch=0; ch < maxModuleChannels(moduleIndex); ch++, y+=32) {
+        // Channel name if present, number if not
+        x = 0.;
+        if (g_model.limitData[ch].name[0] != '\0') {
+          putsChn(x + MENUS_MARGIN_LEFT, y - 3, ch + 1, TINSIZE);
+          lcdDrawSizedText(x + MENUS_MARGIN_LEFT, y + 5, g_model.limitData[ch].name,
+                           sizeof(g_model.limitData[ch].name), ZCHAR | SMLSIZE);
+        } else {
+          putsChn(x + MENUS_MARGIN_LEFT, y, ch + 1, 0);
+        }
+
+        new NumberEdit(this, grid.getFieldSlot(3, 0), -lim, lim,
+                       GET_DEFAULT(calcRESXto1000(g_model.moduleData[moduleIndex].failsafeChannels[ch])),
+                       SET_VALUE(g_model.moduleData[moduleIndex].failsafeChannels[ch], newValue),
+                       PREC1);
+        grid.nextLine();
+
+        int32_t failsafeValue = g_model.moduleData[moduleIndex].failsafeChannels[ch];
+        int32_t channelValue = channelOutputs[ch];
+
+
+        // Gauge
+        x = 160;
+        lcdDrawRect(x, y + 3, SLIDER_W + 1, 12);
+        const coord_t lenChannel = limit((uint8_t) 1, uint8_t((abs(channelValue) * SLIDER_W / 2 + lim / 2) / lim),
+                                         uint8_t(SLIDER_W / 2));
+        const coord_t lenFailsafe = limit((uint8_t) 1, uint8_t((abs(failsafeValue) * SLIDER_W / 2 + lim / 2) / lim),
+                                          uint8_t(SLIDER_W / 2));
+        x += SLIDER_W / 2;
+        const coord_t xChannel = (channelValue > 0) ? x : x + 1 - lenChannel;
+        const coord_t xFailsafe = (failsafeValue > 0) ? x : x + 1 - lenFailsafe;
+        lcdDrawSolidFilledRect(xChannel, y + 4, lenChannel, 5, TEXT_COLOR);
+        lcdDrawSolidFilledRect(xFailsafe, y + 9, lenFailsafe, 5, ALARM_COLOR);
+      }
+      getParent()->moveWindowsTop(top(), adjustHeight());
+    }
+
+  protected:
+    tmr10ms_t lastRefresh = 0;
+    uint8_t moduleIndex;
+};
+
+class FailSafeFooter : public Window {
+  public:
+    FailSafeFooter(Window * parent, const rect_t &rect) :
+      Window(parent, rect)
+    {
+    }
+
+    void paint(BitmapBuffer * dc) override
+    {
+    }
+};
+
+class FailSafePage : public PageTab {
+  public:
+    FailSafePage(uint8_t moduleIndex) :
+      PageTab("FAILSAFE", ICON_STATS_ANALOGS),
+      moduleIndex(moduleIndex)
+    {
+    }
+
+    void build(Window * window) override
+    {
+      new FailSafeBody(window, {0, 0, LCD_W, window->height() - footerHeight}, moduleIndex );
+      new FailSafeFooter(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
+    }
+
+  protected:
+    static constexpr coord_t footerHeight = 30;
+    uint8_t moduleIndex;
+};
+
+FailSafeMenu::FailSafeMenu(uint8_t moduleIndex) :
+  TabsGroup()
+{
+  addTab(new FailSafePage(moduleIndex));
+}
+
 class ModuleWindow : public Window {
   public:
-    ModuleWindow(Window * parent, const rect_t &rect, uint8_t moduleIndex):
+    ModuleWindow(Window * parent, const rect_t &rect, uint8_t moduleIndex) :
       Window(parent, rect),
       moduleIndex(moduleIndex)
     {
@@ -181,14 +289,14 @@ class ModuleWindow : public Window {
       if (moduleType == MODULE_TYPE_FLYSKY) {
         new StaticText(this, grid.getLabelSlot(true), STR_RXFREQUENCY);
         new NumberEdit(this, grid.getFieldSlot(), 50, 400,
-                   GET_DEFAULT(g_model.moduleData[moduleIndex].romData.rx_freq[0] +
-                               g_model.moduleData[moduleIndex].romData.rx_freq[1] * 256),
-                   [=](int32_t newValue) -> void {
-                     g_model.moduleData[moduleIndex].romData.rx_freq[0] = newValue & 0xFF;
-                     g_model.moduleData[moduleIndex].romData.rx_freq[1] = newValue >> 8;
-                     SET_DIRTY();
-                     onIntmoduleReceiverSetFrequency(INTERNAL_MODULE);
-                   });
+                       GET_DEFAULT(g_model.moduleData[moduleIndex].romData.rx_freq[0] +
+                                   g_model.moduleData[moduleIndex].romData.rx_freq[1] * 256),
+                       [=](int32_t newValue) -> void {
+                         g_model.moduleData[moduleIndex].romData.rx_freq[0] = newValue & 0xFF;
+                         g_model.moduleData[moduleIndex].romData.rx_freq[1] = newValue >> 8;
+                         SET_DIRTY();
+                         onIntmoduleReceiverSetFrequency(INTERNAL_MODULE);
+                       });
         grid.nextLine();
       }
 
@@ -260,7 +368,7 @@ class ModuleWindow : public Window {
         if (g_model.moduleData[moduleIndex].failsafeMode == FAILSAFE_CUSTOM) {
           new TextButton(this, grid.getFieldSlot(2, 1), STR_SET,
                          [=]() -> uint8_t {
-                           // TODO launch the failsafe window
+                           new FailSafeMenu(moduleIndex);
                            return 1;
                          });
         }
@@ -425,7 +533,7 @@ void ModelSetupPage::build(Window * window)
     // Timer mode
     new StaticText(window, grid.getLabelSlot(true), STR_MODE);
     new SwitchChoice(window, grid.getFieldSlot(2, 0), -TMRMODE_COUNT - SWSRC_LAST + 1, TMRMODE_COUNT + SWSRC_LAST - 1, GET_SET_DEFAULT(timer->mode));
-    #warning "Timer mode not finished!"
+#warning "Timer mode not finished!"
     new TimeEdit(window, grid.getFieldSlot(2, 1), 0, TIMER_MAX, GET_SET_DEFAULT(timer->start));
     grid.nextLine();
 
@@ -525,7 +633,8 @@ void ModelSetupPage::build(Window * window)
       if (i > 0 && (i % 3) == 0)
         grid.nextLine();
 
-      auto button = new TextButton(window, grid.getFieldSlot(3, i % 3), getSwitchWarningString(s, i), nullptr, (BF_GET(g_model.switchWarningState, 3 * i, 3) == 0 ? 0 : BUTTON_CHECKED));
+      auto button = new TextButton(window, grid.getFieldSlot(3, i % 3), getSwitchWarningString(s, i), nullptr,
+                                   (BF_GET(g_model.switchWarningState, 3 * i, 3) == 0 ? 0 : BUTTON_CHECKED));
       button->setPressHandler([button, i] {
         uint8_t newstate = BF_GET(g_model.switchWarningState, 3 * i, 3);
         if (newstate == 1 && SWITCH_CONFIG(i) != SWITCH_3POS)

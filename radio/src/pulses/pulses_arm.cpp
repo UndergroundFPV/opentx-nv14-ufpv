@@ -289,3 +289,17 @@ void setupPulses(uint8_t port)
     }
   }
 }
+
+void setCustomFailsafe(uint8_t moduleIndex)
+{
+  if (moduleIndex < NUM_MODULES) {
+    for (int ch=0; ch<MAX_OUTPUT_CHANNELS; ch++) {
+      if (ch < g_model.moduleData[moduleIndex].channelsStart || ch >= maxModuleChannels(moduleIndex) + g_model.moduleData[moduleIndex].channelsStart) {
+        g_model.moduleData[moduleIndex].failsafeChannels[ch] = 0;
+      }
+      else if (g_model.moduleData[moduleIndex].failsafeChannels[ch] < FAILSAFE_CHANNEL_HOLD) {
+        g_model.moduleData[moduleIndex].failsafeChannels[ch] = channelOutputs[ch];
+      }
+    }
+  }
+}

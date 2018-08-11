@@ -19,7 +19,11 @@
  */
 
 #include "tabsgroup.h"
-#include "board.h"
+
+class FailSafeMenu: public TabsGroup {
+  public:
+    FailSafeMenu(uint8_t moduleIndex);
+};
 
 class TextButton;
 class ModuleWindow;
