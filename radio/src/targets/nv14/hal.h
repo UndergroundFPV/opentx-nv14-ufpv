@@ -315,9 +315,9 @@
 
 // Internal Module
 #define INTMODULE
-#define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOF | RCC_AHB1Periph_DMA1)
-#define INTMODULE_PWR_GPIO              GPIOF
-#define INTMODULE_PWR_GPIO_PIN          GPIO_Pin_9  // PF.09
+#define INTMODULE_RCC_AHB1Periph        (RCC_AHB1Periph_GPIOF | RCC_AHB1Periph_GPIOH | RCC_AHB1Periph_DMA1)
+#define INTMODULE_PWR_GPIO              GPIOH
+#define INTMODULE_PWR_GPIO_PIN          GPIO_Pin_9  // PH.09
 #define INTMODULE_TX_GPIO               GPIOF
 #define INTMODULE_TX_GPIO_PIN           GPIO_Pin_7  // PF.07
 #define INTMODULE_RX_GPIO               GPIOF

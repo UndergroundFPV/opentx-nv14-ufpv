@@ -162,11 +162,13 @@ void sendByteDsm2(uint8_t b);
 void putDsm2Flush();
 void putDsm2SerialBit(uint8_t bit);
 void sendByteSbus(uint8_t byte);
-void onFlySkyBindReceiver(uint8_t port);
-void onFlySkyReceiverSetPulse(uint8_t port, uint8_t mode_and_port);
+void onIntmoduleBindReceiver(uint8_t port);
+void onIntmoduleSetPower(bool isPowerOn);
+void onIntmoduleReceiverSetFrequency(uint8_t port);
+void onIntmoduleReceiverSetPulse(uint8_t port, uint8_t mode_and_port);
 void intmoduleSendBufferDMA(uint8_t * data, uint8_t size);
-void onFlySkyUpdateRadioFirmwareStart(uint8_t port);
-void usb_transmit(uint8_t *buffer, uint32_t size);
+void onIntmoduleUsbDownloadStart(uint8_t port);
+void usbDownloadTransmit(uint8_t *buffer, uint32_t size);
 
 #if defined(HUBSAN)
 void Hubsan_Init();
