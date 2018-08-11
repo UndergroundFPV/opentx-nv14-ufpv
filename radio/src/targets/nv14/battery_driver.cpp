@@ -51,7 +51,9 @@ uint16_t get_battery_charge_state()
 
 uint16_t getBatteryVoltage()
 {
-#if defined (PCBNV14)
+#if defined (SIMU)
+  return 350 + g_eeGeneral.txVoltageCalibration;
+#else
   int32_t t = getAnalogValue(TX_VOLTAGE) + g_eeGeneral.txVoltageCalibration;
 
   t *= ( 3300 * 20);
@@ -59,9 +61,6 @@ uint16_t getBatteryVoltage()
   t = ( t * 100  + 500 ) / 1000;
 
   return t;
-#else
-    int32_t instant_vbat = anaIn(TX_VOLTAGE);  // using filtered ADC value on purpose
-    return (uint16_t)((instant_vbat * (1000 + g_eeGeneral.txVoltageCalibration)) / 1629);
 #endif
 }
 

@@ -26,15 +26,6 @@
 /***************************************************************************************************
 
 ***************************************************************************************************/
-    #ifdef      EXTERN
-        #undef  EXTERN
-    #endif
-
-    #ifdef  __BATTERY_DRIVER_C__
-        #define EXTERN
-    #else
-        #define EXTERN  extern
-    #endif
 
 #include "board.h"
 
@@ -57,12 +48,11 @@ enum ChargeState
 #define READ_CHARGE_FINISHED_STATE()             GPIO_ReadInputDataBit( PWR_CHARGE_FINISHED_GPIO, PWR_CHARGE_FINISHED_GPIO_PIN )
 #define READ_CHARGING_STATE()                    GPIO_ReadInputDataBit( PWR_CHARGING_GPIO, PWR_CHARGING_GPIO_PIN )
 
-EXTERN void init_battery_charge();
-EXTERN uint16_t get_battery_charge_state();
-EXTERN uint16_t getBatteryVoltage();   // returns current battery voltage in 10mV steps
+extern void init_battery_charge();
+extern uint16_t get_battery_charge_state();
+extern uint16_t getBatteryVoltage();   // returns current battery voltage in 10mV steps
 
 #endif
-
 
 
 
