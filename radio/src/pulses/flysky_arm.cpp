@@ -65,7 +65,7 @@ enum DEBUG_RF_FRAME_PRINT_E {
     BOTH_FRAME_PRINT
 };
 #define DEBUG_RF_FRAME_PRINT            FRAME_PRINT_OFF
-#define FLYSKY_MODULE_TIMEOUT           55 /* ms */
+#define FLYSKY_MODULE_TIMEOUT           155 /* ms */
 #define NUM_OF_NV14_CHANNELS            (14)
 #define VALID_CH_DATA(v)                ((v) > 900 && (v) < 2100)
 
@@ -852,7 +852,7 @@ void parseFlySkyFeedbackFrame(uint8_t port)
       break;
 
     case COMMAND_ID_RF_GET_CONFIG:
-      modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_GET_RECEIVER_CONFIG;
+      modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_RX_PWM_PPM;
       incrFlySkyFrame(port);
       break; }
 
@@ -906,7 +906,7 @@ void parseFlySkyFeedbackFrame(uint8_t port)
       break; }
 
     case COMMAND_ID_SET_RX_IBUS_SBUS: {
-      modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_DEFAULT;
+      modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_RX_FREQUENCY;
       break; }
 
     case COMMAND_ID_SET_RX_SERVO_FREQ: {
