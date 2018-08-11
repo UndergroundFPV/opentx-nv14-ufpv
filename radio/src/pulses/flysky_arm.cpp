@@ -64,8 +64,8 @@ enum DEBUG_RF_FRAME_PRINT_E {
     TX_FRAME_ONLY,
     BOTH_FRAME_PRINT
 };
-#define DEBUG_RF_FRAME_PRINT            FRAME_PRINT_OFF
-#define FLYSKY_MODULE_TIMEOUT           155 /* ms */
+#define DEBUG_RF_FRAME_PRINT            BOTH_FRAME_PRINT
+#define FLYSKY_MODULE_TIMEOUT           55 /* ms */
 #define NUM_OF_NV14_CHANNELS            (14)
 #define VALID_CH_DATA(v)                ((v) > 900 && (v) < 2100)
 
@@ -536,7 +536,7 @@ void onIntmoduleReceiverSetPulse(uint8_t port, uint8_t mode_and_port) // mode_an
 {
     if((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY)) TRACE("PulseMode+Port: %0d", mode_and_port);
     onFlySkyReceiverPulseMode(port);
-    setupPulsesFlySky(port); // effect immediatly
+    setupPulsesFlySky(port); // effect immediately
     //modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_TX_POWER;
 }
 
@@ -897,20 +897,20 @@ void parseFlySkyFeedbackFrame(uint8_t port)
       modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_DEFAULT;
       return; }
 
-    case COMMAND_ID_SET_RX_IBUS_SBUS: {
-      modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_DEFAULT;
-      break; }
-
-    case COMMAND_ID_SET_RX_SERVO_FREQ: {
-      modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_DEFAULT;
-      break; }
-
     case COMMAND_ID0D_SET_TX_POWER: {
       modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_INIT;
       break; }
 
     case COMMAND_ID_SET_RX_PWM_PPM: {
       modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_RX_IBUS_SBUS;
+      break; }
+
+    case COMMAND_ID_SET_RX_IBUS_SBUS: {
+      modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_DEFAULT;
+      break; }
+
+    case COMMAND_ID_SET_RX_SERVO_FREQ: {
+      modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_DEFAULT;
       break; }
 
     case COMMAND_ID0C_UPDATE_RF_FIRMWARE: {
@@ -1114,10 +1114,9 @@ void setupPulsesFlySky(uint8_t port)
 
   if((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY)) {
     /* print each command, except channel data by interval */
-    if ((modulePulsesData[port].flysky.state < FLYSKY_MODULE_STATE_DEFAULT) || (set_loop_cnt++ % 100 ==0)) {
-      uint8_t * data = modulePulsesData[port].pxx_uart.pulses;
+    uint8_t * data = modulePulsesData[port].pxx_uart.pulses;
+    if ( data[3] != COMMAND_ID_SEND_CHANNEL_DATA || (set_loop_cnt++ % 100 ==0)) {
       uint8_t size = modulePulsesData[port].pxx_uart.ptr - data;
-
       TRACE_NOCRLF("TX(State%0d):", modulePulsesData[port].flysky.state);
       for (int idx = 0; idx < size; idx++)
       {
