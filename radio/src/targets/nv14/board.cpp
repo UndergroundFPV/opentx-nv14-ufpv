@@ -182,6 +182,7 @@ void boardInit()
   // and this section is un-initialized
   memset(&g_FATFS_Obj, 0, sizeof(g_FATFS_Obj));
 
+  init_battery_charge();
   monitorInit();
   keysInit();
   adcInit();

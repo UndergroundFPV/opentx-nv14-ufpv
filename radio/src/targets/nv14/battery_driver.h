@@ -38,18 +38,28 @@
 
 #include "board.h"
 
-#define GET_ARRAY_SIZE( ARRAY )       ( ( sizeof( ARRAY ) ) / ( sizeof( ARRAY[0] ) ) )
+enum ChargeState
+{
+  CHARGE_NONE,
+  CHARGE_STARTED,
+  CHARGE_FINISHED
+};
 
 
 #define PWR_CHARGE_FINISHED_GPIO                 GPIOB
 #define PWR_CHARGE_FINISHED_GPIO_REG             PWR_CHARGE_FINISHED_GPIO->IDR
 #define PWR_CHARGE_FINISHED_GPIO_PIN             GPIO_Pin_13 // PB.13
 
-#define PWR_IN_CHARGING_GPIO                     GPIOB
-#define PWR_IN_CHARGING_GPIO_REG                 PWR_IN_CHARGING_GPIO->IDR
-#define PWR_IN_CHARGING_GPIO_PIN                 GPIO_Pin_14 // PB.14
+#define PWR_CHARGING_GPIO                        GPIOB
+#define PWR_CHARGING_GPIO_REG                    PWR_CHARGING_GPIO->IDR
+#define PWR_CHARGING_GPIO_PIN                    GPIO_Pin_14 // PB.14
 
-extern uint16_t getBatteryVoltage();   // returns current battery voltage in 10mV steps
+#define READ_CHARGE_FINISHED_STATE()             GPIO_ReadInputDataBit( PWR_CHARGE_FINISHED_GPIO, PWR_CHARGE_FINISHED_GPIO_PIN )
+#define READ_CHARGING_STATE()                    GPIO_ReadInputDataBit( PWR_CHARGING_GPIO, PWR_CHARGING_GPIO_PIN )
+
+EXTERN void init_battery_charge();
+EXTERN uint16_t get_battery_charge_state();
+EXTERN uint16_t getBatteryVoltage();   // returns current battery voltage in 10mV steps
 
 #endif
 

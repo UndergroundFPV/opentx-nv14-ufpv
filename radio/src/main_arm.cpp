@@ -131,9 +131,6 @@ void checkBatteryAlarms()
 
 void checkBattery()
 {
-#if defined(PCBNV14)
-  g_vbat100mV = getBatteryVoltage();
-#else
   static uint32_t batSum;
   static uint8_t sampleCount;
   // filter battery voltage by averaging it
@@ -152,17 +149,12 @@ void checkBattery()
       // TRACE("checkBattery(): g_vbat100mV = %d", g_vbat100mV);
     }
   }
-#endif
 }
 
-void periodicTick_50ms()
-{
-  checkBattery();
-}
 
 void periodicTick_1s()
 {
-  //checkBattery();
+  checkBattery();
 }
 
 void periodicTick_10s()
@@ -178,9 +170,6 @@ void periodicTick()
   static uint8_t count10s;
   static uint32_t lastTime;
 
-  if ( (get_tmr10ms() - lastTime) >= 5 ) {
-    periodicTick_50ms();
-  }
   if ( (get_tmr10ms() - lastTime) >= 100 ) {
     lastTime += 100;
     periodicTick_1s();

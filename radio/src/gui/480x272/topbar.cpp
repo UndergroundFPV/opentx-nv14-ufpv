@@ -84,10 +84,25 @@ void drawTopBar()
   /* Tx battery */
 #if defined (PCBNV14)
   uint8_t bars = limit<int8_t>(0, 6 * (g_vbat100mV - g_eeGeneral.vBatMin - 90) / (30 + g_eeGeneral.vBatMax - g_eeGeneral.vBatMin), 5);
+  uint8_t charge_state = get_battery_charge_state();
 
   lcdDrawSolidFilledRect(LCD_W-123, 29, (bars + 1) * 20 / 6, 9,  BATTERY_CHARGE_COLOR);
 
-  lcdDrawBitmapPattern(LCD_W-130, 24, LBM_TOPMENU_TXBATT, MENU_TITLE_COLOR);
+  if (charge_state == CHARGE_STARTED || charge_state == CHARGE_FINISHED)
+  {
+    lcdDrawBitmapPattern(LCD_W-130, 24, LBM_TOPMENU_TXBATT_CHARGE, MENU_TITLE_COLOR);
+
+    if (charge_state == CHARGE_FINISHED)
+    {
+        /* Note charge finished */
+    }
+  }
+  else
+  {
+    lcdDrawBitmapPattern(LCD_W-130, 24, LBM_TOPMENU_TXBATT, MENU_TITLE_COLOR);
+  }
+
+
 #else
   uint8_t bars = limit<int8_t>(0, 6 * (g_vbat100mV - g_eeGeneral.vBatMin - 90) / (30 + g_eeGeneral.vBatMax - g_eeGeneral.vBatMin), 5);
 
