@@ -97,6 +97,7 @@ class ModuleWindow : public Window {
                                 [=](int32_t newValue) {
                                   g_model.moduleData[moduleIndex].type = newValue;
                                   SET_DIRTY();
+                                  onIntmoduleSetPower(moduleType == MODULE_TYPE_FLYSKY);
                                   resetModuleSettings(moduleIndex);
                                   update();
                                   moduleChoice->setFocus();
@@ -112,7 +113,7 @@ class ModuleWindow : public Window {
                    [=](int32_t newValue) -> void {
                      g_model.moduleData[moduleIndex].romData.mode = newValue;
                      SET_DIRTY();
-                     onFlySkyReceiverSetPulse(INTERNAL_MODULE, newValue);
+                     onIntmoduleReceiverSetPulse(INTERNAL_MODULE, newValue);
                    });
       }
 
@@ -186,7 +187,7 @@ class ModuleWindow : public Window {
                      g_model.moduleData[moduleIndex].romData.rx_freq[0] = newValue & 0xFF;
                      g_model.moduleData[moduleIndex].romData.rx_freq[1] = newValue >> 8;
                      SET_DIRTY();
-                     onFlySkyReceiverSetPulse(INTERNAL_MODULE, newValue);
+                     onIntmoduleReceiverSetFrequency(INTERNAL_MODULE);
                    });
         grid.nextLine();
       }
@@ -209,7 +210,7 @@ class ModuleWindow : public Window {
           else {
             bindButton->setText(STR_MODULE_BINDING);
             if (isModuleFlysky(moduleIndex))
-              onFlySkyBindReceiver(moduleIndex);
+              onIntmoduleBindReceiver(moduleIndex);
             else
               moduleFlag[moduleIndex] = MODULE_BIND;
             return 1;

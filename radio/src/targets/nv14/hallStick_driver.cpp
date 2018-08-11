@@ -517,7 +517,7 @@ void hallStick_GetTxDataFromUSB( void )
 
                 if ( 0xAE == HallProtocolTx.hallID.ID && HallProtocolTx.length == 0 )
                 {   // 55 AE 00 D3 47
-                    onFlySkyUpdateRadioFirmwareStart(INTERNAL_MODULE);
+                    onIntmoduleUsbDownloadStart(INTERNAL_MODULE);
                     break;
                 }
 
@@ -586,7 +586,7 @@ void hall_stick_loop(void)
                 //TRACE("HALL: %02X %02X %02X ...%04X", pt[0], pt[1], pt[2], HallProtocol.checkSum);
                 pt[HallProtocol.length + 3] = HallProtocol.checkSum & 0xFF;
                 pt[HallProtocol.length + 4] = HallProtocol.checkSum >> 8;
-                usb_transmit( pt, HallProtocol.length + 5 );
+                usbDownloadTransmit( pt, HallProtocol.length + 5 );
                 break;
             }
             //printf_log_now = 1;

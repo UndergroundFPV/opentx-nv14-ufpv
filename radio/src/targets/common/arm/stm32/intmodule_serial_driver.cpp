@@ -64,8 +64,6 @@ void intmoduleNoneStart()
 static uint8_t intmodule_hal_inited = 0;
 void intmodulePxxStart()
 {
-  INTERNAL_MODULE_ON();
-
   NVIC_InitTypeDef NVIC_InitStructure;
   NVIC_InitStructure.NVIC_IRQChannel = INTMODULE_TX_DMA_Stream_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
@@ -83,6 +81,16 @@ void intmodulePxxStart()
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_Init(INTMODULE_TX_GPIO, &GPIO_InitStructure);
+
+  // Init Module PWR
+  GPIO_ResetBits(INTMODULE_PWR_GPIO, INTMODULE_PWR_GPIO_PIN);
+  GPIO_InitStructure.GPIO_Pin = INTMODULE_PWR_GPIO_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+  GPIO_Init(INTMODULE_PWR_GPIO, &GPIO_InitStructure);
+  INTERNAL_MODULE_ON();
 
   USART_DeInit(INTMODULE_USART);
   USART_InitTypeDef USART_InitStructure;
