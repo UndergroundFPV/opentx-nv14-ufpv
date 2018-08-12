@@ -487,6 +487,14 @@ void setFlySkyChannelData(int channel, int16_t servoValue)
     }
 }
 
+void sendPulsesFrameByState(uint8_t port, uint8_t frameState)
+{
+    modulePulsesData[port].flysky.state = frameState;
+    modulePulsesData[port].flysky.state_index = FLYSKY_MODULE_TIMEOUT;
+    //setupPulsesFlySky(port); // effect immediately
+}
+
+
 bool isRxBindingState(uint8_t port)
 {
     return moduleFlag[port] == MODULE_BIND;
@@ -528,16 +536,13 @@ void onFlySkyReceiverPulsePort(uint8_t port)
 
 void onIntmoduleReceiverSetFrequency(uint8_t port)
 {
-    modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_RX_FREQUENCY;
-    setupPulsesFlySky(port); // effect immediatly
+    sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_FREQUENCY);
 }
 
 void onIntmoduleReceiverSetPulse(uint8_t port, uint8_t mode_and_port) // mode_and_port = 0,1,2,3
 {
     if((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY)) TRACE("PulseMode+Port: %0d", mode_and_port);
-    onFlySkyReceiverPulseMode(port);
-    setupPulsesFlySky(port); // effect immediately
-    //modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_TX_POWER;
+    sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_PWM_PPM);
 }
 
 void onFlySkyTransmitterPower(uint8_t port, uint8_t dBmValue)
@@ -587,7 +592,6 @@ void onFlySkyGetTransmitterFirmwareVersion(uint8_t port)
 {
     modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_GET_RF_FW_VERSION;
 }
-
 
 void initFlySkyArray(uint8_t port)
 {
@@ -852,8 +856,8 @@ void parseFlySkyFeedbackFrame(uint8_t port)
       break;
 
     case COMMAND_ID_RF_GET_CONFIG:
-      modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_RX_PWM_PPM;
-      incrFlySkyFrame(port);
+      modulePulsesData[port].flysky.frame_index = frame_number;
+      sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_GET_RECEIVER_CONFIG);
       break; }
 
     case COMMAND_ID_RX_SENSOR_DATA: {
@@ -1000,8 +1004,9 @@ void resetPulsesFlySky(uint8_t port)
   modulePulsesData[port].flysky.state_index = 0;
   modulePulsesData[port].flysky.esc_state = 0;
   moduleFlag[port] = MODULE_NORMAL_MODE;
-  if (50 > g_model.moduleData[port].romData.rx_freq[0] &&
-      0 == g_model.moduleData[port].romData.rx_freq[1])
+  uint16_t rx_freq = g_model.moduleData[port].romData.rx_freq[0];
+  rx_freq += (g_model.moduleData[port].romData.rx_freq[1] * 256);
+  if (50 > rx_freq || 400 < rx_freq)
   {
       g_model.moduleData[port].romData.rx_freq[0] = 50;
   }
@@ -1117,7 +1122,7 @@ void setupPulsesFlySky(uint8_t port)
     uint8_t * data = modulePulsesData[port].pxx_uart.pulses;
     if ( data[3] != COMMAND_ID_SEND_CHANNEL_DATA || (set_loop_cnt++ % 100 ==0)) {
       uint8_t size = modulePulsesData[port].pxx_uart.ptr - data;
-      TRACE_NOCRLF("TX(State%0d):", modulePulsesData[port].flysky.state);
+      TRACE_NOCRLF("TX(State%0d)%0dB:", modulePulsesData[port].flysky.state, size);
       for (int idx = 0; idx < size; idx++)
       {
           TRACE_NOCRLF(" %02X", data[idx]);
