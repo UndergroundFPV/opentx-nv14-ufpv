@@ -344,6 +344,11 @@ void memswap(void * a, void * b, uint8_t size);
 
 #define PWR_PRESS_SHUTDOWN_DELAY       300 // 3s
 
+#if defined (PCBFLYSKY)
+  #define LOW_POWER_DOWN_VOLT            35  //3.5v power down
+  #define LOW_POWER_SHUTDOWN_DELAY       300 // 3s
+#endif
+
 #define GET_LOWRES_POT_POSITION(i)     (getValue(MIXSRC_FIRST_POT+(i)) >> 4)
 #define SAVE_POT_POSITION(i)           g_model.potsWarnPosition[i] = GET_LOWRES_POT_POSITION(i)
 

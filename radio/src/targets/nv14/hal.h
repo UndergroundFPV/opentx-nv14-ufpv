@@ -138,6 +138,11 @@
 #define PWR_ON_GPIO_MODER               GPIO_MODER_MODER1
 #define PWR_ON_GPIO_MODER_OUT           GPIO_MODER_MODER1_0
 
+//BLUETOOTH
+#define BLUETOOTH_ON_RCC_AHB1Periph     RCC_AHB1Periph_GPIOI
+#define BLUETOOTH_ON_GPIO               GPIOI
+#define BLUETOOTH_ON_GPIO_PIN           GPIO_Pin_8 // PI.8
+
 // S.Port update connector
 #define SPORT_MAX_BAUDRATE              250000 // < 400000
 #define SPORT_UPDATE_RCC_AHB1Periph     RCC_AHB1Periph_GPIOH

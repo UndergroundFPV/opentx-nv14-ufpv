@@ -193,6 +193,7 @@ void boardInit()
 #endif
 
 
+
   init2MhzTimer();
   init1msTimer();
   usbInit();

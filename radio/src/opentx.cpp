@@ -2758,6 +2758,7 @@ uint32_t pwrPressedDuration()
   }
 }
 
+
 uint32_t pwrCheck()
 {
   const char * message = NULL;
@@ -2830,6 +2831,95 @@ uint32_t pwrCheck()
 
   return e_power_on;
 }
+
+#if defined (PCBFLYSKY)
+uint32_t low_pwr_time = 0;
+
+uint32_t pwrLowDuration()
+{
+  if (low_pwr_time == 0) {
+    return 0;
+  }
+  else {
+    return get_tmr10ms() - low_pwr_time;
+  }
+}
+
+
+uint32_t lowPowerCheck()
+{
+  const char * message = NULL;
+
+  enum PwrCheckState {
+    PWR_CHECK_ON,
+    PWR_CHECK_OFF,
+    PWR_CHECK_PAUSED,
+  };
+
+  static uint8_t low_pwr_state = PWR_CHECK_ON;
+
+  if (low_pwr_state == PWR_CHECK_OFF) {
+    return e_power_off;
+  }
+  else if (g_vbat100mV < LOW_POWER_DOWN_VOLT) {
+
+    if (TELEMETRY_STREAMING()) {
+      message = STR_MODEL_STILL_POWERED;
+    }
+    if (low_pwr_state == PWR_CHECK_PAUSED) {
+      // nothing
+    }
+    else if (low_pwr_time == 0) {
+      low_pwr_time = get_tmr10ms();
+      if (message && !g_eeGeneral.disableRssiPoweroffAlarm) {
+        audioEvent(AU_MODEL_STILL_POWERED);
+      }
+    }
+    else {
+      inactivity.counter = 0;
+      if (g_eeGeneral.backlightMode != e_backlight_mode_off) {
+        BACKLIGHT_ENABLE();
+      }
+
+      if ((get_tmr10ms() - low_pwr_time) > LOW_POWER_SHUTDOWN_DELAY) {
+#if defined(SHUTDOWN_CONFIRMATION)
+        while (1) {
+#else
+        while ((TELEMETRY_STREAMING() && !g_eeGeneral.disableRssiPoweroffAlarm)) {
+#endif
+          lcdRefreshWait();
+          lcdClear();
+          POPUP_CONFIRMATION("Confirm Shutdown");
+          event_t evt = getEvent(false);
+          DISPLAY_WARNING(evt);
+          lcdRefresh();
+          if (warningResult) {
+            return e_power_off;
+          }
+          else if (!warningText) {
+            // shutdown has been cancelled
+            return e_power_on;
+          }
+        }
+        haptic.play(15, 3, PLAY_NOW);
+        low_pwr_state = PWR_CHECK_OFF;
+        return e_power_off;
+      }
+      else
+      {
+        drawShutdownAnimation(pwrLowDuration(), message);
+        return e_power_low;
+      }
+    }
+  }
+  else {
+    low_pwr_state = PWR_CHECK_ON;
+    low_pwr_time = 0;
+  }
+
+  return e_power_on;
+}
+#endif
 #elif defined(CPUARM)
 uint32_t pwrCheck()
 {

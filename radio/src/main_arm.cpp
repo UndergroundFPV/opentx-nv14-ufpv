@@ -129,6 +129,8 @@ void checkBatteryAlarms()
 #endif
 }
 
+extern void drawSleepBitmap();
+
 void checkBattery()
 {
   static uint32_t batSum;

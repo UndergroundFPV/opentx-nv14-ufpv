@@ -41,14 +41,18 @@ void pwrInit()
   //GPIO_InitStructure.GPIO_Pin = INTMODULE_PWR_GPIO_PIN;
   //GPIO_Init(INTMODULE_PWR_GPIO, &GPIO_InitStructure);
 
-  // TODO move this elsewhere!
-  // GPIO_ResetBits(EXTMODULE_PWR_GPIO, EXTMODULE_PWR_GPIO_PIN);
-  // GPIO_InitStructure.GPIO_Pin = EXTMODULE_PWR_GPIO_PIN;
-  // GPIO_Init(EXTMODULE_PWR_GPIO, &GPIO_InitStructure);
+  //TODO move this elsewhere!
+  GPIO_ResetBits(EXTMODULE_PWR_GPIO, EXTMODULE_PWR_GPIO_PIN);
+  GPIO_InitStructure.GPIO_Pin = EXTMODULE_PWR_GPIO_PIN;
+  GPIO_Init(EXTMODULE_PWR_GPIO, &GPIO_InitStructure);
 
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  //Bluetooth
+  GPIO_SetBits(BLUETOOTH_ON_GPIO, BLUETOOTH_ON_GPIO_PIN);
+  GPIO_InitStructure.GPIO_Pin = BLUETOOTH_ON_GPIO_PIN;
+  GPIO_Init(BLUETOOTH_ON_GPIO, &GPIO_InitStructure);
 
   // Init PWR SWITCH PIN
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
   GPIO_InitStructure.GPIO_Pin = PWR_SWITCH_GPIO_PIN;
   GPIO_Init(PWR_GPIO, &GPIO_InitStructure);
 

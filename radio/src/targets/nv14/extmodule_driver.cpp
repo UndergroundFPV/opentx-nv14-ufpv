@@ -38,6 +38,8 @@ void extmoduleStop()
 void extmoduleNoneStart()
 {
   EXTERNAL_MODULE_OFF();
+  EXTERNAL_MODULE_ON();
+  EXTERNAL_MODULE_OFF();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, 0);
 
