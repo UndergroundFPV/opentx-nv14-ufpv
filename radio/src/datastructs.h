@@ -395,37 +395,17 @@ PACK(struct GVarData {
  * Timer structure
  */
 
-#if defined(CPUARM)
 PACK(struct TimerData {
-  int32_t  mode:9;            // timer trigger source -> off, abs, stk, stk%, sw/!sw, !m_sw/!m_sw
   uint32_t start:23;
-  int32_t  value:24;
+  int32_t  swtch:9; // timer mode (OFF, ON, THs, TH%, THh)
+  int32_t  value:23;
+  uint32_t mode:2;
   uint32_t countdownBeep:2;
   uint32_t minuteBeep:1;
   uint32_t persistent:2;
   int32_t  countdownStart:2;
-  uint32_t direction:1;
   NOBACKUP(char name[LEN_TIMER_NAME]);
 });
-#elif defined(CPUM2560)
-PACK(struct TimerData {
-  int8_t   mode;            // timer trigger source -> off, abs, stk, stk%, sw/!sw, !m_sw/!m_sw
-  uint16_t start;
-  uint8_t  countdownBeep:2;
-  uint8_t  minuteBeep:1;
-  uint8_t  persistent:2;
-  uint8_t  countdownStart:3;
-  uint16_t value;
-});
-#else
-PACK(struct TimerData {
-  int8_t    mode;            // timer trigger source -> off, abs, stk, stk%, sw/!sw, !m_sw/!m_sw
-  uint16_t  start:12;
-  uint16_t  countdownBeep:1;
-  uint16_t  minuteBeep:1;
-  uint16_t  spare:2;
-});
-#endif
 
 /*
  * Swash Ring structure

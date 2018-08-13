@@ -447,58 +447,6 @@ void onBindMenu(const char * result)
   moduleFlag[moduleIdx] = MODULE_BIND;
 }
 
-int getSwitchWarningsCount()
-{
-  int count = 0;
-  for (int i = 0; i < NUM_SWITCHES; ++i) {
-    if (SWITCH_WARNING_ALLOWED(i)) {
-      ++count;
-    }
-  }
-  return count;
-}
-
-void editTimerMode(int timerIdx, coord_t y, LcdFlags attr, event_t event)
-{
-  TimerData &timer = g_model.timers[timerIdx];
-  if (attr && menuHorizontalPosition < 0) {
-//    lcdDrawSolidFilledRect(MODEL_SETUP_2ND_COLUMN - INVERT_HORZ_MARGIN, y - INVERT_VERT_MARGIN + 1,
-//                           115 + 2 * INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
-  }
-  drawStringWithIndex(MENUS_MARGIN_LEFT, y, STR_TIMER, timerIdx + 1, BOLD);
-  // drawTimerMode(window, MODEL_SETUP_2ND_COLUMN, y, timer.mode, (menuHorizontalPosition<=0 ? attr : 0));
-  // drawTimer(window, MODEL_SETUP_2ND_COLUMN+50, y, timer.start, (menuHorizontalPosition!=0 ? attr|TIMEHOUR : TIMEHOUR));
-  if (attr && s_editMode > 0) {
-    switch (menuHorizontalPosition) {
-      case 0: {
-        int32_t timerMode = timer.mode;
-        if (timerMode < 0) timerMode -= TMRMODE_COUNT - 1;
-        CHECK_INCDEC_MODELVAR_CHECK(event, timerMode, -TMRMODE_COUNT - SWSRC_LAST + 1, TMRMODE_COUNT + SWSRC_LAST - 1,
-                                    isSwitchAvailableInTimers);
-        if (timerMode < 0) timerMode += TMRMODE_COUNT - 1;
-        timer.mode = timerMode;
-#if defined(AUTOSWITCH)
-        if (s_editMode > 0) {
-          int8_t val = timer.mode - (TMRMODE_COUNT - 1);
-          int8_t switchVal = checkIncDecMovedSwitch(val);
-          if (val != switchVal) {
-            timer.mode = switchVal + (TMRMODE_COUNT - 1);
-            storageDirty(EE_MODEL);
-          }
-        }
-#endif
-        break;
-      }
-      case 1: {
-        const int stopsMinutes[] = {8, 60, 120, 180, 240, 300, 600, 900, 1200};
-        timer.start = checkIncDec(event, timer.start, 0, TIMER_MAX, EE_MODEL, NULL,
-                                  (const CheckIncDecStops &) stopsMinutes);
-        break;
-      }
-    }
-  }
-}
-
 void ModelSetupPage::build(Window * window)
 {
   GridLayout grid;
@@ -530,16 +478,20 @@ void ModelSetupPage::build(Window * window)
     new Subtitle(window, grid.getLineSlot(), timerLabel);
     grid.nextLine();
 
-    // Timer mode
-    new StaticText(window, grid.getLabelSlot(true), STR_MODE);
-    new SwitchChoice(window, grid.getFieldSlot(2, 0), -TMRMODE_COUNT - SWSRC_LAST + 1, TMRMODE_COUNT + SWSRC_LAST - 1, GET_SET_DEFAULT(timer->mode));
-#warning "Timer mode not finished!"
-    new TimeEdit(window, grid.getFieldSlot(2, 1), 0, TIMER_MAX, GET_SET_DEFAULT(timer->start));
-    grid.nextLine();
-
     // Timer name
     new StaticText(window, grid.getLabelSlot(true), STR_TIMER_NAME);
     new TextEdit(window, grid.getFieldSlot(), timer->name, LEN_TIMER_NAME);
+    grid.nextLine();
+
+    // Timer mode
+    new StaticText(window, grid.getLabelSlot(true), STR_MODE);
+    new SwitchChoice(window, grid.getFieldSlot(2, 0), SWSRC_FIRST, SWSRC_LAST, GET_SET_DEFAULT(timer->swtch));
+    new Choice(window, grid.getFieldSlot(2, 1), "\006""Simple""Thr.\0 ""Thr.%", 0, TMRMODE_COUNT, GET_SET_DEFAULT(timer->mode));
+    grid.nextLine();
+
+    // Timer start value
+    new StaticText(window, grid.getLabelSlot(true), "Start");
+    new TimeEdit(window, grid.getFieldSlot(), 0, TIMER_MAX, GET_SET_DEFAULT(timer->start));
     grid.nextLine();
 
     // Timer minute beep
@@ -549,8 +501,7 @@ void ModelSetupPage::build(Window * window)
 
     // Timer countdown
     new StaticText(window, grid.getLabelSlot(true), STR_BEEPCOUNTDOWN);
-    new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1,
-               GET_SET_DEFAULT(timer->countdownBeep));
+    new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1, GET_SET_DEFAULT(timer->countdownBeep));
     new Choice(window, grid.getFieldSlot(2, 1), STR_COUNTDOWNVALUES, 0, 3, GET_SET_WITH_OFFSET(timer->countdownStart, 2));
     grid.nextLine();
 
