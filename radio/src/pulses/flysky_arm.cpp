@@ -717,12 +717,14 @@ void putFlySkyGetFirmwareVersion(uint8_t port, uint8_t fw_word)
   putFlySkyFrameByte(port, fw_word); // 0x00:RX firmware, 0x01:RF firmware
 }
 
+static uint16_t sendChannelDataFrameCount = 0;
 void putFlySkySendChannelData(uint8_t port)
 {
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_NACK);
   putFlySkyFrameByte(port, COMMAND_ID_SEND_CHANNEL_DATA);
 
-  if (0 /* TODO send failsafe*/) {
+  if ( g_model.moduleData[port].failsafeMode != FAILSAFE_NOT_SET
+       && sendChannelDataFrameCount++ > 400 ) {
     putFlySkyFrameByte(port, 0x01);
     uint8_t channels_start = g_model.moduleData[port].channelsStart;
     uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
@@ -730,8 +732,15 @@ void putFlySkySendChannelData(uint8_t port)
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
       int16_t failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
       uint16_t pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
+      if ( g_model.moduleData[port].failsafeMode != FAILSAFE_HOLD ) {
+          pulseValue = 0x0FFF; // nv14
+      }
       putFlySkyFrameByte(port, pulseValue & 0xff);
       putFlySkyFrameByte(port, pulseValue >> 8);
+    }
+    sendChannelDataFrameCount = 0;
+    if (DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY) {
+        TRACE("------FAILSAFE------");
     }
   }
   else {
@@ -783,7 +792,7 @@ bool checkFlySkyFrameCrc(const uint8_t * ptr, uint8_t size)
   }
 
   if (DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY) {
-    if (ptr[2] != 0x06 || (set_loop_cnt++ % 100 == 0)) {
+    if (ptr[2] != 0x06 || (set_loop_cnt++ % 50 == 0)) {
       TRACE_NOCRLF("RF(%0d): C0", INTERNAL_MODULE_BAUDRATE);
       for (int idx = 0; idx <= size; idx++) {
         TRACE_NOCRLF(" %02X", ptr[idx]);
