@@ -442,6 +442,7 @@ void RadioSetupPage::build(Window * window)
     return std::to_string(1 + value) + ": left=" + std::string(&getSourceString(MIXSRC_Rud + modn12x3[4 * value])[1]) + "+" + std::string(&getSourceString(MIXSRC_Rud + modn12x3[4 * value + 1])[1]);
   });
   grid.nextLine();
+  grid.nextLine();
 
   window->setInnerHeight(grid.getWindowHeight());
 }

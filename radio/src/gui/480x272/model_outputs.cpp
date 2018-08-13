@@ -73,8 +73,8 @@ class OutputEditWindow : public Page {
       // Max
       new StaticText(window, grid.getLabelSlot(), TR_MAX);
       new NumberEdit(window, grid.getFieldSlot(), 0, +limit,
-                     GET_VALUE(output->min + 1000),
-                     SET_VALUE(output->min, newValue - 1000),
+                     GET_VALUE(output->max + 1000),
+                     SET_VALUE(output->max, newValue - 1000),
                      PREC1);
       grid.nextLine();
 
