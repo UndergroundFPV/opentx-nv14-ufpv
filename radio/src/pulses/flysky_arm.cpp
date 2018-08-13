@@ -712,14 +712,30 @@ void putFlySkySendChannelData(uint8_t port)
 {
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_NACK);
   putFlySkyFrameByte(port, COMMAND_ID_SEND_CHANNEL_DATA);
-  putFlySkyFrameByte(port, 0x00); // TODO = 0x01: failsafe
-  uint8_t channels_start = g_model.moduleData[port].channelsStart;
-  uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
-  putFlySkyFrameByte(port, channels_count);
-  for (uint8_t channel = channels_start; channel < channels_count; channel++) {
-    uint16_t value = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelOutputs[channel] + 1024) / 2048), 2100);
-    putFlySkyFrameByte(port, value & 0xff);
-    putFlySkyFrameByte(port, value >> 8);
+
+  if (0 /* TODO send failsafe*/) {
+    putFlySkyFrameByte(port, 0x01);
+    uint8_t channels_start = g_model.moduleData[port].channelsStart;
+    uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
+    putFlySkyFrameByte(port, channels_count);
+    for (uint8_t channel = channels_start; channel < channels_count; channel++) {
+      int16_t failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
+      uint16_t pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
+      putFlySkyFrameByte(port, pulseValue & 0xff);
+      putFlySkyFrameByte(port, pulseValue >> 8);
+    }
+  }
+  else {
+    putFlySkyFrameByte(port, 0x00);
+    uint8_t channels_start = g_model.moduleData[port].channelsStart;
+    uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
+    putFlySkyFrameByte(port, channels_count);
+    for (uint8_t channel = channels_start; channel < channels_count; channel++) {
+      int channelValue = channelOutputs[channel] + 2*PPM_CH_CENTER(channel) - 2*PPM_CENTER;
+      uint16_t pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelValue + 1024) / 2048), 2100);
+      putFlySkyFrameByte(port, pulseValue & 0xff);
+      putFlySkyFrameByte(port, pulseValue >> 8);
+    }
   }
 }
 
