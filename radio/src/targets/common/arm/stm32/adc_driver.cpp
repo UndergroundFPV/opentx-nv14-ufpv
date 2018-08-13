@@ -27,7 +27,7 @@
   const uint8_t anas_mapping[NUM_ANALOGS] = { 0 /*STICK1*/, 1 /*STICK2*/, 2 /*STICK3*/, 3 /*STICK4*/,
                                               4 /*POT1*/, 5 /*POT2*/, 6 /*SWA*/, 13 /*SWB*/,
                                               7 /*SWC*/,  14 /*SWD*/, 8 /*SWE*/, 9 /*SWF*/,
-                                              10 /*SWH*/, 11 /*SWG*/,
+                                              11/*SWH*/,  10/*SWG*/,
                                               12 /*TX_VOLTAGE*/ };
   #define ANAS_MAPPING anas_mapping // TODO => hal.h
 #elif defined(PCBX10)

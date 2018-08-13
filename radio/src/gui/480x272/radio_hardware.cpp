@@ -125,6 +125,7 @@ void RadioHardwarePage::build(Window * window)
   });
   window->invalidate();
   grid.nextLine();
+  grid.nextLine();
 
   window->setInnerHeight(grid.getWindowHeight());
 }
