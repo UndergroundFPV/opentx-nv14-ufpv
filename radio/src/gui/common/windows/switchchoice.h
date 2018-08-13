@@ -55,18 +55,12 @@ class SwitchChoice : public Window {
       isValueAvailable = std::move(handler);
     }
 
-    void setTextHandler(std::function<std::string(int32_t)> handler)
-    {
-      textHandler = std::move(handler);
-    }
-
   protected:
     int16_t vmin;
     int16_t vmax;
     std::function<int16_t()> getValue;
     std::function<void(int16_t)> setValue;
     std::function<bool(int)> isValueAvailable = isSwitchAvailableInMixes;
-    std::function<std::string(int32_t)> textHandler;
     void fillMenu(Menu * menu, std::function<bool(int16_t)> condition=nullptr);
 };
 

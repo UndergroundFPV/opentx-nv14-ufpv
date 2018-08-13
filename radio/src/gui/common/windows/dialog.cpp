@@ -122,7 +122,6 @@ void Dialog::runForever()
       continue;
     }
 
-
     checkBacklight();
     wdt_reset();
 
