@@ -215,7 +215,7 @@ class ModuleWindow : public Window {
       });
 
       // Module parameters
-      if (moduleType == MODULE_TYPE_FLYSKY) {
+      if (isModuleFlysky(moduleIndex)) {
         new Choice(this, grid.getFieldSlot(2, 1), STR_FLYSKY_PROTOCOLS, 0, 3,
                    GET_DEFAULT(g_model.moduleData[moduleIndex].romData.mode),
                    [=](int32_t newValue) -> void {
@@ -286,7 +286,7 @@ class ModuleWindow : public Window {
       }
 
       // Module parameters
-      if (moduleType == MODULE_TYPE_FLYSKY) {
+      if (isModuleFlysky(moduleIndex)) {
         new StaticText(this, grid.getLabelSlot(true), STR_RXFREQUENCY);
         new NumberEdit(this, grid.getFieldSlot(), 50, 400,
                        GET_DEFAULT(g_model.moduleData[moduleIndex].romData.rx_freq[0] +

@@ -208,10 +208,12 @@ inline bool isModuleTypeAllowed(uint8_t idx, uint8_t type)
 {
 #if defined(PCBFLYSKY)
   if (idx == INTERNAL_MODULE) {
-    return type == MODULE_TYPE_NONE || type == MODULE_TYPE_FLYSKY;
+    return (type == MODULE_TYPE_NONE || type == MODULE_TYPE_FLYSKY);
   }
   else if (idx == EXTERNAL_MODULE) {
-    return type == MODULE_TYPE_PPM || type == MODULE_TYPE_XJT || type == MODULE_TYPE_CROSSFIRE || type == MODULE_TYPE_R9M;
+    return (type == MODULE_TYPE_NONE || type == MODULE_TYPE_PPM
+         || type == MODULE_TYPE_XJT || type == MODULE_TYPE_CROSSFIRE
+         || type == MODULE_TYPE_R9M);
   }
 #endif
 
@@ -230,7 +232,7 @@ inline bool isModuleNeedingBindRangeButtons(uint8_t idx)
 
 inline bool isModuleNeedingFailsafeButton(uint8_t idx)
 {
-  return isModulePXX(idx) || isModuleR9M(idx);
+  return isModulePXX(idx) || isModuleR9M(idx) || isModuleFlysky(idx);
 }
 
 #endif // _MODULES_H_
