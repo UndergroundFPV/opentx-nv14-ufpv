@@ -717,8 +717,7 @@ void putFlySkySendChannelData(uint8_t port)
   uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
   putFlySkyFrameByte(port, channels_count);
   for (uint8_t channel = channels_start; channel < channels_count; channel++) {
-    //uint16_t value = 850 + ((2150-850) * (channelOutputs[channel] + 1024) / 2048);
-    uint16_t value = 900 + ((2100 - 900) * (channelOutputs[channel] + 1024) / 2048);
+    uint16_t value = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelOutputs[channel] + 1024) / 2048), 2100);
     putFlySkyFrameByte(port, value & 0xff);
     putFlySkyFrameByte(port, value >> 8);
   }
