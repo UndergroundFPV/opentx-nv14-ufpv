@@ -34,18 +34,13 @@ void resetModuleSettings(uint8_t module)
   }
 }
 
-class FailSafeBody : public Window {
+class ChannelFailsafeBargraph: public Window {
   public:
-    FailSafeBody(Window * parent, const rect_t &rect, uint8_t moduleIndex) :
+    ChannelFailsafeBargraph(Window * parent, const rect_t & rect, uint8_t moduleIndex, uint8_t channel):
       Window(parent, rect),
-      moduleIndex(moduleIndex)
+      moduleIndex(moduleIndex),
+      channel(channel)
     {
-      auto out2fail = new TextButton(this, {10, 520, LCD_W - 20, 26 }, STR_OUTPUTS2FAILSAFE);
-      out2fail->setPressHandler([=]() {
-        setCustomFailsafe(moduleIndex);
-        storageDirty(EE_MODEL);
-        return 0;
-      });
     }
 
     void checkEvents() override
@@ -55,53 +50,80 @@ class FailSafeBody : public Window {
 
     void paint(BitmapBuffer * dc) override
     {
-      GridLayout grid;
-      grid.setLabelWidth(60);
+      int32_t failsafeValue = g_model.moduleData[moduleIndex].failsafeChannels[channel];
+      int32_t channelValue = channelOutputs[channel];
 
-      coord_t x = 20;
-      coord_t y = 0;
-      const uint8_t SLIDER_W = 128;
       const int lim = (g_model.extendedLimits ? (512 * LIMIT_EXT_PERCENT / 100) : 512) * 2;
 
-      for (int ch=0; ch < maxModuleChannels(moduleIndex); ch++, y+=32) {
-        // Channel name if present, number if not
-        x = 0.;
-        if (g_model.limitData[ch].name[0] != '\0') {
-          putsChn(x + MENUS_MARGIN_LEFT, y - 3, ch + 1, TINSIZE);
-          lcdDrawSizedText(x + MENUS_MARGIN_LEFT, y + 5, g_model.limitData[ch].name,
-                           sizeof(g_model.limitData[ch].name), ZCHAR | SMLSIZE);
-        } else {
-          putsChn(x + MENUS_MARGIN_LEFT, y, ch + 1, 0);
-        }
+      coord_t x = 9;
+      coord_t y = 0;
+      lcdDrawRect(x, y + 3, width() + 1, 12);
+      const coord_t lenChannel = limit((uint8_t) 1, uint8_t((abs(channelValue) * width() / 2 + lim / 2) / lim),
+                                       uint8_t(width() / 2));
+      const coord_t lenFailsafe = limit((uint8_t) 1, uint8_t((abs(failsafeValue) * width() / 2 + lim / 2) / lim),
+                                        uint8_t(width() / 2));
+      x += width() / 2;
+      const coord_t xChannel = (channelValue > 0) ? x : x + 1 - lenChannel;
+      const coord_t xFailsafe = (failsafeValue > 0) ? x : x + 1 - lenFailsafe;
+      lcdDrawSolidFilledRect(xChannel, y + 4, lenChannel, 5, TEXT_COLOR);
+      lcdDrawSolidFilledRect(xFailsafe, y + 9, lenFailsafe, 5, ALARM_COLOR);
+    }
 
+  protected:
+    uint8_t moduleIndex;
+    uint8_t channel;
+};
+
+class FailSafeBody : public Window {
+  public:
+    FailSafeBody(Window * parent, const rect_t &rect, uint8_t moduleIndex) :
+      Window(parent, rect),
+      moduleIndex(moduleIndex)
+    {
+      build();
+    }
+
+    void checkEvents() override
+    {
+      invalidate();
+    }
+
+    void build()
+    {
+      GridLayout grid;
+      grid.setLabelWidth(60);
+      grid.spacer(8);
+
+      const int lim = (g_model.extendedLimits ? (512 * LIMIT_EXT_PERCENT / 100) : 512) * 2;
+
+      for (int ch=0; ch < maxModuleChannels(moduleIndex); ch++) {
+        // Channel name
+        // TODO if (g_model.limitData[ch].name[0] != '\0') { <= add channel name
+        new StaticText(this, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch));
+
+        // Channel numeric value
         new NumberEdit(this, grid.getFieldSlot(3, 0), -lim, lim,
                        GET_DEFAULT(calcRESXto1000(g_model.moduleData[moduleIndex].failsafeChannels[ch])),
                        SET_VALUE(g_model.moduleData[moduleIndex].failsafeChannels[ch], newValue),
                        PREC1);
+
+        // Channel bargraph
+        new ChannelFailsafeBargraph(this, grid.getFieldSlot(3, 1), moduleIndex, ch);
         grid.nextLine();
-
-        int32_t failsafeValue = g_model.moduleData[moduleIndex].failsafeChannels[ch];
-        int32_t channelValue = channelOutputs[ch];
-
-
-        // Gauge
-        x = 160;
-        lcdDrawRect(x, y + 3, SLIDER_W + 1, 12);
-        const coord_t lenChannel = limit((uint8_t) 1, uint8_t((abs(channelValue) * SLIDER_W / 2 + lim / 2) / lim),
-                                         uint8_t(SLIDER_W / 2));
-        const coord_t lenFailsafe = limit((uint8_t) 1, uint8_t((abs(failsafeValue) * SLIDER_W / 2 + lim / 2) / lim),
-                                          uint8_t(SLIDER_W / 2));
-        x += SLIDER_W / 2;
-        const coord_t xChannel = (channelValue > 0) ? x : x + 1 - lenChannel;
-        const coord_t xFailsafe = (failsafeValue > 0) ? x : x + 1 - lenFailsafe;
-        lcdDrawSolidFilledRect(xChannel, y + 4, lenChannel, 5, TEXT_COLOR);
-        lcdDrawSolidFilledRect(xFailsafe, y + 9, lenFailsafe, 5, ALARM_COLOR);
       }
-      getParent()->moveWindowsTop(top(), adjustHeight());
+
+      auto out2fail = new TextButton(this, grid.getLineSlot(), STR_OUTPUTS2FAILSAFE);
+      out2fail->setPressHandler([=]() {
+        setCustomFailsafe(moduleIndex);
+        storageDirty(EE_MODEL);
+        return 0;
+      });
+
+      grid.nextLine();
+      setInnerHeight(grid.getWindowHeight());
     }
 
   protected:
-    tmr10ms_t lastRefresh = 0;
     uint8_t moduleIndex;
 };
 
