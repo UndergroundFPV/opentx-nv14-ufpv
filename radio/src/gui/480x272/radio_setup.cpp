@@ -319,24 +319,6 @@ void RadioSetupPage::build(Window * window)
     new StaticText(window, grid.getLabelSlot(true), STR_ALARM);
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_eeGeneral.alarmsFlash));
     grid.nextLine();
-
-#if 0
-    case ITEM_SETUP_BACKLIGHT_DELAY:
-      lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLDELAY);
-      lcdDrawNumber(RADIO_SETUP_2ND_COLUMN, y, g_eeGeneral.lightAutoOff*5, attr|LEFT, 0, NULL, "s");
-      if (attr) CHECK_INCDEC_GENVAR(event, g_eeGeneral.lightAutoOff, 0, 600/5);
-      break;
-
-    case ITEM_SETUP_BRIGHTNESS:
-      lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLONBRIGHTNESS);
-      g_eeGeneral.backlightBright = BACKLIGHT_LEVEL_MAX - editSlider(RADIO_SETUP_2ND_COLUMN, y, event, BACKLIGHT_LEVEL_MAX - g_eeGeneral.backlightBright, BACKLIGHT_LEVEL_MIN, BACKLIGHT_LEVEL_MAX, attr);
-      break;
-
-    case ITEM_SETUP_DIM_LEVEL:
-      lcdDrawText(MENUS_MARGIN_LEFT, y, STR_BLOFFBRIGHTNESS);
-      g_eeGeneral.blOffBright = editSlider(RADIO_SETUP_2ND_COLUMN, y, event, g_eeGeneral.blOffBright, BACKLIGHT_LEVEL_MIN, BACKLIGHT_LEVEL_MAX, attr);
-      break;
-#endif
   }
 
   {

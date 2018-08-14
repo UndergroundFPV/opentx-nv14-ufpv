@@ -55,9 +55,8 @@ class ChannelFailsafeBargraph: public Window {
 
       const int lim = (g_model.extendedLimits ? (512 * LIMIT_EXT_PERCENT / 100) : 512) * 2;
 
-      coord_t x = 9;
-      coord_t y = 0;
-      lcdDrawRect(x, y + 3, width() + 1, 12);
+      coord_t x = 0;
+      lcdDrawRect(x, 0, width(), height());
       const coord_t lenChannel = limit((uint8_t) 1, uint8_t((abs(channelValue) * width() / 2 + lim / 2) / lim),
                                        uint8_t(width() / 2));
       const coord_t lenFailsafe = limit((uint8_t) 1, uint8_t((abs(failsafeValue) * width() / 2 + lim / 2) / lim),
@@ -65,8 +64,8 @@ class ChannelFailsafeBargraph: public Window {
       x += width() / 2;
       const coord_t xChannel = (channelValue > 0) ? x : x + 1 - lenChannel;
       const coord_t xFailsafe = (failsafeValue > 0) ? x : x + 1 - lenFailsafe;
-      lcdDrawSolidFilledRect(xChannel, y + 4, lenChannel, 5, TEXT_COLOR);
-      lcdDrawSolidFilledRect(xFailsafe, y + 9, lenFailsafe, 5, ALARM_COLOR);
+      lcdDrawSolidFilledRect(xChannel, + 2, lenChannel, (height() / 2) - 3, TEXT_COLOR);
+      lcdDrawSolidFilledRect(xFailsafe, (height() / 2) + 1, lenFailsafe, (height() / 2) - 3, ALARM_COLOR);
     }
 
   protected:
@@ -108,7 +107,7 @@ class FailSafeBody : public Window {
                        PREC1);
 
         // Channel bargraph
-        new ChannelFailsafeBargraph(this, grid.getFieldSlot(3, 1), moduleIndex, ch);
+        new ChannelFailsafeBargraph(this, {150, grid.getWindowHeight(), 150, lineHeight}, moduleIndex, ch);
         grid.nextLine();
       }
 
