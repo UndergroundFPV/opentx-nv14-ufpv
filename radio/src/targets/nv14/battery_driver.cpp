@@ -22,7 +22,7 @@
 #define  __BATTERY_DRIVER_C__
 
 
-void init_battery_charge()
+void battery_charge_init()
 {
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = PWR_CHARGE_FINISHED_GPIO_PIN | PWR_CHARGING_GPIO_PIN;

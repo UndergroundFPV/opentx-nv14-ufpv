@@ -84,7 +84,11 @@ void interrupt1ms()
     pre_scale = 0;
 #if !defined(SIMU)
     TouchDriver();
+
+#if defined (FLYSKY_HALL_STICKS)
     hall_stick_loop();
+#endif
+
 #endif
     DEBUG_TIMER_START(debugTimerPer10ms);
     DEBUG_TIMER_SAMPLE(debugTimerPer10msPeriod);
@@ -182,7 +186,7 @@ void boardInit()
   // and this section is un-initialized
   memset(&g_FATFS_Obj, 0, sizeof(g_FATFS_Obj));
 
-  init_battery_charge();
+  battery_charge_init();
   monitorInit();
   keysInit();
   adcInit();
@@ -191,8 +195,6 @@ void boardInit()
 #if defined(FLYSKY_HALL_STICKS)
   hall_stick_init(FLYSKY_HALL_BAUDRATE);
 #endif
-
-
 
   init2MhzTimer();
   init1msTimer();

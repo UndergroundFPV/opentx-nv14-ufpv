@@ -48,6 +48,7 @@ class ChannelFailsafeBargraph: public Window {
       invalidate();
     }
 
+
     void paint(BitmapBuffer * dc) override
     {
       int32_t failsafeValue = g_model.moduleData[moduleIndex].failsafeChannels[channel];
@@ -177,6 +178,11 @@ class ModuleWindow : public Window {
       deleteChildren();
     }
 
+    void checkEvents() override
+    {
+      invalidate();
+    }
+
   protected:
     uint8_t moduleIndex;
     Choice * moduleChoice = nullptr;
@@ -194,6 +200,7 @@ class ModuleWindow : public Window {
                                        g_model.moduleData[moduleIndex].channelsStart + minModuleChannels(moduleIndex),
                                        min<int8_t>(MAX_OUTPUT_CHANNELS, g_model.moduleData[moduleIndex].channelsStart + maxModuleChannels(moduleIndex)),
                                        GET_DEFAULT(g_model.moduleData[moduleIndex].channelsStart + 8 + g_model.moduleData[moduleIndex].channelsCount));
+
       channelStart->setPrefix(STR_CH);
       channelEnd->setPrefix(STR_CH);
       channelStart->setSetValueHandler([=](int32_t newValue) {

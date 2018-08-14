@@ -48,7 +48,7 @@ enum ChargeState
 #define READ_CHARGE_FINISHED_STATE()             GPIO_ReadInputDataBit( PWR_CHARGE_FINISHED_GPIO, PWR_CHARGE_FINISHED_GPIO_PIN )
 #define READ_CHARGING_STATE()                    GPIO_ReadInputDataBit( PWR_CHARGING_GPIO, PWR_CHARGING_GPIO_PIN )
 
-extern void init_battery_charge();
+extern void battery_charge_init();
 extern uint16_t get_battery_charge_state();
 extern uint16_t getBatteryVoltage();   // returns current battery voltage in 10mV steps
 

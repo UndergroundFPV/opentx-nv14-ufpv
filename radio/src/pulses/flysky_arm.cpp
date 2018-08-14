@@ -200,7 +200,7 @@ static uint8_t tx_working_power = 90;
 
 static rf_info_t rf_info = {
   .id               = {8, 8, 8, 8},
-  .bind_power       = BIND_NORMAL_POWER,
+  .bind_power       = BIND_LOW_POWER,
   .num_of_channel   = NUM_OF_NV14_CHANNELS, // TODO + g_model.moduleData[port].channelsCount;
   .channel_data_type= FLYSKY_CHANNEL_DATA_NORMAL,
   .protocol         = 0,
@@ -732,9 +732,11 @@ void putFlySkySendChannelData(uint8_t port)
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
       int16_t failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
       uint16_t pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
+#if 0
       if ( g_model.moduleData[port].failsafeMode != FAILSAFE_HOLD ) {
           pulseValue = 0x0FFF; // nv14
       }
+#endif
       putFlySkyFrameByte(port, pulseValue & 0xff);
       putFlySkyFrameByte(port, pulseValue >> 8);
     }
