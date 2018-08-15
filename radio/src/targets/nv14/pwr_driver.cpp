@@ -25,6 +25,10 @@ uint32_t shutdownRequest;          // Stores intentional shutdown to avoid reboo
 uint32_t shutdownReason;           // Used for detecting unexpected reboots regardless of reason
 uint32_t powerupReason __NOINIT;   // Stores power up reason beyond initialization for emergency mode activation
 
+#if defined (PCBFLYSKY)
+uint32_t powerupState = 0;
+#endif
+
 void pwrInit()
 {
   GPIO_InitTypeDef GPIO_InitStructure;
@@ -60,8 +64,9 @@ void pwrInit()
   // Init TRAINER DETECT PIN
   // GPIO_InitStructure.GPIO_Pin = TRAINER_DETECT_GPIO_PIN;
   // GPIO_Init(TRAINER_DETECT_GPIO, &GPIO_InitStructure);
-
+#if !defined (PCBFLYSKY)
   pwrOn();
+#endif
 }
 
 void pwrOn()
@@ -78,6 +83,7 @@ void pwrOn()
 
   shutdownRequest = NO_SHUTDOWN_REQUEST;
   shutdownReason = DIRTY_SHUTDOWN;
+  powerupState = BOARD_POWER_ON;
 }
 
 void pwrOff()
@@ -87,6 +93,7 @@ void pwrOff()
 
   shutdownRequest = SHUTDOWN_REQUEST;
   shutdownReason = NORMAL_POWER_OFF;
+  powerupState = BOARD_POWER_OFF;
   GPIO_ResetBits(PWR_GPIO, PWR_ON_GPIO_PIN);
 }
 

@@ -331,14 +331,37 @@ class ModuleWindow : public Window {
       // Failsafe
       if (isModuleNeedingFailsafeButton(moduleIndex)) {
         new StaticText(this, grid.getLabelSlot(true), STR_FAILSAFE);
-        failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-                                    GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
-                                    [=](int32_t newValue) {
-                                      g_model.moduleData[moduleIndex].failsafeMode = newValue;
-                                      SET_DIRTY();
-                                      update();
-                                      failSafeChoice->setFocus();
-                                    });
+#if defined (PCBFLYSKY)
+      if (moduleIndex == INTERNAL_MODULE) {
+          failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_CUSTOM,
+                                      GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
+                                      [=](int32_t newValue) {
+                                        g_model.moduleData[moduleIndex].failsafeMode = newValue;
+                                        SET_DIRTY();
+                                        update();
+                                        failSafeChoice->setFocus();
+                                      });
+      }
+      else {
+          failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
+                                      GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
+                                      [=](int32_t newValue) {
+                                        g_model.moduleData[moduleIndex].failsafeMode = newValue;
+                                        SET_DIRTY();
+                                        update();
+                                        failSafeChoice->setFocus();
+                                      });
+      }
+#else
+          failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
+                                      GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
+                                      [=](int32_t newValue) {
+                                        g_model.moduleData[moduleIndex].failsafeMode = newValue;
+                                        SET_DIRTY();
+                                        update();
+                                        failSafeChoice->setFocus();
+                                      });
+#endif
         if (g_model.moduleData[moduleIndex].failsafeMode == FAILSAFE_CUSTOM) {
           new TextButton(this, grid.getFieldSlot(2, 1), STR_SET,
                          [=]() -> uint8_t {

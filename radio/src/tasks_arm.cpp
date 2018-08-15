@@ -197,6 +197,7 @@ TASK_FUNCTION(menusTask)
     uint32_t lowpwr_check = lowPowerCheck();
     if (lowpwr_check == e_power_off) {
       break;
+      CoTickDelay(MENU_TASK_PERIOD_TICKS);
     }
     else if (lowpwr_check == e_power_low) {
       CoTickDelay(MENU_TASK_PERIOD_TICKS);

@@ -262,6 +262,13 @@ enum EnumSwitchesPositions
   SW_SH2,
 };
 
+enum EnumPowerupState
+{
+  BOARD_POWER_OFF,
+  BOARD_POWER_ON,
+  BOARD_STARTED,
+};
+
 void monitorInit(void);
 void keysInit(void);
 uint8_t keyState(uint8_t index);
@@ -278,6 +285,9 @@ uint32_t readTrims(void);
 // WDT driver
 #define WDTO_500MS                      500
 extern uint32_t powerupReason;
+#if defined (PCBFLYSKY)
+extern uint32_t powerupState;
+#endif
 
 #define SHUTDOWN_REQUEST                0xDEADBEEF
 #define NO_SHUTDOWN_REQUEST             ~SHUTDOWN_REQUEST
@@ -365,8 +375,8 @@ void adcRead(void);
 uint16_t getAnalogValue(uint8_t index);
 uint16_t getBatteryVoltage();   // returns current battery voltage in 10mV steps
 
-#define BATTERY_WARN                  37 // 3.7V
-#define BATTERY_MIN                   35 // 3.5V
+#define BATTERY_WARN                  38 // 3.8V
+#define BATTERY_MIN                   37 // 3.5V
 #define BATTERY_MAX                   43 // 4.3V
 
 #if defined(__cplusplus) && !defined(SIMU)

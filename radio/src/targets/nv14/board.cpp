@@ -83,12 +83,12 @@ void interrupt1ms()
   if (pre_scale == 10) {
     pre_scale = 0;
 #if !defined(SIMU)
-    TouchDriver();
-
-#if defined (FLYSKY_HALL_STICKS)
-    hall_stick_loop();
-#endif
-
+    if (powerupState == BOARD_STARTED) {
+        TouchDriver();
+    #if defined (FLYSKY_HALL_STICKS)
+        hall_stick_loop();
+    #endif
+    }
 #endif
     DEBUG_TIMER_START(debugTimerPer10ms);
     DEBUG_TIMER_SAMPLE(debugTimerPer10msPeriod);
@@ -169,17 +169,43 @@ void boardInit()
                          EXTMODULE_RCC_APB2Periph,
                          ENABLE);
 
+  __enable_irq();
+  TRACE("\nNV14 board started :)");
+  delay_ms(10);
+  TRACE("RCC->CSR = %08x", RCC->CSR);
+
   pwrInit();
+  keysInit();
+
+#if !defined(SIMU) && defined (PCBFLYSKY)
+uint32_t pwr_press_time = 0;
+
+  init2MhzTimer();
+  init1msTimer();
+
+  //power up delay
+  while (1) {
+    if (pwrPressed()) {
+      if (pwr_press_time == 0) {
+        pwr_press_time = get_tmr10ms();
+      }
+      else {
+        if ((get_tmr10ms() - pwr_press_time) > POWER_ON_DELAY)
+        {
+          pwrOn();
+          break;
+        }
+      }
+    }
+    else {
+      pwr_press_time = 0;
+    }
+  }
+#endif
 
 #if defined(DEBUG)
    auxSerialInit(0, 0); // default serial mode (None if DEBUG nm  ot defined)
 #endif
-
-  __enable_irq();
-
-  TRACE("\nNV14 board started :)");
-  delay_ms(10);
-  TRACE("RCC->CSR = %08x", RCC->CSR);
   audioInit();
 
   // we need to initialize g_FATFS_Obj here, because it is in .ram section (because of DMA access) 
@@ -188,7 +214,6 @@ void boardInit()
 
   battery_charge_init();
   monitorInit();
-  keysInit();
   adcInit();
   backlightInit();
   lcdInit();
@@ -196,12 +221,16 @@ void boardInit()
   hall_stick_init(FLYSKY_HALL_BAUDRATE);
 #endif
 
+#if !defined (PCBFLYSKY)
   init2MhzTimer();
   init1msTimer();
+#endif
   usbInit();
   hapticInit();
 
   TouchInit();
+
+  powerupState = BOARD_STARTED;
 
 
 #if defined(DEBUG)
