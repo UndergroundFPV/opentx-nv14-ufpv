@@ -177,7 +177,7 @@ void boardInit()
   pwrInit();
   keysInit();
 
-#if !defined(SIMU) && defined (PCBFLYSKY)
+#if !defined(SIMU) && defined (FLYSKY_STARTUP_DELAY)
 uint32_t pwr_press_time = 0;
 
   init2MhzTimer();
@@ -221,7 +221,7 @@ uint32_t pwr_press_time = 0;
   hall_stick_init(FLYSKY_HALL_BAUDRATE);
 #endif
 
-#if !defined (PCBFLYSKY)
+#if !defined (FLYSKY_STARTUP_DELAY)
   init2MhzTimer();
   init1msTimer();
 #endif

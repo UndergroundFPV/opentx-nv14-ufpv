@@ -45,6 +45,7 @@ option(TRACE_LUA_INTERNALS "Turn on traces for Lua internals" OFF)
 option(FRSKY_STICKS "Reverse sticks for FrSky sticks" OFF)
 option(FLYSKY_HALL_STICKS "sticks for FlySky hall sticks" ON)
 option(FLYSKY_HALL_STICKS_REVERSE "Reverse sticks for FlySky hall sticks" OFF)
+option(FLYSKY_STARTUP_DELAY "Start up delay for flysky board" OFF)
 option(NANO "Use nano newlib and binalloc")
 option(NIGHTLY_BUILD_WARNING "Warn this is a nightly build" OFF)
 option(USEHORUSBT "X9E BT module replaced by Horus BT module" OFF)
@@ -354,6 +355,10 @@ endif()
 
 if (FLYSKY_HALL_STICKS_REVERSE)
  add_definitions(-DFLYSKY_HALL_STICKS_REVERSE)
+endif()
+
+if (FLYSKY_STARTUP_DELAY)
+ add_definitions(-DFLYSKY_STARTUP_DELAY)
 endif()
 
 
