@@ -178,11 +178,6 @@ class ModuleWindow : public Window {
       deleteChildren();
     }
 
-    void checkEvents() override
-    {
-      invalidate();
-    }
-
   protected:
     uint8_t moduleIndex;
     Choice * moduleChoice = nullptr;
