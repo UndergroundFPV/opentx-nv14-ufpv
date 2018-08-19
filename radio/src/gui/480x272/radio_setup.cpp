@@ -26,6 +26,148 @@
 
 #define SET_DIRTY()     storageDirty(EE_GENERAL)
 
+class DateTimeWindow : public Window {
+  public:
+    DateTimeWindow(Window * parent, const rect_t &rect) :
+      Window(parent, rect)
+    {
+      update();
+    }
+
+    ~DateTimeWindow()
+    {
+      deleteChildren();
+    }
+
+    void checkEvents() override
+    {
+      if (get_tmr10ms() - lastRefresh > 100) {
+        invalidate();
+        lastRefresh = get_tmr10ms();
+      }
+    }
+
+  protected:
+    tmr10ms_t lastRefresh = 0;
+
+    void update()
+    {
+      GridLayout grid;
+
+      // Date
+      new StaticText(this, grid.getLabelSlot(), STR_DATE);
+      new NumberEdit(this, grid.getFieldSlot(3, 0), 2018, 2100,
+                     [=]() -> int32_t {
+                       struct gtm t;
+                       gettime(&t);
+                       return TM_YEAR_BASE + t.tm_year;
+                     },
+                     [=](int32_t newValue) {
+                       struct gtm t;
+                       gettime(&t);
+                       t.tm_year = newValue - TM_YEAR_BASE;
+                       rtcSetTime(&t);
+                       g_rtcTime = gmktime(&t);
+                     });
+      auto month = new NumberEdit(this, grid.getFieldSlot(3, 1), 1, 12,
+                     [=]() -> int32_t {
+                       struct gtm t;
+                       gettime(&t);
+                       return 1 + t.tm_mon;
+                     },
+                     [=](int32_t newValue) {
+                       struct gtm t;
+                       gettime(&t);
+                       t.tm_mon = newValue - 1;
+                       rtcSetTime(&t);
+                       g_rtcTime = gmktime(&t);
+                     });
+      month->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+      });
+
+      /* TODO dynamic max instead of 31 ...
+      int16_t year = TM_YEAR_BASE + t.tm_year;
+      int8_t dlim = (((((year%4==0) && (year%100!=0)) || (year%400==0)) && (t.tm_mon==1)) ? 1 : 0);
+      static const pm_uint8_t dmon[] PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+      dlim += pgm_read_byte(&dmon[t.tm_mon]);*/
+      int8_t dlim = 31;
+      auto day = new NumberEdit(this, grid.getFieldSlot(3, 2), 1, dlim,
+                     [=]() -> int32_t {
+                       struct gtm t;
+                       gettime(&t);
+                       return t.tm_mday;
+                     },
+                     [=](int32_t newValue) {
+                       struct gtm t;
+                       gettime(&t);
+                       t.tm_mday = newValue;
+                       rtcSetTime(&t);
+                       g_rtcTime = gmktime(&t);
+                     });
+      day->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+      });
+      grid.nextLine();
+
+
+      //Time
+      new StaticText(this, grid.getLabelSlot(), STR_TIME);
+      auto hour = new NumberEdit(this, grid.getFieldSlot(3, 0), 0, 24,
+                     [=]() -> int32_t {
+                       struct gtm t;
+                       gettime(&t);
+                       return t.tm_hour;
+                     },
+                     [=](int32_t newValue) {
+                       struct gtm t;
+                       gettime(&t);
+                       t.tm_hour = newValue;
+                       rtcSetTime(&t);
+                       g_rtcTime = gmktime(&t);
+                     });
+      hour->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+      });
+
+      auto minutes = new NumberEdit(this, grid.getFieldSlot(3, 1), 0, 59,
+                     [=]() -> int32_t {
+                       struct gtm t;
+                       gettime(&t);
+                       return t.tm_min;
+                     },
+                     [=](int32_t newValue) {
+                       struct gtm t;
+                       gettime(&t);
+                       t.tm_min = newValue;
+                       rtcSetTime(&t);
+                       g_rtcTime = gmktime(&t);
+                     });
+      minutes->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+      });
+
+      auto seconds = new NumberEdit(this, grid.getFieldSlot(3, 2), 0, 59,
+                     [=]() -> int32_t {
+                       struct gtm t;
+                       gettime(&t);
+                       return t.tm_sec;
+                     },
+                     [=](int32_t newValue) {
+                       struct gtm t;
+                       gettime(&t);
+                       t.tm_sec = newValue;
+                       rtcSetTime(&t);
+                       g_rtcTime = gmktime(&t);
+                     });
+      seconds->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
+        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+      });
+      grid.nextLine();
+      getParent()->moveWindowsTop(top(), adjustHeight());
+    }
+};
+
 RadioSetupPage::RadioSetupPage():
   PageTab(STR_MENURADIOSETUP, ICON_RADIO_SETUP)
 {
@@ -36,51 +178,10 @@ void RadioSetupPage::build(Window * window)
   GridLayout grid;
   grid.spacer(8);
 
-  // Date
-  new StaticText(window, grid.getLabelSlot(), STR_DATE);
-  new NumberEdit(window, grid.getFieldSlot(3, 0), 2018, 2100,
-                 [=]() -> int32_t {
-                   struct gtm t;
-                   gettime(&t);
-                   return TM_YEAR_BASE + t.tm_year;
-                 },
-                 [=](int32_t newValue) {
-                   struct gtm t;
-                   gettime(&t);
-                   t.tm_year = newValue - TM_YEAR_BASE;
-                   rtcSetTime(&t);
-                 });
-  new NumberEdit(window, grid.getFieldSlot(3, 1), 1, 12,
-                 [=]() -> int32_t {
-                   struct gtm t;
-                   gettime(&t);
-                   return 1 + t.tm_mon;
-                 },
-                 [=](int32_t newValue) {
-                   struct gtm t;
-                   gettime(&t);
-                   t.tm_mon = newValue - 1;
-                   rtcSetTime(&t);
-                 });
-  /* TODO dynamic max instead of 31 ...
-  int16_t year = TM_YEAR_BASE + t.tm_year;
-  int8_t dlim = (((((year%4==0) && (year%100!=0)) || (year%400==0)) && (t.tm_mon==1)) ? 1 : 0);
-  static const pm_uint8_t dmon[] PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-  dlim += pgm_read_byte(&dmon[t.tm_mon]);*/
-  int8_t dlim = 31;
-  new NumberEdit(window, grid.getFieldSlot(3, 2), 1, dlim,
-                 [=]() -> int32_t {
-                   struct gtm t;
-                   gettime(&t);
-                   return t.tm_mday;
-                 },
-                 [=](int32_t newValue) {
-                   struct gtm t;
-                   gettime(&t);
-                   t.tm_mday = newValue;
-                   rtcSetTime(&t);
-                 });
-  grid.nextLine();
+  // Date and Time
+  {
+    grid.addWindow(new DateTimeWindow(window, {0, grid.getWindowHeight(), LCD_W, 0}));
+  }
 
   // Batt meter range - Range 3.0v to 16v
   new StaticText(window, grid.getLabelSlot(), STR_BATTERY_RANGE);
