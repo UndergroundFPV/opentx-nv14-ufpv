@@ -66,8 +66,7 @@ class DateTimeWindow : public Window {
                        struct gtm t;
                        gettime(&t);
                        t.tm_year = newValue - TM_YEAR_BASE;
-                       rtcSetTime(&t);
-                       g_rtcTime = gmktime(&t);
+                       SET_LOAD_DATETIME(&t);
                      });
       auto month = new NumberEdit(this, grid.getFieldSlot(3, 1), 1, 12,
                      [=]() -> int32_t {
@@ -79,8 +78,7 @@ class DateTimeWindow : public Window {
                        struct gtm t;
                        gettime(&t);
                        t.tm_mon = newValue - 1;
-                       rtcSetTime(&t);
-                       g_rtcTime = gmktime(&t);
+                       SET_LOAD_DATETIME(&t);
                      });
       month->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
         drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
@@ -102,8 +100,7 @@ class DateTimeWindow : public Window {
                        struct gtm t;
                        gettime(&t);
                        t.tm_mday = newValue;
-                       rtcSetTime(&t);
-                       g_rtcTime = gmktime(&t);
+                       SET_LOAD_DATETIME(&t);
                      });
       day->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
         drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
@@ -123,8 +120,7 @@ class DateTimeWindow : public Window {
                        struct gtm t;
                        gettime(&t);
                        t.tm_hour = newValue;
-                       rtcSetTime(&t);
-                       g_rtcTime = gmktime(&t);
+                       SET_LOAD_DATETIME(&t);
                      });
       hour->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
         drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
@@ -140,8 +136,7 @@ class DateTimeWindow : public Window {
                        struct gtm t;
                        gettime(&t);
                        t.tm_min = newValue;
-                       rtcSetTime(&t);
-                       g_rtcTime = gmktime(&t);
+                       SET_LOAD_DATETIME(&t);
                      });
       minutes->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
         drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
@@ -157,8 +152,7 @@ class DateTimeWindow : public Window {
                        struct gtm t;
                        gettime(&t);
                        t.tm_sec = newValue;
-                       rtcSetTime(&t);
-                       g_rtcTime = gmktime(&t);
+                       SET_LOAD_DATETIME(&t);
                      });
       seconds->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
         drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
