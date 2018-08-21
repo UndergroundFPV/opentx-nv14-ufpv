@@ -34,18 +34,13 @@ void resetModuleSettings(uint8_t module)
   }
 }
 
-class FailSafeBody : public Window {
+class ChannelFailsafeBargraph: public Window {
   public:
-    FailSafeBody(Window * parent, const rect_t &rect, uint8_t moduleIndex) :
+    ChannelFailsafeBargraph(Window * parent, const rect_t & rect, uint8_t moduleIndex, uint8_t channel):
       Window(parent, rect),
-      moduleIndex(moduleIndex)
+      moduleIndex(moduleIndex),
+      channel(channel)
     {
-      auto out2fail = new TextButton(this, {10, 520, LCD_W - 20, 26 }, STR_OUTPUTS2FAILSAFE);
-      out2fail->setPressHandler([=]() {
-        setCustomFailsafe(moduleIndex);
-        storageDirty(EE_MODEL);
-        return 0;
-      });
     }
 
     void checkEvents() override
@@ -55,53 +50,79 @@ class FailSafeBody : public Window {
 
     void paint(BitmapBuffer * dc) override
     {
-      GridLayout grid;
-      grid.setLabelWidth(60);
+      int32_t failsafeValue = g_model.moduleData[moduleIndex].failsafeChannels[channel];
+      int32_t channelValue = channelOutputs[channel];
 
-      coord_t x = 20;
-      coord_t y = 0;
-      const uint8_t SLIDER_W = 128;
       const int lim = (g_model.extendedLimits ? (512 * LIMIT_EXT_PERCENT / 100) : 512) * 2;
 
-      for (int ch=0; ch < maxModuleChannels(moduleIndex); ch++, y+=32) {
-        // Channel name if present, number if not
-        x = 0.;
-        if (g_model.limitData[ch].name[0] != '\0') {
-          putsChn(x + MENUS_MARGIN_LEFT, y - 3, ch + 1, TINSIZE);
-          lcdDrawSizedText(x + MENUS_MARGIN_LEFT, y + 5, g_model.limitData[ch].name,
-                           sizeof(g_model.limitData[ch].name), ZCHAR | SMLSIZE);
-        } else {
-          putsChn(x + MENUS_MARGIN_LEFT, y, ch + 1, 0);
-        }
+      coord_t x = 0;
+      lcdDrawRect(x, 0, width(), height());
+      const coord_t lenChannel = limit((uint8_t) 1, uint8_t((abs(channelValue) * width() / 2 + lim / 2) / lim),
+                                       uint8_t(width() / 2));
+      const coord_t lenFailsafe = limit((uint8_t) 1, uint8_t((abs(failsafeValue) * width() / 2 + lim / 2) / lim),
+                                        uint8_t(width() / 2));
+      x += width() / 2;
+      const coord_t xChannel = (channelValue > 0) ? x : x + 1 - lenChannel;
+      const coord_t xFailsafe = (failsafeValue > 0) ? x : x + 1 - lenFailsafe;
+      lcdDrawSolidFilledRect(xChannel, + 2, lenChannel, (height() / 2) - 3, TEXT_COLOR);
+      lcdDrawSolidFilledRect(xFailsafe, (height() / 2) + 1, lenFailsafe, (height() / 2) - 3, ALARM_COLOR);
+    }
 
+  protected:
+    uint8_t moduleIndex;
+    uint8_t channel;
+};
+
+class FailSafeBody : public Window {
+  public:
+    FailSafeBody(Window * parent, const rect_t &rect, uint8_t moduleIndex) :
+      Window(parent, rect),
+      moduleIndex(moduleIndex)
+    {
+      build();
+    }
+
+    void checkEvents() override
+    {
+      invalidate();
+    }
+
+    void build()
+    {
+      GridLayout grid;
+      grid.setLabelWidth(60);
+      grid.spacer(8);
+
+      const int lim = (g_model.extendedLimits ? (512 * LIMIT_EXT_PERCENT / 100) : 512) * 2;
+
+      for (int ch=0; ch < maxModuleChannels(moduleIndex); ch++) {
+        // Channel name
+        // TODO if (g_model.limitData[ch].name[0] != '\0') { <= add channel name
+        new StaticText(this, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch));
+
+        // Channel numeric value
         new NumberEdit(this, grid.getFieldSlot(3, 0), -lim, lim,
                        GET_DEFAULT(calcRESXto1000(g_model.moduleData[moduleIndex].failsafeChannels[ch])),
                        SET_VALUE(g_model.moduleData[moduleIndex].failsafeChannels[ch], newValue),
                        PREC1);
+
+        // Channel bargraph
+        new ChannelFailsafeBargraph(this, {150, grid.getWindowHeight(), 150, lineHeight}, moduleIndex, ch);
         grid.nextLine();
-
-        int32_t failsafeValue = g_model.moduleData[moduleIndex].failsafeChannels[ch];
-        int32_t channelValue = channelOutputs[ch];
-
-
-        // Gauge
-        x = 160;
-        lcdDrawRect(x, y + 3, SLIDER_W + 1, 12);
-        const coord_t lenChannel = limit((uint8_t) 1, uint8_t((abs(channelValue) * SLIDER_W / 2 + lim / 2) / lim),
-                                         uint8_t(SLIDER_W / 2));
-        const coord_t lenFailsafe = limit((uint8_t) 1, uint8_t((abs(failsafeValue) * SLIDER_W / 2 + lim / 2) / lim),
-                                          uint8_t(SLIDER_W / 2));
-        x += SLIDER_W / 2;
-        const coord_t xChannel = (channelValue > 0) ? x : x + 1 - lenChannel;
-        const coord_t xFailsafe = (failsafeValue > 0) ? x : x + 1 - lenFailsafe;
-        lcdDrawSolidFilledRect(xChannel, y + 4, lenChannel, 5, TEXT_COLOR);
-        lcdDrawSolidFilledRect(xFailsafe, y + 9, lenFailsafe, 5, ALARM_COLOR);
       }
-      getParent()->moveWindowsTop(top(), adjustHeight());
+
+      auto out2fail = new TextButton(this, grid.getLineSlot(), STR_OUTPUTS2FAILSAFE);
+      out2fail->setPressHandler([=]() {
+        setCustomFailsafe(moduleIndex);
+        storageDirty(EE_MODEL);
+        return 0;
+      });
+
+      grid.nextLine();
+      setInnerHeight(grid.getWindowHeight());
     }
 
   protected:
-    tmr10ms_t lastRefresh = 0;
     uint8_t moduleIndex;
 };
 
@@ -448,58 +469,6 @@ void onBindMenu(const char * result)
   moduleFlag[moduleIdx] = MODULE_BIND;
 }
 
-int getSwitchWarningsCount()
-{
-  int count = 0;
-  for (int i = 0; i < NUM_SWITCHES; ++i) {
-    if (SWITCH_WARNING_ALLOWED(i)) {
-      ++count;
-    }
-  }
-  return count;
-}
-
-void editTimerMode(int timerIdx, coord_t y, LcdFlags attr, event_t event)
-{
-  TimerData &timer = g_model.timers[timerIdx];
-  if (attr && menuHorizontalPosition < 0) {
-//    lcdDrawSolidFilledRect(MODEL_SETUP_2ND_COLUMN - INVERT_HORZ_MARGIN, y - INVERT_VERT_MARGIN + 1,
-//                           115 + 2 * INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
-  }
-  drawStringWithIndex(MENUS_MARGIN_LEFT, y, STR_TIMER, timerIdx + 1, BOLD);
-  // drawTimerMode(window, MODEL_SETUP_2ND_COLUMN, y, timer.mode, (menuHorizontalPosition<=0 ? attr : 0));
-  // drawTimer(window, MODEL_SETUP_2ND_COLUMN+50, y, timer.start, (menuHorizontalPosition!=0 ? attr|TIMEHOUR : TIMEHOUR));
-  if (attr && s_editMode > 0) {
-    switch (menuHorizontalPosition) {
-      case 0: {
-        int32_t timerMode = timer.mode;
-        if (timerMode < 0) timerMode -= TMRMODE_COUNT - 1;
-        CHECK_INCDEC_MODELVAR_CHECK(event, timerMode, -TMRMODE_COUNT - SWSRC_LAST + 1, TMRMODE_COUNT + SWSRC_LAST - 1,
-                                    isSwitchAvailableInTimers);
-        if (timerMode < 0) timerMode += TMRMODE_COUNT - 1;
-        timer.mode = timerMode;
-#if defined(AUTOSWITCH)
-        if (s_editMode > 0) {
-          int8_t val = timer.mode - (TMRMODE_COUNT - 1);
-          int8_t switchVal = checkIncDecMovedSwitch(val);
-          if (val != switchVal) {
-            timer.mode = switchVal + (TMRMODE_COUNT - 1);
-            storageDirty(EE_MODEL);
-          }
-        }
-#endif
-        break;
-      }
-      case 1: {
-        const int stopsMinutes[] = {8, 60, 120, 180, 240, 300, 600, 900, 1200};
-        timer.start = checkIncDec(event, timer.start, 0, TIMER_MAX, EE_MODEL, NULL,
-                                  (const CheckIncDecStops &) stopsMinutes);
-        break;
-      }
-    }
-  }
-}
-
 void ModelSetupPage::build(Window * window)
 {
   GridLayout grid;
@@ -531,16 +500,20 @@ void ModelSetupPage::build(Window * window)
     new Subtitle(window, grid.getLineSlot(), timerLabel);
     grid.nextLine();
 
-    // Timer mode
-    new StaticText(window, grid.getLabelSlot(true), STR_MODE);
-    new SwitchChoice(window, grid.getFieldSlot(2, 0), -TMRMODE_COUNT - SWSRC_LAST + 1, TMRMODE_COUNT + SWSRC_LAST - 1, GET_SET_DEFAULT(timer->mode));
-#warning "Timer mode not finished!"
-    new TimeEdit(window, grid.getFieldSlot(2, 1), 0, TIMER_MAX, GET_SET_DEFAULT(timer->start));
-    grid.nextLine();
-
     // Timer name
     new StaticText(window, grid.getLabelSlot(true), STR_TIMER_NAME);
     new TextEdit(window, grid.getFieldSlot(), timer->name, LEN_TIMER_NAME);
+    grid.nextLine();
+
+    // Timer mode
+    new StaticText(window, grid.getLabelSlot(true), STR_MODE);
+    new SwitchChoice(window, grid.getFieldSlot(2, 0), SWSRC_FIRST, SWSRC_LAST, GET_SET_DEFAULT(timer->swtch));
+    new Choice(window, grid.getFieldSlot(2, 1), "\006""Simple""Thr.\0 ""Thr.%", 0, TMRMODE_COUNT, GET_SET_DEFAULT(timer->mode));
+    grid.nextLine();
+
+    // Timer start value
+    new StaticText(window, grid.getLabelSlot(true), "Start");
+    new TimeEdit(window, grid.getFieldSlot(), 0, TIMER_MAX, GET_SET_DEFAULT(timer->start));
     grid.nextLine();
 
     // Timer minute beep
@@ -550,8 +523,7 @@ void ModelSetupPage::build(Window * window)
 
     // Timer countdown
     new StaticText(window, grid.getLabelSlot(true), STR_BEEPCOUNTDOWN);
-    new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1,
-               GET_SET_DEFAULT(timer->countdownBeep));
+    new Choice(window, grid.getFieldSlot(2, 0), STR_VBEEPCOUNTDOWN, COUNTDOWN_SILENT, COUNTDOWN_COUNT - 1, GET_SET_DEFAULT(timer->countdownBeep));
     new Choice(window, grid.getFieldSlot(2, 1), STR_COUNTDOWNVALUES, 0, 3, GET_SET_WITH_OFFSET(timer->countdownStart, 2));
     grid.nextLine();
 

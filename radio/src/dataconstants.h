@@ -977,11 +977,9 @@ enum Functions {
 };
 
 enum TimerModes {
-  TMRMODE_NONE,
-  TMRMODE_ABS,
+  TMRMODE_SIMPLE,
   TMRMODE_THR,
   TMRMODE_THR_REL,
-  TMRMODE_THR_TRG,
   TMRMODE_COUNT
 };
 

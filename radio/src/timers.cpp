@@ -78,12 +78,13 @@ void saveTimers()
 void evalTimers(int16_t throttle, uint8_t tick10ms)
 {
   for (uint8_t i=0; i<TIMERS; i++) {
-    int8_t timerMode = g_model.timers[i].mode;
+    uint8_t timerMode = g_model.timers[i].mode;
+    int16_t timerSwtch = g_model.timers[i].swtch;
     tmrstart_t timerStart = g_model.timers[i].start;
     TimerState * timerState = &timersStates[i];
 
-    if (timerMode) {
-      if ((timerState->state == TMR_OFF) && (timerMode != TMRMODE_THR_TRG)) {
+    if (timerSwtch && getSwitch(timerSwtch)) {
+      if (timerState->state == TMR_OFF) {
         timerState->state = TMR_RUNNING;
         timerState->cnt = 0;
         timerState->sum = 0;
@@ -102,7 +103,7 @@ void evalTimers(int16_t throttle, uint8_t tick10ms)
         tmrval_t newTimerVal = timerState->val;
         if (timerStart) newTimerVal = timerStart - newTimerVal;
 
-        if (timerMode == TMRMODE_ABS) {
+        if (timerMode == TMRMODE_SIMPLE) {
           newTimerVal++;
         }
         else if (timerMode == TMRMODE_THR) {
@@ -111,35 +112,14 @@ void evalTimers(int16_t throttle, uint8_t tick10ms)
         else if (timerMode == TMRMODE_THR_REL) {
           // @@@ open.20.fsguruh: why so complicated? we have already a s_sum field; use it for the half seconds (not showable) as well
           // check for s_cnt[i]==0 is not needed because we are shure it is at least 1
-  #if defined(ACCURAT_THROTTLE_TIMER)
-          if ((timerState->sum/timerState->cnt) >= 128) {  // throttle was normalized to 0 to 128 value (throttle/64*2 (because - range is added as well)
-            newTimerVal++;  // add second used of throttle
-            timerState->sum -= 128*timerState->cnt;
+          if ((timerState->sum / timerState->cnt) >= 128) { // throttle was normalized to 0 to 128 value (throttle/64*2 (because - range is added as well)
+            newTimerVal++; // add second used of throttle
+            timerState->sum -= 128 * timerState->cnt;
           }
-  #else
-          if ((timerState->sum/timerState->cnt) >= 32) {  // throttle was normalized to 0 to 32 value (throttle/16*2 (because - range is added as well)
-            newTimerVal++;  // add second used of throttle
-            timerState->sum -= 32*timerState->cnt;
-          }
-  #endif
           timerState->cnt = 0;
-        }
-        else if (timerMode == TMRMODE_THR_TRG) {
-          // we can't rely on (throttle || newTimerVal > 0) as a detection if timer should be running
-          // because having persistent timer brakes this rule
-          if ((throttle > THR_TRG_TRESHOLD) && timerState->state == TMR_OFF) {
-            timerState->state = TMR_RUNNING;  // start timer running
-            timerState->cnt = 0;
-            timerState->sum = 0;
-            // TRACE("Timer[%d] THr triggered", i);
-          }
-          if (timerState->state != TMR_OFF) newTimerVal++;
         }
         else {
           if (timerMode > 0) timerMode -= (TMRMODE_COUNT-1);
-          if (getSwitch(timerMode)) {
-            newTimerVal++;
-          }
         }
 
         switch (timerState->state) {
