@@ -378,7 +378,20 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
               insertExpo(index + 1, input);
               editInput(window, input, index + 1);
             });
-            // TODO STR_COPY
+            menu->addLine(STR_COPY, [=]() {
+              s_copyMode = COPY_MODE;
+              s_copySrcIdx = index;
+            });
+            if (s_copyMode == COPY_MODE) {
+              menu->addLine(STR_PASTE_BEFORE, [=]() {
+                s_copyMode = 0;
+                rebuild(window, -1);
+              });
+              menu->addLine(STR_PASTE_AFTER, [=]() {
+                s_copyMode = 0;
+                rebuild(window, -1);
+              });
+            }
           }
           // TODO STR_MOVE
           menu->addLine(STR_DELETE, [=]() {
@@ -389,6 +402,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
         });
 
         grid.spacer(button->height() - 2);
+
         ++index;
         ++line;
       }
@@ -402,7 +416,30 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
                        editInput(window, input, index);
                        return 0;
                      });
-      grid.nextLine();
+      Button * button = new InputLineButton(window, grid.getFieldSlot(), index);
+      if (focusIndex == index)
+        button->setFocus();
+      button->setPressHandler([=]() -> uint8_t {
+        button->bringToTop();
+        Menu * menu = new Menu();
+        menu->addLine(STR_EDIT, [=]() {
+          editInput(window, input, index);
+        });
+        if (!reachExposLimit()) {
+          if (s_copyMode == COPY_MODE)
+            menu->addLine(STR_PASTE, [=]() {
+              s_copyMode = 0;
+              rebuild(window, -1);
+          });
+        }
+        // TODO STR_MOVE
+        return 0;
+      });
+
+      grid.spacer(button->height() - 2);
+      grid.spacer(7);
+      ++index;
+      ++line;
     }
   }
 
@@ -418,6 +455,9 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
 
 // TODO port: avoid global s_currCh on ARM boards (as done here)...
 int8_t s_currCh;
+uint8_t s_copyMode;
+int8_t s_copySrcRow;
+uint8_t s_copySrcIdx;
 void insertExpo(uint8_t idx, uint8_t input)
 {
   pauseMixerCalculations();
