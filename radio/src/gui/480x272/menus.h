@@ -458,6 +458,7 @@ extern uint8_t s_copySrcCh;
 uint8_t getExposCount();
 void deleteExpo(uint8_t idx);
 void insertExpo(uint8_t idx, uint8_t input);
+void copyExpo(uint8_t source, uint8_t dest, uint8_t direction);
 
 uint8_t getMixesCount();
 void deleteMix(uint8_t idx);

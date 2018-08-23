@@ -24,6 +24,9 @@
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
 
+#define PASTE_BEFORE    0
+#define PASTE_AFTER     1
+
 uint8_t getExposCount()
 {
   uint8_t count = 0;
@@ -384,11 +387,11 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
             });
             if (s_copyMode == COPY_MODE) {
               menu->addLine(STR_PASTE_BEFORE, [=]() {
-                s_copyMode = 0;
+                copyExpo(s_copySrcIdx, index, PASTE_BEFORE);
                 rebuild(window, -1);
               });
               menu->addLine(STR_PASTE_AFTER, [=]() {
-                s_copyMode = 0;
+                copyExpo(s_copySrcIdx, index, PASTE_AFTER);
                 rebuild(window, -1);
               });
             }
@@ -426,11 +429,16 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
           editInput(window, input, index);
         });
         if (!reachExposLimit()) {
-          if (s_copyMode == COPY_MODE)
-            menu->addLine(STR_PASTE, [=]() {
-              s_copyMode = 0;
+          if (s_copyMode == COPY_MODE) {
+            menu->addLine(STR_PASTE_BEFORE, [=]() {
+              copyExpo(s_copySrcIdx, index, PASTE_BEFORE);
               rebuild(window, -1);
-          });
+            });
+            menu->addLine(STR_PASTE_AFTER, [=]() {
+              copyExpo(s_copySrcIdx, index, PASTE_AFTER);
+              rebuild(window, -1);
+            });
+          }
         }
         // TODO STR_MOVE
         return 0;
@@ -457,7 +465,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
 int8_t s_currCh;
 uint8_t s_copyMode;
 int8_t s_copySrcRow;
-uint8_t s_copySrcIdx;
+
 void insertExpo(uint8_t idx, uint8_t input)
 {
   pauseMixerCalculations();
@@ -473,11 +481,22 @@ void insertExpo(uint8_t idx, uint8_t input)
   storageDirty(EE_MODEL);
 }
 
-void copyExpo(uint8_t idx)
+void copyExpo(uint8_t source, uint8_t dest, uint8_t direction)
 {
   pauseMixerCalculations();
-  ExpoData * expo = expoAddress(idx);
-  memmove(expo+1, expo, (MAX_EXPOS-(idx+1))*sizeof(ExpoData));
+  ExpoData sourceExpo;
+  memcpy(&sourceExpo, expoAddress(source), sizeof(ExpoData));
+  ExpoData * expo = expoAddress(dest);
+  if(direction == PASTE_AFTER) {
+    memmove(expo+2, expo+1, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo+1, &sourceExpo, sizeof(ExpoData));
+    (expo+1)->chn = (expo)->chn;
+  }
+  else {
+    memmove(expo+1, expo, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo, &sourceExpo, sizeof(ExpoData));
+    expo->chn = (expo+1)->chn;
+  }
   resumeMixerCalculations();
   storageDirty(EE_MODEL);
 }
