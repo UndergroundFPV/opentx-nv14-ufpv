@@ -24,8 +24,8 @@
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
 
-#define PASTE_BEFORE    0
-#define PASTE_AFTER     1
+#define PASTE_BEFORE    -2
+#define PASTE_AFTER     -1
 
 uint8_t getExposCount()
 {
@@ -430,12 +430,8 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
         });
         if (!reachExposLimit()) {
           if (s_copyMode == COPY_MODE) {
-            menu->addLine(STR_PASTE_BEFORE, [=]() {
-              copyExpo(s_copySrcIdx, index, PASTE_BEFORE);
-              rebuild(window, -1);
-            });
-            menu->addLine(STR_PASTE_AFTER, [=]() {
-              copyExpo(s_copySrcIdx, index, PASTE_AFTER);
+            menu->addLine(STR_PASTE, [=]() {
+              copyExpo(s_copySrcIdx, index, input);
               rebuild(window, -1);
             });
           }
@@ -481,21 +477,26 @@ void insertExpo(uint8_t idx, uint8_t input)
   storageDirty(EE_MODEL);
 }
 
-void copyExpo(uint8_t source, uint8_t dest, uint8_t direction)
+void copyExpo(uint8_t source, uint8_t dest, int16_t input)
 {
   pauseMixerCalculations();
   ExpoData sourceExpo;
   memcpy(&sourceExpo, expoAddress(source), sizeof(ExpoData));
   ExpoData * expo = expoAddress(dest);
-  if(direction == PASTE_AFTER) {
+
+  if(input == PASTE_AFTER) {
     memmove(expo+2, expo+1, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
     memcpy(expo+1, &sourceExpo, sizeof(ExpoData));
     (expo+1)->chn = (expo)->chn;
   }
-  else {
+  else if(input == PASTE_BEFORE) {
     memmove(expo+1, expo, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
     memcpy(expo, &sourceExpo, sizeof(ExpoData));
     expo->chn = (expo+1)->chn;
+  }
+  else {
+    memcpy(expo, &sourceExpo, sizeof(ExpoData));
+    expo->chn = input;
   }
   resumeMixerCalculations();
   storageDirty(EE_MODEL);
