@@ -413,37 +413,30 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
       grid.spacer(7);
     }
     else {
-      new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_FIRST_INPUT + input),
-                     [=]() -> uint8_t {
-                       insertExpo(index, input);
-                       editInput(window, input, index);
-                       return 0;
-                     });
-      Button * button = new InputLineButton(window, grid.getFieldSlot(), index);
+      auto button = new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_FIRST_INPUT + input));
       if (focusIndex == index)
         button->setFocus();
       button->setPressHandler([=]() -> uint8_t {
         button->bringToTop();
         Menu * menu = new Menu();
         menu->addLine(STR_EDIT, [=]() {
+          insertExpo(index, input);
           editInput(window, input, index);
+          return 0;
         });
         if (!reachExposLimit()) {
           if (s_copyMode == COPY_MODE) {
             menu->addLine(STR_PASTE, [=]() {
               copyExpo(s_copySrcIdx, index, input);
               rebuild(window, -1);
+              return 0;
             });
           }
         }
         // TODO STR_MOVE
         return 0;
       });
-
-      grid.spacer(button->height() - 2);
-      grid.spacer(7);
-      ++index;
-      ++line;
+      grid.nextLine();
     }
   }
 
