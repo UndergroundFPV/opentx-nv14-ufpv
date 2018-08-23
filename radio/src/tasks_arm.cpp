@@ -193,17 +193,6 @@ TASK_FUNCTION(menusTask)
       CoTickDelay(MENU_TASK_PERIOD_TICKS);
       continue;
     }
-#if defined (PCBFLYSKY)
-    uint32_t lowpwr_check = lowPowerCheck();
-    if (lowpwr_check == e_power_off) {
-      break;
-      CoTickDelay(MENU_TASK_PERIOD_TICKS);
-    }
-    else if (lowpwr_check == e_power_low) {
-      CoTickDelay(MENU_TASK_PERIOD_TICKS);
-      continue;
-    }
-#endif
 #else
   while (pwrCheck() != e_power_off) {
 #endif
@@ -217,6 +206,18 @@ TASK_FUNCTION(menusTask)
     perMain();
 #endif
     DEBUG_TIMER_STOP(debugTimerPerMain);
+
+#if defined (PCBFLYSKY)
+    uint32_t lowpwr_check = lowPowerCheck();
+    if (lowpwr_check == e_power_off) {
+      break;
+      CoTickDelay(MENU_TASK_PERIOD_TICKS);
+    }
+    else if (lowpwr_check == e_power_low) {
+      CoTickDelay(MENU_TASK_PERIOD_TICKS);
+      continue;
+    }
+#endif
     // TODO remove completely massstorage from sky9x firmware
     uint32_t runtime = ((uint32_t)RTOS_GET_TIME() - start);
     // deduct the thread run-time from the wait, if run-time was more than

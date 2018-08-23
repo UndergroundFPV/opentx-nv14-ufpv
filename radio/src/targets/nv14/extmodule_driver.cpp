@@ -37,6 +37,7 @@ void extmoduleStop()
 
 void extmoduleNoneStart()
 {
+#if 1
   EXTERNAL_MODULE_OFF();
 
   GPIO_PinAFConfig(EXTMODULE_TX_GPIO, EXTMODULE_TX_GPIO_PinSource, 0);
@@ -61,6 +62,7 @@ void extmoduleNoneStart()
 
   NVIC_EnableIRQ(EXTMODULE_TIMER_IRQn);
   NVIC_SetPriority(EXTMODULE_TIMER_IRQn, 7);
+#endif
 }
 
 void extmodulePpmStart()

@@ -192,6 +192,8 @@ void adcInit()
     sticksPwmInit();
   }
 #endif
+  //Avoid reading wrong values when the adcRead not be called.
+  adcRead();
 }
 
 void adcSingleRead()

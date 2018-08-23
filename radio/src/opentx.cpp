@@ -2866,6 +2866,7 @@ uint32_t lowPowerCheck()
 
   static uint8_t low_pwr_state = PWR_CHECK_ON;
 
+
   if (low_pwr_state == PWR_CHECK_OFF) {
     return e_power_off;
   }

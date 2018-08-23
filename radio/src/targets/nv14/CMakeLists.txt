@@ -55,6 +55,11 @@ add_definitions(-DEEPROM_VARIANT=0 -DAUDIO -DVOICE -DRTCLOCK)
 add_definitions(-DGPS_USART_BAUDRATE=${INTERNAL_GPS_BAUDRATE})
 add_definitions(-DPWR_BUTTON_${PWR_BUTTON})
 
+add_definitions(-DFLYSKY_HALL_STICKS_REVERSE)
+#add_definitions(-DFLYSKY_STARTUP_DELAY)
+
+
+
 if(NOT UNEXPECTED_SHUTDOWN)
   add_definitions(-DNO_UNEXPECTED_SHUTDOWN)
 endif()

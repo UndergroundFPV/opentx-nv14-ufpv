@@ -170,6 +170,10 @@ void boardInit()
                          ENABLE);
 
   __enable_irq();
+
+#if defined(DEBUG)
+   auxSerialInit(0, 0); // default serial mode (None if DEBUG nm  ot defined)
+#endif
   TRACE("\nNV14 board started :)");
   delay_ms(10);
   TRACE("RCC->CSR = %08x", RCC->CSR);
@@ -202,10 +206,6 @@ uint32_t pwr_press_time = 0;
     }
   }
 #endif
-
-#if defined(DEBUG)
-   auxSerialInit(0, 0); // default serial mode (None if DEBUG nm  ot defined)
-#endif
   audioInit();
 
   // we need to initialize g_FATFS_Obj here, because it is in .ram section (because of DMA access) 
@@ -215,6 +215,7 @@ uint32_t pwr_press_time = 0;
   battery_charge_init();
   monitorInit();
   adcInit();
+
   backlightInit();
   lcdInit();
 #if defined(FLYSKY_HALL_STICKS)
