@@ -385,18 +385,25 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
               s_copyMode = COPY_MODE;
               s_copySrcIdx = index;
             });
-            if (s_copyMode == COPY_MODE) {
+            if (s_copyMode != 0) {
               menu->addLine(STR_PASTE_BEFORE, [=]() {
                 copyExpo(s_copySrcIdx, index, PASTE_BEFORE);
+                if(s_copyMode == MOVE_MODE)
+                  deleteExpo(s_copySrcIdx);
                 rebuild(window, -1);
               });
               menu->addLine(STR_PASTE_AFTER, [=]() {
                 copyExpo(s_copySrcIdx, index, PASTE_AFTER);
+                if(s_copyMode == MOVE_MODE)
+                  deleteExpo(s_copySrcIdx);
                 rebuild(window, -1);
               });
             }
           }
-          // TODO STR_MOVE
+          menu->addLine(STR_MOVE, [=]() {
+            s_copyMode = MOVE_MODE;
+            s_copySrcIdx = index;
+          });
           menu->addLine(STR_DELETE, [=]() {
             deleteExpo(index);
             rebuild(window, -1);
@@ -425,9 +432,11 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
           return 0;
         });
         if (!reachExposLimit()) {
-          if (s_copyMode == COPY_MODE) {
+          if (s_copyMode != 0) {
             menu->addLine(STR_PASTE, [=]() {
               copyExpo(s_copySrcIdx, index, input);
+              if(s_copyMode == MOVE_MODE)
+                deleteExpo(s_copySrcIdx);
               rebuild(window, -1);
               return 0;
             });
