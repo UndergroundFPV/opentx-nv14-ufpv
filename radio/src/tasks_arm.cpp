@@ -207,7 +207,7 @@ TASK_FUNCTION(menusTask)
 #endif
     DEBUG_TIMER_STOP(debugTimerPerMain);
 
-#if defined (PCBFLYSKY)
+#if defined (PCBFLYSKY) && defined(FLYSKY_AUTO_POWER_DOWN)
     uint32_t lowpwr_check = lowPowerCheck();
     if (lowpwr_check == e_power_off) {
       break;

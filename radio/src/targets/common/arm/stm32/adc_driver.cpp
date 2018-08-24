@@ -23,7 +23,11 @@
 #if defined(SIMU)
   // not needed
 #elif defined(PCBNV14)
-  const int8_t ana_direction[NUM_ANALOGS] = { 0 };
+  const int8_t ana_direction[NUM_ANALOGS] = { 0 /*STICK1*/, 0 /*STICK2*/, 0 /*STICK3*/, 0 /*STICK4*/,
+                                              0 /*POT1*/, 0 /*POT2*/, 0 /*SWA*/, 0 /*SWB*/,
+                                              0 /*SWC*/,  -1 /*SWD*/, 0 /*SWE*/, -1 /*SWF*/,
+                                              0 /*SWH*/, 0 /*SWG*/,
+                                              0 /*TX_VOLTAGE*/ };
   const uint8_t anas_mapping[NUM_ANALOGS] = { 0 /*STICK1*/, 1 /*STICK2*/, 2 /*STICK3*/, 3 /*STICK4*/,
                                               4 /*POT1*/, 5 /*POT2*/, 6 /*SWA*/, 13 /*SWB*/,
                                               7 /*SWC*/,  14 /*SWD*/, 8 /*SWE*/, 9 /*SWF*/,

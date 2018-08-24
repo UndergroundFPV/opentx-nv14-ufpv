@@ -271,6 +271,18 @@ class ModuleWindow : public Window {
                      update();
                    });
       }
+
+      if (isModulePPM(moduleIndex)) {
+        new Choice(this, grid.getFieldSlot(2, 1), "\006""     +""     -", 0,
+                   1,
+                   GET_DEFAULT(g_model.moduleData[moduleIndex].ppm.pulsePol),
+                   [=](int32_t newValue) {
+                     g_model.moduleData[moduleIndex].ppm.pulsePol = newValue;
+                     SET_DIRTY();
+                     update();
+                   });
+      }
+
       grid.nextLine();
 
       // Channel Range
