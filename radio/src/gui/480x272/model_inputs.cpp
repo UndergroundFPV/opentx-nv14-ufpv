@@ -388,14 +388,18 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
             if (s_copyMode != 0) {
               menu->addLine(STR_PASTE_BEFORE, [=]() {
                 copyExpo(s_copySrcIdx, index, PASTE_BEFORE);
-                if(s_copyMode == MOVE_MODE)
+                if(s_copyMode == MOVE_MODE) {
                   deleteExpo(s_copySrcIdx);
+                  s_copyMode = 0;
+                }
                 rebuild(window, -1);
               });
               menu->addLine(STR_PASTE_AFTER, [=]() {
                 copyExpo(s_copySrcIdx, index, PASTE_AFTER);
-                if(s_copyMode == MOVE_MODE)
+                if(s_copyMode == MOVE_MODE) {
                   deleteExpo(s_copySrcIdx);
+                  s_copyMode = 0;
+                }
                 rebuild(window, -1);
               });
             }
@@ -435,8 +439,10 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
           if (s_copyMode != 0) {
             menu->addLine(STR_PASTE, [=]() {
               copyExpo(s_copySrcIdx, index, input);
-              if(s_copyMode == MOVE_MODE)
+              if(s_copyMode == MOVE_MODE) {
                 deleteExpo(s_copySrcIdx);
+                s_copyMode = 0;
+              }
               rebuild(window, -1);
               return 0;
             });
