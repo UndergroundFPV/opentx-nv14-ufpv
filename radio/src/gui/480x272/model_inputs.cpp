@@ -50,6 +50,32 @@ bool reachExposLimit()
   return false;
 }
 
+void copyExpo(uint8_t source, uint8_t dest, int16_t input)
+{
+  pauseMixerCalculations();
+  ExpoData sourceExpo;
+  memcpy(&sourceExpo, expoAddress(source), sizeof(ExpoData));
+  ExpoData * expo = expoAddress(dest);
+
+  if(input == PASTE_AFTER) {
+    memmove(expo+2, expo+1, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo+1, &sourceExpo, sizeof(ExpoData));
+    (expo+1)->chn = (expo)->chn;
+  }
+  else if(input == PASTE_BEFORE) {
+    memmove(expo+1, expo, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo, &sourceExpo, sizeof(ExpoData));
+    expo->chn = (expo+1)->chn;
+  }
+  else {
+    memmove(expo+1, expo, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo, &sourceExpo, sizeof(ExpoData));
+    expo->chn = input;
+  }
+  resumeMixerCalculations();
+  storageDirty(EE_MODEL);
+}
+
 void deleteExpo(uint8_t idx)
 {
   pauseMixerCalculations();
@@ -389,7 +415,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
               menu->addLine(STR_PASTE_BEFORE, [=]() {
                 copyExpo(s_copySrcIdx, index, PASTE_BEFORE);
                 if(s_copyMode == MOVE_MODE) {
-                  deleteExpo(s_copySrcIdx);
+                  deleteExpo((s_copySrcIdx > index) ? s_copySrcIdx+1 : s_copySrcIdx);
                   s_copyMode = 0;
                 }
                 rebuild(window, -1);
@@ -397,7 +423,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
               menu->addLine(STR_PASTE_AFTER, [=]() {
                 copyExpo(s_copySrcIdx, index, PASTE_AFTER);
                 if(s_copyMode == MOVE_MODE) {
-                  deleteExpo(s_copySrcIdx);
+                  deleteExpo((s_copySrcIdx > index) ? s_copySrcIdx+1 : s_copySrcIdx);
                   s_copyMode = 0;
                 }
                 rebuild(window, -1);
@@ -440,7 +466,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
             menu->addLine(STR_PASTE, [=]() {
               copyExpo(s_copySrcIdx, index, input);
               if(s_copyMode == MOVE_MODE) {
-                deleteExpo(s_copySrcIdx);
+                deleteExpo((s_copySrcIdx > index) ? s_copySrcIdx+1 : s_copySrcIdx);
                 s_copyMode = 0;
               }
               rebuild(window, -1);
@@ -448,7 +474,6 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
             });
           }
         }
-        // TODO STR_MOVE
         return 0;
       });
       grid.nextLine();
@@ -483,71 +508,4 @@ void insertExpo(uint8_t idx, uint8_t input)
   expo->weight = 100;
   resumeMixerCalculations();
   storageDirty(EE_MODEL);
-}
-
-void copyExpo(uint8_t source, uint8_t dest, int16_t input)
-{
-  pauseMixerCalculations();
-  ExpoData sourceExpo;
-  memcpy(&sourceExpo, expoAddress(source), sizeof(ExpoData));
-  ExpoData * expo = expoAddress(dest);
-
-  if(input == PASTE_AFTER) {
-    memmove(expo+2, expo+1, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
-    memcpy(expo+1, &sourceExpo, sizeof(ExpoData));
-    (expo+1)->chn = (expo)->chn;
-  }
-  else if(input == PASTE_BEFORE) {
-    memmove(expo+1, expo, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
-    memcpy(expo, &sourceExpo, sizeof(ExpoData));
-    expo->chn = (expo+1)->chn;
-  }
-  else {
-    memcpy(expo, &sourceExpo, sizeof(ExpoData));
-    expo->chn = input;
-  }
-  resumeMixerCalculations();
-  storageDirty(EE_MODEL);
-}
-
-bool swapExpos(uint8_t & idx, uint8_t up)
-{
-  ExpoData * x, * y;
-  int8_t tgt_idx = (up ? idx-1 : idx+1);
-
-  x = expoAddress(idx);
-
-  if (tgt_idx < 0) {
-    if (x->chn == 0)
-      return false;
-    x->chn--;
-    return true;
-  }
-
-  if (tgt_idx == MAX_EXPOS) {
-    if (x->chn == NUM_INPUTS-1)
-      return false;
-    x->chn++;
-    return true;
-  }
-
-  y = expoAddress(tgt_idx);
-  if (x->chn != y->chn || !EXPO_VALID(y)) {
-    if (up) {
-      if (x->chn>0) x->chn--;
-      else return false;
-    }
-    else {
-      if (x->chn<NUM_INPUTS-1) x->chn++;
-      else return false;
-    }
-    return true;
-  }
-
-  pauseMixerCalculations();
-  memswap(x, y, sizeof(ExpoData));
-  resumeMixerCalculations();
-
-  idx = tgt_idx;
-  return true;
 }
