@@ -24,6 +24,9 @@
 
 #define SET_DIRTY()     storageDirty(EE_MODEL)
 
+#define PASTE_BEFORE    -2
+#define PASTE_AFTER     -1
+
 uint8_t getMixesCount()
 {
   uint8_t count = 0;
@@ -394,7 +397,20 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
               insertMix(mixIndex + 1, ch);
               editMix(window, ch, mixIndex + 1);
             });
-            // TODO STR_COPY
+            menu->addLine(STR_COPY, [=]() {
+              s_copyMode = COPY_MODE;
+              s_copySrcIdx =mixIndex;
+            });
+            if (s_copyMode == COPY_MODE) {
+              menu->addLine(STR_PASTE_BEFORE, [=]() {
+                copyMix(s_copySrcIdx, mixIndex, PASTE_BEFORE);
+                rebuild(window, -1);
+              });
+              menu->addLine(STR_PASTE_AFTER, [=]() {
+                copyMix(s_copySrcIdx, mixIndex, PASTE_AFTER);
+                rebuild(window, -1);
+              });
+            }
           }
           // TODO STR_MOVE
           menu->addLine(STR_DELETE, [=]() {
@@ -416,12 +432,29 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
       grid.spacer(7);
     }
     else {
-      new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch),
-                     [=]() -> uint8_t {
-                       insertMix(mixIndex, ch);
-                       editMix(window, ch, mixIndex);
-                       return 0;
-                     });
+      auto button = new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch));
+      if (focusMixIndex == mixIndex)
+        button->setFocus();
+      button->setPressHandler([=]() -> uint8_t {
+        button->bringToTop();
+        Menu * menu = new Menu();
+        menu->addLine(STR_EDIT, [=]() {
+          insertMix(mixIndex, ch);
+          editMix(window, ch, mixIndex);
+          return 0;
+        });
+        if (!reachMixesLimit()) {
+          if (s_copyMode == COPY_MODE) {
+            menu->addLine(STR_PASTE, [=]() {
+              copyMix(s_copySrcIdx, mixIndex, ch);
+              rebuild(window, -1);
+              return 0;
+            });
+          }
+        }
+        // TODO STR_MOVE
+        return 0;
+      });
       grid.nextLine();
     }
   }
@@ -451,11 +484,28 @@ void insertMix(uint8_t idx)
   insertMix(idx, s_currCh + 1);
 }
 
-void copyMix(uint8_t idx)
+void copyMix(uint8_t source, uint8_t dest, int16_t ch)
 {
   pauseMixerCalculations();
-  MixData * mix = mixAddress(idx);
-  memmove(mix + 1, mix, (MAX_MIXERS - (idx + 1)) * sizeof(MixData));
+  MixData sourceMix;
+  memcpy(&sourceMix, mixAddress(source), sizeof(MixData));
+  MixData * mix = mixAddress(dest);
+  if(ch == PASTE_AFTER) {
+    memmove(mix+2, mix+1, (MAX_MIXERS-(source+1))*sizeof(MixData));
+    memcpy(mix+1, &sourceMix, sizeof(MixData));
+    (mix+1)->destCh = (mix)->destCh;
+  }
+  else if(ch == PASTE_BEFORE) {
+    memmove(mix+1, mix, (MAX_MIXERS-(source+1))*sizeof(MixData));
+    memcpy(mix, &sourceMix, sizeof(MixData));
+    mix->destCh = (mix+1)->destCh;
+  }
+  else {
+    memcpy(mix, &sourceMix, sizeof(MixData));
+    mix->destCh  = ch;
+  }
+
+  //memmove(mix + 1, mix, (MAX_MIXERS - (dest + 1)) * sizeof(MixData));
   resumeMixerCalculations();
   storageDirty(EE_MODEL);
 }

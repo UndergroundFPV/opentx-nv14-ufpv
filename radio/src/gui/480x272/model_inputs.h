@@ -36,6 +36,7 @@ class ModelInputsPage: public PageTab {
     void build(Window * window, int8_t focusIndex);
     void rebuild(Window * window, int8_t focusIndex);
     void editInput(Window * window, uint8_t channel, uint8_t index);
+    uint8_t s_copySrcIdx;
 };
 
 #endif //_MODEL_INPUTS_H

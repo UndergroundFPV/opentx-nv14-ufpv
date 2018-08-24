@@ -24,6 +24,9 @@
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
 
+#define PASTE_BEFORE    -2
+#define PASTE_AFTER     -1
+
 uint8_t getExposCount()
 {
   uint8_t count = 0;
@@ -384,11 +387,11 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
             });
             if (s_copyMode == COPY_MODE) {
               menu->addLine(STR_PASTE_BEFORE, [=]() {
-                s_copyMode = 0;
+                copyExpo(s_copySrcIdx, index, PASTE_BEFORE);
                 rebuild(window, -1);
               });
               menu->addLine(STR_PASTE_AFTER, [=]() {
-                s_copyMode = 0;
+                copyExpo(s_copySrcIdx, index, PASTE_AFTER);
                 rebuild(window, -1);
               });
             }
@@ -410,36 +413,30 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
       grid.spacer(7);
     }
     else {
-      new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_FIRST_INPUT + input),
-                     [=]() -> uint8_t {
-                       insertExpo(index, input);
-                       editInput(window, input, index);
-                       return 0;
-                     });
-      Button * button = new InputLineButton(window, grid.getFieldSlot(), index);
+      auto button = new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_FIRST_INPUT + input));
       if (focusIndex == index)
         button->setFocus();
       button->setPressHandler([=]() -> uint8_t {
         button->bringToTop();
         Menu * menu = new Menu();
         menu->addLine(STR_EDIT, [=]() {
+          insertExpo(index, input);
           editInput(window, input, index);
+          return 0;
         });
         if (!reachExposLimit()) {
-          if (s_copyMode == COPY_MODE)
+          if (s_copyMode == COPY_MODE) {
             menu->addLine(STR_PASTE, [=]() {
-              s_copyMode = 0;
+              copyExpo(s_copySrcIdx, index, input);
               rebuild(window, -1);
-          });
+              return 0;
+            });
+          }
         }
         // TODO STR_MOVE
         return 0;
       });
-
-      grid.spacer(button->height() - 2);
-      grid.spacer(7);
-      ++index;
-      ++line;
+      grid.nextLine();
     }
   }
 
@@ -457,7 +454,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
 int8_t s_currCh;
 uint8_t s_copyMode;
 int8_t s_copySrcRow;
-uint8_t s_copySrcIdx;
+
 void insertExpo(uint8_t idx, uint8_t input)
 {
   pauseMixerCalculations();
@@ -473,11 +470,27 @@ void insertExpo(uint8_t idx, uint8_t input)
   storageDirty(EE_MODEL);
 }
 
-void copyExpo(uint8_t idx)
+void copyExpo(uint8_t source, uint8_t dest, int16_t input)
 {
   pauseMixerCalculations();
-  ExpoData * expo = expoAddress(idx);
-  memmove(expo+1, expo, (MAX_EXPOS-(idx+1))*sizeof(ExpoData));
+  ExpoData sourceExpo;
+  memcpy(&sourceExpo, expoAddress(source), sizeof(ExpoData));
+  ExpoData * expo = expoAddress(dest);
+
+  if(input == PASTE_AFTER) {
+    memmove(expo+2, expo+1, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo+1, &sourceExpo, sizeof(ExpoData));
+    (expo+1)->chn = (expo)->chn;
+  }
+  else if(input == PASTE_BEFORE) {
+    memmove(expo+1, expo, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo, &sourceExpo, sizeof(ExpoData));
+    expo->chn = (expo+1)->chn;
+  }
+  else {
+    memcpy(expo, &sourceExpo, sizeof(ExpoData));
+    expo->chn = input;
+  }
   resumeMixerCalculations();
   storageDirty(EE_MODEL);
 }
