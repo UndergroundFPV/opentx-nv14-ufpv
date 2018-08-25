@@ -4,10 +4,9 @@ set(LUA_SCRIPT_LOAD_MODE "" CACHE STRING "Script loading mode and compilation fl
 option(LUA_COMPILER "Pre-compile and save Lua scripts" OFF)
 option(LUA_ALLOCATOR_TRACER "Trace Lua memory (de)allocations to debug port (also needs DEBUG=YES NANO=NO)" OFF)
 
+option(USB_SERIAL "Enable USB serial (CDC)" OFF)
+
 set(ARCH ARM)
-set(USB_WKMODE "USB_UNSELECTED" CACHE STRING "USB Working mode setting")
-set_property(CACHE USB_WKMODE PROPERTY STRINGS USB_UNSELECTED USB_JOYSTICK USB_MASS_STORAGE USB_SERIAL)
-add_definitions(-D${USB_WKMODE})
 set(STM32USB_DIR ${THIRDPARTY_DIR}/STM32_USB-Host-Device_Lib_V2.2.0/Libraries)
 add_definitions(-DSTM32 -DLUA_INPUTS -DVARIO -DCROSSFIRE)
 include_directories(${RADIO_SRC_DIRECTORY}/targets/common/arm/stm32)
@@ -41,14 +40,18 @@ set(FIRMWARE_TARGET_SRC
   ../common/arm/stm32/usb_driver.cpp
   ../common/arm/stm32/flash_driver.cpp
   )
-set(FIRMWARE_TARGET_SRC
-  ${FIRMWARE_TARGET_SRC}
-  ../common/arm/stm32/usbd_cdc.cpp
+
+if(DEBUG OR CLI OR USB_SERIAL)
+  set(STM32USB_SRC
+    ${STM32USB_SRC}
+    STM32_USB_Device_Library/Class/cdc/src/usbd_cdc_core.c
   )
-set(STM32USB_SRC
-  ${STM32USB_SRC}
-  STM32_USB_Device_Library/Class/cdc/src/usbd_cdc_core.c
+  set(FIRMWARE_TARGET_SRC
+    ${FIRMWARE_TARGET_SRC}
+    ../common/arm/stm32/usbd_cdc.cpp
   )
+  add_definitions(-DUSB_SERIAL)
+endif()
 set(STM32USB_SRC
   ${STM32USB_SRC}
   STM32_USB_Device_Library/Class/msc/src/usbd_msc_data.c
