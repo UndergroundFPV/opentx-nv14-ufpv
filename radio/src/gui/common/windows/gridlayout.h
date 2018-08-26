@@ -22,10 +22,13 @@
 #define _GRIDLAYOUT_H_
 
 #include "window.h"
+#include "opentx.h"
+
+extern RadioData g_eeGeneral;
 
 static constexpr uint8_t lineSpacing = 6;
-static constexpr uint8_t lineHeight = 26;
 static constexpr uint8_t indentWidth = 10;
+#define lineHeight ((g_eeGeneral.displayLargeLines) ? 31 : 26)
 
 class GridLayout {
   public:
