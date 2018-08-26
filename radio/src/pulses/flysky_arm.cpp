@@ -200,7 +200,7 @@ static uint8_t tx_working_power = 90;
 
 static rf_info_t rf_info = {
   .id               = {8, 8, 8, 8},
-  .bind_power       = BIND_NORMAL_POWER,
+  .bind_power       = BIND_LOW_POWER,
   .num_of_channel   = NUM_OF_NV14_CHANNELS, // TODO + g_model.moduleData[port].channelsCount;
   .channel_data_type= FLYSKY_CHANNEL_DATA_NORMAL,
   .protocol         = 0,
@@ -849,8 +849,9 @@ void parseFlySkyFeedbackFrame(uint8_t port)
           }
 
           else if (moduleFlag[port] == MODULE_RANGECHECK) {
-            moduleFlag[port] = MODULE_NORMAL_MODE;
-            onFlySkyTransmitterPower(port, 0); // set power 0
+            //moduleFlag[port] = MODULE_NORMAL_MODE;
+            if (modulePulsesData[port].flysky.state != FLYSKY_MODULE_STATE_GET_RECEIVER_CONFIG)
+              onFlySkyTransmitterPower(port, 0); // set power 0
             break;
           }
 
@@ -1030,6 +1031,7 @@ void resetPulsesFlySky(uint8_t port)
   modulePulsesData[port].flysky.state_index = 0;
   modulePulsesData[port].flysky.esc_state = 0;
   moduleFlag[port] = MODULE_NORMAL_MODE;
+  tx_working_power = 90; // 17dBm
   uint16_t rx_freq = g_model.moduleData[port].romData.rx_freq[0];
   rx_freq += (g_model.moduleData[port].romData.rx_freq[1] * 256);
   if (50 > rx_freq || 400 < rx_freq) {
@@ -1074,6 +1076,8 @@ void setupPulsesFlySky(uint8_t port)
 
         case FLYSKY_MODULE_STATE_SET_TX_POWER:
           putFlySkySetPowerdBm(port, tx_working_power);
+          if ( moduleFlag[port] == MODULE_RANGECHECK )
+            modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_IDLE;
           break;
 
         case FLYSKY_MODULE_STATE_SET_RX_PWM_PPM:

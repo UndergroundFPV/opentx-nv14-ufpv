@@ -384,6 +384,8 @@ class ModuleWindow : public Window {
           }
           if (moduleFlag[moduleIndex] == MODULE_RANGECHECK) {
             moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
+            if (isModuleFlysky(moduleIndex))
+              resetPulsesFlySky(moduleIndex);
             return 0;
           }
           else {
@@ -391,6 +393,11 @@ class ModuleWindow : public Window {
             if (isModuleFlysky(moduleIndex))
               onFlySkyReceiverRange(moduleIndex);
             return 1;
+          }
+        });
+        rangeButton->setCheckHandler([=]() {
+          if (moduleFlag[moduleIndex] != MODULE_RANGECHECK) {
+            rangeButton->check(false);
           }
         });
 
