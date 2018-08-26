@@ -24,6 +24,9 @@
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
 
+#define PASTE_BEFORE    -2
+#define PASTE_AFTER     -1
+
 uint8_t getExposCount()
 {
   uint8_t count = 0;
@@ -45,6 +48,32 @@ bool reachExposLimit()
     return true;
   }
   return false;
+}
+
+void copyExpo(uint8_t source, uint8_t dest, int16_t input)
+{
+  pauseMixerCalculations();
+  ExpoData sourceExpo;
+  memcpy(&sourceExpo, expoAddress(source), sizeof(ExpoData));
+  ExpoData * expo = expoAddress(dest);
+
+  if(input == PASTE_AFTER) {
+    memmove(expo+2, expo+1, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo+1, &sourceExpo, sizeof(ExpoData));
+    (expo+1)->chn = (expo)->chn;
+  }
+  else if(input == PASTE_BEFORE) {
+    memmove(expo+1, expo, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo, &sourceExpo, sizeof(ExpoData));
+    expo->chn = (expo+1)->chn;
+  }
+  else {
+    memmove(expo+1, expo, (MAX_EXPOS-(source+1))*sizeof(ExpoData));
+    memcpy(expo, &sourceExpo, sizeof(ExpoData));
+    expo->chn = input;
+  }
+  resumeMixerCalculations();
+  storageDirty(EE_MODEL);
 }
 
 void deleteExpo(uint8_t idx)
@@ -378,9 +407,33 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
               insertExpo(index + 1, input);
               editInput(window, input, index + 1);
             });
-            // TODO STR_COPY
+            menu->addLine(STR_COPY, [=]() {
+              s_copyMode = COPY_MODE;
+              s_copySrcIdx = index;
+            });
+            if (s_copyMode != 0) {
+              menu->addLine(STR_PASTE_BEFORE, [=]() {
+                copyExpo(s_copySrcIdx, index, PASTE_BEFORE);
+                if(s_copyMode == MOVE_MODE) {
+                  deleteExpo((s_copySrcIdx > index) ? s_copySrcIdx+1 : s_copySrcIdx);
+                  s_copyMode = 0;
+                }
+                rebuild(window, -1);
+              });
+              menu->addLine(STR_PASTE_AFTER, [=]() {
+                copyExpo(s_copySrcIdx, index, PASTE_AFTER);
+                if(s_copyMode == MOVE_MODE) {
+                  deleteExpo((s_copySrcIdx > index) ? s_copySrcIdx+1 : s_copySrcIdx);
+                  s_copyMode = 0;
+                }
+                rebuild(window, -1);
+              });
+            }
           }
-          // TODO STR_MOVE
+          menu->addLine(STR_MOVE, [=]() {
+            s_copyMode = MOVE_MODE;
+            s_copySrcIdx = index;
+          });
           menu->addLine(STR_DELETE, [=]() {
             deleteExpo(index);
             rebuild(window, -1);
@@ -389,6 +442,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
         });
 
         grid.spacer(button->height() - 2);
+
         ++index;
         ++line;
       }
@@ -396,12 +450,32 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
       grid.spacer(7);
     }
     else {
-      new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_FIRST_INPUT + input),
-                     [=]() -> uint8_t {
-                       insertExpo(index, input);
-                       editInput(window, input, index);
-                       return 0;
-                     });
+      auto button = new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_FIRST_INPUT + input));
+      if (focusIndex == index)
+        button->setFocus();
+      button->setPressHandler([=]() -> uint8_t {
+        button->bringToTop();
+        Menu * menu = new Menu();
+        menu->addLine(STR_EDIT, [=]() {
+          insertExpo(index, input);
+          editInput(window, input, index);
+          return 0;
+        });
+        if (!reachExposLimit()) {
+          if (s_copyMode != 0) {
+            menu->addLine(STR_PASTE, [=]() {
+              copyExpo(s_copySrcIdx, index, input);
+              if(s_copyMode == MOVE_MODE) {
+                deleteExpo((s_copySrcIdx >= index) ? s_copySrcIdx+1 : s_copySrcIdx);
+                s_copyMode = 0;
+              }
+              rebuild(window, -1);
+              return 0;
+            });
+          }
+        }
+        return 0;
+      });
       grid.nextLine();
     }
   }
@@ -418,6 +492,9 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
 
 // TODO port: avoid global s_currCh on ARM boards (as done here)...
 int8_t s_currCh;
+uint8_t s_copyMode;
+int8_t s_copySrcRow;
+
 void insertExpo(uint8_t idx, uint8_t input)
 {
   pauseMixerCalculations();
@@ -431,55 +508,4 @@ void insertExpo(uint8_t idx, uint8_t input)
   expo->weight = 100;
   resumeMixerCalculations();
   storageDirty(EE_MODEL);
-}
-
-void copyExpo(uint8_t idx)
-{
-  pauseMixerCalculations();
-  ExpoData * expo = expoAddress(idx);
-  memmove(expo+1, expo, (MAX_EXPOS-(idx+1))*sizeof(ExpoData));
-  resumeMixerCalculations();
-  storageDirty(EE_MODEL);
-}
-
-bool swapExpos(uint8_t & idx, uint8_t up)
-{
-  ExpoData * x, * y;
-  int8_t tgt_idx = (up ? idx-1 : idx+1);
-
-  x = expoAddress(idx);
-
-  if (tgt_idx < 0) {
-    if (x->chn == 0)
-      return false;
-    x->chn--;
-    return true;
-  }
-
-  if (tgt_idx == MAX_EXPOS) {
-    if (x->chn == NUM_INPUTS-1)
-      return false;
-    x->chn++;
-    return true;
-  }
-
-  y = expoAddress(tgt_idx);
-  if (x->chn != y->chn || !EXPO_VALID(y)) {
-    if (up) {
-      if (x->chn>0) x->chn--;
-      else return false;
-    }
-    else {
-      if (x->chn<NUM_INPUTS-1) x->chn++;
-      else return false;
-    }
-    return true;
-  }
-
-  pauseMixerCalculations();
-  memswap(x, y, sizeof(ExpoData));
-  resumeMixerCalculations();
-
-  idx = tgt_idx;
-  return true;
 }

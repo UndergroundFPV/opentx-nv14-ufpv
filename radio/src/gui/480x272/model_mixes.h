@@ -35,6 +35,7 @@ class ModelMixesPage: public PageTab {
     void build(Window * window, int8_t focusMixIndex);
     void rebuild(Window * window, int8_t focusMixIndex);
     void editMix(Window * window, uint8_t channel, uint8_t mixIndex);
+    uint8_t s_copySrcIdx;
 };
 
 #endif // _MODEL_MIXES_H_
