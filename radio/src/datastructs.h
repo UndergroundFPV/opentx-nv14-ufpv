@@ -913,7 +913,7 @@ PACK(struct TrainerData {
     NOBACKUP(char switchNames[NUM_SWITCHES][LEN_SWITCH_NAME]); \
     NOBACKUP(char anaNames[NUM_STICKS+NUM_POTS+NUM_SLIDERS+NUM_DUMMY_ANAS][LEN_ANA_NAME]); \
     NOBACKUP(char currModelFilename[LEN_MODEL_FILENAME+1]); \
-    NOBACKUP(uint8_t spare:1); \
+    NOBACKUP(uint8_t displayLargeLines:1); \
     NOBACKUP(uint8_t blOffBright:7); \
     NOBACKUP(char bluetoothName[LEN_BLUETOOTH_NAME]);
 #elif defined(PCBTARANIS) || defined(PCBI8) || defined(PCBNV14)
