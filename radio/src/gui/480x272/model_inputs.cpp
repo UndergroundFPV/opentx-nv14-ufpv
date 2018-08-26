@@ -466,7 +466,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
             menu->addLine(STR_PASTE, [=]() {
               copyExpo(s_copySrcIdx, index, input);
               if(s_copyMode == MOVE_MODE) {
-                deleteExpo((s_copySrcIdx > index) ? s_copySrcIdx+1 : s_copySrcIdx);
+                deleteExpo((s_copySrcIdx >= index) ? s_copySrcIdx+1 : s_copySrcIdx);
                 s_copyMode = 0;
               }
               rebuild(window, -1);

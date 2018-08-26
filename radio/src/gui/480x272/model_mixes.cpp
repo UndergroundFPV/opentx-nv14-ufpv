@@ -459,7 +459,7 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
             menu->addLine(STR_PASTE, [=]() {
               copyMix(s_copySrcIdx, mixIndex, ch);
               if(s_copyMode == MOVE_MODE) {
-                deleteMix((s_copySrcIdx > mixIndex) ? s_copySrcIdx+1 : s_copySrcIdx);
+                deleteMix((s_copySrcIdx >= mixIndex) ? s_copySrcIdx+1 : s_copySrcIdx);
                 s_copyMode = 0;
               }
               rebuild(window, -1);
