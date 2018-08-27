@@ -401,18 +401,29 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
               s_copyMode = COPY_MODE;
               s_copySrcIdx =mixIndex;
             });
-            if (s_copyMode == COPY_MODE) {
+            if (s_copyMode != 0) {
               menu->addLine(STR_PASTE_BEFORE, [=]() {
                 copyMix(s_copySrcIdx, mixIndex, PASTE_BEFORE);
+                if(s_copyMode == MOVE_MODE) {
+                  deleteMix((s_copySrcIdx > mixIndex) ? s_copySrcIdx+1 : s_copySrcIdx);
+                  s_copyMode = 0;
+                }
                 rebuild(window, -1);
               });
               menu->addLine(STR_PASTE_AFTER, [=]() {
                 copyMix(s_copySrcIdx, mixIndex, PASTE_AFTER);
+                if(s_copyMode == MOVE_MODE) {
+                  deleteMix((s_copySrcIdx > mixIndex) ? s_copySrcIdx+1 : s_copySrcIdx);
+                  s_copyMode = 0;
+                }
                 rebuild(window, -1);
               });
             }
           }
-          // TODO STR_MOVE
+          menu->addLine(STR_MOVE, [=]() {
+            s_copyMode = MOVE_MODE;
+            s_copySrcIdx = mixIndex;
+          });
           menu->addLine(STR_DELETE, [=]() {
             deleteMix(mixIndex);
             rebuild(window, -1);
@@ -444,9 +455,13 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
           return 0;
         });
         if (!reachMixesLimit()) {
-          if (s_copyMode == COPY_MODE) {
+          if (s_copyMode != 0) {
             menu->addLine(STR_PASTE, [=]() {
               copyMix(s_copySrcIdx, mixIndex, ch);
+              if(s_copyMode == MOVE_MODE) {
+                deleteMix((s_copySrcIdx >= mixIndex) ? s_copySrcIdx+1 : s_copySrcIdx);
+                s_copyMode = 0;
+              }
               rebuild(window, -1);
               return 0;
             });
@@ -501,6 +516,7 @@ void copyMix(uint8_t source, uint8_t dest, int16_t ch)
     mix->destCh = (mix+1)->destCh;
   }
   else {
+    memmove(mix+1, mix, (MAX_MIXERS-(source+1))*sizeof(MixData));
     memcpy(mix, &sourceMix, sizeof(MixData));
     mix->destCh  = ch;
   }
