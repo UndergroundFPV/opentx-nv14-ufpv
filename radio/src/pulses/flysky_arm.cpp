@@ -849,9 +849,8 @@ void parseFlySkyFeedbackFrame(uint8_t port)
           }
 
           else if (moduleFlag[port] == MODULE_RANGECHECK) {
-            //moduleFlag[port] = MODULE_NORMAL_MODE;
-            if (modulePulsesData[port].flysky.state != FLYSKY_MODULE_STATE_GET_RECEIVER_CONFIG)
-              onFlySkyTransmitterPower(port, 0); // set power 0
+            moduleFlag[port] = MODULE_NORMAL_MODE;
+            onFlySkyTransmitterPower(port, 0); // set power 0
             break;
           }
 
@@ -1076,8 +1075,6 @@ void setupPulsesFlySky(uint8_t port)
 
         case FLYSKY_MODULE_STATE_SET_TX_POWER:
           putFlySkySetPowerdBm(port, tx_working_power);
-          if ( moduleFlag[port] == MODULE_RANGECHECK )
-            modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_IDLE;
           break;
 
         case FLYSKY_MODULE_STATE_SET_RX_PWM_PPM:
