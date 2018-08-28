@@ -848,9 +848,8 @@ void parseFlySkyFeedbackFrame(uint8_t port)
             modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_BIND;
           }
 
-          else if (moduleFlag[port] == MODULE_RANGECHECK) {
-            moduleFlag[port] = MODULE_NORMAL_MODE;
-            onFlySkyTransmitterPower(port, 0); // set power 0
+          else if (moduleFlag[port] == MODULE_RANGECHECK && tx_working_power != 0) {
+            onFlySkyTransmitterPower(port, 0);
             break;
           }
 
