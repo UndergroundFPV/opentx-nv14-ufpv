@@ -50,7 +50,7 @@ bool reachExposLimit()
   return false;
 }
 
-void copyExpo(uint8_t source, uint8_t dest, int16_t input)
+void copyExpo(uint8_t source, uint8_t dest, int8_t input)
 {
   pauseMixerCalculations();
   ExpoData sourceExpo;
@@ -418,7 +418,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
                   deleteExpo((s_copySrcIdx > index) ? s_copySrcIdx+1 : s_copySrcIdx);
                   s_copyMode = 0;
                 }
-                rebuild(window, -1);
+                rebuild(window, index);
               });
               menu->addLine(STR_PASTE_AFTER, [=]() {
                 copyExpo(s_copySrcIdx, index, PASTE_AFTER);
@@ -426,7 +426,7 @@ void ModelInputsPage::build(Window * window, int8_t focusIndex)
                   deleteExpo((s_copySrcIdx > index) ? s_copySrcIdx+1 : s_copySrcIdx);
                   s_copyMode = 0;
                 }
-                rebuild(window, -1);
+                rebuild(window, index+1);
               });
             }
           }

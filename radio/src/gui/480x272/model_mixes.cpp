@@ -408,7 +408,7 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
                   deleteMix((s_copySrcIdx > mixIndex) ? s_copySrcIdx+1 : s_copySrcIdx);
                   s_copyMode = 0;
                 }
-                rebuild(window, -1);
+                rebuild(window, mixIndex);
               });
               menu->addLine(STR_PASTE_AFTER, [=]() {
                 copyMix(s_copySrcIdx, mixIndex, PASTE_AFTER);
@@ -416,7 +416,7 @@ void ModelMixesPage::build(Window * window, int8_t focusMixIndex)
                   deleteMix((s_copySrcIdx > mixIndex) ? s_copySrcIdx+1 : s_copySrcIdx);
                   s_copyMode = 0;
                 }
-                rebuild(window, -1);
+                rebuild(window, mixIndex+1);
               });
             }
           }
@@ -499,7 +499,7 @@ void insertMix(uint8_t idx)
   insertMix(idx, s_currCh + 1);
 }
 
-void copyMix(uint8_t source, uint8_t dest, int16_t ch)
+void copyMix(uint8_t source, uint8_t dest, int8_t ch)
 {
   pauseMixerCalculations();
   MixData sourceMix;
