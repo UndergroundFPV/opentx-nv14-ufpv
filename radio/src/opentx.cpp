@@ -1984,7 +1984,7 @@ void opentxClose(uint8_t shutdown)
 #endif
 
   g_eeGeneral.unexpectedShutdown = 0;
-  storageDirty(EE_GENERAL);
+  storageDirty(EE_GENERAL | EE_MODEL);
   storageCheck(true);
 
 #if defined(CPUARM)
