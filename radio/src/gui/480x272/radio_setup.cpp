@@ -31,7 +31,7 @@ class DateTimeWindow : public Window {
     DateTimeWindow(Window * parent, const rect_t &rect) :
       Window(parent, rect)
     {
-      update();
+      build();
     }
 
     ~DateTimeWindow()
@@ -50,7 +50,7 @@ class DateTimeWindow : public Window {
   protected:
     tmr10ms_t lastRefresh = 0;
 
-    void update()
+    void build()
     {
       GridLayout grid;
 
