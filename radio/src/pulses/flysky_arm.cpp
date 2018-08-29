@@ -855,9 +855,8 @@ void parseFlySkyFeedbackFrame(uint8_t port)
             modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_BIND;
           }
 
-          else if (moduleFlag[port] == MODULE_RANGECHECK) {
-            moduleFlag[port] = MODULE_NORMAL_MODE;
-            onFlySkyTransmitterPower(port, 0); // set power 0
+          else if (moduleFlag[port] == MODULE_RANGECHECK && tx_working_power != 0) {
+            onFlySkyTransmitterPower(port, 0);
             break;
           }
 
@@ -1037,6 +1036,7 @@ void resetPulsesFlySky(uint8_t port)
   modulePulsesData[port].flysky.state_index = 0;
   modulePulsesData[port].flysky.esc_state = 0;
   moduleFlag[port] = MODULE_NORMAL_MODE;
+  tx_working_power = 90; // 17dBm
   uint16_t rx_freq = g_model.moduleData[port].romData.rx_freq[0];
   rx_freq += (g_model.moduleData[port].romData.rx_freq[1] * 256);
   if (50 > rx_freq || 400 < rx_freq) {

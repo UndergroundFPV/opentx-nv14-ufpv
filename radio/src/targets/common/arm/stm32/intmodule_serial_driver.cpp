@@ -194,11 +194,15 @@ uint8_t intmoduleGetByte(uint8_t * byte)
 #endif
 }
 
+static uint8_t dmaBuffer[512] __DMA;
 void intmoduleSendBufferDMA(uint8_t * data, uint8_t size)
 {
   if (IS_PXX_PROTOCOL(s_current_protocol[INTERNAL_MODULE]) || IS_FLYSKY_PROTOCOL(s_current_protocol[INTERNAL_MODULE])) {
-    if (size) {
+    if (size > 0 && size < 512) {
 #if !defined(SIMU)
+      for (int idx = 0; idx < size; idx++) {
+          dmaBuffer[idx] = data[idx];
+      }
       if (data[0] == 0x55 || data[3] == 0x0C) { // Firmware update printf
           TRACE("TX: %02X %02X %02X ...%02X %02X; CRC:%04X", data[0], data[1], data[2],
                 data[size-2], data[size-1], calc_crc16(data, size - 2));
@@ -209,7 +213,7 @@ void intmoduleSendBufferDMA(uint8_t * data, uint8_t size)
       DMA_InitStructure.DMA_Channel = INTMODULE_DMA_CHANNEL;
       DMA_InitStructure.DMA_PeripheralBaseAddr = CONVERT_PTR_UINT(&INTMODULE_USART->DR);
       DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-      DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(data);
+      DMA_InitStructure.DMA_Memory0BaseAddr = CONVERT_PTR_UINT(dmaBuffer);
       DMA_InitStructure.DMA_BufferSize = size;
       DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
       DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
