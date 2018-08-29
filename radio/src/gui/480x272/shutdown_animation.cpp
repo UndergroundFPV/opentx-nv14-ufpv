@@ -36,11 +36,12 @@ void drawShutdownAnimation(uint32_t index, const char * message)
   if (last_quarter >= 0 && quarter == last_quarter)
     return;
 
+
   lcd->setOffset(0, 0);
   lcd->clearClippingRect();
 
   if (shutdownBitmap && circleBitmap) {
-    if (last_quarter < 0) {
+    if (last_quarter < 0 || index == (PWR_PRESS_SHUTDOWN_DELAY / 5)) {
       lcdDrawBlackOverlay();
       lcd->drawBitmap((LCD_W - shutdownBitmap->getWidth()) / 2, (LCD_H - shutdownBitmap->getHeight()) / 2, shutdownBitmap);
     }

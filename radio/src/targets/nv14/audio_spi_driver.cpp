@@ -427,6 +427,16 @@ void audioSendRiffHeader()
 }
 
 #if defined(PCBNV14)
+void openAudioAmp()
+{
+  GPIO_SetBits(AUDIO_SHUTDOWN_GPIO, AUDIO_SHUTDOWN_GPIO_PIN);
+}
+
+void closeAudioAmp()
+{
+  GPIO_ResetBits(AUDIO_SHUTDOWN_GPIO, AUDIO_SHUTDOWN_GPIO_PIN);
+}
+
 void audioShutdownInit()
 {
   GPIO_InitTypeDef GPIO_InitStructure;
@@ -436,7 +446,7 @@ void audioShutdownInit()
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
   GPIO_Init(AUDIO_SHUTDOWN_GPIO, &GPIO_InitStructure);
-  GPIO_SetBits(AUDIO_SHUTDOWN_GPIO, AUDIO_SHUTDOWN_GPIO_PIN); // we never RESET it, there is a 2s delay on STARTUP
+  closeAudioAmp(); // close amplifier in starup time to avoid strange noise
 }
 #endif
 

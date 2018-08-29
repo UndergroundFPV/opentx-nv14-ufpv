@@ -456,6 +456,8 @@ void audioSpiSetSpeed(uint8_t speed);
 uint8_t audioHardReset(void);
 uint8_t audioSoftReset(void);
 void audioSendRiffHeader();
+void openAudioAmp();
+void closeAudioAmp();
 
 #define SPI_SPEED_2                    0
 #define SPI_SPEED_4                    1

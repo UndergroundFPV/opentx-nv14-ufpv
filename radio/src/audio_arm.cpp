@@ -531,6 +531,11 @@ TASK_FUNCTION(audioTask)
   audioSpiSetSpeed(SPI_SPEED_8);
   delay_01us(10000);
   audioSendRiffHeader();
+#if defined (PCBNV14)
+  /* Open audio amp */
+  openAudioAmp();
+  delay_01us(10000);
+#endif
 
   if (!unexpectedShutdown) {
     AUDIO_HELLO();
