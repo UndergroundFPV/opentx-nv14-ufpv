@@ -20,6 +20,11 @@
 
 #include "tabsgroup.h"
 
+class QR_CodeMenu: public TabsGroup {
+  public:
+    QR_CodeMenu(uint8_t QR_Index);
+};
+
 class RadioVersionPage: public PageTab {
   public:
     RadioVersionPage();

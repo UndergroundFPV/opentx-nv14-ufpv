@@ -850,6 +850,8 @@ extern const pm_char STR_FACTORYRESET[];
 extern const pm_char STR_CONFIRMRESET[];
 extern const pm_char STR_TOO_MANY_LUA_SCRIPTS[];
 extern const pm_char STR_BLCOLOR[];
+extern const pm_char STR_QUICK_START_GUIDE[];
+extern const pm_char STR_USER_MANUAL[];
 
 #if defined(CPUARM)
   extern const pm_char STR_MODELNAME[];

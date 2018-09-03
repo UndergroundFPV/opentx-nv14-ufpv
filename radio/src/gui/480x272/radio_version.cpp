@@ -22,6 +22,98 @@
 #include "opentx.h"
 #include "libwindows.h"
 
+enum QR_Code
+{
+  QR_CODE_QUICK_START,
+  QR_CODE_USER_MANUAL
+};
+
+class ShowQR_Code: public Window {
+  public:
+    ShowQR_Code(Window * parent, const rect_t & rect, uint8_t QR_Index):
+      Window(parent, rect),
+      QR_Index(QR_Index)
+    {
+    }
+
+    void checkEvents() override
+    {
+      invalidate();
+    }
+
+
+    void paint(BitmapBuffer * dc) override
+    {
+      if (QR_Index == QR_CODE_QUICK_START){
+        static BitmapBuffer * quickStartBitmap = BitmapBuffer::loadMask(getThemePath("quick_start_guide.png"));
+
+        lcd->setOffset(0, 0);
+        lcd->clearClippingRect();
+
+        lcd->drawBitmap((LCD_W - quickStartBitmap->getWidth()) / 2, (LCD_H - quickStartBitmap->getHeight()) / 2, quickStartBitmap);
+      }
+      else if (QR_Index == QR_CODE_USER_MANUAL){
+        static BitmapBuffer * userManulBitmap = BitmapBuffer::loadMask(getThemePath("user_manual.png"));
+
+        lcd->setOffset(0, 0);
+        lcd->clearClippingRect();
+
+        lcd->drawBitmap((LCD_W - userManulBitmap->getWidth()) / 2, (LCD_H - userManulBitmap->getHeight()) / 2, userManulBitmap);
+      }
+    }
+
+  protected:
+    uint8_t QR_Index;
+};
+
+class QR_CodeBody : public Window {
+  public:
+    QR_CodeBody(Window * parent, const rect_t &rect, uint8_t QR_Index) :
+      Window(parent, rect),
+      QR_Index(QR_Index)
+    {
+      build();
+    }
+
+    void checkEvents() override
+    {
+      invalidate();
+    }
+
+    void build()
+    {
+      new ShowQR_Code(this, {30, 30, 100, 250}, QR_Index);
+    }
+
+  protected:
+    uint8_t QR_Index;
+};
+
+class QR_CodePage : public PageTab {
+  public:
+    QR_CodePage(uint8_t QR_Index) :
+      PageTab(QR_Index == QR_CODE_QUICK_START ? "Quick start guide":"User manual", ICON_RADIO_VERSION),
+      QR_Index(QR_Index)
+    {
+    }
+
+    void build(Window * window) override
+    {
+      new QR_CodeBody(window, {0, 0, LCD_W, window->height() - footerHeight}, QR_Index);
+      //new FailSafeFooter(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
+    }
+
+  protected:
+    static constexpr coord_t footerHeight = 30;
+    uint8_t QR_Index;
+};
+
+QR_CodeMenu::QR_CodeMenu(uint8_t QR_Index) :
+  TabsGroup()
+{
+  addTab(new QR_CodePage(QR_Index));
+}
+
 RadioVersionPage::RadioVersionPage():
   PageTab(STR_MENUVERSION, ICON_RADIO_VERSION)
 {
@@ -54,6 +146,17 @@ void RadioVersionPage::build(Window * window)
   new StaticText(window, grid.getLabelSlot(), "UID");
   new StaticText(window, grid.getFieldSlot(), reusableBuffer.version.id);
   grid.nextLine();
+
+
+  new TextButton(window, {LCD_W/2-125, window->height() - 150, 250, 30}, STR_QUICK_START_GUIDE, [=]() -> int8_t {
+      new QR_CodeMenu(QR_CODE_QUICK_START);
+      return 1;
+  });
+
+  new TextButton(window, {LCD_W/2-125, window->height() - 100, 250, 30}, STR_USER_MANUAL, [=]() -> int8_t {
+      new QR_CodeMenu(QR_CODE_USER_MANUAL);
+      return 1;
+  });
 
   new TextButton(window, {LCD_W/2-125, window->height() - 50, 250, 30}, STR_FACTORYRESET, [=]() -> int8_t {
     // TODO not implemented on X12 / X10 today!
