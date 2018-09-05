@@ -1047,6 +1047,13 @@ void checkFailsafe()
         ALERT(STR_FAILSAFEWARN, STR_NO_FAILSAFE, AU_ERROR);
         break;
       }
+    }else if (isModuleFlysky(i))
+    {
+      ModuleData & moduleData = g_model.moduleData[i];
+      if (moduleData.failsafeMode == FAILSAFE_NOT_SET) {
+        ALERT(STR_FAILSAFEWARN, STR_NO_FAILSAFE, AU_ERROR);
+        break;
+      }
     }
   }
 }

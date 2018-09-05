@@ -103,9 +103,9 @@ class FailSafeBody : public Window {
 
         // Channel numeric value
         new NumberEdit(this, grid.getFieldSlot(3, 0), -lim, lim,
-                       GET_DEFAULT(calcRESXto1000(g_model.moduleData[moduleIndex].failsafeChannels[ch])),
-                       SET_VALUE(g_model.moduleData[moduleIndex].failsafeChannels[ch], newValue),
-                       PREC1);
+                       GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeChannels[ch]),
+                       //GET_DEFAULT(calcRESXto1000(g_model.moduleData[moduleIndex].failsafeChannels[ch])),
+                       SET_VALUE(g_model.moduleData[moduleIndex].failsafeChannels[ch], newValue), PREC1);
 
         // Channel bargraph
         new ChannelFailsafeBargraph(this, {150, grid.getWindowHeight(), 150, lineHeight}, moduleIndex, ch);

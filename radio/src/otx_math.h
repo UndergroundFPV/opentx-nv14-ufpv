@@ -117,7 +117,7 @@ inline int calc1000toRESX(int x)
 
 inline int calcRESXto1000(int x)
 {
-  return divRoundClosest(x*1000, RESX);
+  divRoundClosest(x*1000, RESX);
 }
 
 inline int calcRESXto100(int x)
