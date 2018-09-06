@@ -74,7 +74,7 @@ class SpecialFunctionEditWindow : public Page {
       switch (func) {
         case FUNC_OVERRIDE_CHANNEL:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_CH);
-          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS - 1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
+          new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), 1, MAX_OUTPUT_CHANNELS, GET_SET_VALUE_WITH_OFFSET(CFN_CH_INDEX(cfn), 1));
           grid.nextLine();
 
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
@@ -278,7 +278,7 @@ class SpecialFunctionButton : public Button {
       }
       uint8_t func = CFN_FUNC(cfn);
 
-      drawSwitch(col1, line1, CFN_SWITCH(cfn), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE) 1 << index)) ? BOLD : 0));
+      drawSwitch(col1, line1, CFN_SWITCH(cfn), 0);
       if (CFN_EMPTY(cfn))
         return;
 
