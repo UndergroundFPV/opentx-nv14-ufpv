@@ -40,8 +40,8 @@ class StickCalibrationWindow: public Window {
     void paint(BitmapBuffer * dc) override
     {
       dc->drawBitmap(0, 0, calibStickBackground);
-      int16_t x = calibratedAnalogs[stickX];
-      int16_t y = calibratedAnalogs[stickY];
+      int16_t x = calibratedAnalogs[CONVERT_MODE(stickX)];
+      int16_t y = calibratedAnalogs[CONVERT_MODE(stickY)];
       dc->drawBitmap(width() / 2 - 9 + (bitmapSize / 2 * x) / RESX, height() / 2 - 9 - (bitmapSize / 2 * y) / RESX, calibStick);
     }
 
