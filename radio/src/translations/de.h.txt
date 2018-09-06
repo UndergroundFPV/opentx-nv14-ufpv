@@ -61,8 +61,13 @@
 #define LEN_VRENAVIG           "\003"
 #define TR_VRENAVIG            "AUSDGaDGb"
 
+#if defined(PCBNV14)
+#define LEN_VBLMODE            "\005"
+#define TR_VBLMODE             "AUS\0 ""Touch""Stks\0""Beide""EIN\0 "
+#else
 #define LEN_VBLMODE            "\005"
 #define TR_VBLMODE             "AUS\0 ""Taste""Stks\0""Beide""EIN\0 " // Anpassung
+#endif
 
 #define LEN_TRNMODE            "\003"
 #define TR_TRNMODE             "AUS"" +="" :="
