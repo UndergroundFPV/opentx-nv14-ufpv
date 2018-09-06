@@ -35,6 +35,7 @@ MEMORY
   CCM (xrw)       : ORIGIN = 0x10000000, LENGTH = 64K
   MEMORY_B1 (rx)  : ORIGIN = 0x60000000, LENGTH = 0K
   SDRAM(xrw)      : ORIGIN = 0xC0000000, LENGTH = 8192K
+  SYSTEM_MEMORY   : ORIGIN = 0x1FFF0000, LENGTH = 30K
 }
 
 _estack = 0x10000000 + LENGTH(CCM) - 8;
@@ -104,6 +105,12 @@ SECTIONS
     KEEP (*(SORT(.fini_array.*)))
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
+
+  /* more convenient access to system memory */
+  .system_memory (NOLOAD) :
+  {
+    PROVIDE(_system_isr_vector_table_base = .);
+  } > SYSTEM_MEMORY
 
   /* used by the startup to initialize data */
   _sidata = .;
