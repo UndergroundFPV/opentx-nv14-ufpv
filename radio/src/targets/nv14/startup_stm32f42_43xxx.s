@@ -78,7 +78,7 @@ Reset_Handler:
   STR R0, [R0, #0]
   CMP R2, R1
   BNE NormalStart
-  LDR R0, =0x1FFFF000
+  LDR R0, =0x1FFF0000
   LDR SP,[R0, #0]
   LDR R0,[R0, #4]
   BX R0
