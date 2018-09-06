@@ -44,6 +44,12 @@ _main_stack_start = _estack - _Main_Stack_Size;
 /* Define output sections */
 SECTIONS
 {
+  /* more convenient access to system memory */
+  .system_memory (NOLOAD) :
+  {
+    PROVIDE(_system_isr_vector_table_base = .);
+  } >SYSTEM_MEMORY
+
   /* The startup code goes first into FLASH */
 
   /* The program code and other data goes into FLASH */
@@ -105,12 +111,6 @@ SECTIONS
     KEEP (*(SORT(.fini_array.*)))
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
-
-  /* more convenient access to system memory */
-  .system_memory (NOLOAD) :
-  {
-    PROVIDE(_system_isr_vector_table_base = .);
-  } > SYSTEM_MEMORY
 
   /* used by the startup to initialize data */
   _sidata = .;
