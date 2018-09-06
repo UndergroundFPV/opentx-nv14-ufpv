@@ -39,11 +39,26 @@ class SpecialFunctionEditWindow : public Page {
     CustomFunctionData * functions;
     uint8_t index;
     Window * specialFunctionOneWindow = nullptr;
+    StaticText * headerSF = nullptr;
+    bool active = false;
+
+    bool isActive() {
+      return (modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
+    }
+
+    void checkEvents() override
+    {
+      if (active != isActive()) {
+        invalidate();
+        headerSF->setFlags(isActive() ? BOLD|WARNING_COLOR : MENU_TITLE_COLOR);
+        active = !active;
+      }
+    }
 
     void buildHeader(Window * window)
     {
       new StaticText(window, {70, 4, 200, 20}, functions == g_model.customFn ? STR_MENUCUSTOMFUNC : STR_MENUSPECIALFUNCS, MENU_TITLE_COLOR);
-      new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
+      headerSF = new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
     }
 
     void updateSpecialFunctionOneWindow()
@@ -243,8 +258,7 @@ class SpecialFunctionButton : public Button {
 
     bool isActive()
     {
-      // TODO
-      return false;
+      return (modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
     }
 
     void checkEvents() override

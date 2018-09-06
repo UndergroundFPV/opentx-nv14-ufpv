@@ -34,6 +34,8 @@ class SpecialFunctionsPage: public PageTab {
       build(window, -1);
     }
 
+    void checkEvents() override;
+
   protected:
     CustomFunctionData * functions;
     void build(Window * window, int8_t focusSpecialFunctionIndex);
