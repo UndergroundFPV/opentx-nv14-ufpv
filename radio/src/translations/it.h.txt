@@ -61,8 +61,13 @@
 #define LEN_VRENAVIG           "\003"
 #define TR_VRENAVIG            "No REaREb"
 
+#if defined(PCBNV14)
+#define LEN_VBLMODE                    "\005"
+#define TR_VBLMODE                     "Off\0 ""Touch""Ctrl\0""Both\0""ON\0  "
+#else
 #define LEN_VBLMODE            TR("\005", "\006")
 #define TR_VBLMODE             TR("OFF\0 ""Tasti""Stks\0""Tutti""ON\0  ", "Spenta""Tasti\0""Sticks""Tutti\0""Accesa")
+#endif
 
 #define LEN_TRNMODE            "\003"
 #define TR_TRNMODE             "off"" +="" :="

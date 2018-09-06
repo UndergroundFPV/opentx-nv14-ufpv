@@ -61,8 +61,13 @@
 #define LEN_VRENAVIG           "\003"
 #define TR_VRENAVIG            "UITREaREb"
 
+#if defined(PCBNV14)
+#define LEN_VBLMODE            "\005"
+#define TR_VBLMODE             "UIT\0 ""Touch""Stick""Beide""AAN\0 "
+#else
 #define LEN_VBLMODE            TR("\005", "\010")
 #define TR_VBLMODE             TR("UIT\0 ""Keys\0""Stick""Beide""AAN\0 ", "UIT\0    ""Toetsen\0""Sticks\0 ""Beide\0  ""AAN\0    ")
+#endif
 
 #define LEN_TRNMODE            "\003"
 #define TR_TRNMODE             "UIT"" +="" :="
