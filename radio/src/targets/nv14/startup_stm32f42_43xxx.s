@@ -67,16 +67,14 @@ defined in linker script */
  * @retval : None
 */
 
-    .section  .text.Reset_Handler
+  .section  .text.Reset_Handler
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 Reset_Handler:  
-
-
   LDR R0, =_estack
-  LDR R1, =0xDEADBEEF
-  LDR R2, [R0, #0]
+  LDR R1, [R0, #0]
   STR R0, [R0, #0]
+  LDR R2, =0xDEADBEEF
   CMP R2, R1
   BNE NormalStart
   LDR R0, =_system_isr_vector_table_base

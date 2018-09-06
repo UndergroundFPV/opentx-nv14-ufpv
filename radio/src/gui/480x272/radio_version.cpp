@@ -168,8 +168,7 @@ void RadioVersionPage::build(Window * window)
   });
 
   new TextButton(window, {LCD_W/2-125, window->height() - 50, 250, 30}, STR_FIRMWAREUPDATE, [=]() -> int8_t {
-    __DSB();
-    *((unsigned long *)(_estack)) = BOOTLOADER_MAGIC;
+    *((unsigned int *)(_estack)) = BOOTLOADER_MAGIC;
     NVIC_SystemReset();
     return 0;
   });

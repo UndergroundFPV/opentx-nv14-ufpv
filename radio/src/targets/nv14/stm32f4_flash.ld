@@ -35,20 +35,14 @@ MEMORY
   CCM (xrw)       : ORIGIN = 0x10000000, LENGTH = 64K
   MEMORY_B1 (rx)  : ORIGIN = 0x60000000, LENGTH = 0K
   SDRAM(xrw)      : ORIGIN = 0xC0000000, LENGTH = 8192K
-  SYSTEM_MEMORY   : ORIGIN = 0x1FFF0000, LENGTH = 30K
 }
 
 _estack = 0x10000000 + LENGTH(CCM) - 8;
 _main_stack_start = _estack - _Main_Stack_Size;
-
+_system_isr_vector_table_base = 0x1FFF0000;
 /* Define output sections */
 SECTIONS
 {
-  /* more convenient access to system memory */
-  .system_memory (NOLOAD) :
-  {
-    PROVIDE(_system_isr_vector_table_base = .);
-  } >SYSTEM_MEMORY
 
   /* The startup code goes first into FLASH */
 
