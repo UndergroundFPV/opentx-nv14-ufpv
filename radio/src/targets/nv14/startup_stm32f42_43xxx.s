@@ -56,6 +56,7 @@ defined in linker script */
 /* end address for the .bss section. defined in linker script */
 .word  _ebss
 /* stack used for SystemInit_ExtMemCtl; always internal RAM used */
+.word _system_isr_vector_table_base
 
 /**
  * @brief  This is the code that gets called when the processor first
@@ -78,7 +79,7 @@ Reset_Handler:
   STR R0, [R0, #0]
   CMP R2, R1
   BNE NormalStart
-  LDR R0, =0x1FFF0000
+  LDR R0, =_system_isr_vector_table_base
   LDR SP,[R0, #0]
   LDR R0,[R0, #4]
   BX R0
