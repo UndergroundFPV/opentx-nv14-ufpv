@@ -2477,7 +2477,7 @@ void opentxInit(OPENTX_INIT_ARGS)
   //  * radios without CPU controlled power can only use Reset status register (if available)
   if (UNEXPECTED_SHUTDOWN()) {
     TRACE("Unexpected Shutdown detected");
-    // unexpectedShutdown = 1;
+    unexpectedShutdown = 1;
   }
 
 #if defined(SDCARD) && !defined(PCBMEGA2560)
