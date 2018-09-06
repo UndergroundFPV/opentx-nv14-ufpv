@@ -92,7 +92,7 @@ class QR_CodeBody : public Window {
 class QR_CodePage : public PageTab {
   public:
     QR_CodePage(uint8_t QR_Index) :
-      PageTab(QR_Index == QR_CODE_QUICK_START ? "Quick start guide":"User manual", ICON_RADIO_VERSION),
+      PageTab(QR_Index == QR_CODE_QUICK_START ? STR_QUICK_START_GUIDE:STR_USER_MANUAL, ICON_RADIO_VERSION),
       QR_Index(QR_Index)
     {
     }
@@ -148,21 +148,28 @@ void RadioVersionPage::build(Window * window)
   grid.nextLine();
 
 
-  new TextButton(window, {LCD_W/2-125, window->height() - 150, 250, 30}, STR_QUICK_START_GUIDE, [=]() -> int8_t {
+  new TextButton(window, {LCD_W/2-125, window->height() - 200, 250, 30}, STR_QUICK_START_GUIDE, [=]() -> int8_t {
       new QR_CodeMenu(QR_CODE_QUICK_START);
       return 1;
   });
 
-  new TextButton(window, {LCD_W/2-125, window->height() - 100, 250, 30}, STR_USER_MANUAL, [=]() -> int8_t {
+  new TextButton(window, {LCD_W/2-125, window->height() - 150, 250, 30}, STR_USER_MANUAL, [=]() -> int8_t {
       new QR_CodeMenu(QR_CODE_USER_MANUAL);
       return 1;
   });
 
-  new TextButton(window, {LCD_W/2-125, window->height() - 50, 250, 30}, STR_FACTORYRESET, [=]() -> int8_t {
+  new TextButton(window, {LCD_W/2-125, window->height() - 100, 250, 30}, STR_FACTORYRESET, [=]() -> int8_t {
     // TODO not implemented on X12 / X10 today!
     // POPUP_CONFIRMATION(STR_CONFIRMRESET);
     // showMessageBox(STR_STORAGE_FORMAT);
     storageEraseAll(false);
+    NVIC_SystemReset();
+    return 0;
+  });
+
+  new TextButton(window, {LCD_W/2-125, window->height() - 50, 250, 30}, STR_FIRMWAREUPDATE, [=]() -> int8_t {
+    __DSB();
+    *((unsigned long *)(_estack)) = BOOTLOADER_MAGIC;
     NVIC_SystemReset();
     return 0;
   });

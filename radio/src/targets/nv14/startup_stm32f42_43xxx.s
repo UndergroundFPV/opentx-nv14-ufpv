@@ -71,8 +71,19 @@ defined in linker script */
   .type  Reset_Handler, %function
 Reset_Handler:  
 
-  bl pwrResetHandler    /*jump to WDT reset handler where soft power control pin is turned on as soon as possible */
 
+  LDR R0, =_estack
+  LDR R1, =0xDEADBEEF
+  LDR R2, [R0, #0]
+  STR R0, [R0, #0]
+  CMP R2, R1
+  BNE NormalStart
+  LDR R0, =0x1FFFF000
+  LDR SP,[R0, #0]
+  LDR R0,[R0, #4]
+  BX R0
+NormalStart:
+  bl pwrResetHandler    /*jump to WDT reset handler where soft power control pin is turned on as soon as possible */
 /* Copy the data segment initializers from flash to SRAM */  
   movs  r1, #0
   b  LoopCopyDataInit

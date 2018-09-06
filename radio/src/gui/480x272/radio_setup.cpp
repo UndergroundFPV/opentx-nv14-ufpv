@@ -262,7 +262,8 @@ void RadioSetupPage::build(Window * window)
   new StaticText(window, grid.getLabelSlot(true), STR_SPEAKER_VOLUME);
   new Slider(window, grid.getFieldSlot(), -VOLUME_LEVEL_DEF, VOLUME_LEVEL_MAX-VOLUME_LEVEL_DEF, GET_SET_DEFAULT(g_eeGeneral.speakerVolume));
   grid.nextLine();
-
+  NumberEdit* edit;
+#ifndef SUPER_SIMPLE_MENU
   // Beeps volume
   new StaticText(window, grid.getLabelSlot(true), STR_BEEP_VOLUME);
   new Slider(window, grid.getFieldSlot(), -2, +2, GET_SET_DEFAULT(g_eeGeneral.beepVolume));
@@ -295,7 +296,7 @@ void RadioSetupPage::build(Window * window)
   edit->setPrefix("+");
   edit->setSuffix("Hz");
   grid.nextLine();
-
+#endif
 #if defined(VARIO)
   new Subtitle(window, grid.getLabelSlot(), STR_VARIO);
   grid.nextLine();

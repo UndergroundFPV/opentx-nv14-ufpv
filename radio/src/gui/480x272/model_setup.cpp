@@ -582,7 +582,9 @@ void ModelSetupPage::build(Window * window)
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.extendedLimits));
   grid.nextLine();
 
+#ifndef SUPER_SIMPLE_MENU
   // Extended trims
+
   new StaticText(window, grid.getLabelSlot(), STR_ETRIMS);
   new CheckBox(window, grid.getFieldSlot(2, 0), GET_SET_DEFAULT(g_model.extendedTrims));
   new TextButton(window, grid.getFieldSlot(2, 1), STR_RESET_BTN,
@@ -606,7 +608,8 @@ void ModelSetupPage::build(Window * window)
   new StaticText(window, grid.getLabelSlot(), STR_TRIMINC);
   new Choice(window, grid.getFieldSlot(), STR_VTRIMINC, -2, 2, GET_SET_DEFAULT(g_model.trimInc));
   grid.nextLine();
-
+#endif
+#ifndef SUPER_SIMPLE_MENU
   // Throttle parameters
   {
     new Subtitle(window, grid.getLineSlot(), STR_THROTTLE_LABEL);
@@ -627,7 +630,7 @@ void ModelSetupPage::build(Window * window)
     new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.thrTrim));
     grid.nextLine();
   }
-
+#endif
   // Preflight parameters
   {
     new Subtitle(window, grid.getLineSlot(), STR_PREFLIGHT);

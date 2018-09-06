@@ -59,9 +59,10 @@ add_definitions(-DPWR_BUTTON_${PWR_BUTTON})
 add_definitions(-DFLYSKY_HALL_STICKS_REVERSE)
 #add_definitions(-DFLYSKY_AUTO_POWER_DOWN)
 #add_definitions(-DFLYSKY_STARTUP_DELAY)
-
-
-
+option(MENU_SIMPLE "Used simplified menu" ON)
+if(MENU_SIMPLE)
+ add_definitions(-DSUPER_SIMPLE_MENU)
+endif()
 if(NOT UNEXPECTED_SHUTDOWN)
   add_definitions(-DNO_UNEXPECTED_SHUTDOWN)
 endif()

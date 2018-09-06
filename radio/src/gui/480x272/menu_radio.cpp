@@ -32,7 +32,9 @@ RadioMenu::RadioMenu():
 {
   addTab(new RadioSetupPage());
   addTab(new RadioSdManagerPage());
+#ifndef SUPER_SIMPLE_MENU
   addTab(new SpecialFunctionsPage(g_eeGeneral.customFn));
+#endif
   // TODO trainer
   addTab(new RadioHardwarePage());
   addTab(new RadioCalibrationPage());

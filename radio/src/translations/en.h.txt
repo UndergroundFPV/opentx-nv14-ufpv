@@ -1143,6 +1143,9 @@
 #if defined(COLORLCD)
 #define TR_EEBACKUP                    "EEPROM backup"
 #define TR_FACTORYRESET                "Factory reset"
+#define TR_FIRMWAREUPDATE              "Firmware update"
+#define TR_USER_MANUAL                 "User manual"
+#define TR_QUICK_START_GUIDE           "Quick start guide"
 #elif defined(PCBI8)
 #define TR_EEBACKUP                    TR("\001[K1 Long]: Backup", "\012[K1 Long]: EEPROM backup")
 #define TR_FACTORYRESET                TR("\001[DOWN Long]: Fact. reset", "\012[DOWN Long]: Factory reset")

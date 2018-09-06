@@ -293,6 +293,8 @@ void generalDefault()
 
 #if defined(PCBNV14)
   g_eeGeneral.backlightBright = 60;
+  g_eeGeneral.speakerVolume = VOLUME_LEVEL_MAX;
+  g_eeGeneral.lightAutoOff = 200/5;
 #endif
 
 #if defined(CPUARM)

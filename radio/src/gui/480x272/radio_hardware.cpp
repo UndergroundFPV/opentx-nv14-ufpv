@@ -82,6 +82,7 @@ void RadioHardwarePage::build(Window * window)
   grid.setLabelWidth(80);
 
   // Sticks
+  #ifndef SUPER_SIMPLE_MENU
   new Subtitle(window, grid.getLineSlot(), STR_STICKS);
   grid.nextLine();
   for(int i=0; i < NUM_STICKS; i++){
@@ -109,7 +110,7 @@ void RadioHardwarePage::build(Window * window)
     new Choice(window, grid.getFieldSlot(2, 1), STR_SWTYPES, SWITCH_NONE, SWITCH_TYPE_MAX(i), GET_SET_BF(g_eeGeneral.switchConfig, 2 * i, 2));
     grid.nextLine();
   }
-
+  #endif
   grid.setLabelWidth(150);
 
   // ADC filter
