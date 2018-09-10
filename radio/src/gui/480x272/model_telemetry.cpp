@@ -515,6 +515,7 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
   auto choice = new SourceChoice(window, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
                                  GET_DEFAULT(g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM + 3 * (g_model.frsky.varioSource - 1) : MIXSRC_NONE),
                                  SET_VALUE(g_model.frsky.varioSource, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
+#if 0
   choice->setAvailableHandler([=](int16_t value) {
     if (value == MIXSRC_NONE)
       return true;
@@ -523,6 +524,7 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
     auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
     return qr.rem == 0 && isSensorAvailable(qr.quot + 1);
   });
+#endif
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_RANGE);
   new NumberEdit(window, grid.getFieldSlot(2, 0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMin, -10));

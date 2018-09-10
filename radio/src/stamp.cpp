@@ -31,7 +31,7 @@
 #endif
 
 #if defined(COLORLCD)
-  const char vers_stamp[] = "flysky-" FLAVOUR "-" VERSION " (" GIT_STR ")";
+  const char vers_stamp[] = "flysky-" FLAVOUR "-" VERSION;// "(" GIT_STR ")";
   const char date_stamp[] = DATE;
   const char time_stamp[] = TIME;
   const char eeprom_stamp[] = EEPROM_STR;

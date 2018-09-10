@@ -363,7 +363,7 @@
 #define EXTMODULE_TIMER                 TIM8
 #define EXTMODULE_TIMER_IRQn            TIM8_CC_IRQn
 #define EXTMODULE_TIMER_IRQHandler      TIM8_CC_IRQHandler
-#define EXTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB1)
+#define EXTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
 #define EXTMODULE_DMA_CHANNEL           DMA_Channel_7
 #define EXTMODULE_DMA_STREAM            DMA2_Stream1
 #define EXTMODULE_DMA_IRQn              DMA2_Stream1_IRQn

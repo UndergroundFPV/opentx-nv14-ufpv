@@ -58,7 +58,7 @@ add_definitions(-DPWR_BUTTON_${PWR_BUTTON})
 
 add_definitions(-DFLYSKY_HALL_STICKS_REVERSE)
 #add_definitions(-DFLYSKY_AUTO_POWER_DOWN)
-#add_definitions(-DFLYSKY_STARTUP_DELAY)
+add_definitions(-DFLYSKY_STARTUP_DELAY)
 
 
 

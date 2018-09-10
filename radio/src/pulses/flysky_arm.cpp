@@ -733,7 +733,7 @@ void putFlySkySendChannelData(uint8_t port)
     uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
     putFlySkyFrameByte(port, channels_count);
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
-
+#if 0
       if ( g_model.moduleData[port].failsafeMode == FAILSAFE_HOLD ) {
           pulseValue = 0x0FFF; // nv14
       }
@@ -741,7 +741,12 @@ void putFlySkySendChannelData(uint8_t port)
           failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
           pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
       }
-
+#else
+      if ( g_model.moduleData[port].failsafeMode == FAILSAFE_CUSTOM - 1) {
+          failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
+          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
+      }
+#endif
       putFlySkyFrameByte(port, pulseValue & 0xff);
       putFlySkyFrameByte(port, pulseValue >> 8);
     }

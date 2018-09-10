@@ -244,6 +244,7 @@ TASK_FUNCTION(menusTask)
 
   drawSleepBitmap();
   opentxClose();
+  CoTickDelay(100);
   boardOff(); // Only turn power off if necessary
 
   TASK_RETURN();

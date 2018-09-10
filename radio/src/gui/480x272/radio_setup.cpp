@@ -387,7 +387,7 @@ void RadioSetupPage::build(Window * window)
 
     // Delay
     new StaticText(window, grid.getLabelSlot(true), STR_BLDELAY);
-    auto edit = new NumberEdit(window, grid.getFieldSlot(2, 0), 0, 600,
+    auto edit = new NumberEdit(window, grid.getFieldSlot(2, 0), 15, 600,
       GET_DEFAULT(g_eeGeneral.lightAutoOff * 5),
       SET_VALUE(g_eeGeneral.lightAutoOff, newValue / 5));
     edit->setStep(5);

@@ -31,7 +31,7 @@ class SpecialFunctionEditWindow : public Page {
       functions(functions),
       index(index)
     {
-      buildBody(&body);
+      //buildBody(&body);
       buildHeader(&header);
     }
 
@@ -59,7 +59,8 @@ class SpecialFunctionEditWindow : public Page {
       switch (func) {
         case FUNC_OVERRIDE_CHANNEL:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_CH);
-          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS - 1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
+          //new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS - 1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
+          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(CFN_CH_INDEX(cfn))/*GET_SET_DEFAULT(g_model.swashR.elevatorSource)*/);
           grid.nextLine();
 
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
@@ -209,9 +210,11 @@ class SpecialFunctionEditWindow : public Page {
                                  SET_DIRTY();
                                  updateSpecialFunctionOneWindow();
                                });
+
       choice->setAvailableHandler([=](int value) {
         return isAssignableFunctionAvailable(value, functions);
       });
+
       grid.nextLine();
 
       specialFunctionOneWindow = new Window(window, {0, grid.getWindowHeight(), LCD_W, 0});
