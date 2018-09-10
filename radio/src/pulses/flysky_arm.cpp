@@ -41,7 +41,7 @@ enum FlySkyModuleCommandID {
   COMMAND_ID_RX_SENSOR_DATA,
   COMMAND_ID_SET_RX_PWM_PPM,
   COMMAND_ID_SET_RX_SERVO_FREQ,
-  COMMAND_ID_GET_FIRMWARE_REV,
+  COMMAND_ID_GET_VERSION_INFO,
   COMMAND_ID_SET_RX_IBUS_SBUS,
   COMMAND_ID_SET_RX_IBUS_SERVO_EXT,
   COMMAND_ID0C_UPDATE_RF_FIRMWARE = 0x0C,
@@ -98,10 +98,8 @@ enum FlySkyModuleState_E {
   FLYSKY_MODULE_STATE_UPDATE_HALL_FIRMWARE,
   FLYSKY_MODULE_STATE_UPDATE_RF_PROTOCOL,
   FLYSKY_MODULE_STATE_GET_RECEIVER_CONFIG,
-  FLYSKY_MODULE_STATE_GET_RX_FIRMWARE_INFO,
-  FLYSKY_MODULE_STATE_GET_RX_FW_VERSION,
-  FLYSKY_MODULE_STATE_GET_RF_FIRMWARE_INFO,
-  FLYSKY_MODULE_STATE_GET_RF_FW_VERSION,
+  FLYSKY_MODULE_STATE_GET_RX_VERSION_INFO,
+  FLYSKY_MODULE_STATE_GET_RF_VERSION_INFO,
   FLYSKY_MODULE_STATE_IDLE,
   FLYSKY_MODULE_STATE_DEFAULT,
 };
@@ -197,6 +195,11 @@ typedef struct RX_INFO_S {
 
 static rx_sensor_t rx_sensor_info;
 static uint8_t tx_working_power = 90;
+static STRUCT_HALL rfProtocolRx = {0};
+static uint32_t rfRxCount = 0;
+static uint8_t lastState = FLYSKY_MODULE_STATE_IDLE;
+extern uint8_t intmoduleGetByte(uint8_t * byte);
+
 
 static rf_info_t rf_info = {
   .id               = {8, 8, 8, 8},
@@ -490,6 +493,44 @@ bool isFlySkyUsbDownload(void)
   return rf_info.fw_state != 0;
 }
 
+void usbSetFrameTransmit(uint8_t packetID, uint8_t *dataBuf, uint32_t nBytes)
+{
+    // send to host via usb
+    uint8_t *pt = (uint8_t*)&rfProtocolRx;
+    rfProtocolRx.hallID.hall_Id.packetID = packetID;//0x08;
+    rfProtocolRx.hallID.hall_Id.senderID = 0x03;
+    rfProtocolRx.hallID.hall_Id.receiverID = 0x02;
+
+    if ( packetID == 0x08 ) {
+      uint8_t fwVerision[40];
+      for(int idx = 40; idx > 0; idx--)
+      {
+          if ( idx <= nBytes ) {
+              fwVerision[idx-1] = dataBuf[idx-1];
+          }
+          else fwVerision[idx-1] = 0;
+      }
+      dataBuf = fwVerision;
+      nBytes = 40;
+    }
+
+    rfProtocolRx.length = nBytes;
+
+    TRACE_NOCRLF("\r\nToUSB: 55 %02X %02X ", rfProtocolRx.hallID.ID, nBytes);
+    for ( int idx = 0; idx < nBytes; idx++ )
+    {
+        rfProtocolRx.data[idx] = dataBuf[idx];
+        TRACE_NOCRLF("%02X ", rfProtocolRx.data[idx]);
+    }
+    uint16_t checkSum = calc_crc16(pt, rfProtocolRx.length+3);
+    TRACE(" CRC:%04X;", checkSum);
+
+    pt[rfProtocolRx.length + 3] = checkSum & 0xFF;
+    pt[rfProtocolRx.length + 4] = checkSum >> 8;
+    usbDownloadTransmit(pt, rfProtocolRx.length + 5);
+}
+
+
 void onFlySkyModuleSetPower(uint8_t port, bool isPowerOn)
 {
   if (DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY) TRACE("RF Power %s", isPowerOn != 0 ? "ON" : "OFF");
@@ -551,9 +592,11 @@ void onFlySkyUpdateReceiverFirmwareStart(uint8_t port)
   modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_UPDATE_RX_FIRMWARE;
 }
 
-void onIntmoduleUsbDownloadStart(uint8_t port)
+void onFlySkyUsbDownloadFirmware(uint8_t port, uint8_t isRfTransfer)
 {
-  modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_UPDATE_RF_FIRMWARE;
+  if ( isRfTransfer != 0 )
+    modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_UPDATE_RF_FIRMWARE;
+  else modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_UPDATE_RX_FIRMWARE;
 }
 
 void onFlySkyUsbDownloadStart(uint8_t fw_state)
@@ -567,24 +610,12 @@ void onFlySkyUpdateTransmitterProtocol(uint8_t port)
 }
 
 
-void onFlySkyGetReceiverFirmwareInfo(uint8_t port)
+void onFlySkyGetVersionInfoStart(uint8_t port, uint8_t isRfTransfer)
 {
-  modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_GET_RX_FIRMWARE_INFO;
-}
-
-void onFlySkyGetTransmitterFirmwareInfo(uint8_t port)
-{
-  modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_GET_RF_FIRMWARE_INFO;
-}
-
-void onFlySkyGetReceiverFirmwareVersion(uint8_t port)
-{
-  modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_GET_RX_FW_VERSION;
-}
-
-void onFlySkyGetTransmitterFirmwareVersion(uint8_t port)
-{
-  modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_GET_RF_FW_VERSION;
+  lastState = modulePulsesData[port].flysky.state;
+  if ( isRfTransfer != 0 )
+    modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_GET_RF_VERSION_INFO;
+  else modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_GET_RX_VERSION_INFO;
 }
 
 void initFlySkyArray(uint8_t port)
@@ -694,15 +725,6 @@ void putFlySkySetReceiverServoFreq(uint8_t port)
   putFlySkyFrameByte(port, gRomData.rx_freq[1]); // receiver servo freq bit[15:8]
 }
 
-void putFlySkyGetFirmwareInfo(uint8_t port, uint8_t fw_word)
-{
-#ifdef RF_PROTOCOL_V13
-  putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_ACK);
-  putFlySkyFrameByte(port, COMMAND_ID_GET_FIRMWARE_INFO);
-  putFlySkyFrameByte(port, fw_word); // 0x00:RX firmware, 0x01:RF firmware
-#endif
-}
-
 void putFlySkySetPowerdBm(uint8_t port, uint8_t dBm)
 {
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_ACK);
@@ -713,7 +735,7 @@ void putFlySkySetPowerdBm(uint8_t port, uint8_t dBm)
 void putFlySkyGetFirmwareVersion(uint8_t port, uint8_t fw_word)
 {
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_ACK);
-  putFlySkyFrameByte(port, COMMAND_ID_GET_FIRMWARE_REV);
+  putFlySkyFrameByte(port, COMMAND_ID_GET_VERSION_INFO);
   putFlySkyFrameByte(port, fw_word); // 0x00:RX firmware, 0x01:RF firmware
 }
 
@@ -778,7 +800,7 @@ void putFlySkyUpdateFirmwareStart(uint8_t port, uint8_t fw_word)
   else {
     fw_word = COMMAND_ID0C_UPDATE_RF_FIRMWARE;
   }
-  putFlySkyFrameByte(port, fw_word); // 0x00:RX firmware, 0x01:RF firmware
+  putFlySkyFrameByte(port, fw_word);
 }
 
 void putFlySkyUpdateRfProtocol(uint8_t port)
@@ -820,10 +842,12 @@ bool checkFlySkyFrameCrc(const uint8_t * ptr, uint8_t size)
   return (crc ^ 0xff) == ptr[size];
 }
 
+
 void parseFlySkyFeedbackFrame(uint8_t port)
 {
   const uint8_t * ptr = modulePulsesData[port].flysky.telemetry;
-  if (*ptr++ != END)
+  uint8_t dataLen = modulePulsesData[port].flysky.telemetry_index;
+  if (*ptr++ != END || dataLen < 2 )
     return;
 
   uint8_t frame_number = *ptr++;
@@ -832,7 +856,8 @@ void parseFlySkyFeedbackFrame(uint8_t port)
   uint8_t first_para = *ptr++;
   uint8_t * p_data = NULL;
 
-  if (!checkFlySkyFrameCrc(modulePulsesData[port].flysky.telemetry + 1, modulePulsesData[port].flysky.telemetry_index - 2)) {
+  dataLen -= 2;
+  if (!checkFlySkyFrameCrc(modulePulsesData[port].flysky.telemetry + 1, dataLen)) {
     return;
   }
 
@@ -957,13 +982,20 @@ void parseFlySkyFeedbackFrame(uint8_t port)
       modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_IDLE;
       break;
     }
+
+    case COMMAND_ID_GET_VERSION_INFO: {
+      if ( dataLen > 4 ) {
+        usbSetFrameTransmit(0x08, (uint8_t*)ptr, dataLen - 4 );
+      }
+      if ( lastState == FLYSKY_MODULE_STATE_GET_RF_VERSION_INFO ||
+           lastState == FLYSKY_MODULE_STATE_GET_RX_VERSION_INFO ) {
+        lastState = FLYSKY_MODULE_STATE_INIT;
+      }
+      modulePulsesData[port].flysky.state = lastState;
+      break;
+    }
   }
 }
-
-extern uint8_t intmoduleGetByte(uint8_t * byte);
-
-static STRUCT_HALL rfProtocolRx = {0};
-static uint32_t rfRxCount = 0;
 
 bool isRfProtocolRxMsgOK(void)
 {
@@ -1112,19 +1144,11 @@ void setupPulsesFlySky(uint8_t port)
           putFlySkyUpdateFirmwareStart(port, FLYSKY_RF_FIRMWARE);
           break;
 
-        case FLYSKY_MODULE_STATE_GET_RX_FIRMWARE_INFO:
-          putFlySkyGetFirmwareInfo(port, FLYSKY_RX_FIRMWARE);
-          break;
-
-        case FLYSKY_MODULE_STATE_GET_RF_FIRMWARE_INFO:
-          putFlySkyGetFirmwareInfo(port, FLYSKY_RF_FIRMWARE);
-          break;
-
-        case FLYSKY_MODULE_STATE_GET_RX_FW_VERSION:
+        case FLYSKY_MODULE_STATE_GET_RX_VERSION_INFO:
           putFlySkyGetFirmwareVersion(port, FLYSKY_RX_FIRMWARE);
           break;
 
-        case FLYSKY_MODULE_STATE_GET_RF_FW_VERSION:
+        case FLYSKY_MODULE_STATE_GET_RF_VERSION_INFO:
           putFlySkyGetFirmwareVersion(port, FLYSKY_RF_FIRMWARE);
           break;
 
