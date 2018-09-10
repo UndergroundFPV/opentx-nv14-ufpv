@@ -39,11 +39,26 @@ class SpecialFunctionEditWindow : public Page {
     CustomFunctionData * functions;
     uint8_t index;
     Window * specialFunctionOneWindow = nullptr;
+    StaticText * headerSF = nullptr;
+    bool active = false;
+
+    bool isActive() {
+      return (modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
+    }
+
+    void checkEvents() override
+    {
+      if (active != isActive()) {
+        invalidate();
+        headerSF->setFlags(isActive() ? BOLD|WARNING_COLOR : MENU_TITLE_COLOR);
+        active = !active;
+      }
+    }
 
     void buildHeader(Window * window)
     {
       new StaticText(window, {70, 4, 200, 20}, functions == g_model.customFn ? STR_MENUCUSTOMFUNC : STR_MENUSPECIALFUNCS, MENU_TITLE_COLOR);
-      new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
+      headerSF = new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
     }
 
     void updateSpecialFunctionOneWindow()
@@ -59,8 +74,7 @@ class SpecialFunctionEditWindow : public Page {
       switch (func) {
         case FUNC_OVERRIDE_CHANNEL:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_CH);
-          //new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MAX_OUTPUT_CHANNELS - 1, GET_SET_DEFAULT(CFN_CH_INDEX(cfn)));
-          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_CH, GET_SET_DEFAULT(CFN_CH_INDEX(cfn))/*GET_SET_DEFAULT(g_model.swashR.elevatorSource)*/);
+          new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), 1, MAX_OUTPUT_CHANNELS, GET_SET_VALUE_WITH_OFFSET(CFN_CH_INDEX(cfn), 1));
           grid.nextLine();
 
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_VALUE);
@@ -246,8 +260,7 @@ class SpecialFunctionButton : public Button {
 
     bool isActive()
     {
-      // TODO
-      return false;
+      return (modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
     }
 
     void checkEvents() override
@@ -267,7 +280,7 @@ class SpecialFunctionButton : public Button {
       }
       uint8_t func = CFN_FUNC(cfn);
 
-      drawSwitch(col1, line1, CFN_SWITCH(cfn), ((modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE) 1 << index)) ? BOLD : 0));
+      drawSwitch(col1, line1, CFN_SWITCH(cfn), 0);
       if (CFN_EMPTY(cfn))
         return;
 
