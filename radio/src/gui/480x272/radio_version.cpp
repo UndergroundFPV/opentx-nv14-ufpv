@@ -128,8 +128,9 @@ void RadioVersionPage::build(Window * window)
   getCPUUniqueID(reusableBuffer.version.id);
 
   new StaticText(window, grid.getLabelSlot(), "FW Version :");
-  grid.nextLine(12);
-  new StaticText(window, {6, grid.getWindowHeight(), LCD_W - 6, 26}, vers_stamp);
+  new StaticText(window, grid.getFieldSlot(), vers_stamp);
+  //grid.nextLine(12);
+  //new StaticText(window, {6, grid.getWindowHeight(), LCD_W - 6, 26}, vers_stamp);
   grid.nextLine();
 
   new StaticText(window, grid.getLabelSlot(), "Data version");

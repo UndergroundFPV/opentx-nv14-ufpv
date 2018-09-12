@@ -522,12 +522,15 @@ void usbSetFrameTransmit(uint8_t packetID, uint8_t *dataBuf, uint32_t nBytes)
         rfProtocolRx.data[idx] = dataBuf[idx];
         TRACE_NOCRLF("%02X ", rfProtocolRx.data[idx]);
     }
+#if !defined(SIMU)
     uint16_t checkSum = calc_crc16(pt, rfProtocolRx.length+3);
     TRACE(" CRC:%04X;", checkSum);
 
     pt[rfProtocolRx.length + 3] = checkSum & 0xFF;
     pt[rfProtocolRx.length + 4] = checkSum >> 8;
+
     usbDownloadTransmit(pt, rfProtocolRx.length + 5);
+#endif
 }
 
 
@@ -1023,8 +1026,10 @@ void checkFlySkyFeedback(uint8_t port)
             pt[rfProtocolRx.length + 4] = rfProtocolRx.checkSum >> 8;
 
             if((DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY)) {
+#if !defined(SIMU)
                 TRACE("RF: %02X %02X %02X ...%04X; CRC:%04X", pt[0], pt[1], pt[2],
                       rfProtocolRx.checkSum, calc_crc16(pt, rfProtocolRx.length+3));
+#endif
             }
 
             if ( 0x01 == rfProtocolRx.length &&
@@ -1033,8 +1038,9 @@ void checkFlySkyFeedback(uint8_t port)
                 modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_INIT;
                 rf_info.fw_state = 0;
             }
-
+#if !defined(SIMU)
             usbDownloadTransmit(pt, rfProtocolRx.length + 5);
+#endif
         }
         //continue;
     }

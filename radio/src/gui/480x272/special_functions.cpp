@@ -31,7 +31,7 @@ class SpecialFunctionEditWindow : public Page {
       functions(functions),
       index(index)
     {
-      //buildBody(&body);
+      buildBody(&body);
       buildHeader(&header);
     }
 
@@ -84,7 +84,7 @@ class SpecialFunctionEditWindow : public Page {
 
         case FUNC_TRAINER:
           new StaticText(specialFunctionOneWindow, grid.getLabelSlot(), STR_TIMER);
-          new SourceChoice(specialFunctionOneWindow, grid.getFieldSlot(), 0, 4, GET_SET_DEFAULT(CFN_TIMER_INDEX(cfn)));
+          new NumberEdit(specialFunctionOneWindow, grid.getFieldSlot(), 1, 3, GET_SET_DEFAULT(CFN_TIMER_INDEX(cfn)));
           grid.nextLine();
           break;
 
