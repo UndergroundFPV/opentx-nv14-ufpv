@@ -340,12 +340,12 @@
 #define INTMODULE_TX_DMA_Stream_IRQHandler DMA1_Stream1_IRQHandler
 #define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF1
 #define INTMODULE_DMA_CHANNEL           DMA_Channel_5
-#define INTMODULE_RCC_APB1Periph        (RCC_APB1Periph_UART7)
-#define INTMODULE_RCC_APB2Periph        (RCC_APB2Periph_TIM1)
-#define INTMODULE_TIMER                 TIM1
-#define INTMODULE_TIMER_IRQn            TIM1_CC_IRQn
-#define INTMODULE_TIMER_IRQHandler      TIM1_CC_IRQHandler
-#define INTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
+#define INTMODULE_RCC_APB1Periph        (RCC_APB1Periph_UART7 | RCC_APB1Periph_TIM3)
+#define INTMODULE_RCC_APB2Periph        (0)
+#define INTMODULE_TIMER                 TIM3
+#define INTMODULE_TIMER_IRQn            TIM3_IRQn
+#define INTMODULE_TIMER_IRQHandler      TIM3_IRQHandler
+#define INTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB1)
 
 // External Module
 #define EXTMODULE
