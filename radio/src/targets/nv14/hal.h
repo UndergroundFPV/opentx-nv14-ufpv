@@ -230,7 +230,6 @@
 #define DMA_SCREEN_IRQ_PRIO             6
 
 // Backlight
-// TODO TIM3, TIM8, TIM14, review the channel in backlight_driver.cpp according to the chosen timer
 #define BACKLIGHT_RCC_AHB1Periph        RCC_AHB1Periph_GPIOA
 #define BACKLIGHT_RCC_APB1Periph        RCC_APB1Periph_TIM2
 #define BACKLIGHT_GPIO                  GPIOA
@@ -305,18 +304,18 @@
 #define I2C_RCC_AHB1Periph              0
 #define I2C_RCC_APB1Periph              0
 
-// Haptic: TIM1_CH2
+// Haptic: TIM1_CH1
 #define HAPTIC_PWM
 #define HAPTIC_RCC_AHB1Periph           RCC_AHB1Periph_GPIOA
 #define HAPTIC_RCC_APB2Periph           RCC_APB2ENR_TIM1EN
 #define HAPTIC_GPIO                     GPIOA
-#define HAPTIC_GPIO_PIN                 GPIO_Pin_9
+#define HAPTIC_GPIO_PIN                 GPIO_Pin_8
 #define HAPTIC_GPIO_TIMER               TIM1
 #define HAPTIC_GPIO_AF                  GPIO_AF_TIM1
-#define HAPTIC_GPIO_PinSource           GPIO_PinSource9
-#define HAPTIC_TIMER_OUTPUT_ENABLE      TIM_CCER_CC2E
-#define HAPTIC_TIMER_MODE               TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2
-#define HAPTIC_TIMER_COMPARE_VALUE      HAPTIC_GPIO_TIMER->CCR2
+#define HAPTIC_GPIO_PinSource           GPIO_PinSource8
+#define HAPTIC_TIMER_OUTPUT_ENABLE      TIM_CCER_CC1E
+#define HAPTIC_TIMER_MODE               TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2
+#define HAPTIC_TIMER_COMPARE_VALUE      HAPTIC_GPIO_TIMER->CCR1
 
 // Internal Module
 #define INTMODULE
