@@ -201,6 +201,8 @@ class ModuleWindow : public Window {
       channelStart->setSetValueHandler([=](int32_t newValue) {
         g_model.moduleData[moduleIndex].channelsStart = newValue - 1;
         SET_DIRTY();
+        if (isModuleFlysky(moduleIndex) && moduleFlag[moduleIndex] != MODULE_NORMAL_MODE)
+          resetPulsesFlySky(moduleIndex);
         channelEnd->setMin(g_model.moduleData[moduleIndex].channelsStart + minModuleChannels(moduleIndex));
         channelEnd->setMax(min<int8_t>(MAX_OUTPUT_CHANNELS, g_model.moduleData[moduleIndex].channelsStart + maxModuleChannels(moduleIndex)));
         channelEnd->invalidate();
@@ -208,6 +210,8 @@ class ModuleWindow : public Window {
       channelEnd->setSetValueHandler([=](int32_t newValue) {
         g_model.moduleData[moduleIndex].channelsCount = newValue - g_model.moduleData[moduleIndex].channelsStart - 8;
         SET_DIRTY();
+        if (isModuleFlysky(moduleIndex) && moduleFlag[moduleIndex] != MODULE_NORMAL_MODE)
+          resetPulsesFlySky(moduleIndex);
         channelStart->setMax(MAX_OUTPUT_CHANNELS - sentModuleChannels(moduleIndex) + 1);
       });
       channelEnd->enable(minModuleChannels(moduleIndex) < maxModuleChannels(moduleIndex));
@@ -338,55 +342,21 @@ class ModuleWindow : public Window {
       // Failsafe
       if (isModuleNeedingFailsafeButton(moduleIndex)) {
         new StaticText(this, grid.getLabelSlot(true), STR_FAILSAFE);
-#if defined (PCBFLYSKY)
-      if (moduleIndex == INTERNAL_MODULE) {
-          failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), "\011" "Not set\0 ""Custom\0  ", 0, FAILSAFE_HOLD,
-                                      GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
-                                      [=](int32_t newValue) {
-                                        g_model.moduleData[moduleIndex].failsafeMode = newValue;
-                                        SET_DIRTY();
-                                        update();
-                                        failSafeChoice->setFocus();
-                                        SEND_FAILSAFE_NOW(moduleIndex);
-                                      });
-          if (g_model.moduleData[moduleIndex].failsafeMode == FAILSAFE_CUSTOM - 1) {
-            new TextButton(this, grid.getFieldSlot(2, 1), STR_SET,
-                           [=]() -> uint8_t {
-                             new FailSafeMenu(moduleIndex);
-                             return 1;
-                           });
-          }
-          grid.nextLine();
-      }
-      else {
-          failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-                                      GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
-                                      [=](int32_t newValue) {
-                                        g_model.moduleData[moduleIndex].failsafeMode = newValue;
-                                        SET_DIRTY();
-                                        update();
-                                        failSafeChoice->setFocus();
-                                        SEND_FAILSAFE_NOW(moduleIndex);
-                                      });
-          if (g_model.moduleData[moduleIndex].failsafeMode == FAILSAFE_CUSTOM) {
-            new TextButton(this, grid.getFieldSlot(2, 1), STR_SET,
-                           [=]() -> uint8_t {
-                             new FailSafeMenu(moduleIndex);
-                             return 1;
-                           });
-          }
-          grid.nextLine();
-      }
-#else
-          failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-                                      GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
-                                      [=](int32_t newValue) {
-                                        g_model.moduleData[moduleIndex].failsafeMode = newValue;
-                                        SET_DIRTY();
-                                        update();
-                                        failSafeChoice->setFocus();
-                                      });
-
+        failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
+                                    GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
+                                    [=](int32_t newValue) {
+                                      g_model.moduleData[moduleIndex].failsafeMode = newValue;
+                                      if ( isModuleFlysky(moduleIndex) && moduleFlag[moduleIndex] != MODULE_NORMAL_MODE )
+                                        resetPulsesFlySky(moduleIndex);
+                                      SET_DIRTY();
+                                      update();
+                                      failSafeChoice->setFocus();
+                                    });
+        failSafeChoice->setAvailableHandler([=](int8_t newValue) {
+          if ( isModuleFlysky(moduleIndex) )
+            return (newValue == FAILSAFE_NOT_SET || newValue == FAILSAFE_CUSTOM);
+          else return true;
+        });
         if (g_model.moduleData[moduleIndex].failsafeMode == FAILSAFE_CUSTOM) {
           new TextButton(this, grid.getFieldSlot(2, 1), STR_SET,
                          [=]() -> uint8_t {

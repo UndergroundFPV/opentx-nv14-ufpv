@@ -541,6 +541,7 @@ void onFlySkyModuleSetPower(uint8_t port, bool isPowerOn)
   {
       if (isPowerOn) {
         INTERNAL_MODULE_ON();
+        resetPulsesFlySky(port);
       }
       else {
         INTERNAL_MODULE_OFF();
@@ -574,13 +575,19 @@ void onFlySkyReceiverPulsePort(uint8_t port)
 
 void onFlySkyReceiverSetFrequency(uint8_t port)
 {
-  sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_FREQUENCY);
+  if ( moduleFlag[port] != MODULE_NORMAL_MODE ) {
+    resetPulsesFlySky(port);
+  }
+  else sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_FREQUENCY);
 }
 
 void onFlySkyReceiverSetPulse(uint8_t port, uint8_t mode_and_port) // mode_and_port = 0,1,2,3
 {
   if ((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY)) TRACE("PulseMode+Port: %0d", mode_and_port);
-  sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_PWM_PPM);
+  if ( moduleFlag[port] != MODULE_NORMAL_MODE ) {
+    resetPulsesFlySky(port);
+  }
+  else sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_PWM_PPM);
 }
 
 void onFlySkyTransmitterPower(uint8_t port, uint8_t dBmValue)
