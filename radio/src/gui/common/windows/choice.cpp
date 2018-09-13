@@ -117,19 +117,32 @@ void CustomCurveChoice::paint(BitmapBuffer * dc)
   }
   dc->drawText(3, 2, getCurveString(s, value), flags | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
+  dc->drawBitmapPattern(rect.w - 14, (rect.h - 5) / 2, LBM_DROPDOWN, lineColor);
 }
 
 bool CustomCurveChoice::onTouchEnd(coord_t x, coord_t y)
 {
-  if (hasFocus()) {
-    int16_t value = getValue() + 1;
-    if (value > vmax)
-      value = vmin;
-    setValue(value);
+  auto menu = new Menu();
+  auto value = getValue();
+  int count = 0;
+  int current = -1;
+  char s[8];
+
+  for (int i = vmin; i <= vmax; ++i) {
+      menu->addLine(getCurveString(s, i), [=]() {
+        setValue(i);
+      });
+
+    if (value == i) {
+      current = count;
+    }
+    ++count;
   }
-  else {
-    setFocus();
+
+  if (current >= 0) {
+    menu->select(current);
   }
-  invalidate();
+
+  setFocus();
   return true;
 }
