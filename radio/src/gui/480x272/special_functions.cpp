@@ -43,7 +43,7 @@ class SpecialFunctionEditWindow : public Page {
     bool active = false;
 
     bool isActive() {
-      return (modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
+      return ((functions == g_model.customFn ? modelFunctionsContext.activeSwitches : globalFunctionsContext.activeSwitches) & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
     }
 
     void checkEvents() override
@@ -258,7 +258,7 @@ class SpecialFunctionButton : public Button {
 
     bool isActive()
     {
-      return (modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
+      return ((functions == g_model.customFn ? modelFunctionsContext.activeSwitches : globalFunctionsContext.activeSwitches) & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
     }
 
     void checkEvents() override
