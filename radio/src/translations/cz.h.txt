@@ -59,8 +59,12 @@
 #define LEN_VRENAVIG           "\003"
 #define TR_VRENAVIG            "Ne REaREb"
 
+#define LEN_VBLMODE            "\005"
+#define TR_VBLMODE             "Vyp\0 ""Touch""Páky\0""Vše\0 ""Zap\0 "
+#else
 #define LEN_VBLMODE            TR("\005", "\007")
 #define TR_VBLMODE             TR("Vyp\0 ""Kláv.""Páky\0""Vše\0 ""Zap\0 ", "Vypnuto""Klávesy""Páky\0  ""Vše\0   ""Zapnuto")
+#endif
 
 #define LEN_TRNMODE            "\003"
 #define TR_TRNMODE             " X "" +="" :="
