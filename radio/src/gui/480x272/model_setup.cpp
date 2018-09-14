@@ -365,7 +365,6 @@ class ModuleWindow : public Window {
                          });
         }
         grid.nextLine();
-#endif
       }
 
       // Bind and Range buttons
