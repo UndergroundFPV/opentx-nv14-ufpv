@@ -61,6 +61,7 @@
   #define HORUS_FIELD(x)
 #endif
 
+// When using unions, wrap all but the largest member in NOBACKUP()
 #if defined(BACKUP)
   #define NOBACKUP(...)
 #else
@@ -640,12 +641,12 @@ PACK(struct ModuleData {
   uint8_t invertedSerial:1; // telemetry serial inverted from standard
   int16_t failsafeChannels[MAX_OUTPUT_CHANNELS];
   union {
-    struct {
+    NOBACKUP(struct {
       int8_t  delay:6;
       uint8_t pulsePol:1;
       uint8_t outputType:1;    // false = open drain, true = push pull
       int8_t  frameLength;
-    } ppm;
+    } ppm);
     NOBACKUP(struct {
       uint8_t rfProtocolExtra:2;
       uint8_t spare1:3;
@@ -655,11 +656,11 @@ PACK(struct ModuleData {
       int8_t optionValue;
     } multi);
 
-    NOBACKUP(struct {
+    struct {
       uint8_t rx_id[4];
       uint8_t mode;
       uint8_t rx_freq[2];
-    } romData);
+    } romData;
 
     NOBACKUP(struct {
       uint8_t power:2;                  // 0=10 mW, 1=100 mW, 2=500 mW, 3=1W
