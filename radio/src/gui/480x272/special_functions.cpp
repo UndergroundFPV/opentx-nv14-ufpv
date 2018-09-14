@@ -405,6 +405,8 @@ void SpecialFunctionsPage::build(Window * window, int8_t focusIndex)
 
   Window::clearFocus();
   char s[5] = "SF";
+  if (functions == g_eeGeneral.customFn)
+    s[0] = 'G';
 
   for (uint8_t i = 0; i < MAX_SPECIAL_FUNCTIONS; i++) {
     CustomFunctionData * cfn = &functions[i];
