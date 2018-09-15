@@ -23,6 +23,15 @@
 #include "libwindows.h"
 
 #define SET_DIRTY()     storageDirty(EE_MODEL)
+#define STR_4BIND(v)    ((moduleFlag[moduleIndex] == MODULE_BIND) ? STR_MODULE_BINDING : (v))
+
+void moduleFlagBackNormal(uint8_t moduleIndex)
+{
+  if (isModuleFlysky(moduleIndex) && moduleFlag[moduleIndex] != MODULE_NORMAL_MODE) {
+    moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
+    resetPulsesFlySky(moduleIndex);
+  }
+}
 
 void resetModuleSettings(uint8_t module)
 {
@@ -32,6 +41,7 @@ void resetModuleSettings(uint8_t module)
   if (isModulePPM(module)) {
     SET_DEFAULT_PPM_FRAME_LENGTH(EXTERNAL_MODULE);
   }
+  moduleFlagBackNormal(module);
 }
 
 class ChannelFailsafeBargraph: public Window {
@@ -201,8 +211,7 @@ class ModuleWindow : public Window {
       channelStart->setSetValueHandler([=](int32_t newValue) {
         g_model.moduleData[moduleIndex].channelsStart = newValue - 1;
         SET_DIRTY();
-        if (isModuleFlysky(moduleIndex) && moduleFlag[moduleIndex] != MODULE_NORMAL_MODE)
-          resetPulsesFlySky(moduleIndex);
+        moduleFlagBackNormal(moduleIndex);
         channelEnd->setMin(g_model.moduleData[moduleIndex].channelsStart + minModuleChannels(moduleIndex));
         channelEnd->setMax(min<int8_t>(MAX_OUTPUT_CHANNELS, g_model.moduleData[moduleIndex].channelsStart + maxModuleChannels(moduleIndex)));
         channelEnd->invalidate();
@@ -210,8 +219,7 @@ class ModuleWindow : public Window {
       channelEnd->setSetValueHandler([=](int32_t newValue) {
         g_model.moduleData[moduleIndex].channelsCount = newValue - g_model.moduleData[moduleIndex].channelsStart - 8;
         SET_DIRTY();
-        if (isModuleFlysky(moduleIndex) && moduleFlag[moduleIndex] != MODULE_NORMAL_MODE)
-          resetPulsesFlySky(moduleIndex);
+        moduleFlagBackNormal(moduleIndex);
         channelStart->setMax(MAX_OUTPUT_CHANNELS - sentModuleChannels(moduleIndex) + 1);
       });
       channelEnd->enable(minModuleChannels(moduleIndex) < maxModuleChannels(moduleIndex));
@@ -232,8 +240,8 @@ class ModuleWindow : public Window {
                                 [=](int32_t newValue) {
                                   g_model.moduleData[moduleIndex].type = newValue;
                                   SET_DIRTY();
-                                  onFlySkyModuleSetPower(moduleIndex, newValue == MODULE_TYPE_FLYSKY);
                                   resetModuleSettings(moduleIndex);
+                                  onFlySkyModuleSetPower(moduleIndex, newValue == MODULE_TYPE_FLYSKY);
                                   update();
                                   moduleChoice->setFocus();
                                 });
@@ -248,6 +256,7 @@ class ModuleWindow : public Window {
                    [=](int32_t newValue) -> void {
                      g_model.moduleData[moduleIndex].romData.mode = newValue;
                      SET_DIRTY();
+                     moduleFlagBackNormal(moduleIndex);
                      onFlySkyReceiverSetPulse(INTERNAL_MODULE, newValue);
                    });
       }
@@ -334,6 +343,7 @@ class ModuleWindow : public Window {
                          g_model.moduleData[moduleIndex].romData.rx_freq[0] = newValue & 0xFF;
                          g_model.moduleData[moduleIndex].romData.rx_freq[1] = newValue >> 8;
                          SET_DIRTY();
+                         moduleFlagBackNormal(moduleIndex);
                          onFlySkyReceiverSetFrequency(INTERNAL_MODULE);
                        });
         grid.nextLine();
@@ -349,12 +359,8 @@ class ModuleWindow : public Window {
                                       SET_DIRTY();
                                       update();
                                       failSafeChoice->setFocus();
-                                      if ( isModuleFlysky(moduleIndex) ) {
-                                        if ( moduleFlag[moduleIndex] != MODULE_NORMAL_MODE )
-                                          resetPulsesFlySky(moduleIndex);
-                                        else onFlySkyFailsaveModeUpdate(moduleIndex);
-                                      }
-                                      else SEND_FAILSAFE_NOW(moduleIndex);
+                                      moduleFlagBackNormal(moduleIndex);
+                                      SEND_FAILSAFE_NOW(moduleIndex);
                                     });
         failSafeChoice->setAvailableHandler([=](int8_t newValue) {
           if ( isModuleFlysky(moduleIndex) )
@@ -373,17 +379,16 @@ class ModuleWindow : public Window {
 
       // Bind and Range buttons
       if (isModuleNeedingBindRangeButtons(moduleIndex)) {
-        bindButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_MODULE_BIND);
+        bindButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_4BIND(STR_MODULE_BIND));
         bindButton->setPressHandler([=]() -> uint8_t {
           if (moduleFlag[moduleIndex] == MODULE_RANGECHECK) {
             rangeButton->check(false);
           }
           if (moduleFlag[moduleIndex] == MODULE_BIND) {
             bindButton->setText(STR_MODULE_BIND);
+            moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
             if (isModuleFlysky(moduleIndex))
               resetPulsesFlySky(moduleIndex);
-            else
-              moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
             return 0;
           }
           else {
@@ -406,23 +411,17 @@ class ModuleWindow : public Window {
           if (moduleFlag[moduleIndex] == MODULE_BIND) {
             bindButton->setText(STR_MODULE_BIND);
             bindButton->check(false);
-            if (isModuleFlysky(moduleIndex))
-              resetPulsesFlySky(moduleIndex);
-            else
-              moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
           }
-          if (moduleFlag[moduleIndex] == MODULE_RANGECHECK) {
-            moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
-            if (isModuleFlysky(moduleIndex))
-              resetPulsesFlySky(moduleIndex);
-            return 0;
-          }
-          else {
+          if (moduleFlag[moduleIndex] != MODULE_RANGECHECK) {
             moduleFlag[moduleIndex] = MODULE_RANGECHECK;
             if (isModuleFlysky(moduleIndex))
               onFlySkyReceiverRange(moduleIndex);
             return 1;
           }
+          moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
+          if (isModuleFlysky(moduleIndex))
+            resetPulsesFlySky(moduleIndex);
+          return 0;
         });
         rangeButton->setCheckHandler([=]() {
           if (moduleFlag[moduleIndex] != MODULE_RANGECHECK) {

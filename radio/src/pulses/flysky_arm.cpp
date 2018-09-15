@@ -199,7 +199,6 @@ static uint8_t tx_working_power = 90;
 static STRUCT_HALL rfProtocolRx = {0};
 static uint32_t rfRxCount = 0;
 static uint8_t lastState = FLYSKY_MODULE_STATE_IDLE;
-static uint32_t failsaveSendWaitCounter = FAILSAVE_SEND_COUNTER_MAX;
 extern uint8_t intmoduleGetByte(uint8_t * byte);
 
 
@@ -538,10 +537,9 @@ void usbSetFrameTransmit(uint8_t packetID, uint8_t *dataBuf, uint32_t nBytes)
 
 void onFlySkyModuleSetPower(uint8_t port, bool isPowerOn)
 {
-  if (DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY) TRACE("RF Power %s", isPowerOn != 0 ? "ON" : "OFF");
   if ( INTERNAL_MODULE == port )
   {
-      if (isPowerOn) {
+      if ( isPowerOn ) {
         INTERNAL_MODULE_ON();
         resetPulsesFlySky(port);
       }
@@ -566,11 +564,6 @@ void onFlySkyBindReceiver(uint8_t port)
   modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_INIT;
 }
 
-void onFlySkyFailsaveModeUpdate(uint8_t port)
-{
-    failsaveSendWaitCounter = 0;
-}
-
 void onFlySkyReceiverPulseMode(uint8_t port)
 {
   modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_RX_PWM_PPM;
@@ -583,19 +576,13 @@ void onFlySkyReceiverPulsePort(uint8_t port)
 
 void onFlySkyReceiverSetFrequency(uint8_t port)
 {
-  if ( moduleFlag[port] != MODULE_NORMAL_MODE ) {
-    resetPulsesFlySky(port);
-  }
-  else sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_FREQUENCY);
+  sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_FREQUENCY);
 }
 
 void onFlySkyReceiverSetPulse(uint8_t port, uint8_t mode_and_port) // mode_and_port = 0,1,2,3
 {
   if ((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY)) TRACE("PulseMode+Port: %0d", mode_and_port);
-  if ( moduleFlag[port] != MODULE_NORMAL_MODE ) {
-    resetPulsesFlySky(port);
-  }
-  else sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_PWM_PPM);
+  sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_PWM_PPM);
 }
 
 void onFlySkyTransmitterPower(uint8_t port, uint8_t dBmValue)
@@ -766,8 +753,8 @@ void putFlySkySendChannelData(uint8_t port)
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_NACK);
   putFlySkyFrameByte(port, COMMAND_ID_SEND_CHANNEL_DATA);
 
-  if ( failsaveSendWaitCounter-- == 0 ) {
-    failsaveSendWaitCounter = FAILSAVE_SEND_COUNTER_MAX;
+  if ( failsafeCounter[port]-- == 0 ) {
+    failsafeCounter[port] = FAILSAVE_SEND_COUNTER_MAX;
     putFlySkyFrameByte(port, 0x01);
     putFlySkyFrameByte(port, channels_count);
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
@@ -1082,7 +1069,6 @@ void resetPulsesFlySky(uint8_t port)
   modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_TX_POWER;
   modulePulsesData[port].flysky.state_index = 0;
   modulePulsesData[port].flysky.esc_state = 0;
-  moduleFlag[port] = MODULE_NORMAL_MODE;
   tx_working_power = 90; // 17dBm
   uint16_t rx_freq = g_model.moduleData[port].romData.rx_freq[0];
   rx_freq += (g_model.moduleData[port].romData.rx_freq[1] * 256);
@@ -1181,6 +1167,8 @@ void setupPulsesFlySky(uint8_t port)
     }
   }
   else {
+    if ( moduleFlag[port] == MODULE_BIND )
+      moduleFlag[port] = MODULE_NORMAL_MODE;
     putFlySkySendChannelData(port);
   }
 
