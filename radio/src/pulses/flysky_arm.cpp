@@ -199,7 +199,7 @@ static uint8_t tx_working_power = 90;
 static STRUCT_HALL rfProtocolRx = {0};
 static uint32_t rfRxCount = 0;
 static uint8_t lastState = FLYSKY_MODULE_STATE_IDLE;
-static uint32_t failsaveSendCounter = FAILSAVE_SEND_COUNTER_MAX;
+static uint32_t failsaveSendWaitCounter = FAILSAVE_SEND_COUNTER_MAX;
 extern uint8_t intmoduleGetByte(uint8_t * byte);
 
 
@@ -546,6 +546,7 @@ void onFlySkyModuleSetPower(uint8_t port, bool isPowerOn)
         resetPulsesFlySky(port);
       }
       else {
+        moduleFlag[port] = MODULE_NORMAL_MODE;
         INTERNAL_MODULE_OFF();
       }
   }
@@ -567,7 +568,7 @@ void onFlySkyBindReceiver(uint8_t port)
 
 void onFlySkyFailsaveModeUpdate(uint8_t port)
 {
-    failsaveSendCounter = 0;
+    failsaveSendWaitCounter = 0;
 }
 
 void onFlySkyReceiverPulseMode(uint8_t port)
@@ -765,8 +766,8 @@ void putFlySkySendChannelData(uint8_t port)
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_NACK);
   putFlySkyFrameByte(port, COMMAND_ID_SEND_CHANNEL_DATA);
 
-  if ( failsaveSendCounter-- == 0 ) {
-    failsaveSendCounter = FAILSAVE_SEND_COUNTER_MAX;
+  if ( failsaveSendWaitCounter-- == 0 ) {
+    failsaveSendWaitCounter = FAILSAVE_SEND_COUNTER_MAX;
     putFlySkyFrameByte(port, 0x01);
     putFlySkyFrameByte(port, channels_count);
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
