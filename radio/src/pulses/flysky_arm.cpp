@@ -68,6 +68,7 @@ enum DEBUG_RF_FRAME_PRINT_E {
 #define FLYSKY_MODULE_TIMEOUT           155 /* ms */
 #define NUM_OF_NV14_CHANNELS            (14)
 #define VALID_CH_DATA(v)                ((v) > 900 && (v) < 2100)
+#define FAILSAVE_SEND_COUNTER_MAX       (400)
 
 #define gRomData                        g_model.moduleData[INTERNAL_MODULE].romData
 #define SET_DIRTY()                     storageDirty(EE_MODEL)
@@ -536,14 +537,14 @@ void usbSetFrameTransmit(uint8_t packetID, uint8_t *dataBuf, uint32_t nBytes)
 
 void onFlySkyModuleSetPower(uint8_t port, bool isPowerOn)
 {
-  if (DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY) TRACE("RF Power %s", isPowerOn != 0 ? "ON" : "OFF");
   if ( INTERNAL_MODULE == port )
   {
-      if (isPowerOn) {
+      if ( isPowerOn ) {
         INTERNAL_MODULE_ON();
         resetPulsesFlySky(port);
       }
       else {
+        moduleFlag[port] = MODULE_NORMAL_MODE;
         INTERNAL_MODULE_OFF();
       }
   }
@@ -575,19 +576,13 @@ void onFlySkyReceiverPulsePort(uint8_t port)
 
 void onFlySkyReceiverSetFrequency(uint8_t port)
 {
-  if ( moduleFlag[port] != MODULE_NORMAL_MODE ) {
-    resetPulsesFlySky(port);
-  }
-  else sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_FREQUENCY);
+  sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_FREQUENCY);
 }
 
 void onFlySkyReceiverSetPulse(uint8_t port, uint8_t mode_and_port) // mode_and_port = 0,1,2,3
 {
   if ((DEBUG_RF_FRAME_PRINT & TX_FRAME_ONLY)) TRACE("PulseMode+Port: %0d", mode_and_port);
-  if ( moduleFlag[port] != MODULE_NORMAL_MODE ) {
-    resetPulsesFlySky(port);
-  }
-  else sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_PWM_PPM);
+  sendPulsesFrameByState(port, FLYSKY_MODULE_STATE_SET_RX_PWM_PPM);
 }
 
 void onFlySkyTransmitterPower(uint8_t port, uint8_t dBmValue)
@@ -749,52 +744,41 @@ void putFlySkyGetFirmwareVersion(uint8_t port, uint8_t fw_word)
   putFlySkyFrameByte(port, fw_word); // 0x00:RX firmware, 0x01:RF firmware
 }
 
-static uint16_t sendChannelDataFrameCount = 0;
 void putFlySkySendChannelData(uint8_t port)
 {
-  int16_t failsafeValue = 0;
   uint16_t pulseValue = 0;
+  uint8_t channels_start = g_model.moduleData[port].channelsStart;
+  uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
 
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_NACK);
   putFlySkyFrameByte(port, COMMAND_ID_SEND_CHANNEL_DATA);
 
-  if ( g_model.moduleData[port].failsafeMode != FAILSAFE_NOT_SET
-       && sendChannelDataFrameCount++ > 400 ) {
+  if ( failsafeCounter[port]-- == 0 ) {
+    failsafeCounter[port] = FAILSAVE_SEND_COUNTER_MAX;
     putFlySkyFrameByte(port, 0x01);
-    uint8_t channels_start = g_model.moduleData[port].channelsStart;
-    uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
     putFlySkyFrameByte(port, channels_count);
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
-#if 0
-      if ( g_model.moduleData[port].failsafeMode == FAILSAFE_HOLD ) {
-          pulseValue = 0x0FFF; // nv14
+      if ( g_model.moduleData[port].failsafeMode == FAILSAFE_CUSTOM) {
+          int16_t failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
+          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
       }
       else {
-          failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
-          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
+          int channelValue = channelOutputs[channel] + 2*PPM_CH_CENTER(channel) - 2*PPM_CENTER;
+          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelValue + 1024) / 2048), 2100);
       }
-#else
-      if ( g_model.moduleData[port].failsafeMode == FAILSAFE_CUSTOM - 1) {
-          failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
-          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
-      }
-#endif
       putFlySkyFrameByte(port, pulseValue & 0xff);
       putFlySkyFrameByte(port, pulseValue >> 8);
     }
-    sendChannelDataFrameCount = 0;
     if (DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY) {
         TRACE("------FAILSAFE------");
     }
   }
   else {
     putFlySkyFrameByte(port, 0x00);
-    uint8_t channels_start = g_model.moduleData[port].channelsStart;
-    uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
     putFlySkyFrameByte(port, channels_count);
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
       int channelValue = channelOutputs[channel] + 2*PPM_CH_CENTER(channel) - 2*PPM_CENTER;
-      uint16_t pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelValue + 1024) / 2048), 2100);
+      pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelValue + 1024) / 2048), 2100);
       putFlySkyFrameByte(port, pulseValue & 0xff);
       putFlySkyFrameByte(port, pulseValue >> 8);
     }
@@ -1085,7 +1069,6 @@ void resetPulsesFlySky(uint8_t port)
   modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_TX_POWER;
   modulePulsesData[port].flysky.state_index = 0;
   modulePulsesData[port].flysky.esc_state = 0;
-  moduleFlag[port] = MODULE_NORMAL_MODE;
   tx_working_power = 90; // 17dBm
   uint16_t rx_freq = g_model.moduleData[port].romData.rx_freq[0];
   rx_freq += (g_model.moduleData[port].romData.rx_freq[1] * 256);
@@ -1184,6 +1167,8 @@ void setupPulsesFlySky(uint8_t port)
     }
   }
   else {
+    if ( moduleFlag[port] == MODULE_BIND )
+      moduleFlag[port] = MODULE_NORMAL_MODE;
     putFlySkySendChannelData(port);
   }
 
