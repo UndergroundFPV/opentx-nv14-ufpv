@@ -21,6 +21,7 @@
 #include "textedit.h"
 #include "keyboard_text.h"
 #include "draw_functions.h"
+#include "opentx.h"
 
 void TextEdit::paint(BitmapBuffer * dc)
 {
@@ -63,5 +64,6 @@ bool TextEdit::onTouchEnd(coord_t x, coord_t y)
 void TextEdit::onFocusLost()
 {
   TextKeyboard::instance()->disable(true);
+  storageDirty(EE_MODEL);
 }
 

@@ -61,8 +61,13 @@
 #define LEN_VRENAVIG           "\003"
 #define TR_VRENAVIG            "No REaREb"
 
+#if defined(PCBNV14)
+#define LEN_VBLMODE            "\005"
+#define TR_VBLMODE             "Wył\0 ""Touch\0""Drąż\0""Oba\0" "Zał\0 "
+#else
 #define LEN_VBLMODE            TR("\004", "\010")
 #define TR_VBLMODE             TR("Wył\0""Przy""Drąż""Oba\0""Zał\0", "Wyłącz  ""Przycisk""Drązki\0 ""Oba\0    ""Włącz   ")
+#endif
 
 #define LEN_TRNMODE            "\003"
 #define TR_TRNMODE             "Wył"" +="" :="
