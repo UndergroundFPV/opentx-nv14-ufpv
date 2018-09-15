@@ -42,10 +42,8 @@ ModelMenu::ModelMenu():
   addTab(new ModelInputsPage());
   addTab(new ModelMixesPage());
   addTab(new ModelOutputsPage());
-#ifndef SUPER_SIMPLE_MENU
   addTab(new ModelCurvesPage());
   addTab(new ModelLogicalSwitchesPage());
   addTab(new SpecialFunctionsPage(g_model.customFn));
-#endif
   addTab(new ModelTelemetryPage());
 }
