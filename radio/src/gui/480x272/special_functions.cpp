@@ -43,7 +43,7 @@ class SpecialFunctionEditWindow : public Page {
     bool active = false;
 
     bool isActive() {
-      return (modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
+      return ((functions == g_model.customFn ? modelFunctionsContext.activeSwitches : globalFunctionsContext.activeSwitches) & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
     }
 
     void checkEvents() override
@@ -58,7 +58,7 @@ class SpecialFunctionEditWindow : public Page {
     void buildHeader(Window * window)
     {
       new StaticText(window, {70, 4, 200, 20}, functions == g_model.customFn ? STR_MENUCUSTOMFUNC : STR_MENUSPECIALFUNCS, MENU_TITLE_COLOR);
-      headerSF = new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
+      headerSF = new StaticText(window, {70, 28, 100, 20}, (functions == g_model.customFn ? "SF" : "GF" ) + std::to_string(index), MENU_TITLE_COLOR);
     }
 
     void updateSpecialFunctionOneWindow()
@@ -260,7 +260,7 @@ class SpecialFunctionButton : public Button {
 
     bool isActive()
     {
-      return (modelFunctionsContext.activeSwitches & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
+      return ((functions == g_model.customFn ? modelFunctionsContext.activeSwitches : globalFunctionsContext.activeSwitches) & ((MASK_CFN_TYPE)1 << index) ? 1 : 0);
     }
 
     void checkEvents() override
@@ -407,6 +407,8 @@ void SpecialFunctionsPage::build(Window * window, int8_t focusIndex)
 
   Window::clearFocus();
   char s[5] = "SF";
+  if (functions == g_eeGeneral.customFn)
+    s[0] = 'G';
 
   for (uint8_t i = 0; i < MAX_SPECIAL_FUNCTIONS; i++) {
     CustomFunctionData * cfn = &functions[i];
