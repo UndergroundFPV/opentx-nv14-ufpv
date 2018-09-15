@@ -168,7 +168,8 @@ void onFlySkyModuleSetPower(uint8_t port, bool isPowerOn);
 void onFlySkyReceiverSetFrequency(uint8_t port);
 void onFlySkyReceiverSetPulse(uint8_t port, uint8_t mode_and_port);
 void intmoduleSendBufferDMA(uint8_t * data, uint8_t size);
-void onIntmoduleUsbDownloadStart(uint8_t port);
+void onFlySkyUsbDownloadFirmware(uint8_t port, uint8_t isRfTransfer);
+void onFlySkyGetVersionInfoStart(uint8_t port, uint8_t isRfTransfer);
 void usbDownloadTransmit(uint8_t *buffer, uint32_t size);
 
 #if defined(HUBSAN)
