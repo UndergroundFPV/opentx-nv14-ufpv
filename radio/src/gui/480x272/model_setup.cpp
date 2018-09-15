@@ -346,11 +346,15 @@ class ModuleWindow : public Window {
                                     GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
                                     [=](int32_t newValue) {
                                       g_model.moduleData[moduleIndex].failsafeMode = newValue;
-                                      if ( isModuleFlysky(moduleIndex) && moduleFlag[moduleIndex] != MODULE_NORMAL_MODE )
-                                        resetPulsesFlySky(moduleIndex);
                                       SET_DIRTY();
                                       update();
                                       failSafeChoice->setFocus();
+                                      if ( isModuleFlysky(moduleIndex) ) {
+                                        if ( moduleFlag[moduleIndex] != MODULE_NORMAL_MODE )
+                                          resetPulsesFlySky(moduleIndex);
+                                        else onFlySkyFailsaveModeUpdate(moduleIndex);
+                                      }
+                                      else SEND_FAILSAFE_NOW(moduleIndex);
                                     });
         failSafeChoice->setAvailableHandler([=](int8_t newValue) {
           if ( isModuleFlysky(moduleIndex) )

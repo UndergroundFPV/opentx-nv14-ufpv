@@ -163,6 +163,7 @@ void putDsm2Flush();
 void putDsm2SerialBit(uint8_t bit);
 void sendByteSbus(uint8_t byte);
 void onFlySkyBindReceiver(uint8_t port);
+void onFlySkyFailsaveModeUpdate(uint8_t port);
 void onFlySkyReceiverRange(uint8_t port);
 void onFlySkyModuleSetPower(uint8_t port, bool isPowerOn);
 void onFlySkyReceiverSetFrequency(uint8_t port);

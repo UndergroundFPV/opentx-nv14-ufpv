@@ -68,6 +68,7 @@ enum DEBUG_RF_FRAME_PRINT_E {
 #define FLYSKY_MODULE_TIMEOUT           155 /* ms */
 #define NUM_OF_NV14_CHANNELS            (14)
 #define VALID_CH_DATA(v)                ((v) > 900 && (v) < 2100)
+#define FAILSAVE_SEND_COUNTER_MAX       (400)
 
 #define gRomData                        g_model.moduleData[INTERNAL_MODULE].romData
 #define SET_DIRTY()                     storageDirty(EE_MODEL)
@@ -198,6 +199,7 @@ static uint8_t tx_working_power = 90;
 static STRUCT_HALL rfProtocolRx = {0};
 static uint32_t rfRxCount = 0;
 static uint8_t lastState = FLYSKY_MODULE_STATE_IDLE;
+static uint32_t failsaveSendCounter = FAILSAVE_SEND_COUNTER_MAX;
 extern uint8_t intmoduleGetByte(uint8_t * byte);
 
 
@@ -563,6 +565,11 @@ void onFlySkyBindReceiver(uint8_t port)
   modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_INIT;
 }
 
+void onFlySkyFailsaveModeUpdate(uint8_t port)
+{
+    failsaveSendCounter = 0;
+}
+
 void onFlySkyReceiverPulseMode(uint8_t port)
 {
   modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_SET_RX_PWM_PPM;
@@ -749,52 +756,41 @@ void putFlySkyGetFirmwareVersion(uint8_t port, uint8_t fw_word)
   putFlySkyFrameByte(port, fw_word); // 0x00:RX firmware, 0x01:RF firmware
 }
 
-static uint16_t sendChannelDataFrameCount = 0;
 void putFlySkySendChannelData(uint8_t port)
 {
-  int16_t failsafeValue = 0;
   uint16_t pulseValue = 0;
+  uint8_t channels_start = g_model.moduleData[port].channelsStart;
+  uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
 
   putFlySkyFrameByte(port, FRAME_TYPE_REQUEST_NACK);
   putFlySkyFrameByte(port, COMMAND_ID_SEND_CHANNEL_DATA);
 
-  if ( g_model.moduleData[port].failsafeMode != FAILSAFE_NOT_SET
-       && sendChannelDataFrameCount++ > 400 ) {
+  if ( failsaveSendCounter-- == 0 ) {
+    failsaveSendCounter = FAILSAVE_SEND_COUNTER_MAX;
     putFlySkyFrameByte(port, 0x01);
-    uint8_t channels_start = g_model.moduleData[port].channelsStart;
-    uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
     putFlySkyFrameByte(port, channels_count);
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
-#if 0
-      if ( g_model.moduleData[port].failsafeMode == FAILSAFE_HOLD ) {
-          pulseValue = 0x0FFF; // nv14
+      if ( g_model.moduleData[port].failsafeMode == FAILSAFE_CUSTOM) {
+          int16_t failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
+          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
       }
       else {
-          failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
-          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
+          int channelValue = channelOutputs[channel] + 2*PPM_CH_CENTER(channel) - 2*PPM_CENTER;
+          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelValue + 1024) / 2048), 2100);
       }
-#else
-      if ( g_model.moduleData[port].failsafeMode == FAILSAFE_CUSTOM - 1) {
-          failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
-          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
-      }
-#endif
       putFlySkyFrameByte(port, pulseValue & 0xff);
       putFlySkyFrameByte(port, pulseValue >> 8);
     }
-    sendChannelDataFrameCount = 0;
     if (DEBUG_RF_FRAME_PRINT & RF_FRAME_ONLY) {
         TRACE("------FAILSAFE------");
     }
   }
   else {
     putFlySkyFrameByte(port, 0x00);
-    uint8_t channels_start = g_model.moduleData[port].channelsStart;
-    uint8_t channels_count = min<unsigned int>(NUM_OF_NV14_CHANNELS, channels_start + 8 + g_model.moduleData[port].channelsCount);
     putFlySkyFrameByte(port, channels_count);
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
       int channelValue = channelOutputs[channel] + 2*PPM_CH_CENTER(channel) - 2*PPM_CENTER;
-      uint16_t pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelValue + 1024) / 2048), 2100);
+      pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelValue + 1024) / 2048), 2100);
       putFlySkyFrameByte(port, pulseValue & 0xff);
       putFlySkyFrameByte(port, pulseValue >> 8);
     }
