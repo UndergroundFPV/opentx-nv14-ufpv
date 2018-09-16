@@ -296,6 +296,9 @@ char * getSwitchString(char * dest, swsrc_t idx)
     }
     else {
       *s++ = 'S';
+#if defined(PCBNV14)
+      *s++ = 'W';
+#endif
 #if defined(PCBX7)
       if (swinfo.quot == 5)
         *s++ = 'H';
