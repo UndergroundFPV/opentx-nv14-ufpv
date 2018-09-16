@@ -197,7 +197,7 @@ void RadioSetupPage::build(Window * window)
   });
   grid.nextLine();
 
-  new StaticText(window, grid.getLabelSlot(), "Larger lines");
+  new StaticText(window, grid.getLabelSlot(), "Touch enlarge");
   new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_eeGeneral.displayLargeLines));
   grid.nextLine();
 
