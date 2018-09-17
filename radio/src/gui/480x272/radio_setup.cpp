@@ -490,7 +490,12 @@ void RadioSetupPage::build(Window * window)
 
   // USB mode
   new StaticText(window, grid.getLabelSlot(), STR_USBMODE);
-  new Choice(window, grid.getFieldSlot(), STR_USBMODES, USB_UNSELECTED_MODE, USB_MAX_MODE, GET_SET_DEFAULT(g_eeGeneral.USBMode));
+  choice = new Choice(window, grid.getFieldSlot(), STR_USBMODES, USB_UNSELECTED_MODE, USB_MAX_MODE,
+                      GET_SET_DEFAULT(g_eeGeneral.USBMode)
+                      );
+  choice->setAvailableHandler([=](int8_t usbType) {
+    return (usbType == USB_SERIAL_MODE || usbType == USB_MASS_STORAGE_MODE);
+  });
   grid.nextLine();
 
   // RX channel order

@@ -1194,6 +1194,8 @@ void setupPulsesFlySky(uint8_t port)
 #if !defined(SIMU)
 void usbDownloadTransmit(uint8_t *buffer, uint32_t size)
 {
+    if (USB_SERIAL_MODE != getSelectedUsbMode()) return;
+
     for (int idx = 0; idx < size; idx++)
     {
         usbSerialPutc(buffer[idx]);

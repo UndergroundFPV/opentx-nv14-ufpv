@@ -223,9 +223,10 @@ static uint16_t VCP_DataRx (uint8_t* Buf, uint32_t Len)
     cliRxFifo.push(Buf[i]);
 #endif
 
-#if defined(USB_SERIAL) && defined(FLYSKY_HALL_STICKS)
+#if defined(FLYSKY_HALL_STICKS)
     extern Fifo<uint8_t, HALLSTICK_BUFF_SIZE> hallStickTxFifo;
-    hallStickTxFifo.push(Buf[i]);
+    if (USB_SERIAL_MODE == getSelectedUsbMode())
+      hallStickTxFifo.push(Buf[i]);
 #endif
   }
 
