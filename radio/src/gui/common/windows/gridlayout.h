@@ -28,8 +28,7 @@ extern RadioData g_eeGeneral;
 
 static constexpr uint8_t lineSpacing = 6;
 static constexpr uint8_t indentWidth = 10;
-static constexpr uint8_t defaultLineHeight = 26;
-#define lineHeight ((g_eeGeneral.displayLargeLines) ? 31 : defaultLineHeight)
+#define lineHeight ((g_eeGeneral.displayLargeLines) ? 39 : 26)
 
 class GridLayout {
   public:
@@ -81,7 +80,7 @@ class GridLayout {
       currentY += height;
     }
 
-    void nextLine(coord_t height=defaultLineHeight)
+    void nextLine(coord_t height=lineHeight)
     {
       spacer(height + lineSpacing);
     }

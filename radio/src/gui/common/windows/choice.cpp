@@ -24,6 +24,10 @@
 #include "menu.h"
 #include "draw_functions.h"
 #include "strhelpers.h"
+#include "opentx.h"
+
+extern RadioData g_eeGeneral;
+
 
 const uint8_t LBM_DROPDOWN[] = {
 #include "mask_dropdown.lbm"
@@ -51,9 +55,9 @@ void Choice::paint(BitmapBuffer * dc)
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
   if (textHandler)
-    dc->drawText(3, 2, textHandler(getValue()).c_str());
+    dc->drawText(3, Y_ENLARGEABLE, textHandler(getValue()).c_str());
   else
-    drawTextAtIndex(dc, 3, 2, values, getValue() - vmin, flags | textColor);
+    drawTextAtIndex(dc, 3, Y_ENLARGEABLE, values, getValue() - vmin, flags | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
   dc->drawBitmapPattern(rect.w - 14, (rect.h - 5) / 2, LBM_DROPDOWN, lineColor);
 }

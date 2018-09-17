@@ -81,7 +81,7 @@ class DateTimeWindow : public Window {
                        SET_LOAD_DATETIME(&t);
                      });
       month->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+        drawNumber(dc, 2, Y_ENLARGEABLE, value, flags | LEADING0, 2);
       });
 
       /* TODO dynamic max instead of 31 ...
@@ -103,7 +103,7 @@ class DateTimeWindow : public Window {
                        SET_LOAD_DATETIME(&t);
                      });
       day->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+        drawNumber(dc, 2, Y_ENLARGEABLE, value, flags | LEADING0, 2);
       });
       grid.nextLine();
 
@@ -123,7 +123,7 @@ class DateTimeWindow : public Window {
                        SET_LOAD_DATETIME(&t);
                      });
       hour->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+        drawNumber(dc, 2, Y_ENLARGEABLE, value, flags | LEADING0, 2);
       });
 
       auto minutes = new NumberEdit(this, grid.getFieldSlot(3, 1), 0, 59,
@@ -139,7 +139,7 @@ class DateTimeWindow : public Window {
                        SET_LOAD_DATETIME(&t);
                      });
       minutes->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+        drawNumber(dc, 2, Y_ENLARGEABLE, value, flags | LEADING0, 2);
       });
 
       auto seconds = new NumberEdit(this, grid.getFieldSlot(3, 2), 0, 59,
@@ -155,7 +155,7 @@ class DateTimeWindow : public Window {
                        SET_LOAD_DATETIME(&t);
                      });
       seconds->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-        drawNumber(dc, 2, 2, value, flags | LEADING0, 2);
+        drawNumber(dc, 2, Y_ENLARGEABLE, value, flags | LEADING0, 2);
       });
       grid.nextLine();
       getParent()->moveWindowsTop(top(), adjustHeight());
