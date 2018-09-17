@@ -24,10 +24,6 @@
 #include "menu.h"
 #include "draw_functions.h"
 #include "strhelpers.h"
-#include "opentx.h"
-
-extern RadioData g_eeGeneral;
-
 
 const uint8_t LBM_DROPDOWN[] = {
 #include "mask_dropdown.lbm"

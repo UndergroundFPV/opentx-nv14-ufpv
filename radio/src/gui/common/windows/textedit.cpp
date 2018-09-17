@@ -21,10 +21,6 @@
 #include "textedit.h"
 #include "keyboard_text.h"
 #include "draw_functions.h"
-#include "opentx.h"
-
-extern RadioData g_eeGeneral;
-
 
 void TextEdit::paint(BitmapBuffer * dc)
 {

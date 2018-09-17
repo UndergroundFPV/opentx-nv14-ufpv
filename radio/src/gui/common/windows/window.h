@@ -28,6 +28,9 @@
 #include <functional>
 #include "bitmapbuffer.h"
 #include "debug.h"
+#include "opentx.h"
+
+extern RadioData g_eeGeneral;
 
 //OPAQUE/TRANSPARENT defined in WinGDI
 #ifndef OPAQUE

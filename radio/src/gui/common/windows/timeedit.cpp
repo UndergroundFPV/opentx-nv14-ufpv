@@ -22,10 +22,6 @@
 #include "keyboard_number.h"
 #include "draw_functions.h"
 #include "strhelpers.h"
-#include "opentx.h"
-
-extern RadioData g_eeGeneral;
-
 
 TimeEdit::TimeEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags):
   BaseNumberEdit(parent, rect, vmin, vmax, getValue, setValue, flags)

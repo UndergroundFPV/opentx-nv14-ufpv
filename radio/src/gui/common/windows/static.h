@@ -23,9 +23,6 @@
 
 #include <string>
 #include "window.h"
-#include "opentx.h"
-
-extern RadioData g_eeGeneral;
 
 class StaticText : public Window {
   public:
