@@ -166,7 +166,6 @@ void TextKeyboard::paint(BitmapBuffer * dc)
     coord_t y = 15 + i * 40;
     coord_t x = 15;
     const char * c = layout[i];
-    TRACE("STRING : %s", c);
     while(*c) {
       if (*c == ' ') {
         x += x_space;
