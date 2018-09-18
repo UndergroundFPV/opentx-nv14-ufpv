@@ -59,7 +59,7 @@ class TextKeyboard : public Keyboard<TextEdit> {
 
     bool onTouchEnd(coord_t x, coord_t y) override;
 
-    void checkEvents() override;
+    void setSize();
 
   protected:
     static TextKeyboard * _instance;

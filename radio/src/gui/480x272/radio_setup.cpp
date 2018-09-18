@@ -198,7 +198,20 @@ void RadioSetupPage::build(Window * window)
   grid.nextLine();
 
   new StaticText(window, grid.getLabelSlot(), "Touch enlarge");
-  new CheckBox(window, grid.getFieldSlot(), GET_SET_DEFAULT(g_eeGeneral.displayLargeLines));
+  new CheckBox(window, grid.getFieldSlot(),
+               GET_DEFAULT(g_eeGeneral.displayLargeLines),
+               [=](int32_t newValue) {
+                 g_eeGeneral.displayLargeLines= newValue;
+                 if (g_eeGeneral.displayLargeLines) {
+                   TextKeyboard::instance()->setHeight(220);
+                 }
+                 else {
+                   TextKeyboard::instance()->setHeight(160);
+                 }
+                 TextKeyboard::instance()->setTop(LCD_H - TextKeyboard::instance()->height());
+                 TextKeyboard::instance()->setSize();
+                 SET_DIRTY();
+               });
   grid.nextLine();
 
   new Subtitle(window, grid.getLabelSlot(), STR_SOUND_LABEL);

@@ -26,7 +26,7 @@
 int8_t char2idx(char c);
 char idx2char(int8_t idx);
 
-#define KEYBOARD_HEIGHT     220 //((g_eeGeneral.displayLargeLines) ? 220 : 160)
+#define KEYBOARD_HEIGHT     ((g_eeGeneral.displayLargeLines) ? 220 : 160)
 
 TextKeyboard * TextKeyboard::_instance = nullptr;
 
@@ -119,15 +119,26 @@ TextKeyboard::TextKeyboard():
 {
 }
 
-void TextKeyboard::checkEvents()
+void TextKeyboard::setSize()
 {
-  layout = g_eeGeneral.displayLargeLines ? LARGE_KEYBOARD_LOWERCASE : KEYBOARD_LOWERCASE;
-  x_space = ((g_eeGeneral.displayLargeLines) ? 30 : 15);
-  x_spacebar = ((g_eeGeneral.displayLargeLines) ? 160 : 135);
-  x_special = ((g_eeGeneral.displayLargeLines) ? 50 : 45);
-  x_regular = ((g_eeGeneral.displayLargeLines) ? 45 : 30);
-  x_enter = ((g_eeGeneral.displayLargeLines) ? 80 : 80);
-  lines = ((g_eeGeneral.displayLargeLines) ? 5 : 4);
+  if (g_eeGeneral.displayLargeLines) {
+    layout = LARGE_KEYBOARD_LOWERCASE;
+    x_space = 30;
+    x_spacebar = 160;
+    x_special = 50;
+    x_regular = 45;
+    x_enter = 80;
+    lines = 5;
+  }
+  else {
+    layout = KEYBOARD_LOWERCASE;
+    x_space = 15;
+    x_spacebar = 135;
+    x_special = 45;
+    x_regular = 30;
+    x_enter = 80;
+    lines = 4;
+  }
 }
 
 TextKeyboard::~TextKeyboard()
