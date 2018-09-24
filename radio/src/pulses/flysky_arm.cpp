@@ -917,10 +917,17 @@ void parseFlySkyFeedbackFrame(uint8_t port)
     }
 
     case COMMAND_ID_RX_SENSOR_DATA: {
+      extern Fifo<uint8_t, TELEMETRY_FIFO_SIZE> telemetryNoDMAFifo;
+      telemetryNoDMAFifo.push(0xAA);
+      //telemetryNoDMAFifo.push(0x30); // TXID
+      //telemetryNoDMAFifo.push(0x31); // RXID
+      telemetryNoDMAFifo.push(first_para);// sensor id refer to FlySkySensorType_E
       // rx_sensor_info.sensor_id = *ptr++; // TBC: in protocol doc, but no such byte in sample data
       if (first_para == FLYSKY_SENSOR_RX_VOLTAGE) {
         rx_sensor_info.voltage[0] = *ptr++;
         rx_sensor_info.voltage[1] = *ptr++;
+        telemetryNoDMAFifo.push(rx_sensor_info.voltage[0]);
+        telemetryNoDMAFifo.push(rx_sensor_info.voltage[1]);
       }
 
       else if (first_para == FLYSKY_SENSOR_GPS) {
@@ -932,12 +939,16 @@ void parseFlySkyFeedbackFrame(uint8_t port)
 
       else if (first_para == FLYSKY_SENSOR_RX_SIGNAL) {
         rx_sensor_info.signal = *ptr++;
+        telemetryNoDMAFifo.push(rx_sensor_info.signal);
+        telemetryNoDMAFifo.push(0x00);
       }
 
       else if (first_para > FLYSKY_SENSOR_RX_SIGNAL && first_para < FLYSKY_SENSOR_GPS) {
         p_data = rx_sensor_info.rssi + (first_para - FLYSKY_SENSOR_RX_RSSI) * 2;
         p_data[0] = *ptr++;
         p_data[1] = *ptr++;
+        telemetryNoDMAFifo.push(p_data[0]);
+        telemetryNoDMAFifo.push(p_data[1]);
       }
 
       if (moduleFlag[port] == MODULE_NORMAL_MODE && modulePulsesData[port].flysky.state >= FLYSKY_MODULE_STATE_IDLE) {
