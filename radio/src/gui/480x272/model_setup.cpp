@@ -27,9 +27,9 @@
 
 void moduleFlagBackNormal(uint8_t moduleIndex)
 {
-  if (isModuleFlysky(moduleIndex) && moduleFlag[moduleIndex] != MODULE_NORMAL_MODE) {
+  if (moduleFlag[moduleIndex] != MODULE_NORMAL_MODE) {
     moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
-    resetPulsesFlySky(moduleIndex);
+    if(isModuleFlysky(moduleIndex)) resetPulsesFlySky(moduleIndex);
   }
 }
 
@@ -211,7 +211,6 @@ class ModuleWindow : public Window {
       channelStart->setSetValueHandler([=](int32_t newValue) {
         g_model.moduleData[moduleIndex].channelsStart = newValue - 1;
         SET_DIRTY();
-        moduleFlagBackNormal(moduleIndex);
         channelEnd->setMin(g_model.moduleData[moduleIndex].channelsStart + minModuleChannels(moduleIndex));
         channelEnd->setMax(min<int8_t>(MAX_OUTPUT_CHANNELS, g_model.moduleData[moduleIndex].channelsStart + maxModuleChannels(moduleIndex)));
         channelEnd->invalidate();
@@ -219,7 +218,6 @@ class ModuleWindow : public Window {
       channelEnd->setSetValueHandler([=](int32_t newValue) {
         g_model.moduleData[moduleIndex].channelsCount = newValue - g_model.moduleData[moduleIndex].channelsStart - 8;
         SET_DIRTY();
-        moduleFlagBackNormal(moduleIndex);
         channelStart->setMax(MAX_OUTPUT_CHANNELS - sentModuleChannels(moduleIndex) + 1);
       });
       channelEnd->enable(minModuleChannels(moduleIndex) < maxModuleChannels(moduleIndex));
