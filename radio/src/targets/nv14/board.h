@@ -479,7 +479,7 @@ void setScaledVolume(uint8_t volume);
 void setVolume(uint8_t volume);
 int32_t getVolume(void);
 #define VOLUME_LEVEL_MAX               23
-#define VOLUME_LEVEL_DEF               12
+#define VOLUME_LEVEL_DEF               23
 
 // Telemetry driver
 #define TELEMETRY_FIFO_SIZE             512
