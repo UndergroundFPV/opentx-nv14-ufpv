@@ -370,9 +370,9 @@ void perMain()
 #if defined(STM32)
   if (usbPlugged() && getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
     // disable access to menus
-    lcdClear();
+    //lcdClear();
     // menuMainView(0);
-    lcdRefresh();
+    //lcdRefresh();
     return;
   }
 #endif

@@ -258,6 +258,9 @@ void generalDefault()
 #if !defined(PCBHORUS)
   g_eeGeneral.contrast = LCD_CONTRAST_DEFAULT;
 #endif
+#if defined (PCBNV14)
+  g_eeGeneral.USBMode = USB_MASS_STORAGE_MODE;
+#endif
 
   g_eeGeneral.potsConfig = DEFAULT_POTS_CONFIG;
   g_eeGeneral.switchConfig = DEFAULT_SWITCH_CONFIG;

@@ -34,6 +34,7 @@ class SourceChoiceMenuToolbar : public MenuToolbar<SourceChoice> {
 #if defined(LUA_MODEL_SCRIPTS)
       addButton(char('\322'), MIXSRC_LAST_LUA, MIXSRC_FIRST_LUA);
 #endif
+
       addButton(char('\307'), MIXSRC_FIRST_STICK, MIXSRC_LAST_STICK);
       addButton(char('\310'), MIXSRC_LAST_POT, MIXSRC_FIRST_POT);
       addButton(char('\315'), MIXSRC_MAX, MIXSRC_MAX);

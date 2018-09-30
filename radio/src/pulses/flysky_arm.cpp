@@ -756,15 +756,14 @@ void putFlySkySendChannelData(uint8_t port)
   if ( failsafeCounter[port]-- == 0 ) {
     failsafeCounter[port] = FAILSAVE_SEND_COUNTER_MAX;
     putFlySkyFrameByte(port, 0x01);
-    putFlySkyFrameByte(port, channels_count);
+    putFlySkyFrameByte(port, NUM_OF_NV14_CHANNELS/*channels_count*/);
     for (uint8_t channel = channels_start; channel < channels_count; channel++) {
       if ( g_model.moduleData[port].failsafeMode == FAILSAFE_CUSTOM) {
           int16_t failsafeValue = g_model.moduleData[port].failsafeChannels[channel];
           pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (failsafeValue + 1024) / 2048), 2100);
       }
       else {
-          int channelValue = channelOutputs[channel] + 2*PPM_CH_CENTER(channel) - 2*PPM_CENTER;
-          pulseValue = limit<uint16_t>(900, 900 + ((2100 - 900) * (channelValue + 1024) / 2048), 2100);
+          pulseValue = 0xfff;
       }
       putFlySkyFrameByte(port, pulseValue & 0xff);
       putFlySkyFrameByte(port, pulseValue >> 8);
@@ -917,10 +916,17 @@ void parseFlySkyFeedbackFrame(uint8_t port)
     }
 
     case COMMAND_ID_RX_SENSOR_DATA: {
+      extern Fifo<uint8_t, TELEMETRY_FIFO_SIZE> telemetryNoDMAFifo;
+      telemetryNoDMAFifo.push(0xAA);
+      //telemetryNoDMAFifo.push(0x30); // TXID
+      //telemetryNoDMAFifo.push(0x31); // RXID
+      telemetryNoDMAFifo.push(first_para);// sensor id refer to FlySkySensorType_E
       // rx_sensor_info.sensor_id = *ptr++; // TBC: in protocol doc, but no such byte in sample data
       if (first_para == FLYSKY_SENSOR_RX_VOLTAGE) {
         rx_sensor_info.voltage[0] = *ptr++;
         rx_sensor_info.voltage[1] = *ptr++;
+        telemetryNoDMAFifo.push(rx_sensor_info.voltage[0]);
+        telemetryNoDMAFifo.push(rx_sensor_info.voltage[1]);
       }
 
       else if (first_para == FLYSKY_SENSOR_GPS) {
@@ -932,12 +938,16 @@ void parseFlySkyFeedbackFrame(uint8_t port)
 
       else if (first_para == FLYSKY_SENSOR_RX_SIGNAL) {
         rx_sensor_info.signal = *ptr++;
+        telemetryNoDMAFifo.push(rx_sensor_info.signal);
+        telemetryNoDMAFifo.push(0x00);
       }
 
       else if (first_para > FLYSKY_SENSOR_RX_SIGNAL && first_para < FLYSKY_SENSOR_GPS) {
         p_data = rx_sensor_info.rssi + (first_para - FLYSKY_SENSOR_RX_RSSI) * 2;
         p_data[0] = *ptr++;
         p_data[1] = *ptr++;
+        telemetryNoDMAFifo.push(p_data[0]);
+        telemetryNoDMAFifo.push(p_data[1]);
       }
 
       if (moduleFlag[port] == MODULE_NORMAL_MODE && modulePulsesData[port].flysky.state >= FLYSKY_MODULE_STATE_IDLE) {
