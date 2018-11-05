@@ -29,6 +29,7 @@
 #include "model_curves.h"
 #include "model_logical_switches.h"
 #include "special_functions.h"
+#include "model_custom_scripts.h"
 #include "model_telemetry.h"
 
 ModelMenu::ModelMenu():
@@ -45,5 +46,8 @@ ModelMenu::ModelMenu():
   addTab(new ModelCurvesPage());
   addTab(new ModelLogicalSwitchesPage());
   addTab(new SpecialFunctionsPage(g_model.customFn));
+#if defined(LUA_MODEL_SCRIPTS)
+  addTab(new ModelCustomScriptsPage());
+#endif
   addTab(new ModelTelemetryPage());
 }
