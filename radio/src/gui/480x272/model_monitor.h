@@ -18,29 +18,16 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _MODEL_CUSTOM_SCRIPTS_H
-#define _MODEL_CUSTOM_SCRIPTS_H
-
 #include "tabsgroup.h"
 
-class ModelCustomScriptsPage: public PageTab {
-public:
-    ModelCustomScriptsPage();
 
-    virtual void build(Window * window) override {
-      build(window, -1);
-    }
+class ModelMonitorPage: public PageTab {
+  public:
+    ModelMonitorPage();
 
+    void build(Window * window) override;
 
-protected:
-
-    void build(Window * window, int8_t focusIndex);
-    void rebuild(Window * window, int8_t focusIndex);
-<<<<<<< HEAD
-    void editLogicalSwitch(Window * window, uint8_t lsIndex);
-=======
-    void editCustomScript(Window * window, uint8_t lsIndex);
->>>>>>> b68a4a831599a463f7499c55f21e8d72cf49a871
+  protected:
+    static constexpr coord_t footerHeight = 30;
+    uint8_t moduleIndex;
 };
-
-#endif //_MODEL_CUSTOM_SCRIPTS_H
