@@ -185,6 +185,20 @@ TASK_FUNCTION(menusTask)
 
 #if defined(PWR_BUTTON_PRESS)
   while (1) {
+ #if 1
+      static uint32_t UsbModeFlag = 0;
+      if(usbPlugged() && (USB_UNSELECTED_MODE ==g_eeGeneral.USBMode))
+      {
+         g_eeGeneral.USBMode = UsbModeSelect(UsbModeFlag);
+         UsbModeFlag = 1;
+         CoTickDelay(MENU_TASK_PERIOD_TICKS);
+         continue;
+      }
+      else
+      {
+        UsbModeFlag = 0;
+      }
+ #endif
     uint32_t pwr_check = pwrCheck();
     if (pwr_check == e_power_off) {
       break;
@@ -245,8 +259,12 @@ TASK_FUNCTION(menusTask)
   drawSleepBitmap();
   opentxClose();
   CoTickDelay(100);
+  shutdownflag = 0x12345678;
   boardOff(); // Only turn power off if necessary
-
+  while(1)
+  {
+        NVIC_SystemReset();
+  }
   TASK_RETURN();
 }
 

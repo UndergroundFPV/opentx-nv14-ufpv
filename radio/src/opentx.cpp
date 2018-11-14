@@ -2487,9 +2487,10 @@ void opentxInit(OPENTX_INIT_ARGS)
   //  * radios without CPU controlled power can only use Reset status register (if available)
   if (UNEXPECTED_SHUTDOWN()) {
     TRACE("Unexpected Shutdown detected");
+
     unexpectedShutdown = 1;
   }
-
+  shutdownflag = 0x87654321;
 #if defined(SDCARD) && !defined(PCBMEGA2560)
   // SDCARD related stuff, only done if not unexpectedShutdown
   if (!unexpectedShutdown) {
@@ -2753,6 +2754,26 @@ int main()
 #if defined(SIMU)
   return NULL;
 #endif
+}
+
+uint8_t UsbModeSelect( uint32_t index )
+{
+    lcd->setOffset(0, 0);
+    lcd->clearClippingRect();
+    if(!index)
+    {
+        //lcdDrawBlackOverlay();
+        lcd->drawFilledRect(70, 195, 200, 120, SOLID, HEADER_BGCOLOR);
+        lcd->drawText(80, 205, "Joystick",MENU_TITLE_COLOR);
+        lcd->drawText(80, 245, "Serial",MENU_TITLE_COLOR);
+        lcd->drawText(80, 285, "Storage",MENU_TITLE_COLOR);
+        lcd->drawHorizontalLine(70, 235, 200, SOLID, MENU_TITLE_COLOR);
+        lcd->drawHorizontalLine(70, 275, 200, SOLID, MENU_TITLE_COLOR);
+
+    }
+    // force a refresh if the user stops the animation
+    mainWindow.invalidate();
+    return USB_UNSELECTED_MODE;
 }
 
 #if defined(PWR_BUTTON_PRESS)

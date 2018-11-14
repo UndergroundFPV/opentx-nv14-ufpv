@@ -103,8 +103,8 @@
 #define LEN_COUNTRYCODES               TR("\002", "\007")
 #define TR_COUNTRYCODES                TR("US""JP""EU", "America""Japan\0 ""Europe\0")
 
-#define LEN_USBMODES                   TR("\006", "\010")
-#define TR_USBMODES                    TR("Ask\0  ""Joyst\0""SDCard""Serial", "Ask\0    ""Joystick""Storage\0""Serial\0 ")
+#define LEN_USBMODES                   TR("\013", "\010")
+#define TR_USBMODES                    TR("Ask(SDCard)""Joyst\0     ""Serial\0    ", "Ask\0    ""Joystick""Storage\0""Serial\0 ")
 
 #if defined(COLORLCD)
 #define LEN_MODULE_PROTOCOLS           "\006"

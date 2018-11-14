@@ -43,6 +43,7 @@ void onUSBConnectMenu(const char *result)
 void handleUsbConnection()
 {
 #if defined(STM32) && !defined(SIMU)
+    setSelectedUsbMode(g_eeGeneral.USBMode);
   if (!usbStarted() && usbPlugged() && !(getSelectedUsbMode() == USB_UNSELECTED_MODE)) {
     usbStart();
     if (getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
@@ -50,6 +51,7 @@ void handleUsbConnection()
       usbPluggedIn();
     }
   }
+#if 0
   if (!usbStarted() && usbPlugged() && getSelectedUsbMode() == USB_UNSELECTED_MODE) {
     if((g_eeGeneral.USBMode == USB_UNSELECTED_MODE) && (popupMenuNoItems == 0)) {
       POPUP_MENU_ADD_ITEM(STR_USB_JOYSTICK);
@@ -61,6 +63,7 @@ void handleUsbConnection()
       setSelectedUsbMode(g_eeGeneral.USBMode);
     }
   }
+#endif
   if (usbStarted() && !usbPlugged()) {
     usbStop();
     if (getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
