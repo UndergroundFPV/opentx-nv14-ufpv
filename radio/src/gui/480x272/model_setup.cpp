@@ -21,6 +21,7 @@
 #include "model_setup.h"
 #include "opentx.h"
 #include "libwindows.h"
+#include "model_crossfire.h"
 
 #define SET_DIRTY()     storageDirty(EE_MODEL)
 
@@ -220,6 +221,7 @@ class ModuleWindow : public Window {
 
       clear();
 
+
       // Module Type
       new StaticText(this, grid.getLabelSlot(true), STR_MODE);
       moduleChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_MODULE_PROTOCOLS,
@@ -237,6 +239,10 @@ class ModuleWindow : public Window {
         return isModuleTypeAllowed(moduleIndex, moduleType);
       });
 
+      if (isModuleCrossfire(moduleIndex)) {
+    	  grid.nextLine();
+    	  new StaticText(this, grid.getLineSlot(), "ALWAYS POWERED ON!", CENTERED);
+      }
       // Module parameters
       if (isModuleFlysky(moduleIndex)) {
         new Choice(this, grid.getFieldSlot(2, 1), STR_FLYSKY_PROTOCOLS, 0, 3,
@@ -454,6 +460,16 @@ class ModuleWindow : public Window {
                    GET_DEFAULT(min<uint8_t>(g_model.moduleData[moduleIndex].pxx.power, R9M_LBT_POWER_MAX)),
                    SET_DEFAULT(g_model.moduleData[moduleIndex].pxx.power));
       }
+
+
+#if defined (PCBFLYSKY) && defined (CROSSFIRE_NATIVE)
+      if(isModuleCrossfire(moduleIndex)){
+    	  new TextButton(this, grid.getFieldSlot(), STR_CROSSFIRE_SETUP, [=]() -> uint8_t {
+              new CrossfireMenu();
+              return 1;
+          });
+      }
+#endif
 
       getParent()->moveWindowsTop(top(), adjustHeight());
     }

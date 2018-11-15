@@ -194,7 +194,7 @@ inline void telemetryOutputSetTrigger(uint8_t byte)
   outputTelemetryBufferTrigger = byte;
 }
 
-#if defined(LUA)
+#if defined(LUA) || defined(CROSSFIRE_NATIVE)
 #define LUA_TELEMETRY_INPUT_FIFO_SIZE  256
 extern Fifo<uint8_t, LUA_TELEMETRY_INPUT_FIFO_SIZE> * luaInputTelemetryFifo;
 #endif

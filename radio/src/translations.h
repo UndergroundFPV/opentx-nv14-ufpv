@@ -1047,6 +1047,10 @@ extern const pm_char STR_ENABLE[];
   extern const pm_char STR_MAVLINK_LON[];
 #endif
 
+#ifdef CROSSFIRE_NATIVE
+  extern const pm_char STR_CROSSFIRE_SETUP[];
+#endif
+
 #if !defined(CPUM64)
   extern const pm_char STR_ABOUTUS[];
   extern const pm_char STR_ABOUT_OPENTX_1[];
