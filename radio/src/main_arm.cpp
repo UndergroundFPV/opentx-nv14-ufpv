@@ -24,7 +24,7 @@
 uint8_t currentSpeakerVolume = 255;
 uint8_t requiredSpeakerVolume = 255;
 uint8_t mainRequestFlags = 0;
-
+extern uint8_t UsbModes;
 #if defined(STM32)
 void onUSBConnectMenu(const char *result)
 {
@@ -43,7 +43,7 @@ void onUSBConnectMenu(const char *result)
 void handleUsbConnection()
 {
 #if defined(STM32) && !defined(SIMU)
-    setSelectedUsbMode(g_eeGeneral.USBMode);
+    setSelectedUsbMode(UsbModes);
   if (!usbStarted() && usbPlugged() && !(getSelectedUsbMode() == USB_UNSELECTED_MODE)) {
     usbStart();
     if (getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
@@ -71,7 +71,12 @@ void handleUsbConnection()
     }
 #if !defined(BOOT)
     setSelectedUsbMode(USB_UNSELECTED_MODE);
+    UsbModes = USB_UNSELECTED_MODE;
 #endif
+  }
+  if( !usbPlugged() )
+  {
+     UsbModes = g_eeGeneral.USBMode;
   }
 #endif // defined(STM32) && !defined(SIMU)
 }
@@ -322,7 +327,9 @@ void perMain()
   checkSpeakerVolume();
   checkEeprom();
   logsWrite();
+#if !defined (PCBFLYSKY)
   handleUsbConnection();
+#endif
   checkTrainerSettings();
   periodicTick();
   DEBUG_TIMER_STOP(debugTimerPerMain1);
@@ -405,5 +412,8 @@ void perMain()
 
 #if defined(INTERNAL_GPS)
   gpsWakeup();
+#endif
+ #if defined(PCBFLYSKY)
+  handleUsbConnection();
 #endif
 }

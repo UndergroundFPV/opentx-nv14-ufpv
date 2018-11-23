@@ -106,6 +106,9 @@
 #define LEN_USBMODES                   TR("\013", "\010")
 #define TR_USBMODES                    TR("Ask(SDCard)""Joyst\0     ""Serial\0    ", "Ask\0    ""Joystick""Storage\0""Serial\0 ")
 
+#define LEN_USBMODESELECT               "\011"
+#define TR_USBMODESELECT                "Joystick\0""Serial\0  ""Storage\0 "
+
 #if defined(COLORLCD)
 #define LEN_MODULE_PROTOCOLS           "\006"
 #define TR_MODULE_PROTOCOLS            "Off\0  ""PPM\0  ""XJT\0  ""FlySky""DSM2\0 ""CRSF\0 ""MULT.\0""R9M\0  ""SBUS"

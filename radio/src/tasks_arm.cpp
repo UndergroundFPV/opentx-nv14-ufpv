@@ -178,18 +178,22 @@ void scheduleNextMixerCalculation(uint8_t module, uint16_t delay)
 #if defined(COLORLCD) && defined(CLI)
 bool perMainEnabled = true;
 #endif
+uint8_t UsbModes = USB_UNSELECTED_MODE;
 
 TASK_FUNCTION(menusTask)
 {
   opentxInit();
-
 #if defined(PWR_BUTTON_PRESS)
   while (1) {
- #if 1
+ #if defined(PCBFLYSKY)
       static uint32_t UsbModeFlag = 0;
-      if(usbPlugged() && (USB_UNSELECTED_MODE ==g_eeGeneral.USBMode))
+      if(USB_UNSELECTED_MODE ==UsbModes)
       {
-         g_eeGeneral.USBMode = UsbModeSelect(UsbModeFlag);
+          UsbModes = g_eeGeneral.USBMode;
+      }
+      if(usbPlugged() && (USB_UNSELECTED_MODE ==UsbModes) && (!unexpectedShutdown))
+      {
+         UsbModes = UsbModeSelect(UsbModeFlag);
          UsbModeFlag = 1;
          CoTickDelay(MENU_TASK_PERIOD_TICKS);
          continue;
@@ -261,10 +265,13 @@ TASK_FUNCTION(menusTask)
   CoTickDelay(100);
   shutdownflag = 0x12345678;
   boardOff(); // Only turn power off if necessary
+ #if defined(PCBFLYSKY)
+  delay_ms(50);
   while(1)
   {
-        NVIC_SystemReset();
+      NVIC_SystemReset();
   }
+#endif
   TASK_RETURN();
 }
 
