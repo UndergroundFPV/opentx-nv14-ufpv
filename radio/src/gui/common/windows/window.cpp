@@ -114,7 +114,10 @@ void Window::setFocus()
     clearFocus();
     focusWindow = this;
   }
-  parent->scrollTo(this);
+  if (parent) {
+    parent->scrollTo(this);
+  }
+
   invalidate();
 }
 
@@ -158,9 +161,12 @@ void Window::fullPaint(BitmapBuffer * dc)
 #if defined(DEBUG_WINDOWS)
   TRACE("%s", getWindowDebugString().c_str());
 #endif
-  paint(dc);
-  drawVerticalScrollbar(dc);
-  paintChildren(dc);
+  //if (!(luaState & INTERPRETER_RUNNING_STANDALONE_SCRIPT))
+  {
+    paint(dc);
+    drawVerticalScrollbar(dc);
+    paintChildren(dc);
+  }
 }
 
 bool Window::isChildFullSize(Window * child)

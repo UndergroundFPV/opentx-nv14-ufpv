@@ -2490,7 +2490,9 @@ void opentxInit(OPENTX_INIT_ARGS)
 
     unexpectedShutdown = 1;
   }
+#if !defined(SIMU)
   shutdownflag = 0x87654321;
+#endif
 #if defined(SDCARD) && !defined(PCBMEGA2560)
   // SDCARD related stuff, only done if not unexpectedShutdown
   if (!unexpectedShutdown) {

@@ -70,6 +70,7 @@ class Layout2P1: public Layout
 void Layout2P1::refresh()
 {
   theme->drawBackground();
+  //lcdDrawText(40, 40, "fuck here", 0);
 
   if (persistentData->options[0].boolValue) {
     drawTopBar();
@@ -77,12 +78,14 @@ void Layout2P1::refresh()
 
   if (persistentData->options[1].boolValue) {
     // Flight mode
+#if 0
     lcdDrawSizedText(LCD_W / 2 - getTextWidth(g_model.flightModeData[mixerCurrentFlightMode].name,
                                               sizeof(g_model.flightModeData[mixerCurrentFlightMode].name),
                                               ZCHAR | SMLSIZE) / 2,
                      237,
                      g_model.flightModeData[mixerCurrentFlightMode].name,
                      sizeof(g_model.flightModeData[mixerCurrentFlightMode].name), ZCHAR | SMLSIZE);
+#endif
   }
 
   if (persistentData->options[2].boolValue) {

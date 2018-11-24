@@ -233,6 +233,7 @@ void ModelCustomScriptsPage::editCustomScript(Window * window, uint8_t lsIndex)
 
 void ModelCustomScriptsPage::build(Window * window, int8_t focusIndex)
 {
+#if 0
     GridLayout grid;
     grid.spacer(8);
     grid.setLabelWidth(70);
@@ -279,4 +280,19 @@ void ModelCustomScriptsPage::build(Window * window, int8_t focusIndex)
     grid.nextLine();
 
     window->setInnerHeight(grid.getWindowHeight());
+#else
+
+    //lcd->clear();
+    //lcd->drawText(0, 0, "fuck you!", TEXT_COLOR);
+    //lcdNextLayer();
+    //lcd->clear();
+    //lcd->drawText(0, 0, "fuck you!", TEXT_COLOR);
+    window->clear();
+    window->getParent();
+    //GridLayout grid;
+    //grid.spacer(8);
+    //grid.setLabelWidth(70);
+
+    //new TextButton(window, grid.getLabelSlot(), "Fuck!");
+#endif
 }

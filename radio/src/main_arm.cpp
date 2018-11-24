@@ -191,6 +191,7 @@ void periodicTick()
 #if defined(GUI) && defined(COLORLCD)
 void guiMain(event_t evt)
 {
+  bool refreshNeeded = false;
 #if defined(LUA)
   uint32_t t0 = get_tmr10ms();
   static uint32_t lastLuaTime = 0;
@@ -200,7 +201,17 @@ void guiMain(event_t evt)
     maxLuaInterval = interval;
   }
 
-  luaTask(0, RUN_STNDAL_SCRIPT | RUN_TELEM_FG_SCRIPT | RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, true);
+  luaTask(0,  RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, false);
+
+  // draw LCD from menus or from Lua script
+  // run Lua scripts that use LCD
+#if 1
+  DEBUG_TIMER_START(debugTimerLuaFg);
+  refreshNeeded = luaTask(0, RUN_STNDAL_SCRIPT, true);
+  if (!refreshNeeded) {
+    refreshNeeded = luaTask(0, RUN_TELEM_FG_SCRIPT, true);
+  }
+  DEBUG_TIMER_STOP(debugTimerLuaFg);
 
   t0 = get_tmr10ms() - t0;
   if (t0 > maxLuaDuration) {
@@ -208,7 +219,17 @@ void guiMain(event_t evt)
   }
 #endif
 
-  mainWindow.run();
+#else
+  lcdRefreshWait();   // WARNING: make sure no code above this line does any change to the LCD display buffer!
+#endif
+
+  if (!refreshNeeded) {
+    mainWindow.run();
+  }
+  else {
+    lcdRefresh();
+  }
+
 }
 #elif defined(GUI)
 

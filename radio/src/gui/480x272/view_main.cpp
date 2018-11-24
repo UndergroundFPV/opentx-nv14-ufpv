@@ -129,6 +129,7 @@ ViewMain::ViewMain(bool icons):
   Window(&mainWindow, { 0, 0, LCD_W, LCD_H })
 {
   if (icons) {
+
     new FabIconButton(this, 50, 100, ICON_MODEL,
                       [=]() -> uint8_t {
                         new ModelMenu();
@@ -210,7 +211,7 @@ void ViewMain::checkEvents()
 
 void ViewMain::paint(BitmapBuffer * dc)
 {
-  theme->drawBackground();
+  //theme->drawBackground();
 
   if (g_model.view >= getMainViewsCount()) {
     g_model.view = 0;
