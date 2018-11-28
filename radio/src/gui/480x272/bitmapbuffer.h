@@ -310,6 +310,12 @@ class BitmapBuffer: public BitmapBufferBase<uint16_t>
 
     void drawSizedText(coord_t x, coord_t y, const char * s, uint8_t len, LcdFlags flags=0);
 
+    void clearOffset(coord_t offsetX, coord_t offsetY)
+    {
+      this->offsetX = offsetX;
+      this->offsetY = offsetY;
+    }
+
     void drawText(coord_t x, coord_t y, const char * s, LcdFlags flags=0) {
       drawSizedText(x, y, s, 255, flags);
     }

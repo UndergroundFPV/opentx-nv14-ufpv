@@ -223,13 +223,16 @@ void guiMain(event_t evt)
   lcdRefreshWait();   // WARNING: make sure no code above this line does any change to the LCD display buffer!
 #endif
 
+#if 0
   if (!refreshNeeded) {
     mainWindow.run();
   }
   else {
     lcdRefresh();
   }
-
+#else
+  mainWindow.run();
+#endif
 }
 #elif defined(GUI)
 

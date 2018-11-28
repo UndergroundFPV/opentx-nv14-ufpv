@@ -65,7 +65,6 @@ class ModelBitmapWidget: public Widget
 
     virtual void refresh()
     {
-#if 0
       uint32_t new_hash = MathUtil::hash(g_model.header.bitmap, sizeof(g_model.header.bitmap));
       new_hash ^= MathUtil::hash(g_model.header.name, sizeof(g_model.header.name));
       new_hash ^= MathUtil::hash(g_eeGeneral.themeName, sizeof(g_eeGeneral.themeName));
@@ -77,8 +76,6 @@ class ModelBitmapWidget: public Widget
       if (buffer) {
         lcd->drawBitmap(zone.x, zone.y, buffer);
       }
-#endif
-      lcd->drawText(zone.x, zone.y, "Fuck here", 0);
     }
 
   protected:

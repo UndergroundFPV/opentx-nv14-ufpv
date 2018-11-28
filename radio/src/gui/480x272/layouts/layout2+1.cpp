@@ -70,7 +70,6 @@ class Layout2P1: public Layout
 void Layout2P1::refresh()
 {
   theme->drawBackground();
-  //lcdDrawText(40, 40, "fuck here", 0);
 
   if (persistentData->options[0].boolValue) {
     drawTopBar();
