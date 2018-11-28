@@ -70,11 +70,15 @@ static int luaLcdClear(lua_State *L)
 int Lua_screen_created = 0;
 int Lua_screen_exit = 0;
 
-static int luaNewWindow(lua_State *L)
+static int luaRunMainWindow(lua_State *L)
 {
   if (luaLcdAllowed && !Lua_screen_created && !Lua_screen_exit) {
     new ScreenLua(0);
     Lua_screen_created = 1;
+  }
+  else {
+    LcdFlags color = luaL_optunsigned(L, 1, TEXT_BGCOLOR);
+    lcd->clear(color);
   }
 
   return 0;
@@ -900,7 +904,7 @@ const luaL_Reg lcdLib[] = {
   { "drawCombobox", luaLcdDrawCombobox },
 #endif
 #if defined (PCBNV14)
-  { "drawNewWindow", luaNewWindow },
+  { "runMainWindow", luaRunMainWindow },
 #endif
   { NULL, NULL }  /* sentinel */
 };
