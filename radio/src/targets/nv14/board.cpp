@@ -248,7 +248,7 @@ void boardOff()
   while (pwrPressed()) {
     wdt_reset();
   }
-
+  lcd->drawFilledRect(0, 0, LCD_WIDTH, LCD_HEIGHT, SOLID, HEADER_BGCOLOR);
   SysTick->CTRL = 0; // turn off systick
   pwrOff();
 }

@@ -104,6 +104,7 @@ const pm_char STR_OPEN9X[] PROGMEM =
 #if defined(PXX) || defined(CPUARM)
     ISTR(COUNTRYCODES)
     ISTR(USBMODES)
+    ISTR(USBMODESELECT)
     ISTR(VFAILSAFE)
 #endif
 #if defined(CPUARM)

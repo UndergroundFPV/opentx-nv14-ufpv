@@ -22,6 +22,11 @@
 #include <stdio.h>
 #include "opentx.h"
 #include "lua_api.h"
+#include "screen_lua.h"
+
+#if defined (PCBNV14)
+#include "libwindows.h"
+#endif
 
 /*luadoc
 @function lcd.refresh()
@@ -59,6 +64,19 @@ static int luaLcdClear(lua_State *L)
     lcdClear();
 #endif
   }
+  return 0;
+}
+
+int Lua_screen_created = 0;
+int Lua_screen_exit = 0;
+
+static int luaNewWindow(lua_State *L)
+{
+  if (luaLcdAllowed && !Lua_screen_created && !Lua_screen_exit) {
+    new ScreenLua(0);
+    Lua_screen_created = 1;
+  }
+
   return 0;
 }
 
@@ -880,6 +898,9 @@ const luaL_Reg lcdLib[] = {
   { "drawPixmap", luaLcdDrawPixmap },
   { "drawScreenTitle", luaLcdDrawScreenTitle },
   { "drawCombobox", luaLcdDrawCombobox },
+#endif
+#if defined (PCBNV14)
+  { "drawNewWindow", luaNewWindow },
 #endif
   { NULL, NULL }  /* sentinel */
 };

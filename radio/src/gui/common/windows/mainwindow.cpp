@@ -37,12 +37,14 @@ void MainWindow::emptyTrash()
 void MainWindow::checkEvents()
 {
   if (touchState.Event == TE_DOWN) {
-    onTouchStart(touchState.X + scrollPositionX, touchState.Y + scrollPositionY);
+    //onTouchStart(touchState.X + scrollPositionX, touchState.Y + scrollPositionY);
+    onTouchStart(touchState.X, touchState.Y);
     // touchState.Event = TE_NONE;
   }
   else if (touchState.Event == TE_UP) {
     touchState.Event = TE_NONE;
-    onTouchEnd(touchState.startX + scrollPositionX, touchState.startY + scrollPositionY);
+    //onTouchEnd(touchState.startX + scrollPositionX, touchState.startY + scrollPositionY);
+    onTouchEnd(touchState.startX, touchState.startY);
   }
   else if (touchState.Event == TE_SLIDE) {
     coord_t x = touchState.X - touchState.lastX;

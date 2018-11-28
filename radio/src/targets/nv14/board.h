@@ -287,6 +287,7 @@ uint32_t readTrims(void);
 extern uint32_t powerupReason;
 #if defined (PCBFLYSKY)
 extern uint32_t powerupState;
+extern uint32_t shutdownflag;
 #endif
 
 #define SHUTDOWN_REQUEST                0xDEADBEEF
@@ -390,6 +391,7 @@ uint32_t pwrCheck(void);
 #if defined(PCBFLYSKY)
 uint32_t lowPowerCheck(void);
 #endif
+uint8_t UsbModeSelect( uint32_t index );
 void pwrOn(void);
 void pwrOff(void);
 void pwrResetHandler(void);
@@ -398,7 +400,7 @@ uint32_t pwrPressedDuration(void);
 #if defined(SIMU) || defined(NO_UNEXPECTED_SHUTDOWN)
   #define UNEXPECTED_SHUTDOWN()         (false)
 #else
-  #define UNEXPECTED_SHUTDOWN()         ((powerupReason == DIRTY_SHUTDOWN) || WAS_RESET_BY_WATCHDOG_OR_SOFTWARE())
+  #define UNEXPECTED_SHUTDOWN()        ((shutdownflag != 0x12345678 )&&((powerupReason == DIRTY_SHUTDOWN) || WAS_RESET_BY_WATCHDOG_OR_SOFTWARE()))
 #endif
 
 // LCD driver

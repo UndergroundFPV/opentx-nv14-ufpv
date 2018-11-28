@@ -217,11 +217,12 @@ extern const pm_char STR_OPEN9X[];
   #define OFS_VVARIOCENTER      (OFS_COUNTDOWNVALUES + sizeof(TR_COUNTDOWNVALUES))
   #define OFS_COUNTRYCODES      (OFS_VVARIOCENTER + sizeof(TR_VVARIOCENTER))
   #define OFS_USBMODES          (OFS_COUNTRYCODES + sizeof(TR_COUNTRYCODES))
+  #define OFS_USBMODESELECT     (OFS_USBMODES + sizeof(TR_USBMODES))
 #else
   #define OFS_COUNTRYCODES      (OFS_VLCD)
 #endif
 #if defined(PXX) || defined(CPUARM)
-  #define OFS_VFAILSAFE         (OFS_USBMODES + sizeof(TR_USBMODES))
+  #define OFS_VFAILSAFE         (OFS_USBMODESELECT + sizeof(TR_USBMODESELECT))
   #define OFS_VTRAINERMODES     (OFS_VFAILSAFE + sizeof(TR_VFAILSAFE))
 #else
   #define OFS_VFAILSAFE         (OFS_COUNTRYCODES)
@@ -356,6 +357,7 @@ extern const pm_char STR_OPEN9X[];
 #if defined(PXX) || defined(CPUARM)
   #define STR_COUNTRYCODES      (STR_OPEN9X + OFS_COUNTRYCODES)
   #define STR_USBMODES          (STR_OPEN9X + OFS_USBMODES)
+  #define STR_USBMODESELECT     (STR_OPEN9X + OFS_USBMODESELECT)
   #define STR_VFAILSAFE         (STR_OPEN9X + OFS_VFAILSAFE)
 #endif
 

@@ -271,7 +271,7 @@ class Window {
 
     std::function<void()> onClose;
 
-    void  attach(Window * window);
+    void attach(Window * window);
 
     void detach();
 

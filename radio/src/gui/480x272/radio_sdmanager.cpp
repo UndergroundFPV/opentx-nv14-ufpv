@@ -22,6 +22,8 @@
 #include "opentx.h"
 #include "libwindows.h"
 
+Window *LuaWindow = NULL;
+
 RadioSdManagerPage::RadioSdManagerPage():
   PageTab(SD_IS_HC() ? STR_SDHC_CARD : STR_SD_CARD, ICON_RADIO_SD_BROWSER)
 {
@@ -50,6 +52,7 @@ char * getFullPath(const std::string & filename)
   return full_path;
 }
 
+extern int Lua_screen_exit;
 void RadioSdManagerPage::build(Window * window)
 {
   GridLayout grid;
@@ -123,6 +126,7 @@ void RadioSdManagerPage::build(Window * window)
 #if defined(LUA)
           else if (isExtensionMatching(ext, SCRIPTS_EXT)) {
             menu->addLine(STR_EXECUTE_FILE, [=]() {
+              Lua_screen_exit = 0;
               luaExec(getFullPath(name));
             });
           }

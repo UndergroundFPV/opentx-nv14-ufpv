@@ -24,7 +24,7 @@
 uint8_t currentSpeakerVolume = 255;
 uint8_t requiredSpeakerVolume = 255;
 uint8_t mainRequestFlags = 0;
-
+extern uint8_t UsbModes;
 #if defined(STM32)
 void onUSBConnectMenu(const char *result)
 {
@@ -43,6 +43,7 @@ void onUSBConnectMenu(const char *result)
 void handleUsbConnection()
 {
 #if defined(STM32) && !defined(SIMU)
+    setSelectedUsbMode(UsbModes);
   if (!usbStarted() && usbPlugged() && !(getSelectedUsbMode() == USB_UNSELECTED_MODE)) {
     usbStart();
     if (getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
@@ -50,6 +51,7 @@ void handleUsbConnection()
       usbPluggedIn();
     }
   }
+#if 0
   if (!usbStarted() && usbPlugged() && getSelectedUsbMode() == USB_UNSELECTED_MODE) {
     if((g_eeGeneral.USBMode == USB_UNSELECTED_MODE) && (popupMenuNoItems == 0)) {
       POPUP_MENU_ADD_ITEM(STR_USB_JOYSTICK);
@@ -61,6 +63,7 @@ void handleUsbConnection()
       setSelectedUsbMode(g_eeGeneral.USBMode);
     }
   }
+#endif
   if (usbStarted() && !usbPlugged()) {
     usbStop();
     if (getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
@@ -68,7 +71,12 @@ void handleUsbConnection()
     }
 #if !defined(BOOT)
     setSelectedUsbMode(USB_UNSELECTED_MODE);
+    UsbModes = USB_UNSELECTED_MODE;
 #endif
+  }
+  if( !usbPlugged() )
+  {
+     UsbModes = g_eeGeneral.USBMode;
   }
 #endif // defined(STM32) && !defined(SIMU)
 }
@@ -183,6 +191,7 @@ void periodicTick()
 #if defined(GUI) && defined(COLORLCD)
 void guiMain(event_t evt)
 {
+  bool refreshNeeded = false;
 #if defined(LUA)
   uint32_t t0 = get_tmr10ms();
   static uint32_t lastLuaTime = 0;
@@ -192,7 +201,17 @@ void guiMain(event_t evt)
     maxLuaInterval = interval;
   }
 
-  luaTask(0, RUN_STNDAL_SCRIPT | RUN_TELEM_FG_SCRIPT | RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, true);
+  luaTask(0,  RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, false);
+
+  // draw LCD from menus or from Lua script
+  // run Lua scripts that use LCD
+#if 1
+  DEBUG_TIMER_START(debugTimerLuaFg);
+  refreshNeeded = luaTask(0, RUN_STNDAL_SCRIPT, true);
+  if (!refreshNeeded) {
+    refreshNeeded = luaTask(0, RUN_TELEM_FG_SCRIPT, true);
+  }
+  DEBUG_TIMER_STOP(debugTimerLuaFg);
 
   t0 = get_tmr10ms() - t0;
   if (t0 > maxLuaDuration) {
@@ -200,7 +219,20 @@ void guiMain(event_t evt)
   }
 #endif
 
+#else
+  lcdRefreshWait();   // WARNING: make sure no code above this line does any change to the LCD display buffer!
+#endif
+
+#if 0
+  if (!refreshNeeded) {
+    mainWindow.run();
+  }
+  else {
+    lcdRefresh();
+  }
+#else
   mainWindow.run();
+#endif
 }
 #elif defined(GUI)
 
@@ -319,7 +351,9 @@ void perMain()
   checkSpeakerVolume();
   checkEeprom();
   logsWrite();
+#if !defined (PCBFLYSKY)
   handleUsbConnection();
+#endif
   checkTrainerSettings();
   periodicTick();
   DEBUG_TIMER_STOP(debugTimerPerMain1);
@@ -402,5 +436,8 @@ void perMain()
 
 #if defined(INTERNAL_GPS)
   gpsWakeup();
+#endif
+ #if defined(PCBFLYSKY)
+  handleUsbConnection();
 #endif
 }
