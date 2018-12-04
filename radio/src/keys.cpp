@@ -54,6 +54,10 @@ event_t getEvent(bool trim)
   int8_t k = EVT_KEY_MASK(s_evt) - TRM_BASE;
   bool trim_evt = (k>=0 && k<TRM_LAST-TRM_BASE+1);
 
+  if (evt)
+  {
+    evt = s_evt;
+  }
   if (trim == trim_evt) {
     s_evt = 0;
     return evt;

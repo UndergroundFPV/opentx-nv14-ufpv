@@ -21,6 +21,7 @@
 #include "touch_driver.h"
 #include "lcd.h"
 #include "mainwindow.h"
+#include "keys.h"
 
 void DMACopy(void * src, void * dest, unsigned len);
 STRUCT_TOUCH touchState;
@@ -39,16 +40,36 @@ void MainWindow::checkEvents()
   if (touchState.Event == TE_DOWN) {
     //onTouchStart(touchState.X + scrollPositionX, touchState.Y + scrollPositionY);
     onTouchStart(touchState.X, touchState.Y);
-    // touchState.Event = TE_NONE;
+    putEvent(EVT_TOUCH(TOUCH_DOWN));
   }
   else if (touchState.Event == TE_UP) {
     touchState.Event = TE_NONE;
     //onTouchEnd(touchState.startX + scrollPositionX, touchState.startY + scrollPositionY);
     onTouchEnd(touchState.startX, touchState.startY);
+    putEvent(EVT_TOUCH(TOUCH_UP));
   }
   else if (touchState.Event == TE_SLIDE) {
     coord_t x = touchState.X - touchState.lastX;
     coord_t y = touchState.Y - touchState.lastY;
+
+    if (x > 5)
+    {
+      putEvent(EVT_TOUCH(TOUCH_SLIDE_RIGHT));
+    }
+    else if (x < -5)
+    {
+      putEvent(EVT_TOUCH(TOUCH_SLIDE_LEFT));
+    }
+
+    if (y > 5)
+    {
+      putEvent(EVT_TOUCH(TOUCH_SLIDE_DOWN));
+    }
+    else if (y < -5)
+    {
+      putEvent(EVT_TOUCH(TOUCH_SLIDE_UP));
+    }
+
     onTouchSlide(touchState.X, touchState.Y, touchState.startX, touchState.startY, x, y);
     touchState.lastX = touchState.X;
     touchState.lastY = touchState.Y;
@@ -77,13 +98,13 @@ bool MainWindow::refresh()
 {
   if (invalidatedRect.w) {
     if (invalidatedRect.x > 0 || invalidatedRect.y > 0 || invalidatedRect.w < LCD_W || invalidatedRect.h < LCD_H) {
-      TRACE("Refresh rect: left=%d top=%d width=%d height=%d", invalidatedRect.left(), invalidatedRect.top(), invalidatedRect.w, invalidatedRect.h);
+      //TRACE("Refresh rect: left=%d top=%d width=%d height=%d", invalidatedRect.left(), invalidatedRect.top(), invalidatedRect.w, invalidatedRect.h);
       BitmapBuffer * previous = lcd;
       lcdNextLayer();
       DMACopy(previous->getData(), lcd->getData(), DISPLAY_BUFFER_SIZE);
     }
     else {
-      TRACE("Refresh full screen");
+      //TRACE("Refresh full screen");
       lcdNextLayer();
     }
     lcd->setOffset(0, 0);

@@ -32,6 +32,9 @@
 #define EVT_ENTRY                      0x1000
 #define EVT_ENTRY_UP                   0x2000
 #else
+#if defined (PCBNV14)
+#define _MSK_TOUCH_EVENT               0x3000
+#endif
 #define _MSK_KEY_BREAK                 0x20
 #define _MSK_KEY_REPT                  0x40
 #define _MSK_KEY_FIRST                 0x60
@@ -51,6 +54,10 @@
 #define IS_KEY_LONG(evt)               (((evt) & _MSK_KEY_FLAGS) == _MSK_KEY_LONG)
 #define IS_KEY_REPT(evt)               (((evt) & _MSK_KEY_FLAGS) == _MSK_KEY_REPT)
 #define IS_KEY_BREAK(evt)              (((evt) & _MSK_KEY_FLAGS) == _MSK_KEY_BREAK)
+
+#if defined (PCBNV14)
+#define EVT_TOUCH(evt)                 ((evt)|_MSK_TOUCH_EVENT)
+#endif
 
 #if (defined(PCBHORUS) || defined(PCBTARANIS)) && defined(ROTARY_ENCODER_NAVIGATION)
   #define EVT_ROTARY_BREAK             EVT_KEY_BREAK(KEY_ENTER)

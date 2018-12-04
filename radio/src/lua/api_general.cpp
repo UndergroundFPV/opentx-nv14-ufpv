@@ -24,6 +24,7 @@
 #include "stamp.h"
 #include "lua_api.h"
 #include "telemetry/frsky.h"
+#include "keys.h"
 
 #if defined(PCBX12S)
   #include "lua/lua_exports_x12s.inc"   // this line must be after lua headers
@@ -1450,9 +1451,14 @@ const luaR_value_entry opentxConstants[] = {
   { "ERASE", ERASE },
   { "ROUND", ROUND },
 #endif
-//   { "EVT_ENTER_BREAK", EVT_KEY_BREAK(KEY_ENTER) },
-  //{ "EVT_ENTER_LONG", EVT_KEY_LONG(KEY_ENTER) },
-  //{ "EVT_EXIT_BREAK", EVT_KEY_BREAK(KEY_EXIT) },
+#if defined (PCBNV14)
+  { "EVT_TOUCH_DOWN", EVT_TOUCH(TOUCH_DOWN) },
+  { "EVT_TOUCH_UP", EVT_TOUCH(TOUCH_UP) },
+  { "EVT_TOUCH_SLIDE_UP", EVT_TOUCH(TOUCH_SLIDE_UP) },
+  { "EVT_TOUCH_SLIDE_DOWN", EVT_TOUCH(TOUCH_SLIDE_DOWN) },
+  { "EVT_TOUCH_SLIDE_LEFT", EVT_TOUCH(TOUCH_SLIDE_LEFT) },
+  { "EVT_TOUCH_SLIDE_RIGHT", EVT_TOUCH(TOUCH_SLIDE_RIGHT) },
+#endif
 #if defined(ROTARY_ENCODER_NAVIGATION)
   { "EVT_ROT_BREAK", EVT_KEY_BREAK(KEY_ENTER) },
   { "EVT_ROT_LONG", EVT_KEY_LONG(KEY_ENTER) },

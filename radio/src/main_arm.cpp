@@ -207,9 +207,9 @@ void guiMain(event_t evt)
   // run Lua scripts that use LCD
 #if 1
   DEBUG_TIMER_START(debugTimerLuaFg);
-  refreshNeeded = luaTask(0, RUN_STNDAL_SCRIPT, true);
+  refreshNeeded = luaTask(evt, RUN_STNDAL_SCRIPT, true);
   if (!refreshNeeded) {
-    refreshNeeded = luaTask(0, RUN_TELEM_FG_SCRIPT, true);
+    refreshNeeded = luaTask(evt, RUN_TELEM_FG_SCRIPT, true);
   }
   DEBUG_TIMER_STOP(debugTimerLuaFg);
 
@@ -365,10 +365,20 @@ void perMain()
   }
 
   event_t evt = getEvent(false);
+#if 0
   if (evt && (g_eeGeneral.backlightMode & e_backlight_mode_keys)) {
     // on keypress turn the light on
     backlightOn();
   }
+#else
+  if (evt) {
+    if (g_eeGeneral.backlightMode & e_backlight_mode_keys) {
+      // on keypress turn the light on
+      backlightOn();
+    }
+  }
+
+#endif
   doLoopCommonActions();
 #if defined(NAVIGATION_STICKS)
   uint8_t sticks_evt = getSticksNavigationEvent();
