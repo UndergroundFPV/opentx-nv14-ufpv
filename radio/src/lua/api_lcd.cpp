@@ -76,10 +76,12 @@ static int luaRunMainWindow(lua_State *L)
     new ScreenLua(0);
     Lua_screen_created = 1;
   }
+#if 0
   else {
     LcdFlags color = luaL_optunsigned(L, 1, TEXT_BGCOLOR);
     lcd->clear(color);
   }
+#endif
 
   return 0;
 }

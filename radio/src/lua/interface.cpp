@@ -871,13 +871,14 @@ void luaDoOneRunStandalone(event_t evt)
       luaError(lsScripts, standaloneScript.state);
       luaState = INTERPRETER_RELOAD_PERMANENT_SCRIPTS;
     }
-
-/*    if (evt == EVT_KEY_LONG(KEY_EXIT)) {
+/*
+    if (evt == EVT_KEY_LONG(KEY_EXIT)) {
       TRACE("Script force exit");
       killEvents(evt);
       standaloneScript.state = SCRIPT_NOFILE;
       luaState = INTERPRETER_RELOAD_PERMANENT_SCRIPTS;
     }
+
 #if !defined(PCBHORUS) && !defined(PCBXLITE)
   // TODO find another key and add a #define
     else if (evt == EVT_KEY_LONG(KEY_MENU)) {
@@ -885,7 +886,7 @@ void luaDoOneRunStandalone(event_t evt)
       luaDisplayStatistics = !luaDisplayStatistics;
     }
 #endif
- */
+*/
   }
   else {
     TRACE("Script run method missing");
@@ -1017,6 +1018,9 @@ bool luaTask(event_t evt, uint8_t scriptType, bool allowLcdUsage)
     // run permanent scripts
     if (luaState & INTERPRETER_RELOAD_PERMANENT_SCRIPTS) {
       luaState = 0;
+#if defined (PCBNV14)
+
+#endif
       luaInit();
       if (luaState == INTERPRETER_PANIC) return false;
       luaLoadPermanentScripts();
