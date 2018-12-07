@@ -416,11 +416,6 @@ void lcdRefresh()
   if (memcmp(simuLcdBuf, displayBuf, DISPLAY_BUFFER_SIZE)) {
     memcpy(simuLcdBuf, displayBuf, DISPLAY_BUFFER_SIZE);
 
-    if (test == 85)
-    {
-      memset(simuLcdBuf, 0xFF, sizeof (simuLcdBuf));
-    }
-
     simuLcdRefresh = true;
   }
 #endif

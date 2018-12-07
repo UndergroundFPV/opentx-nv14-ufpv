@@ -22,10 +22,13 @@
 #include "lcd.h"
 #include "mainwindow.h"
 #include "keys.h"
+#include "queue"
 
 void DMACopy(void * src, void * dest, unsigned len);
 STRUCT_TOUCH touchState;
 MainWindow mainWindow;
+
+std::queue<touch_event_type>TouchQueue;
 
 void MainWindow::emptyTrash()
 {
@@ -37,42 +40,50 @@ void MainWindow::emptyTrash()
 
 void MainWindow::checkEvents()
 {
+  touch_event_type touch_evt;
+
+  memset(&touch_evt, 0, sizeof(touch_evt));
+  touch_evt.touch_type = TE_NONE;
+
   if (touchState.Event == TE_DOWN) {
     //onTouchStart(touchState.X + scrollPositionX, touchState.Y + scrollPositionY);
     onTouchStart(touchState.X, touchState.Y);
-    putEvent(EVT_TOUCH(TOUCH_DOWN));
+    //putEvent(EVT_TOUCH(TOUCH_DOWN));
+    touch_evt.touch_type = TE_DOWN;
+    touch_evt.touch_x = touchState.X;
+    touch_evt.touch_y = touchState.Y;
   }
   else if (touchState.Event == TE_UP) {
     touchState.Event = TE_NONE;
     //onTouchEnd(touchState.startX + scrollPositionX, touchState.startY + scrollPositionY);
     onTouchEnd(touchState.startX, touchState.startY);
-    putEvent(EVT_TOUCH(TOUCH_UP));
+
+    touch_evt.touch_type = TE_UP;
+    touch_evt.touch_x = touchState.startX;
+    touch_evt.touch_y = touchState.startY;
   }
   else if (touchState.Event == TE_SLIDE) {
     coord_t x = touchState.X - touchState.lastX;
     coord_t y = touchState.Y - touchState.lastY;
 
-    if (x > 5)
+    if (x != 0 && y != 0)
     {
-      putEvent(EVT_TOUCH(TOUCH_SLIDE_RIGHT));
-    }
-    else if (x < -5)
-    {
-      putEvent(EVT_TOUCH(TOUCH_SLIDE_LEFT));
-    }
-
-    if (y > 5)
-    {
-      putEvent(EVT_TOUCH(TOUCH_SLIDE_DOWN));
-    }
-    else if (y < -5)
-    {
-      putEvent(EVT_TOUCH(TOUCH_SLIDE_UP));
+      touch_evt.touch_type = TE_SLIDE;
+      touch_evt.slide_start_x = touchState.lastX;
+      touch_evt.slide_start_y = touchState.lastY;
+      touch_evt.slide_end_x = touchState.X;
+      touch_evt.slide_end_y = touchState.Y;
     }
 
     onTouchSlide(touchState.X, touchState.Y, touchState.startX, touchState.startY, x, y);
     touchState.lastX = touchState.X;
     touchState.lastY = touchState.Y;
+  }
+
+  if (touch_evt.touch_type != TE_NONE /* && TouchQueue.size() < MAX_TOUCH_EVENT_CNT*/)
+  {
+    TouchQueue.push(touch_evt);
+    //TRACE("empty = %d, size = %d\r\n", TouchQueue.empty() ? 1:0, TouchQueue.size());
   }
 
   Window::checkEvents();

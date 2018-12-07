@@ -69,20 +69,24 @@ static int luaLcdClear(lua_State *L)
 
 int Lua_screen_created = 0;
 int Lua_screen_exit = 0;
+extern event_t Lua_touch_evt;
 
 static int luaRunMainWindow(lua_State *L)
 {
+  static int refresh_counter = 0;
+
   if (luaLcdAllowed && !Lua_screen_created && !Lua_screen_exit) {
     new ScreenLua(0);
     Lua_screen_created = 1;
   }
-#if 0
   else {
-    LcdFlags color = luaL_optunsigned(L, 1, TEXT_BGCOLOR);
-    lcd->clear(color);
+    //if (Lua_touch_evt || refresh_counter++ % 6 == 0)
+    //if (refresh_counter++ % 6 == 0)
+    {
+      LcdFlags color = luaL_optunsigned(L, 1, TEXT_BGCOLOR);
+      lcd->clear(color);
+    }
   }
-#endif
-
   return 0;
 }
 

@@ -70,6 +70,8 @@ void TouchInit( void )
   SET_TOUCH_SCL();
   SET_TOUCH_SDA();
   SET_TOUCH_INT_IN();
+
+  TouchQueue.clear();
 }
 /*==================================================================================================
 Name:
