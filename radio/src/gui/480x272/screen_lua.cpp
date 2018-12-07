@@ -62,7 +62,7 @@ class LuaPage : public PageTab {
 
     void build(Window * window) override
     {
-      new LuaBody(window, {0, 0, LCD_W, window->height() - footerHeight}, param);
+      new LuaBody(window, {0, 0, LCD_W, LCD_H/*window->height() - footerHeight*/}, param);
     }
 
   protected:

@@ -188,11 +188,18 @@ void periodicTick()
   }
 }
 
+
 #if defined(GUI) && defined(COLORLCD)
+
+#if defined (PCBNV14)
+void guiMain(touch_event_type evt)
+#else
 void guiMain(event_t evt)
+#endif
 {
   bool refreshNeeded = false;
 #if defined(LUA)
+#if 0
   uint32_t t0 = get_tmr10ms();
   static uint32_t lastLuaTime = 0;
   uint16_t interval = (lastLuaTime == 0 ? 0 : (t0 - lastLuaTime));
@@ -200,8 +207,13 @@ void guiMain(event_t evt)
   if (interval > maxLuaInterval) {
     maxLuaInterval = interval;
   }
+#endif
 
+#if defined (PCBNV14)
+  luaTask(evt,  RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, false);
+#else
   luaTask(0,  RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, false);
+#endif
 
   // draw LCD from menus or from Lua script
   // run Lua scripts that use LCD
@@ -212,11 +224,12 @@ void guiMain(event_t evt)
     refreshNeeded = luaTask(evt, RUN_TELEM_FG_SCRIPT, true);
   }
   DEBUG_TIMER_STOP(debugTimerLuaFg);
-
+#if 0
   t0 = get_tmr10ms() - t0;
   if (t0 > maxLuaDuration) {
     maxLuaDuration = t0;
   }
+#endif
 #endif
 
 #else
@@ -363,22 +376,34 @@ void perMain()
     flightReset();
     mainRequestFlags &= ~(1 << REQUEST_FLIGHT_RESET);
   }
+#if defined (PCBNV14)
+  touch_event_type evt;
+  memset(&evt, 0, sizeof(evt));
 
-  event_t evt = getEvent(false);
-#if 0
-  if (evt && (g_eeGeneral.backlightMode & e_backlight_mode_keys)) {
-    // on keypress turn the light on
-    backlightOn();
+  if (!TouchQueue.empty())
+  {
+    evt = TouchQueue.front();
+    TouchQueue.pop();
+    //TRACE("evt type:%d\r\n", evt.touch_type);
+  }
+
+  if (evt.touch_type != TE_NONE) {
+    if (g_eeGeneral.backlightMode & e_backlight_mode_keys) {
+      // on touch turn the light on
+      backlightOn();
+    }
   }
 #else
+  event_t evt = getEvent(false);
+
   if (evt) {
     if (g_eeGeneral.backlightMode & e_backlight_mode_keys) {
       // on keypress turn the light on
       backlightOn();
     }
   }
-
 #endif
+
   doLoopCommonActions();
 #if defined(NAVIGATION_STICKS)
   uint8_t sticks_evt = getSticksNavigationEvent();

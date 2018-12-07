@@ -254,16 +254,6 @@ enum EnumKeys
 };
 #endif
 
-enum ENUM_LUA_TOUCH_EVENT
-{
-  TOUCH_DOWN,
-  TOUCH_UP,
-  TOUCH_SLIDE_UP,
-  TOUCH_SLIDE_DOWN,
-  TOUCH_SLIDE_LEFT,
-  TOUCH_SLIDE_RIGHT
-};
-
 enum EnumSwitches
 {
   SW_SA,
