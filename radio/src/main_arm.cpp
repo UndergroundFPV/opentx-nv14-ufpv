@@ -20,6 +20,7 @@
 
 #include "opentx.h"
 #include "mainwindow.h"
+#include <queue>
 
 uint8_t currentSpeakerVolume = 255;
 uint8_t requiredSpeakerVolume = 255;
@@ -354,6 +355,8 @@ void guiMain(event_t evt)
   lcdRefresh();
 }
 #endif
+
+extern std::queue<touch_event_type>TouchQueue;
 
 void perMain()
 {

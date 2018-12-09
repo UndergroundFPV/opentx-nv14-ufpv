@@ -827,6 +827,11 @@ void luaDoOneRunStandalone(touch_event_type evt)
       lua_pushunsigned(lsScripts, EVT_TOUCH(evt.touch_type));
       lua_pushunsigned(lsScripts, evt.touch_x);
       lua_pushunsigned(lsScripts, evt.touch_y);
+
+      if (evt.touch_type == TE_DOWN)
+        TRACE("down:%d %d\r\n", evt.touch_x, evt.touch_y);
+      else
+        TRACE("up:%d %d\r\n", evt.touch_x, evt.touch_y);
       pushParamCnt = 3;
     }
     else if (evt.touch_type == TE_SLIDE)

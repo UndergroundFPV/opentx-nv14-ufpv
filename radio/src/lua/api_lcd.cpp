@@ -69,7 +69,7 @@ static int luaLcdClear(lua_State *L)
 
 int Lua_screen_created = 0;
 int Lua_screen_exit = 0;
-extern event_t Lua_touch_evt;
+extern uint8_t Lua_touch_evt;
 
 static int luaRunMainWindow(lua_State *L)
 {
@@ -80,11 +80,11 @@ static int luaRunMainWindow(lua_State *L)
     Lua_screen_created = 1;
   }
   else {
-    //if (Lua_touch_evt || refresh_counter++ % 6 == 0)
-    //if (refresh_counter++ % 6 == 0)
+    if (Lua_touch_evt /*|| refresh_counter++ % 6 == 0*/)
     {
       LcdFlags color = luaL_optunsigned(L, 1, TEXT_BGCOLOR);
       lcd->clear(color);
+      Lua_touch_evt = 0;
     }
   }
   return 0;
@@ -640,6 +640,8 @@ Draw a solid rectangle from top left corner (x,y) of specified width and height
 */
 static int luaLcdDrawFilledRectangle(lua_State *L)
 {
+  //lcd->clearOffset(0, 0);
+
   if (!luaLcdAllowed) return 0;
   int x = luaL_checkinteger(L, 1);
   int y = luaL_checkinteger(L, 2);
