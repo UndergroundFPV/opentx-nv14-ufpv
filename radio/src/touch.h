@@ -21,7 +21,7 @@
 #ifndef TOUCH_H
 #define TOUCH_H
 
-#include "queue"
+//#include "queue"
 #include "opentx_types.h"
 
 enum ENUM_TOUCH_EVENT
@@ -57,8 +57,6 @@ typedef struct
 }touch_event_type;
 
 #define SLIDE_RANGE                 ( 6 )
-#define MAX_TOUCH_EVENT_CNT         ( 30 )
-
-extern std::queue<touch_event_type>TouchQueue;
+#define MAX_TOUCH_EVENT_CNT         ( 10 )
 
 #endif // TOUCH_H

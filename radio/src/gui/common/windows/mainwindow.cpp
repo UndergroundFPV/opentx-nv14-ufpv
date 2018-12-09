@@ -22,7 +22,8 @@
 #include "lcd.h"
 #include "mainwindow.h"
 #include "keys.h"
-#include "queue"
+#include <queue>
+#include "opentx.h"
 
 void DMACopy(void * src, void * dest, unsigned len);
 STRUCT_TOUCH touchState;
@@ -38,9 +39,12 @@ void MainWindow::emptyTrash()
   trash.clear();
 }
 
+uint8_t Lua_touch_evt = 0;
+
 void MainWindow::checkEvents()
 {
   touch_event_type touch_evt;
+  static touch_event_type last_evt;
 
   memset(&touch_evt, 0, sizeof(touch_evt));
   touch_evt.touch_type = TE_NONE;
@@ -52,6 +56,7 @@ void MainWindow::checkEvents()
     touch_evt.touch_type = TE_DOWN;
     touch_evt.touch_x = touchState.X;
     touch_evt.touch_y = touchState.Y;
+
   }
   else if (touchState.Event == TE_UP) {
     touchState.Event = TE_NONE;
@@ -80,10 +85,17 @@ void MainWindow::checkEvents()
     touchState.lastY = touchState.Y;
   }
 
-  if (touch_evt.touch_type != TE_NONE /* && TouchQueue.size() < MAX_TOUCH_EVENT_CNT*/)
+
+  if (touch_evt.touch_type != TE_NONE  && TouchQueue.size() < MAX_TOUCH_EVENT_CNT)
   {
-    TouchQueue.push(touch_evt);
-    //TRACE("empty = %d, size = %d\r\n", TouchQueue.empty() ? 1:0, TouchQueue.size());
+    if (0 != memcmp(&touch_evt, &last_evt, sizeof(touch_event_type)))
+    {
+      TouchQueue.push(touch_evt);
+      last_evt = touch_evt;
+
+      Lua_touch_evt = 1;
+      //TRACE("empty = %d, size = %d\r\n", TouchQueue.empty() ? 1:0, TouchQueue.size());
+    }
   }
 
   Window::checkEvents();
