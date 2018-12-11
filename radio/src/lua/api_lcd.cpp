@@ -73,7 +73,7 @@ extern uint8_t Lua_touch_evt;
 
 static int luaRunMainWindow(lua_State *L)
 {
-  static int refresh_counter = 0;
+  //static int refresh_counter = 0;
 
   if (luaLcdAllowed && !Lua_screen_created && !Lua_screen_exit) {
     new ScreenLua(0);
