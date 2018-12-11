@@ -397,9 +397,31 @@ uint8_t BitmapBuffer::drawChar(coord_t x, coord_t y, const uint8_t * font, const
   return width;
 }
 
+uint8_t BitmapBuffer::drawCharWithoutCache(coord_t x, coord_t y, const uint8_t * font, const uint16_t * spec, int index, LcdFlags flags)
+{
+  coord_t offset = spec[index];
+  coord_t width = spec[index+1] - offset;
+  if (width > 0)
+    drawBitmapPattern(x, y, font, flags, offset, width);
+  return width;
+}
+
+uint8_t BitmapBuffer::drawCharWithCache(coord_t x, coord_t y, const BitmapBuffer * font, const uint16_t * spec, int index, LcdFlags flags)
+{
+  coord_t offset = spec[index];
+  coord_t width = spec[index+1] - offset;
+  if (width > 0)
+    drawBitmap(x, y, font, offset, 0, width);
+  return width;
+}
 void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t len, LcdFlags flags)
 {
   MOVE_OFFSET();
+
+    uint32_t fontindex = FONTINDEX(flags);
+    const pm_uchar * font = fontsTable[fontindex];
+    const uint16_t * fontspecs = fontspecsTable[fontindex];
+    BitmapBuffer * fontcache = NULL;
 
 #define INCREMENT_POS(delta) \
   do { if (flags & VERTICAL) y -= delta; else x += delta; } while(0)
@@ -412,9 +434,44 @@ void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t l
     return;
   }
 
-  uint32_t fontindex = FONTINDEX(flags);
-  const pm_uchar * font = fontsTable[fontindex];
-  const uint16_t * fontspecs = fontspecsTable[fontindex];
+#if 1
+  if ((flags & INVERS) && ((~flags & BLINK) || BLINK_ON_PHASE)) {
+    uint16_t fgColor = lcdColorTable[COLOR_IDX(flags)];
+    if (fgColor == lcdColorTable[TEXT_COLOR_INDEX]) {
+      flags = TEXT_INVERTED_COLOR | (flags & 0x0ffff);
+    }
+    if (fontindex == STDSIZE_INDEX) {
+      if (fgColor == lcdColorTable[TEXT_COLOR_INDEX]) {
+        drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, INVERT_HORZ_MARGIN-1, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
+        drawSolidFilledRect(x+width-1, y, INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
+        fontcache = fontCache[1];
+      }
+      else {
+        drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, width+2*INVERT_HORZ_MARGIN-1, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
+      }
+    }
+    else if (fontindex == TINSIZE_INDEX) {
+      drawSolidFilledRect(x-INVERT_HORZ_MARGIN+2, y, width+2*INVERT_HORZ_MARGIN-5, height+2, TEXT_INVERTED_BGCOLOR);
+    }
+    else if (fontindex == SMLSIZE_INDEX) {
+      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, width+2*INVERT_HORZ_MARGIN-2, height+2, TEXT_INVERTED_BGCOLOR);
+    }
+    else if (fontindex == MIDSIZE_INDEX) {
+      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y-1, width+2*INVERT_HORZ_MARGIN-2, height+3, TEXT_INVERTED_BGCOLOR);  // MIDSIZE and DBLSIZE font are missing a pixel on top compared to others
+    }
+    else if (fontindex == DBLSIZE_INDEX) {
+      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y-1, width+2*INVERT_HORZ_MARGIN-2, height+3, TEXT_INVERTED_BGCOLOR); // MIDSIZE and DBLSIZE font are missing a pixel on top compared to others
+    }
+    else if (fontindex == XXLSIZE_INDEX) {
+      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, width+2*INVERT_HORZ_MARGIN-2, height+2, TEXT_INVERTED_BGCOLOR);
+    }
+    else {
+      drawSolidFilledRect(x-INVERT_HORZ_MARGIN, y, width+2*INVERT_HORZ_MARGIN, INVERT_LINE_HEIGHT, TEXT_INVERTED_BGCOLOR);
+    }
+  }
+#endif
+
+
 
   if (flags & RIGHT) {
     INCREMENT_POS(-width);
@@ -442,7 +499,14 @@ void BitmapBuffer::drawSizedText(coord_t x, coord_t y, const char * s, uint8_t l
     }
     else if (c >= 0x20) {
       uint8_t width;
+#if 0
       width = drawChar(x-1, y, font, fontspecs, getMappedChar(c), flags);
+#else
+      if (fontcache)
+        width = drawCharWithCache(x-1, y, fontcache, fontspecs, getMappedChar(c), flags);
+      else
+        width = drawCharWithoutCache(x-1, y, font, fontspecs, getMappedChar(c), flags);
+#endif
       INCREMENT_POS(width);
     }
     else if (c == 0x1F) {  // X-coord prefix

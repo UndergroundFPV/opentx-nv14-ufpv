@@ -31,6 +31,11 @@ extern const uint16_t * const fontspecsTable[1];
 extern const uint8_t * const fontsTable[1];
 #endif
 
+#if defined(PCBHORUS) || defined(PCBNV14)
+extern BitmapBuffer * fontCache[2];
+void loadFontCache();
+#endif
+
 #else
 
 extern const pm_uchar font_5x7[];

@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -68,7 +68,7 @@ const uint16_t font_xxlsize_specs[] = {
 };
 
 const pm_uchar font_xxlsize[] = {
-// #include "font_xxlsize.lbm"
+#include "font_xxlsize.lbm"
 };
 
 const uint16_t font_stdsizebold_specs[] = {
@@ -94,3 +94,27 @@ const uint8_t * const fontsTable[16] = {
 const uint16_t * const fontspecsTable[1] = { font_stdsize_specs };
 const uint8_t * const fontsTable[1]      = { font_stdsize };
 #endif
+
+BitmapBuffer * fontCache[2] = { NULL, NULL };
+
+BitmapBuffer * createFontCache(const uint8_t * font, LcdFlags fg, LcdFlags bg)
+{
+  coord_t width = *((uint16_t *)font);
+  coord_t height = *(((uint16_t *)font)+1);
+
+  BitmapBuffer * buffer = new BitmapBuffer(BMP_RGB565, width, height);
+  if (buffer) {
+    buffer->clear(bg);
+    buffer->drawBitmapPattern(0, 0, font, fg);
+  }
+  return buffer;
+}
+
+void loadFontCache()
+{
+  delete fontCache[0];
+  delete fontCache[1];
+
+  fontCache[0] = createFontCache(fontsTable[0], TEXT_COLOR, TEXT_BGCOLOR);
+  fontCache[1] = createFontCache(fontsTable[0], TEXT_INVERTED_COLOR, TITLE_BGCOLOR);
+}
