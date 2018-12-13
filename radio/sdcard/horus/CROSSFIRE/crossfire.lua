@@ -16,7 +16,20 @@
 ---- #########################################################################
 local devices = { }
 local lineIndex = 1
+local lineToggled = 0
 local pageOffset = 0
+
+local curTouch = {
+    touchX,
+    touchY
+}
+
+local curSlide = {
+    startX,
+    startY,
+    endX,
+    endY
+}
 
 local function createDevice(id, name)
   local device = {
@@ -80,36 +93,81 @@ local function init()
   pageOffset = 0
 end
 
-NoCross = { 110, LCD_H - 28, "Waiting for Crossfire devices...", TEXT_COLOR + INVERS + BLINK }
 
--- Main
-local function run(event)
-  if event == nil then
-    error("Cannot be run as a model script!")
-    return 2
-  elseif event == EVT_EXIT_BREAK then
-    return 2
-  elseif event == EVT_ROT_LEFT then
-    selectDevice(1)
-  elseif event == EVT_ROT_RIGHT then
-    selectDevice(-1)
+local function onTouchValid(startX, startY, endX, endY)
+
+  if (startX < curTouch.touchX and curTouch.touchX < endX) and (startY < curTouch.touchY and curTouch.touchY < endY) then
+    return 1
   end
 
-  lcd.clear()
-  lcd.drawFilledRectangle(0, 0, LCD_W, 30, TITLE_BGCOLOR)
-  lcd.drawText(1, 5,"CROSSFIRE SETUP", MENU_TITLE_COLOR)
+  return 0
+end
 
+NoCross = { 30, 375, "Waiting for Crossfire devices...", TEXT_COLOR + INVERS + BLINK }
+
+-- Main
+local function run(...)
+  local attr = 0
+  local args = {...}
+  local event = args[1]
+
+  lineToggled = 0
+
+  if ... == nil then
+    error("Cannot be run as a model script!")
+    return 2
+
+  elseif event == EVT_TOUCH_UP  then
+    curTouch.touchX = args[2]
+    curTouch.touchY = args[3] 
+
+    if onTouchValid(7, 140, 67, 158) == 1 then
+      if lineIndex == 1 then
+        lineToggled = 1
+      else
+        lineIndex = 1
+      end
+    elseif onTouchValid(7, 180, 67, 200) == 1 then
+      if lineIndex == 2 then
+        lineToggled = 1
+      else
+        lineIndex = 2
+      end
+    end
+
+  elseif event == EVT_TOUCH_SLIDE then
+    curSlide.startX = args[2]
+    curSlide.startY = args[3] 
+    curSlide.endX = args[4] 
+    curSlide.endY = args[5] 
+  end
+
+
+  local touchField = {
+    startX,
+    startY,
+    endX,
+    endY
+  }
+
+
+  lcd.runMainWindow()
+
+  --lcd.clear()
+
+  lcd.drawText(70, 0,"CROSSFIRE SETUP", TEXT_COLOR)
 
   if #devices == 0 then
     lcd.drawText(NoCross[1],NoCross[2],NoCross[3],NoCross[4])
   else
     for i=1, #devices do
       local attr = (lineIndex == i and INVERS or 0)
-      if event == EVT_ROT_BREAK and attr == INVERS then
-          crossfireTelemetryPush(0x28, { devices[i].id, 0xEA })
-          return "device.lua"
-      end
-      lcd.drawText(5, i*22+10, devices[i].name, attr)
+        if lineToggled == 1 and attr == INVERS then
+            crossfireTelemetryPush(0x28, { devices[i].id, 0xEA })
+            return "device.lua"
+        end
+
+      lcd.drawText(5, i*42+10, devices[i].name, attr) 
     end
   end
 

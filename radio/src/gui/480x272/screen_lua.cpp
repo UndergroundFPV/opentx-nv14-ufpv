@@ -40,6 +40,7 @@ class LuaBody : public Window {
 
     void build()
     {
+
     }
 
     void paint(BitmapBuffer * dc) override
