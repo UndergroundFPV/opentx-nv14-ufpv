@@ -68,7 +68,7 @@ const uint16_t font_xxlsize_specs[] = {
 };
 
 const pm_uchar font_xxlsize[] = {
-#include "font_xxlsize.lbm"
+//#include "font_xxlsize.lbm"
 };
 
 const uint16_t font_stdsizebold_specs[] = {
