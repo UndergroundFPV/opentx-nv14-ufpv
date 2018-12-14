@@ -2783,6 +2783,7 @@ uint8_t UsbModeSelect( uint32_t index )
             lcd->drawSizedText(80, 205+(40*i), s+(length*i), length, MENU_TITLE_COLOR);
             lcd->drawHorizontalLine(70, 235+(40*i), 200, SOLID, MENU_TITLE_COLOR);
         }
+        haptic.event( AU_ERROR );
     }
     // force a refresh if the user stops the animation
     mainWindow.invalidate();
@@ -2791,16 +2792,17 @@ uint8_t UsbModeSelect( uint32_t index )
         if(IspointInRect(touchState.X,touchState.Y,rect1))
         {
             UsbModeTmp = USB_JOYSTICK_MODE;
+            haptic.event( AU_ERROR );
         }
         else if(IspointInRect(touchState.X,touchState.Y,rect2))
         {
             UsbModeTmp = USB_SERIAL_MODE;
+            haptic.event( AU_ERROR );
         }
         else if(IspointInRect(touchState.X,touchState.Y,rect3))
-
-
         {
             UsbModeTmp = USB_MASS_STORAGE_MODE;
+            haptic.event( AU_ERROR );
         }
         else
         {

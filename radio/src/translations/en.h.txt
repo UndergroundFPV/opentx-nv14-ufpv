@@ -1365,7 +1365,13 @@
 #define TR_MENU_INVERT                 "Invert"
 #define TR_JITTER_FILTER               "ADC filter"
 
+#define ZSTR_NOISE                     "Noise"
 #define ZSTR_RSSI                      "RSSI"
+#define ZSTR_SNR                       "SNR"
+#define ZSTR_SIG                       "Signal"
+#define ZSTR_TEMP                      "Temp"
+#define ZSTR_AIRPRE                    "Airpre"
+#define ZSTR_EBATT                     "ERxBt"
 #define ZSTR_RAS                       "SWR"
 #define ZSTR_A1                        "A1"
 #define ZSTR_A2                        "A2"

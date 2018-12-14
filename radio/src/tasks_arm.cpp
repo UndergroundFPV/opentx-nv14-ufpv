@@ -277,6 +277,7 @@ TASK_FUNCTION(menusTask)
 #endif
   boardOff(); // Only turn power off if necessary
  #if defined(PCBFLYSKY) && !defined (SIMU)
+  haptic.event( AU_ERROR );
   delay_ms(50);
   while(1)
   {

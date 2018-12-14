@@ -161,6 +161,7 @@ bool ViewMain::onTouchEnd(coord_t x, coord_t y)
     return true;
 
   if (x < 60 && y < 60) {
+    AUDIO_KEY_PRESS();
     Menu * menu = new Menu();
     menu->addLine(STR_MODEL_SELECT, [=]() {
       new ModelselectMenu();

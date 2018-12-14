@@ -48,8 +48,10 @@
   #include "flysky_ibus.h"
   #include "multi.h"
 #endif
-
-extern uint8_t telemetryStreaming; // >0 (true) == data is streaming in. 0 = no data detected for some time
+#if defined(PCBNV14)
+  #include "flysky_nv14.h"
+#endif
+extern uint16_t telemetryStreaming; // >0 (true) == data is streaming in. 0 = no data detected for some time
 
 #if defined(WS_HOW_HIGH)
 extern uint8_t wshhStreaming;

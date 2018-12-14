@@ -60,6 +60,7 @@ void Choice::paint(BitmapBuffer * dc)
 
 bool Choice::onTouchEnd(coord_t, coord_t)
 {
+  AUDIO_KEY_PRESS();
   auto menu = new Menu();
   auto value = getValue();
   int count = 0;

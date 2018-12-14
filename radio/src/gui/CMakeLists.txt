@@ -22,7 +22,7 @@ set(GUI_SRC
   )
 
 if(GUI_DIR STREQUAL 480x272)
-  set(GUI_SRC ${GUI_SRC} special_functions.cpp menu_screens.cpp screen_theme.cpp screen_setup.cpp widgets_setup.cpp screen_lua.cpp)
+  set(GUI_SRC ${GUI_SRC} special_functions.cpp menu_screens.cpp screen_theme.cpp screen_setup.cpp widgets_setup.cpp)
   if(HELI)
   set(GUI_SRC
     ${GUI_SRC}

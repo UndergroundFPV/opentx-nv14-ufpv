@@ -536,8 +536,11 @@ extern uint32_t telemetryErrors;
 void hapticInit(void);
 void hapticDone(void);
 void hapticOff(void);
-#define HAPTIC_OFF()                    hapticOff()
 void hapticOn(uint32_t pwmPercent);
+extern void audioKeyPress();
+#define HAPTIC_OFF()                    hapticOff()
+#define AUDIO_KEY_PRESS()               audioKeyPress()
+
 
 // Second serial port driver
 #define AUX_SERIAL

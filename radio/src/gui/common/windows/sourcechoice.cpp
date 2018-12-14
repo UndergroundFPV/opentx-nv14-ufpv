@@ -99,7 +99,7 @@ bool SourceChoice::onTouchEnd(coord_t, coord_t)
   fillMenu(menu);
 
   menu->setToolbar(new SourceChoiceMenuToolbar(this, menu));
-
+  AUDIO_KEY_PRESS();
   setFocus();
   return true;
 }

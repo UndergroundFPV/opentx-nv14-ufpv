@@ -72,7 +72,7 @@ enum DEBUG_RF_FRAME_PRINT_E {
 
 #define gRomData                        g_model.moduleData[INTERNAL_MODULE].romData
 #define SET_DIRTY()                     storageDirty(EE_MODEL)
-
+#if 0
 enum FlySkySensorType_E {
   FLYSKY_SENSOR_RX_VOLTAGE,
   FLYSKY_SENSOR_RX_SIGNAL,
@@ -85,7 +85,7 @@ enum FlySkySensorType_E {
   FLYSKY_SENSOR_PRESURRE,
   FLYSKY_SENSOR_GPS
 };
-
+#endif
 enum FlySkyModuleState_E {
   FLYSKY_MODULE_STATE_SET_TX_POWER,
   FLYSKY_MODULE_STATE_INIT,
@@ -143,31 +143,6 @@ typedef struct RX_FLYSKY_IBUS_S {
   uint8_t channel[2];
 } rx_ibus_t;
 
-typedef struct FLYSKY_GPS_INFO_S {
-  uint8_t position_fix;
-  uint8_t satell_cnt;
-  uint8_t latitude[4];
-  uint8_t longtitude[4];
-  uint8_t altitude[4];
-  uint8_t g_speed[2];
-  uint8_t direction[2];
-} gps_info_t;
-
-typedef struct FLYSKY_SENSOR_DATA_S {
-  uint8_t sensor_type;
-  uint8_t sensor_id;
-  uint8_t voltage[2];
-  uint8_t signal;
-  uint8_t rssi[2];
-  uint8_t noise[2];
-  uint8_t snr[2];
-  uint8_t temp[2];
-  uint8_t ext_voltage[2];
-  uint8_t moto_rpm[2];
-  uint8_t pressure_value[2];
-  gps_info_t gps_info;
-} rx_sensor_t;
-
 typedef struct FLYSKY_FIRMWARE_INFO_S {
   uint8_t fw_id[4];
   uint8_t fw_len[4];
@@ -194,7 +169,7 @@ typedef struct RX_INFO_S {
   fw_info_t fw_info;
 } rx_info_t;
 
-static rx_sensor_t rx_sensor_info;
+rx_sensor_t rx_sensor_info;
 static uint8_t tx_working_power = 90;
 static STRUCT_HALL rfProtocolRx = {0};
 static uint32_t rfRxCount = 0;
@@ -916,7 +891,11 @@ void parseFlySkyFeedbackFrame(uint8_t port)
     }
 
     case COMMAND_ID_RX_SENSOR_DATA: {
+#if 1
+      flySkyNv14ProcessTelemetryPacket( ptr, first_para );
+#else
       extern Fifo<uint8_t, TELEMETRY_FIFO_SIZE> telemetryNoDMAFifo;
+       uint8_t Sensor_id = *ptr;
       telemetryNoDMAFifo.push(0xAA);
       //telemetryNoDMAFifo.push(0x30); // TXID
       //telemetryNoDMAFifo.push(0x31); // RXID
@@ -949,7 +928,7 @@ void parseFlySkyFeedbackFrame(uint8_t port)
         telemetryNoDMAFifo.push(p_data[0]);
         telemetryNoDMAFifo.push(p_data[1]);
       }
-
+#endif
       if (moduleFlag[port] == MODULE_NORMAL_MODE && modulePulsesData[port].flysky.state >= FLYSKY_MODULE_STATE_IDLE) {
         modulePulsesData[port].flysky.state = FLYSKY_MODULE_STATE_DEFAULT;
       }

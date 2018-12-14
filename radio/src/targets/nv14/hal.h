@@ -305,18 +305,18 @@
 #define I2C_RCC_AHB1Periph              0
 #define I2C_RCC_APB1Periph              0
 
-// Haptic: TIM1_CH2
+// Haptic: TIM1_CH1
 #define HAPTIC_PWM
 #define HAPTIC_RCC_AHB1Periph           RCC_AHB1Periph_GPIOA
 #define HAPTIC_RCC_APB2Periph           RCC_APB2ENR_TIM1EN
 #define HAPTIC_GPIO                     GPIOA
-#define HAPTIC_GPIO_PIN                 GPIO_Pin_9
+#define HAPTIC_GPIO_PIN                 GPIO_Pin_8
 #define HAPTIC_GPIO_TIMER               TIM1
 #define HAPTIC_GPIO_AF                  GPIO_AF_TIM1
-#define HAPTIC_GPIO_PinSource           GPIO_PinSource9
-#define HAPTIC_TIMER_OUTPUT_ENABLE      TIM_CCER_CC2E
-#define HAPTIC_TIMER_MODE               TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2
-#define HAPTIC_TIMER_COMPARE_VALUE      HAPTIC_GPIO_TIMER->CCR2
+#define HAPTIC_GPIO_PinSource           GPIO_PinSource8
+#define HAPTIC_TIMER_OUTPUT_ENABLE      TIM_CCER_CC1E | TIM_CCER_CC1NE;
+#define HAPTIC_TIMER_MODE               TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1PE
+#define HAPTIC_TIMER_COMPARE_VALUE      HAPTIC_GPIO_TIMER->CCR1
 
 // Internal Module
 #define INTMODULE
@@ -342,11 +342,12 @@
 #define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF1
 #define INTMODULE_DMA_CHANNEL           DMA_Channel_5
 #define INTMODULE_RCC_APB1Periph        (RCC_APB1Periph_UART7)
-#define INTMODULE_RCC_APB2Periph        (RCC_APB2Periph_TIM1)
-#define INTMODULE_TIMER                 TIM1
-#define INTMODULE_TIMER_IRQn            TIM1_CC_IRQn
-#define INTMODULE_TIMER_IRQHandler      TIM1_CC_IRQHandler
-#define INTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
+
+#define INTMODULE_RCC_APB1Periph_TIM3   RCC_APB1Periph_TIM3
+#define INTMODULE_TIMER                 TIM3
+#define INTMODULE_TIMER_IRQn            TIM3_IRQn
+#define INTMODULE_TIMER_IRQHandler      TIM3_IRQHandler
+#define INTMODULE_TIMER_FREQ            (PERI1_FREQUENCY * TIMER_MULT_APB1)
 
 // External Module
 #define EXTMODULE
