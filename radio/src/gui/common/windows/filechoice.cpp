@@ -60,7 +60,7 @@ bool FileChoice::onTouchEnd(coord_t, coord_t)
   std::list<std::string> files;
   const char * fnExt;
   uint8_t fnLen, extLen;
-
+  AUDIO_KEY_PRESS();
 
   FRESULT res = f_opendir(&dir, folder.c_str()); // Open the directory
   if (res == FR_OK) {

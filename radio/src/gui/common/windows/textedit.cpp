@@ -48,7 +48,8 @@ void TextEdit::paint(BitmapBuffer * dc)
 bool TextEdit::onTouchEnd(coord_t x, coord_t y)
 {
   if (!hasFocus()) {
-    setFocus();
+      AUDIO_KEY_PRESS();
+      setFocus();
   }
 
   auto keyboard = TextKeyboard::instance();

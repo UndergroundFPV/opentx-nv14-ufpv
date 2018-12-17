@@ -164,7 +164,7 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
 {
   if (!field)
     return false;
-
+  AUDIO_KEY_PRESS();
   uint8_t size = field->getMaxLength();
   char * data = field->getData();
 
@@ -173,7 +173,7 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
   uint8_t row = max<coord_t>(0, y - 5) / 40;
   const char * key = layout[row];
   while(*key) {
-    if (*key == ' ') {
+    if (*key == ' '){
       x -= 15;
     }
     else if (*key == '\t') {

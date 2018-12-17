@@ -471,6 +471,7 @@ enum TelemetryProtocol
   TELEM_PROTO_SPEKTRUM,
   TELEM_PROTO_LUA,
   TELEM_PROTO_FLYSKY_IBUS,
+  TELEM_PROTO_FLYSKY_NV14,
 };
 
 enum TelemAnas {

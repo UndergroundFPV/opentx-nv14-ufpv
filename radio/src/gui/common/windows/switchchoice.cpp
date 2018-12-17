@@ -79,6 +79,7 @@ void SwitchChoice::fillMenu(Menu * menu, std::function<bool(int16_t)> filter)
 
 bool SwitchChoice::onTouchEnd(coord_t, coord_t)
 {
+  AUDIO_KEY_PRESS();
   auto menu = new Menu();
   fillMenu(menu);
 

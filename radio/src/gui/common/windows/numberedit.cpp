@@ -57,7 +57,7 @@ bool NumberEdit::onTouchEnd(coord_t, coord_t)
   if (!enabled) {
     return true;
   }
-
+    AUDIO_KEY_PRESS();
   if (!hasFocus()) {
     setFocus();
   }

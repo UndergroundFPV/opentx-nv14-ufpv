@@ -245,11 +245,11 @@ TASK_FUNCTION(menusTask)
     if (runtime < MENU_TASK_PERIOD_TICKS) {
       if (Lua_screen_created)
       {
-        CoTickDelay(MENU_TASK_PERIOD_TICKS - runtime);
+        CoTickDelay(MENU_LUA_PERIOD_TICKS - runtime);
       }
       else
       {
-        CoTickDelay(MENU_LUA_PERIOD_TICKS - runtime);
+        CoTickDelay(MENU_TASK_PERIOD_TICKS - runtime);
       }
     }
 
@@ -277,6 +277,7 @@ TASK_FUNCTION(menusTask)
 #endif
   boardOff(); // Only turn power off if necessary
  #if defined(PCBFLYSKY) && !defined (SIMU)
+  haptic.event( AU_ERROR );
   delay_ms(50);
   while(1)
   {

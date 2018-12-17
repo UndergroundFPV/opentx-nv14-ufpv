@@ -143,7 +143,7 @@ void boardInit()
                          AUDIO_RCC_AHB1Periph |
                          HAPTIC_RCC_AHB1Periph |
                          INTMODULE_RCC_AHB1Periph |
-                         HALL_RCC_AHB1Periph |
+                         INTMODULE_RCC_AHB1Periph|
                          EXTMODULE_RCC_AHB1Periph,
                          ENABLE);
 
@@ -157,6 +157,7 @@ void boardInit()
                          INTMODULE_RCC_APB1Periph |
                          HALL_RCC_APB1Periph |
                          EXTMODULE_RCC_APB1Periph |
+                         INTMODULE_RCC_APB1Periph_TIM3 |
                          BACKLIGHT_RCC_APB1Periph,
                          ENABLE);
 
@@ -164,7 +165,7 @@ void boardInit()
                          ADC_RCC_APB2Periph |
                          HAPTIC_RCC_APB2Periph |
                          AUX_SERIAL_RCC_APB2Periph |
-                         INTMODULE_RCC_APB2Periph |
+                         //INTMODULE_RCC_APB2Periph |
                          AUDIO_RCC_APB2Periph |
                          EXTMODULE_RCC_APB2Periph,
                          ENABLE);
@@ -207,7 +208,6 @@ uint32_t pwr_press_time = 0;
   }
 #endif
   audioInit();
-
   // we need to initialize g_FATFS_Obj here, because it is in .ram section (because of DMA access) 
   // and this section is un-initialized
   memset(&g_FATFS_Obj, 0, sizeof(g_FATFS_Obj));
@@ -228,7 +228,6 @@ uint32_t pwr_press_time = 0;
 #endif
   usbInit();
   hapticInit();
-
   TouchInit();
 
   powerupState = BOARD_STARTED;
