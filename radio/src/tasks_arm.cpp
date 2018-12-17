@@ -245,11 +245,11 @@ TASK_FUNCTION(menusTask)
     if (runtime < MENU_TASK_PERIOD_TICKS) {
       if (Lua_screen_created)
       {
-        CoTickDelay(MENU_TASK_PERIOD_TICKS - runtime);
+        CoTickDelay(MENU_LUA_PERIOD_TICKS - runtime);
       }
       else
       {
-        CoTickDelay(MENU_LUA_PERIOD_TICKS - runtime);
+        CoTickDelay(MENU_TASK_PERIOD_TICKS - runtime);
       }
     }
 
