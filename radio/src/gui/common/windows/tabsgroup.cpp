@@ -142,7 +142,7 @@ void TabsGroup::checkEvents()
 extern int Lua_screen_created;
 void TabsGroup::paint(BitmapBuffer * dc)
 {
-  //if (!Lua_screen_created)
+  if (!Lua_screen_created)
   {
     dc->clear(TEXT_BGCOLOR);
   }

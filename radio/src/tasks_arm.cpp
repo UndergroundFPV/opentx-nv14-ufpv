@@ -174,7 +174,7 @@ void scheduleNextMixerCalculation(uint8_t module, uint16_t delay)
 }
 
 #define MENU_TASK_PERIOD_TICKS      10    // 50ms
-#define MENU_LUA_PERIOD_TICKS  250
+#define MENU_LUA_PERIOD_TICKS  50//250
 
 #if defined(COLORLCD) && defined(CLI)
 bool perMainEnabled = true;
