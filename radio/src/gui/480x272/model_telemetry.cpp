@@ -110,6 +110,11 @@ class SensorEditWindow : public Page {
       buildHeader(&header);
     }
 
+    void checkEvents()
+    {
+      invalidate();
+    }
+
     ~SensorEditWindow()
     {
       body.deleteChildren();
@@ -122,8 +127,16 @@ class SensorEditWindow : public Page {
     void buildHeader(Window * window)
     {
       new StaticText(window, {70, 4, 200, 20}, STR_SENSOR + std::to_string(index + 1), MENU_TITLE_COLOR);
-      // dynamic display of sensor value ?
-      //new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
+      TelemetrySensor & telemetrySensor = g_model.telemetrySensors[index];
+      uint8_t unit = telemetrySensor.unit == UNIT_CELLS ? UNIT_VOLTS : telemetrySensor.unit;
+      if (unit != UNIT_RAW) {
+        char unitStr[8];
+        strAppend(unitStr, STR_VTELEMUNIT+1+unit*STR_VTELEMUNIT[0], STR_VTELEMUNIT[0]);
+        new StaticText(window, {185, 4, 200, 20}, std::to_string(getValue(MIXSRC_FIRST_TELEM + 3 * index)) + unitStr, MENU_TITLE_COLOR);
+      }
+      else {
+        new StaticText(window, {185, 4, 200, 20}, std::to_string(getValue(MIXSRC_FIRST_TELEM + 3 * index)), MENU_TITLE_COLOR);
+      }
     }
 
     void updateSensorOneWindow()
