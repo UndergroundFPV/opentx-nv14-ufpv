@@ -470,16 +470,17 @@ local function runDevicePage(...)
   if event == EVT_TOUCH_UP  then
     curTouch.touchX = args[2]
     curTouch.touchY = args[3] 
+   
     
-    if onTouchValid(149, 454, 175, 471) == 1 then
+    if onTouchValid(129, 440, 195, 485) == 1 then
       if edit then
-        incrField(1)
+        incrField(-1)
       else
         selectField(1)
       end 
-    elseif onTouchValid(149, 87, 175, 109) == 1 then
+    elseif onTouchValid(129, 77, 195, 119) == 1 then
       if edit then
-        incrField(-1)
+        incrField(1)
       else
         selectField(-1)
       end 
