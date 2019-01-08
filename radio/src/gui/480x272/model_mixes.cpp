@@ -130,7 +130,7 @@ class MixEditWindow : public Page {
       // Weight
       new StaticText(window, grid.getLabelSlot(), STR_WEIGHT);
       // TODO GVAR ?
-      NumberEdit * edit = new NumberEdit(window, grid.getFieldSlot(), -100, 100, GET_SET_DEFAULT(mix->weight));
+      NumberEdit * edit = new NumberEdit(window, grid.getFieldSlot(), -500, 500, GET_SET_DEFAULT(mix->weight));
       edit->setSuffix("%");
       grid.nextLine();
 

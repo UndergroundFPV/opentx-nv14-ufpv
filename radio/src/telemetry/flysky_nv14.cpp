@@ -66,7 +66,7 @@ const FlyskyNv14Sensor Nv14Sensor[]=
     {FLYSKY_SENSOR_GPS,        5, ZSTR_GSPD,        UNIT_KMH,           1},
     {FLYSKY_SENSOR_GPS,        6, ZSTR_HDG,         UNIT_DEGREE,        3},
 };
-const S16 tAltitude[225]=
+const signed short tAltitude[225]=
 {
     20558, 20357, 20158, 19962, 19768, 19576, 19387, 19200, 19015,  18831, 18650, 18471, 18294, 18119, 17946, 17774,
     17604, 17436, 17269, 17105, 16941, 16780, 16619, 16461, 16304,  16148, 15993, 15841, 15689, 15539, 15390, 15242,
@@ -90,13 +90,13 @@ Function:
 Input:
 Output:
 ==================================================================================================*/
-S16 CalculateAltitude( U32 Pressure, U32 SeaLevelPressure )
+signed short CalculateAltitude( unsigned int Pressure, unsigned int SeaLevelPressure )
 {
-  U32 Index;
-  S32 Altitude1;
-  S32 Altitude2;
-  U32 Decimal;
-  U64 Ratio;
+  unsigned int Index;
+  signed int Altitude1;
+  signed int Altitude2;
+  unsigned int Decimal;
+  unsigned long Ratio;
 
   Ratio = ( ( ( unsigned long long ) Pressure << 16 ) + ( SeaLevelPressure / 2 ) ) / SeaLevelPressure;
   if( Ratio < ( ( 1 << 16 ) * 250 / 1000 ) )// 0.250 inclusive
