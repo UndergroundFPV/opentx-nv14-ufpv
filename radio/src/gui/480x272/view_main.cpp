@@ -129,6 +129,7 @@ ViewMain::ViewMain(bool icons):
   Window(&mainWindow, { 0, 0, LCD_W, LCD_H })
 {
   if (icons) {
+
     new FabIconButton(this, 50, 100, ICON_MODEL,
                       [=]() -> uint8_t {
                         new ModelMenu();
@@ -160,6 +161,7 @@ bool ViewMain::onTouchEnd(coord_t x, coord_t y)
     return true;
 
   if (x < 60 && y < 60) {
+    AUDIO_KEY_PRESS();
     Menu * menu = new Menu();
     menu->addLine(STR_MODEL_SELECT, [=]() {
       new ModelselectMenu();
@@ -210,7 +212,7 @@ void ViewMain::checkEvents()
 
 void ViewMain::paint(BitmapBuffer * dc)
 {
-  theme->drawBackground();
+  //theme->drawBackground();
 
   if (g_model.view >= getMainViewsCount()) {
     g_model.view = 0;

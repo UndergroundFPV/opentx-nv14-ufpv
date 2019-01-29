@@ -24,9 +24,9 @@
 #include "rtos.h"
 
 // stack sizes should be in multiples of 8 for better alignment
-#define MENUS_STACK_SIZE       2000
-#define MIXER_STACK_SIZE       2000 //504
-#define AUDIO_STACK_SIZE       2000
+#define MENUS_STACK_SIZE       3000
+#define MIXER_STACK_SIZE       500 //504
+#define AUDIO_STACK_SIZE       500
 #define TOUCH_STACK_SIZE       400  // TODO: this can be reduced a lot after debug (tracing) is done (on last check only 42 Words are actually used)
 #define BLUETOOTH_STACK_SIZE   504  // WTF: there is no BT task.... ???
 

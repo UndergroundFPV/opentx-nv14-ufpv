@@ -513,19 +513,18 @@ void hallStick_GetTxDataFromUSB( void )
                 break;
 
             case TRANSFER_DIR_RFMODULE:
+                onFlySkyUsbDownloadStart(TRANSFER_DIR_RFMODULE);
+
                 if ( 0xAE == HallProtocolTx.hallID.ID && HallProtocolTx.length == 0 )
                 {
-                    onFlySkyUsbDownloadStart(TRANSFER_DIR_RFMODULE);
                     onFlySkyUsbDownloadFirmware(INTERNAL_MODULE, 1);
                     break;
                 }
 
                 if ( 0x0D == HallProtocolTx.hallID.hall_Id.packetID && HallProtocolTx.data[0] == 1 )
                 {
-                    if ( !isFlySkyUsbDownload() ) {
-                      onFlySkyGetVersionInfoStart(INTERNAL_MODULE, 1);
-                      break;
-                    }
+                    onFlySkyGetVersionInfoStart(INTERNAL_MODULE, 1);
+                    break;
                 }
 
                 //if ( isFlySkyUsbDownload() )

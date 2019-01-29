@@ -22,7 +22,6 @@
 #include "draw_functions.h"
 #include "lcd.h"
 #include "theme.h"
-
 bool Button::onTouchEnd(coord_t x, coord_t y)
 {
   if (enabled()) {
@@ -34,6 +33,7 @@ bool Button::onTouchEnd(coord_t x, coord_t y)
     if (!(flags & BUTTON_NOFOCUS)) {
       setFocus();
     }
+    AUDIO_KEY_PRESS();
   }
   return true;
 }

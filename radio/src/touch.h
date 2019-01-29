@@ -21,6 +21,9 @@
 #ifndef TOUCH_H
 #define TOUCH_H
 
+//#include "queue"
+#include "opentx_types.h"
+
 enum ENUM_TOUCH_EVENT
 {
     TE_NONE,
@@ -42,6 +45,18 @@ typedef struct
    uint32_t Time;
 } STRUCT_TOUCH;
 
-#define SLIDE_RANGE                     ( 6 )
+typedef struct
+{
+  uint8_t  touch_type;
+  uint16_t touch_x;
+  uint16_t touch_y;
+  uint16_t slide_start_x;
+  uint16_t slide_start_y;
+  uint16_t slide_end_x;
+  uint16_t slide_end_y;
+}touch_event_type;
+
+#define SLIDE_RANGE                 ( 6 )
+#define MAX_TOUCH_EVENT_CNT         ( 10 )
 
 #endif // TOUCH_H

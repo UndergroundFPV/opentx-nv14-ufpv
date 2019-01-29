@@ -230,6 +230,7 @@
 #define DMA_SCREEN_IRQ_PRIO             6
 
 // Backlight
+// TODO TIM3, TIM8, TIM14, review the channel in backlight_driver.cpp according to the chosen timer
 #define BACKLIGHT_RCC_AHB1Periph        RCC_AHB1Periph_GPIOA
 #define BACKLIGHT_RCC_APB1Periph        RCC_APB1Periph_TIM2
 #define BACKLIGHT_GPIO                  GPIOA
@@ -240,7 +241,7 @@
 #define BACKLIGHT_TIMER_FREQ            (PERI1_FREQUENCY * TIMER_MULT_APB1)
 
 // SD card
-#define SD_RCC_AHB1Periph               (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOH | RCC_AHB1Periph_DMA2)
+#define SD_RCC_AHB1Periph               (RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_DMA2)
 #define SD_RCC_APB1Periph               0
 #define SD_PRESENT_GPIO                 GPIOH
 #define SD_PRESENT_GPIO_PIN             GPIO_Pin_10  // PH.10
@@ -315,8 +316,8 @@
 #define HAPTIC_GPIO_TIMER               TIM1
 #define HAPTIC_GPIO_AF                  GPIO_AF_TIM1
 #define HAPTIC_GPIO_PinSource           GPIO_PinSource8
-#define HAPTIC_TIMER_OUTPUT_ENABLE      TIM_CCER_CC1E
-#define HAPTIC_TIMER_MODE               TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2
+#define HAPTIC_TIMER_OUTPUT_ENABLE      TIM_CCER_CC1E | TIM_CCER_CC1NE;
+#define HAPTIC_TIMER_MODE               TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1PE
 #define HAPTIC_TIMER_COMPARE_VALUE      HAPTIC_GPIO_TIMER->CCR1
 
 // Internal Module
@@ -342,12 +343,13 @@
 #define INTMODULE_TX_DMA_Stream_IRQHandler DMA1_Stream1_IRQHandler
 #define INTMODULE_TX_DMA_FLAG_TC        DMA_IT_TCIF1
 #define INTMODULE_DMA_CHANNEL           DMA_Channel_5
-#define INTMODULE_RCC_APB1Periph        (RCC_APB1Periph_UART7 | RCC_APB1Periph_TIM3)
-#define INTMODULE_RCC_APB2Periph        (0)
+#define INTMODULE_RCC_APB1Periph        (RCC_APB1Periph_UART7)
+
+#define INTMODULE_RCC_APB1Periph_TIM3   RCC_APB1Periph_TIM3
 #define INTMODULE_TIMER                 TIM3
 #define INTMODULE_TIMER_IRQn            TIM3_IRQn
 #define INTMODULE_TIMER_IRQHandler      TIM3_IRQHandler
-#define INTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB1)
+#define INTMODULE_TIMER_FREQ            (PERI1_FREQUENCY * TIMER_MULT_APB1)
 
 // External Module
 #define EXTMODULE
@@ -364,7 +366,7 @@
 #define EXTMODULE_TIMER                 TIM8
 #define EXTMODULE_TIMER_IRQn            TIM8_CC_IRQn
 #define EXTMODULE_TIMER_IRQHandler      TIM8_CC_IRQHandler
-#define EXTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB1)
+#define EXTMODULE_TIMER_FREQ            (PERI2_FREQUENCY * TIMER_MULT_APB2)
 #define EXTMODULE_DMA_CHANNEL           DMA_Channel_7
 #define EXTMODULE_DMA_STREAM            DMA2_Stream1
 #define EXTMODULE_DMA_IRQn              DMA2_Stream1_IRQn

@@ -173,18 +173,38 @@ void scheduleNextMixerCalculation(uint8_t module, uint16_t delay)
   DEBUG_TIMER_STOP(debugTimerMixerCalcToUsage);
 }
 
-#define MENU_TASK_PERIOD_TICKS      25    // 50ms
+#define MENU_TASK_PERIOD_TICKS      10    // 50ms
+#define MENU_LUA_PERIOD_TICKS  50//250
 
 #if defined(COLORLCD) && defined(CLI)
 bool perMainEnabled = true;
 #endif
+uint8_t UsbModes = USB_UNSELECTED_MODE;
+extern int Lua_screen_created;
 
 TASK_FUNCTION(menusTask)
 {
   opentxInit();
-
 #if defined(PWR_BUTTON_PRESS)
   while (1) {
+ #if defined(PCBFLYSKY)
+      static uint32_t UsbModeFlag = 0;
+      if(USB_UNSELECTED_MODE ==UsbModes)
+      {
+          UsbModes = g_eeGeneral.USBMode;
+      }
+      if(usbPlugged() && (USB_UNSELECTED_MODE ==UsbModes) && (!unexpectedShutdown))
+      {
+         UsbModes = UsbModeSelect(UsbModeFlag);
+         UsbModeFlag = 1;
+         CoTickDelay(MENU_TASK_PERIOD_TICKS);
+         continue;
+      }
+      else
+      {
+        UsbModeFlag = 0;
+      }
+ #endif
     uint32_t pwr_check = pwrCheck();
     if (pwr_check == e_power_off) {
       break;
@@ -223,7 +243,14 @@ TASK_FUNCTION(menusTask)
     // deduct the thread run-time from the wait, if run-time was more than
     // desired period, then skip the wait all together
     if (runtime < MENU_TASK_PERIOD_TICKS) {
-      CoTickDelay(MENU_TASK_PERIOD_TICKS - runtime);
+      if (Lua_screen_created)
+      {
+        CoTickDelay(MENU_LUA_PERIOD_TICKS - runtime);
+      }
+      else
+      {
+        CoTickDelay(MENU_TASK_PERIOD_TICKS - runtime);
+      }
     }
 
     resetForcePowerOffRequest();
@@ -244,8 +271,19 @@ TASK_FUNCTION(menusTask)
 
   drawSleepBitmap();
   opentxClose();
+  CoTickDelay(100);
+#if !defined(SIMU)
+  shutdownflag = 0x12345678;
+#endif
   boardOff(); // Only turn power off if necessary
-
+ #if defined(PCBFLYSKY) && !defined (SIMU)
+  haptic.event( AU_ERROR );
+  delay_ms(50);
+  while(1)
+  {
+    NVIC_SystemReset();
+  }
+#endif
   TASK_RETURN();
 }
 

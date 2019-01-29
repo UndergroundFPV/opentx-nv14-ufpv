@@ -291,7 +291,7 @@ void setupPulsesPXX(uint8_t port)
   }
   else if (g_model.moduleData[port].failsafeMode != FAILSAFE_NOT_SET && g_model.moduleData[port].failsafeMode != FAILSAFE_RECEIVER) {
     if (failsafeCounter[port]-- == 0) {
-      failsafeCounter[port] = 1000;
+      failsafeCounter[port] = 500;//1000;
       flag1 |= PXX_SEND_FAILSAFE;
     }
     if (failsafeCounter[port] == 0 && g_model.moduleData[port].channelsCount > 0) {

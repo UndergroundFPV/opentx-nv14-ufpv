@@ -107,6 +107,7 @@ set(SRC
   telemetry/frsky.cpp
   telemetry/frsky_d_arm.cpp
   telemetry/frsky_sport.cpp
+  telemetry/flysky_nv14.cpp
   crc16.cpp
   vario.cpp
   )

@@ -24,9 +24,9 @@
 uint32_t shutdownRequest;          // Stores intentional shutdown to avoid reboot loop
 uint32_t shutdownReason;           // Used for detecting unexpected reboots regardless of reason
 uint32_t powerupReason __NOINIT;   // Stores power up reason beyond initialization for emergency mode activation
-
 #if defined (PCBFLYSKY)
 uint32_t powerupState = 0;
+uint32_t shutdownflag __NOINIT;
 #endif
 
 void pwrInit()

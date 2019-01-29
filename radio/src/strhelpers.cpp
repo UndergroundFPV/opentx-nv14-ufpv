@@ -30,7 +30,7 @@ char hex2zchar(uint8_t hex)
 
 char idx2char(int8_t idx)
 {
-  if (idx == 0) return ' ';
+  if (idx == 0 || idx == ' ' ) return ' ';
   if (idx < 0) {
     if (idx > -27) return 'a' - idx - 1;
     idx = -idx;
@@ -57,6 +57,7 @@ int8_t char2idx(char c)
   if (c == '-') return 38;
   if (c == '.') return 39;
   if (c == ',') return 40;
+  if (c == ' ') return 32;
   return 0;
 }
 
@@ -296,6 +297,9 @@ char * getSwitchString(char * dest, swsrc_t idx)
     }
     else {
       *s++ = 'S';
+#if defined(PCBNV14)
+      *s++ = 'W';
+#endif
 #if defined(PCBX7)
       if (swinfo.quot == 5)
         *s++ = 'H';

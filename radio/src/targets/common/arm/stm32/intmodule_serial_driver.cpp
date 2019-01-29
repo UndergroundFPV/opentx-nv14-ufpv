@@ -50,7 +50,7 @@ void intmoduleNoneStart()
 
   INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
   INTMODULE_TIMER->PSC = INTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
-  INTMODULE_TIMER->ARR = 36000; // 18mS
+  INTMODULE_TIMER->ARR = 36000; // 9mS
   INTMODULE_TIMER->CCR2 = 32000; // Update time
   INTMODULE_TIMER->EGR = 1; // Restart
   INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF; // Clear flag
@@ -138,24 +138,22 @@ void intmodulePxxStart()
   USART_Cmd(INTMODULE_USART, ENABLE);
   DMA_Cmd(INTMODULE_RX_DMA_STREAM, ENABLE); // TRACE("RF DMA receive started...");
  #endif
-
   // Timer
   INTMODULE_TIMER->CR1 &= ~TIM_CR1_CEN;
   INTMODULE_TIMER->PSC = INTMODULE_TIMER_FREQ / 2000000 - 1; // 0.5uS (2Mhz)
   INTMODULE_TIMER->ARR = 18000; // 9mS
   INTMODULE_TIMER->CCR2 = 15000; // Update time
-  INTMODULE_TIMER->CCER = TIM_CCER_CC3E;
-  INTMODULE_TIMER->CCMR2 = 0;
-  INTMODULE_TIMER->EGR = 1; // Restart
-  INTMODULE_TIMER->CCMR2 = TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_0; // Toggle CC1 o/p
+  INTMODULE_TIMER->CCER |= TIM_CCER_CC2E;
+  INTMODULE_TIMER->EGR |= TIM_EGR_CC2G; //
+  INTMODULE_TIMER->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_0; // Toggle CC1 o/p
   INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF; // Clear flag
   INTMODULE_TIMER->DIER |= TIM_DIER_CC2IE;  // Enable this interrupt
   INTMODULE_TIMER->CR1 |= TIM_CR1_CEN;
-
   NVIC_SetPriority(INTMODULE_TIMER_IRQn, 7);
   NVIC_EnableIRQ(INTMODULE_TIMER_IRQn);
 
   intmodule_hal_inited = 1;
+
 }
 
 extern "C" void INTMODULE_USART_IRQHandler(void)
@@ -242,8 +240,10 @@ extern "C" void INTMODULE_TIMER_IRQHandler()
   DEBUG_TIMER_START(debugTimerIntPulsesDuration);
 
   INTMODULE_TIMER->SR &= ~TIM_SR_CC2IF; // clear flag
+
   setupPulses(INTERNAL_MODULE);
   intmoduleSendNextFrame();
 
   DEBUG_TIMER_STOP(debugTimerIntPulsesDuration);
 }
+

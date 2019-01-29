@@ -23,7 +23,6 @@
 #include "libwindows.h"
 
 #define SET_DIRTY() storageDirty(EE_MODEL)
-
 static constexpr coord_t SENSOR_COL1 = 30;
 static constexpr coord_t SENSOR_COL2 = SENSOR_COL1 + 70;
 static constexpr coord_t SENSOR_COL3 = LCD_W - 50;
@@ -36,6 +35,24 @@ class SensorSourceChoice : public SourceChoice {
                    [=](uint8_t newValue) {
                      *source = newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1;
                    })
+    {
+      setAvailableHandler([=](int16_t value) {
+        if (value == MIXSRC_NONE)
+          return true;
+        if (value < MIXSRC_FIRST_TELEM)
+          return false;
+        auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
+        return qr.rem == 0 && isValueAvailable(qr.quot + 1);
+      });
+    }
+};
+
+class VarioChoice : public SourceChoice {
+  public:
+    VarioChoice(Window * window, const rect_t &rect, IsValueAvailable isValueAvailable) :
+    SourceChoice(window, rect, MIXSRC_NONE, MIXSRC_LAST_TELEM,
+                 GET_DEFAULT(g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM + 3 * (g_model.frsky.varioSource - 1) : MIXSRC_NONE),
+                 SET_VALUE(g_model.frsky.varioSource, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1))
     {
       setAvailableHandler([=](int16_t value) {
         if (value == MIXSRC_NONE)
@@ -110,6 +127,11 @@ class SensorEditWindow : public Page {
       buildHeader(&header);
     }
 
+    void checkEvents()
+    {
+      invalidate();
+    }
+
     ~SensorEditWindow()
     {
       body.deleteChildren();
@@ -122,8 +144,16 @@ class SensorEditWindow : public Page {
     void buildHeader(Window * window)
     {
       new StaticText(window, {70, 4, 200, 20}, STR_SENSOR + std::to_string(index + 1), MENU_TITLE_COLOR);
-      // dynamic display of sensor value ?
-      //new StaticText(window, {70, 28, 100, 20}, "SF" + std::to_string(index), MENU_TITLE_COLOR);
+      TelemetrySensor & telemetrySensor = g_model.telemetrySensors[index];
+      uint8_t unit = telemetrySensor.unit == UNIT_CELLS ? UNIT_VOLTS : telemetrySensor.unit;
+      if (unit != UNIT_RAW) {
+        char unitStr[8];
+        strAppend(unitStr, STR_VTELEMUNIT+1+unit*STR_VTELEMUNIT[0], STR_VTELEMUNIT[0]);
+        new StaticText(window, {185, 4, 200, 20}, std::to_string(getValue(MIXSRC_FIRST_TELEM + 3 * index)) + unitStr, MENU_TITLE_COLOR);
+      }
+      else {
+        new StaticText(window, {185, 4, 200, 20}, std::to_string(getValue(MIXSRC_FIRST_TELEM + 3 * index)), MENU_TITLE_COLOR);
+      }
     }
 
     void updateSensorOneWindow()
@@ -132,7 +162,6 @@ class SensorEditWindow : public Page {
       GridLayout grid;
       sensorOneWindow->clear();
       TelemetrySensor * sensor = &g_model.telemetrySensors[index];
-
       if (sensor->type == TELEM_TYPE_CALCULATED) {
         // Formula
         new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_FORMULA);
@@ -512,9 +541,14 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
   new Subtitle(window, grid.getLineSlot(), STR_VARIO);
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
-  auto choice = new SourceChoice(window, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
+#if 0
+ auto choice = new SourceChoice(window, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
                                  GET_DEFAULT(g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM + 3 * (g_model.frsky.varioSource - 1) : MIXSRC_NONE),
                                  SET_VALUE(g_model.frsky.varioSource, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
+#else
+ new VarioChoice(window, grid.getFieldSlot(), isSensorAvailable);
+#endif
+#if 0
   choice->setAvailableHandler([=](int16_t value) {
     if (value == MIXSRC_NONE)
       return true;
@@ -523,6 +557,7 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
     auto qr = div(value - MIXSRC_FIRST_TELEM, 3);
     return qr.rem == 0 && isSensorAvailable(qr.quot + 1);
   });
+#endif
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_RANGE);
   new NumberEdit(window, grid.getFieldSlot(2, 0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMin, -10));

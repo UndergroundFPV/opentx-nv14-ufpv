@@ -48,7 +48,7 @@ bool TimeEdit::onTouchEnd(coord_t x, coord_t y)
   if (!hasFocus()) {
     setFocus();
   }
-
+  AUDIO_KEY_PRESS();
   NumberKeyboard * keyboard = NumberKeyboard::instance();
   if (keyboard->getField() != this) {
     keyboard->setField(this);

@@ -71,6 +71,6 @@ extern hapticQueue haptic;
 
 #define IS_HAPTIC_BUSY()     haptic.busy()
 #define HAPTIC_HEARTBEAT()   haptic.heartbeat()
-
+#define HAPTIC_PLAY(tLen, tPause, tRepeat)   haptic.play(tLen, tPause, tRepeat)
 
 #endif // _HAPTIC_H_

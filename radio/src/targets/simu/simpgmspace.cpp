@@ -404,13 +404,21 @@ void lcdNextLayer()
 
 void lcdRefresh()
 {
+  static int test = 0;
   static bool lightEnabled = (bool)isBacklightEnabled();
-
+#if 0
   if (bool(isBacklightEnabled()) != lightEnabled || memcmp(simuLcdBuf, displayBuf, DISPLAY_BUFFER_SIZE)) {
     memcpy(simuLcdBuf, displayBuf, DISPLAY_BUFFER_SIZE);
     lightEnabled = (bool)isBacklightEnabled();
     simuLcdRefresh = true;
   }
+#else
+  if (memcmp(simuLcdBuf, displayBuf, DISPLAY_BUFFER_SIZE)) {
+    memcpy(simuLcdBuf, displayBuf, DISPLAY_BUFFER_SIZE);
+
+    simuLcdRefresh = true;
+  }
+#endif
 }
 
 void telemetryPortInit(uint8_t baudrate)

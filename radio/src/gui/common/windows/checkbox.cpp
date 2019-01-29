@@ -45,6 +45,7 @@ void CheckBox::paint(BitmapBuffer * dc)
 
 bool CheckBox::onTouchEnd(coord_t x, coord_t y)
 {
+  AUDIO_KEY_PRESS();
   setValue(!getValue());
   setFocus();
   invalidate({0, 0, 20, 20});

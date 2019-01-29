@@ -103,8 +103,11 @@
 #define LEN_COUNTRYCODES               TR("\002", "\007")
 #define TR_COUNTRYCODES                TR("US""JP""EU", "America""Japan\0 ""Europe\0")
 
-#define LEN_USBMODES                   TR("\006", "\010")
-#define TR_USBMODES                    TR("Ask\0  ""Joyst\0""SDCard""Serial", "Ask\0    ""Joystick""Storage\0""Serial\0 ")
+#define LEN_USBMODES                   TR("\013", "\010")
+#define TR_USBMODES                    TR("Ask(SDCard)""Joyst\0     ""Serial\0    ", "Ask\0    ""Joystick""Storage\0""Serial\0 ")
+
+#define LEN_USBMODESELECT               "\011"
+#define TR_USBMODESELECT                "Joystick\0""Serial\0  ""Storage\0 "
 
 #if defined(COLORLCD)
 #define LEN_MODULE_PROTOCOLS           "\006"
@@ -517,8 +520,8 @@
   #define TR_POTS_VSRCRAW              "\310S1\0""\310S2\0"
   #define TR_SW_VSRCRAW                "\312SA\0""\312SB\0""\312SC\0""\312SD\0""\312SE\0""\312SF\0"
 #elif defined(PCBNV14)
-  #define TR_POTS_VSRCRAW              "\310S1\0""\310S2\0"
-  #define TR_SW_VSRCRAW                "\312SA\0""\312SB\0""\312SC\0""\312SD\0""\312SE\0""\312SF\0""\312SG\0""\312SH\0"
+  #define TR_POTS_VSRCRAW              "\310VRA""\310VRB"
+  #define TR_SW_VSRCRAW                "\312SWA""\312SWB""\312SWC""\312SWD""\312SWE""\312SWF""\312SWG""\312SWH"
 #elif defined(PCBSKY9X)
   #define TR_POTS_VSRCRAW              "P1\0 ""P2\0 ""P3\0 "
   #define TR_SW_VSRCRAW                "3POS" "THR\0""RUD\0""ELE\0""AIL\0""GEA\0""TRN\0"
@@ -773,6 +776,8 @@
 #define TR_BLONBRIGHTNESS              INDENT "On brightness"
 #define TR_BLOFFBRIGHTNESS             INDENT "Off brightness"
 #define TR_BLCOLOR                     INDENT "Color"
+#define TR_QUICK_START_GUIDE           INDENT "Quick start guide"
+#define TR_USER_MANUAL                 INDENT "User manual"
 #define TR_SPLASHSCREEN                "Splash screen"
 #define TR_THROTTLEWARNING             TR(IF_CPUARM(INDENT) "T-Warning", INDENT "Throttle state")
 #define TR_SWITCHWARNING               TR(IF_CPUARM(INDENT) "S-Warning", INDENT "Switch positions")
@@ -1153,8 +1158,6 @@
 #define TR_EEBACKUP                    "EEPROM backup"
 #define TR_FACTORYRESET                "Factory reset"
 #define TR_FIRMWAREUPDATE              "Firmware update"
-#define TR_USER_MANUAL                 "User manual"
-#define TR_QUICK_START_GUIDE           "Quick start guide"
 #elif defined(PCBI8)
 #define TR_EEBACKUP                    TR("\001[K1 Long]: Backup", "\012[K1 Long]: EEPROM backup")
 #define TR_FACTORYRESET                TR("\001[DOWN Long]: Fact. reset", "\012[DOWN Long]: Factory reset")
@@ -1362,10 +1365,14 @@
 #define TR_MENU_OTHER                  "Other"
 #define TR_MENU_INVERT                 "Invert"
 #define TR_JITTER_FILTER               "ADC filter"
-
 #define TR_CROSSFIRE_SETUP			   "Crossfire setup"
-
+#define ZSTR_NOISE                     "Noise"
 #define ZSTR_RSSI                      "RSSI"
+#define ZSTR_SNR                       "SNR"
+#define ZSTR_SIG                       "Signal"
+#define ZSTR_TEMP                      "Temp"
+#define ZSTR_AIRPRE                    "Airpre"
+#define ZSTR_EBATT                     "ERxBt"
 #define ZSTR_RAS                       "SWR"
 #define ZSTR_A1                        "A1"
 #define ZSTR_A2                        "A2"

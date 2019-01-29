@@ -46,6 +46,7 @@ int Slider::value(coord_t x) const
 bool Slider::onTouchStart(coord_t x, coord_t y)
 {
   if (!hasFocus()) {
+    AUDIO_KEY_PRESS();
     setFocus();
   }
   sliding = (value(x) == getValue());
@@ -56,6 +57,7 @@ bool Slider::onTouchEnd(coord_t x, coord_t y)
 {
   setValue(value(x));
   invalidate();
+  AUDIO_KEY_PRESS();
   return true;
 }
 
@@ -66,6 +68,7 @@ bool Slider::onTouchSlide(coord_t x, coord_t y, coord_t startX, coord_t startY, 
     if (getValue() != newValue) {
       setValue(newValue);
       invalidate();
+      AUDIO_KEY_PRESS();
     }
   }
   return true;

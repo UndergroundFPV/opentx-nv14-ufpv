@@ -60,8 +60,9 @@ void drawTopBar()
     lcdDrawBitmapPattern(LCD_W-98, 8, LBM_TOPMENU_USB, MENU_TITLE_COLOR);
   }
 
-  // RSSI
-  const uint8_t rssiBarsValue[] = {30, 40, 50, 60, 80};
+  // RSSI 50 70
+  //const uint8_t rssiBarsValue[] = {30, 40, 50, 60, 80};
+  const uint8_t rssiBarsValue[] = {47, 52, 57, 62, 66};
   const uint8_t rssiBarsHeight[] = {5, 10, 15, 21, 31};
   for (unsigned int i = 0; i < DIM(rssiBarsHeight); i++) {
     uint8_t height = rssiBarsHeight[i];

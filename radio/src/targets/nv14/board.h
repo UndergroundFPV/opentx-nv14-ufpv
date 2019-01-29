@@ -198,6 +198,7 @@ void stop_trainer_ppm(void);
 void init_trainer_capture(void);
 void stop_trainer_capture(void);
 
+#if 0
 // Keys driver
 enum EnumKeys
 {
@@ -218,6 +219,40 @@ enum EnumKeys
 
   NUM_KEYS
 };
+#else
+// Keys driver
+enum EnumKeys
+{
+  KEY_PGUP,
+  KEY_PGDN,
+  KEY_ENTER,
+  KEY_MODEL,
+  KEY_UP = KEY_MODEL,
+  KEY_EXIT,
+  KEY_DOWN = KEY_EXIT,
+  KEY_TELEM,
+  KEY_RIGHT = KEY_TELEM,
+  KEY_RADIO,
+  KEY_LEFT = KEY_RADIO,
+
+  TRM_BASE,
+  TRM_LH_DWN = TRM_BASE,
+  TRM_LH_UP,
+  TRM_LV_DWN,
+  TRM_LV_UP,
+  TRM_RV_DWN,
+  TRM_RV_UP,
+  TRM_RH_DWN,
+  TRM_RH_UP,
+  TRM_LS_DWN,
+  TRM_LS_UP,
+  TRM_RS_DWN,
+  TRM_RS_UP,
+  TRM_LAST = TRM_RS_UP,
+
+  NUM_KEYS
+};
+#endif
 
 enum EnumSwitches
 {
@@ -269,6 +304,8 @@ enum EnumPowerupState
   BOARD_STARTED,
 };
 
+
+
 void monitorInit(void);
 void keysInit(void);
 uint8_t keyState(uint8_t index);
@@ -287,6 +324,7 @@ uint32_t readTrims(void);
 extern uint32_t powerupReason;
 #if defined (PCBFLYSKY)
 extern uint32_t powerupState;
+extern uint32_t shutdownflag;
 #endif
 
 #define SHUTDOWN_REQUEST                0xDEADBEEF
@@ -390,6 +428,7 @@ uint32_t pwrCheck(void);
 #if defined(PCBFLYSKY)
 uint32_t lowPowerCheck(void);
 #endif
+uint8_t UsbModeSelect( uint32_t index );
 void pwrOn(void);
 void pwrOff(void);
 void pwrResetHandler(void);
@@ -398,7 +437,7 @@ uint32_t pwrPressedDuration(void);
 #if defined(SIMU) || defined(NO_UNEXPECTED_SHUTDOWN)
   #define UNEXPECTED_SHUTDOWN()         (false)
 #else
-  #define UNEXPECTED_SHUTDOWN()         ((powerupReason == DIRTY_SHUTDOWN) || WAS_RESET_BY_WATCHDOG_OR_SOFTWARE())
+  #define UNEXPECTED_SHUTDOWN()        ((shutdownflag != 0x12345678 )&&((powerupReason == DIRTY_SHUTDOWN) || WAS_RESET_BY_WATCHDOG_OR_SOFTWARE()))
 #endif
 
 // LCD driver
@@ -479,7 +518,7 @@ void setScaledVolume(uint8_t volume);
 void setVolume(uint8_t volume);
 int32_t getVolume(void);
 #define VOLUME_LEVEL_MAX               23
-#define VOLUME_LEVEL_DEF               12
+#define VOLUME_LEVEL_DEF               23
 
 // Telemetry driver
 #define TELEMETRY_FIFO_SIZE             512
@@ -497,8 +536,11 @@ extern uint32_t telemetryErrors;
 void hapticInit(void);
 void hapticDone(void);
 void hapticOff(void);
-#define HAPTIC_OFF()                    hapticOff()
 void hapticOn(uint32_t pwmPercent);
+extern void audioKeyPress();
+#define HAPTIC_OFF()                    hapticOff()
+#define AUDIO_KEY_PRESS()               audioKeyPress()
+
 
 // Second serial port driver
 #define AUX_SERIAL

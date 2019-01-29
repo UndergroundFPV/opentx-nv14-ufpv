@@ -60,10 +60,11 @@ bool FileChoice::onTouchEnd(coord_t, coord_t)
   std::list<std::string> files;
   const char * fnExt;
   uint8_t fnLen, extLen;
+  AUDIO_KEY_PRESS();
 
   FRESULT res = f_opendir(&dir, folder.c_str()); // Open the directory
   if (res == FR_OK) {
-    bool firstTime = true;
+    bool firstTime = false;
     for (;;) {
       res = sdReadDir(&dir, &fno, firstTime);
       if (res != FR_OK || fno.fname[0] == 0)
@@ -88,6 +89,8 @@ bool FileChoice::onTouchEnd(coord_t, coord_t)
 
     // sort files
     files.sort(compare_nocase);
+    // Remove duplicate list values
+    files.unique();
 
     auto menu = new Menu();
     int count = 0;

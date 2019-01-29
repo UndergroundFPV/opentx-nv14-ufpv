@@ -20,11 +20,12 @@
 
 #include "opentx.h"
 #include "mainwindow.h"
+#include <queue>
 
 uint8_t currentSpeakerVolume = 255;
 uint8_t requiredSpeakerVolume = 255;
 uint8_t mainRequestFlags = 0;
-
+extern uint8_t UsbModes;
 #if defined(STM32)
 void onUSBConnectMenu(const char *result)
 {
@@ -43,6 +44,7 @@ void onUSBConnectMenu(const char *result)
 void handleUsbConnection()
 {
 #if defined(STM32) && !defined(SIMU)
+    setSelectedUsbMode(UsbModes);
   if (!usbStarted() && usbPlugged() && !(getSelectedUsbMode() == USB_UNSELECTED_MODE)) {
     usbStart();
     if (getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
@@ -50,19 +52,19 @@ void handleUsbConnection()
       usbPluggedIn();
     }
   }
+#if 0
   if (!usbStarted() && usbPlugged() && getSelectedUsbMode() == USB_UNSELECTED_MODE) {
     if((g_eeGeneral.USBMode == USB_UNSELECTED_MODE) && (popupMenuNoItems == 0)) {
       POPUP_MENU_ADD_ITEM(STR_USB_JOYSTICK);
       POPUP_MENU_ADD_ITEM(STR_USB_MASS_STORAGE);
-#if defined(USB_SERIAL)
       POPUP_MENU_ADD_ITEM(STR_USB_SERIAL);
-#endif
       POPUP_MENU_START(onUSBConnectMenu);
     }
     if (g_eeGeneral.USBMode != USB_UNSELECTED_MODE) {
       setSelectedUsbMode(g_eeGeneral.USBMode);
     }
   }
+#endif
   if (usbStarted() && !usbPlugged()) {
     usbStop();
     if (getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
@@ -70,7 +72,12 @@ void handleUsbConnection()
     }
 #if !defined(BOOT)
     setSelectedUsbMode(USB_UNSELECTED_MODE);
+    UsbModes = USB_UNSELECTED_MODE;
 #endif
+  }
+  if( !usbPlugged() )
+  {
+     UsbModes = g_eeGeneral.USBMode;
   }
 #endif // defined(STM32) && !defined(SIMU)
 }
@@ -182,10 +189,18 @@ void periodicTick()
   }
 }
 
+
 #if defined(GUI) && defined(COLORLCD)
+
+#if defined (PCBNV14)
+void guiMain(touch_event_type evt)
+#else
 void guiMain(event_t evt)
+#endif
 {
+  bool refreshNeeded = false;
 #if defined(LUA)
+#if 0
   uint32_t t0 = get_tmr10ms();
   static uint32_t lastLuaTime = 0;
   uint16_t interval = (lastLuaTime == 0 ? 0 : (t0 - lastLuaTime));
@@ -193,16 +208,45 @@ void guiMain(event_t evt)
   if (interval > maxLuaInterval) {
     maxLuaInterval = interval;
   }
+#endif
 
-  luaTask(0, RUN_STNDAL_SCRIPT | RUN_TELEM_FG_SCRIPT | RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, true);
+#if defined (PCBNV14)
+  luaTask(evt,  RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, false);
+#else
+  luaTask(0,  RUN_MIX_SCRIPT | RUN_FUNC_SCRIPT | RUN_TELEM_BG_SCRIPT, false);
+#endif
 
+  // draw LCD from menus or from Lua script
+  // run Lua scripts that use LCD
+#if 1
+  DEBUG_TIMER_START(debugTimerLuaFg);
+  refreshNeeded = luaTask(evt, RUN_STNDAL_SCRIPT, true);
+  if (!refreshNeeded) {
+    refreshNeeded = luaTask(evt, RUN_TELEM_FG_SCRIPT, true);
+  }
+  DEBUG_TIMER_STOP(debugTimerLuaFg);
+#if 0
   t0 = get_tmr10ms() - t0;
   if (t0 > maxLuaDuration) {
     maxLuaDuration = t0;
   }
 #endif
+#endif
 
+#else
+  lcdRefreshWait();   // WARNING: make sure no code above this line does any change to the LCD display buffer!
+#endif
+
+#if 0
+  if (!refreshNeeded) {
+    mainWindow.run();
+  }
+  else {
+    lcdRefresh();
+  }
+#else
   mainWindow.run();
+#endif
 }
 #elif defined(GUI)
 
@@ -312,6 +356,8 @@ void guiMain(event_t evt)
 }
 #endif
 
+extern std::queue<touch_event_type>TouchQueue;
+
 void perMain()
 {
   DEBUG_TIMER_START(debugTimerPerMain1);
@@ -321,7 +367,9 @@ void perMain()
   checkSpeakerVolume();
   checkEeprom();
   logsWrite();
+#if !defined (PCBFLYSKY)
   handleUsbConnection();
+#endif
   checkTrainerSettings();
   periodicTick();
   DEBUG_TIMER_STOP(debugTimerPerMain1);
@@ -331,12 +379,34 @@ void perMain()
     flightReset();
     mainRequestFlags &= ~(1 << REQUEST_FLIGHT_RESET);
   }
+#if defined (PCBNV14)
+  touch_event_type evt;
+  memset(&evt, 0, sizeof(evt));
 
-  event_t evt = getEvent(false);
-  if (evt && (g_eeGeneral.backlightMode & e_backlight_mode_keys)) {
-    // on keypress turn the light on
-    backlightOn();
+  if (!TouchQueue.empty())
+  {
+    evt = TouchQueue.front();
+    TouchQueue.pop();
+    //TRACE("evt type:%d\r\n", evt.touch_type);
   }
+
+  if (evt.touch_type != TE_NONE) {
+    if (g_eeGeneral.backlightMode & e_backlight_mode_keys) {
+      // on touch turn the light on
+      backlightOn();
+    }
+  }
+#else
+  event_t evt = getEvent(false);
+
+  if (evt) {
+    if (g_eeGeneral.backlightMode & e_backlight_mode_keys) {
+      // on keypress turn the light on
+      backlightOn();
+    }
+  }
+#endif
+
   doLoopCommonActions();
 #if defined(NAVIGATION_STICKS)
   uint8_t sticks_evt = getSticksNavigationEvent();
@@ -372,9 +442,9 @@ void perMain()
 #if defined(STM32)
   if (usbPlugged() && getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
     // disable access to menus
-    lcdClear();
+    //lcdClear();
     // menuMainView(0);
-    lcdRefresh();
+    //lcdRefresh();
     return;
   }
 #endif
@@ -404,5 +474,8 @@ void perMain()
 
 #if defined(INTERNAL_GPS)
   gpsWakeup();
+#endif
+ #if defined(PCBFLYSKY)
+  handleUsbConnection();
 #endif
 }

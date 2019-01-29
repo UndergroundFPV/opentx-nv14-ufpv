@@ -104,6 +104,7 @@ const pm_char STR_OPEN9X[] PROGMEM =
 #if defined(PXX) || defined(CPUARM)
     ISTR(COUNTRYCODES)
     ISTR(USBMODES)
+    ISTR(USBMODESELECT)
     ISTR(VFAILSAFE)
 #endif
 #if defined(CPUARM)
@@ -614,6 +615,7 @@ const pm_char STR_TOO_MANY_LUA_SCRIPTS[] PROGMEM = TR_TO_MANY_LUA_SCRIPTS;
 const pm_char STR_BLCOLOR[]  PROGMEM = TR_BLCOLOR;
 const pm_char STR_QUICK_START_GUIDE[] PROGMEM = TR_QUICK_START_GUIDE;
 const pm_char STR_USER_MANUAL[] = TR_USER_MANUAL;
+
 
 #if defined(CPUARM)
   const pm_char STR_MODELNAME[] PROGMEM = TR_MODELNAME;

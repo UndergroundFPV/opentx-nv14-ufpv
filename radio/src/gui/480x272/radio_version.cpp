@@ -28,9 +28,9 @@ enum QR_Code
   QR_CODE_USER_MANUAL
 };
 
-class ShowQR_Code: public Window {
+class QR_CodeBody : public Window {
   public:
-    ShowQR_Code(Window * parent, const rect_t & rect, uint8_t QR_Index):
+    QR_CodeBody(Window * parent, const rect_t &rect, uint8_t QR_Index) :
       Window(parent, rect),
       QR_Index(QR_Index)
     {
@@ -40,7 +40,6 @@ class ShowQR_Code: public Window {
     {
       invalidate();
     }
-
 
     void paint(BitmapBuffer * dc) override
     {
@@ -66,29 +65,6 @@ class ShowQR_Code: public Window {
     uint8_t QR_Index;
 };
 
-class QR_CodeBody : public Window {
-  public:
-    QR_CodeBody(Window * parent, const rect_t &rect, uint8_t QR_Index) :
-      Window(parent, rect),
-      QR_Index(QR_Index)
-    {
-      build();
-    }
-
-    void checkEvents() override
-    {
-      invalidate();
-    }
-
-    void build()
-    {
-      new ShowQR_Code(this, {30, 30, 100, 250}, QR_Index);
-    }
-
-  protected:
-    uint8_t QR_Index;
-};
-
 class QR_CodePage : public PageTab {
   public:
     QR_CodePage(uint8_t QR_Index) :
@@ -100,7 +76,6 @@ class QR_CodePage : public PageTab {
     void build(Window * window) override
     {
       new QR_CodeBody(window, {0, 0, LCD_W, window->height() - footerHeight}, QR_Index);
-      //new FailSafeFooter(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
     }
 
   protected:
@@ -128,8 +103,9 @@ void RadioVersionPage::build(Window * window)
   getCPUUniqueID(reusableBuffer.version.id);
 
   new StaticText(window, grid.getLabelSlot(), "FW Version :");
-  grid.nextLine(12);
-  new StaticText(window, {6, grid.getWindowHeight(), LCD_W - 6, 26}, vers_stamp);
+  new StaticText(window, grid.getFieldSlot(), vers_stamp);
+  //grid.nextLine(12);
+  //new StaticText(window, {6, grid.getWindowHeight(), LCD_W - 6, 26}, vers_stamp);
   grid.nextLine();
 
   new StaticText(window, grid.getLabelSlot(), "Data version");

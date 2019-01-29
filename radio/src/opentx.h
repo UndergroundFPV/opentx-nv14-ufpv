@@ -1605,6 +1605,9 @@ enum ClipboardType {
   CLIPBOARD_TYPE_NONE,
   CLIPBOARD_TYPE_CUSTOM_SWITCH,
   CLIPBOARD_TYPE_CUSTOM_FUNCTION,
+#if defined(PCBNV14)
+  CLIPBOARD_TYPE_CUSTOM_SCRIPT,
+#endif
   CLIPBOARD_TYPE_SD_FILE,
 };
 
@@ -1619,6 +1622,9 @@ struct Clipboard {
   union {
     LogicalSwitchData csw;
     CustomFunctionData cfn;
+#if defined(PCBNV14)
+    ScriptData         csd;
+#endif
     struct {
       char directory[CLIPBOARD_PATH_LEN];
       char filename[CLIPBOARD_PATH_LEN];

@@ -60,7 +60,7 @@ add_definitions(-DCROSSFIRE_NATIVE)
 
 add_definitions(-DFLYSKY_HALL_STICKS_REVERSE)
 #add_definitions(-DFLYSKY_AUTO_POWER_DOWN)
-#add_definitions(-DFLYSKY_STARTUP_DELAY)
+add_definitions(-DFLYSKY_STARTUP_DELAY)
 option(MENU_SIMPLE "Used simplified menu" ON)
 if(MENU_SIMPLE)
  add_definitions(-DSUPER_SIMPLE_MENU)

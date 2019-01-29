@@ -24,6 +24,15 @@
 #include "model_crossfire.h"
 
 #define SET_DIRTY()     storageDirty(EE_MODEL)
+#define STR_4BIND(v)    ((moduleFlag[moduleIndex] == MODULE_BIND) ? STR_MODULE_BINDING : (v))
+
+void moduleFlagBackNormal(uint8_t moduleIndex)
+{
+  if (moduleFlag[moduleIndex] != MODULE_NORMAL_MODE) {
+    moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
+    if(isModuleFlysky(moduleIndex)) resetPulsesFlySky(moduleIndex);
+  }
+}
 
 void resetModuleSettings(uint8_t module)
 {
@@ -33,6 +42,7 @@ void resetModuleSettings(uint8_t module)
   if (isModulePPM(module)) {
     SET_DEFAULT_PPM_FRAME_LENGTH(EXTERNAL_MODULE);
   }
+  moduleFlagBackNormal(module);
 }
 
 class ChannelFailsafeBargraph: public Window {
@@ -104,9 +114,9 @@ class FailSafeBody : public Window {
 
         // Channel numeric value
         new NumberEdit(this, grid.getFieldSlot(3, 0), -lim, lim,
-                       GET_DEFAULT(calcRESXto1000(g_model.moduleData[moduleIndex].failsafeChannels[ch])),
-                       SET_VALUE(g_model.moduleData[moduleIndex].failsafeChannels[ch], newValue),
-                       PREC1);
+                       GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeChannels[ch]),
+                       //GET_DEFAULT(calcRESXto1000(g_model.moduleData[moduleIndex].failsafeChannels[ch])),
+                       SET_VALUE(g_model.moduleData[moduleIndex].failsafeChannels[ch], newValue), PREC1);
 
         // Channel bargraph
         new ChannelFailsafeBargraph(this, {150, grid.getWindowHeight(), 150, lineHeight}, moduleIndex, ch);
@@ -230,8 +240,8 @@ class ModuleWindow : public Window {
                                 [=](int32_t newValue) {
                                   g_model.moduleData[moduleIndex].type = newValue;
                                   SET_DIRTY();
-                                  onFlySkyModuleSetPower(moduleIndex, newValue == MODULE_TYPE_FLYSKY);
                                   resetModuleSettings(moduleIndex);
+                                  onFlySkyModuleSetPower(moduleIndex, newValue == MODULE_TYPE_FLYSKY);
                                   update();
                                   moduleChoice->setFocus();
                                 });
@@ -250,6 +260,7 @@ class ModuleWindow : public Window {
                    [=](int32_t newValue) -> void {
                      g_model.moduleData[moduleIndex].romData.mode = newValue;
                      SET_DIRTY();
+                     moduleFlagBackNormal(moduleIndex);
                      onFlySkyReceiverSetPulse(INTERNAL_MODULE, newValue);
                    });
       }
@@ -336,6 +347,7 @@ class ModuleWindow : public Window {
                          g_model.moduleData[moduleIndex].romData.rx_freq[0] = newValue & 0xFF;
                          g_model.moduleData[moduleIndex].romData.rx_freq[1] = newValue >> 8;
                          SET_DIRTY();
+                         moduleFlagBackNormal(moduleIndex);
                          onFlySkyReceiverSetFrequency(INTERNAL_MODULE);
                        });
         grid.nextLine();
@@ -344,37 +356,21 @@ class ModuleWindow : public Window {
       // Failsafe
       if (isModuleNeedingFailsafeButton(moduleIndex)) {
         new StaticText(this, grid.getLabelSlot(true), STR_FAILSAFE);
-#if defined (PCBFLYSKY)
-      if (moduleIndex == INTERNAL_MODULE) {
-          failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_CUSTOM,
-                                      GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
-                                      [=](int32_t newValue) {
-                                        g_model.moduleData[moduleIndex].failsafeMode = newValue;
-                                        SET_DIRTY();
-                                        update();
-                                        failSafeChoice->setFocus();
-                                      });
-      }
-      else {
-          failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-                                      GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
-                                      [=](int32_t newValue) {
-                                        g_model.moduleData[moduleIndex].failsafeMode = newValue;
-                                        SET_DIRTY();
-                                        update();
-                                        failSafeChoice->setFocus();
-                                      });
-      }
-#else
-          failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-                                      GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
-                                      [=](int32_t newValue) {
-                                        g_model.moduleData[moduleIndex].failsafeMode = newValue;
-                                        SET_DIRTY();
-                                        update();
-                                        failSafeChoice->setFocus();
-                                      });
-#endif
+        failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
+                                    GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
+                                    [=](int32_t newValue) {
+                                      g_model.moduleData[moduleIndex].failsafeMode = newValue;
+                                      SET_DIRTY();
+                                      update();
+                                      failSafeChoice->setFocus();
+                                      moduleFlagBackNormal(moduleIndex);
+                                      SEND_FAILSAFE_NOW(moduleIndex);
+                                    });
+        failSafeChoice->setAvailableHandler([=](int8_t newValue) {
+          if ( isModuleFlysky(moduleIndex) )
+            return (newValue == FAILSAFE_NOT_SET || newValue == FAILSAFE_CUSTOM);
+          else return true;
+        });
         if (g_model.moduleData[moduleIndex].failsafeMode == FAILSAFE_CUSTOM) {
           new TextButton(this, grid.getFieldSlot(2, 1), STR_SET,
                          [=]() -> uint8_t {
@@ -387,17 +383,16 @@ class ModuleWindow : public Window {
 
       // Bind and Range buttons
       if (isModuleNeedingBindRangeButtons(moduleIndex)) {
-        bindButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_MODULE_BIND);
+        bindButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_4BIND(STR_MODULE_BIND));
         bindButton->setPressHandler([=]() -> uint8_t {
           if (moduleFlag[moduleIndex] == MODULE_RANGECHECK) {
             rangeButton->check(false);
           }
           if (moduleFlag[moduleIndex] == MODULE_BIND) {
             bindButton->setText(STR_MODULE_BIND);
+            moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
             if (isModuleFlysky(moduleIndex))
               resetPulsesFlySky(moduleIndex);
-            else
-              moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
             return 0;
           }
           else {
@@ -420,23 +415,17 @@ class ModuleWindow : public Window {
           if (moduleFlag[moduleIndex] == MODULE_BIND) {
             bindButton->setText(STR_MODULE_BIND);
             bindButton->check(false);
-            if (isModuleFlysky(moduleIndex))
-              resetPulsesFlySky(moduleIndex);
-            else
-              moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
           }
-          if (moduleFlag[moduleIndex] == MODULE_RANGECHECK) {
-            moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
-            if (isModuleFlysky(moduleIndex))
-              resetPulsesFlySky(moduleIndex);
-            return 0;
-          }
-          else {
+          if (moduleFlag[moduleIndex] != MODULE_RANGECHECK) {
             moduleFlag[moduleIndex] = MODULE_RANGECHECK;
             if (isModuleFlysky(moduleIndex))
               onFlySkyReceiverRange(moduleIndex);
             return 1;
           }
+          moduleFlag[moduleIndex] = MODULE_NORMAL_MODE;
+          if (isModuleFlysky(moduleIndex))
+            resetPulsesFlySky(moduleIndex);
+          return 0;
         });
         rangeButton->setCheckHandler([=]() {
           if (moduleFlag[moduleIndex] != MODULE_RANGECHECK) {
@@ -528,7 +517,7 @@ void onBindMenu(const char * result)
 
   moduleFlag[moduleIdx] = MODULE_BIND;
 }
-
+static char ModeName[20];
 void ModelSetupPage::build(Window * window)
 {
   GridLayout grid;
@@ -536,6 +525,8 @@ void ModelSetupPage::build(Window * window)
 
   // Model name
   new StaticText(window, grid.getLabelSlot(), STR_MODELNAME);
+  memcpy((void *)ModeName, (const void *)g_model.header.name, sizeof(g_model.header.name));
+  ModeName[sizeof(g_model.header.name)+2] = sizeof(g_model.header.name);
   new TextEdit(window, grid.getFieldSlot(), g_model.header.name, sizeof(g_model.header.name));
   grid.nextLine();
 

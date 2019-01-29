@@ -258,6 +258,9 @@ void generalDefault()
 #if !defined(PCBHORUS)
   g_eeGeneral.contrast = LCD_CONTRAST_DEFAULT;
 #endif
+#if defined (PCBNV14)
+  g_eeGeneral.USBMode = USB_UNSELECTED_MODE;
+#endif
 
   g_eeGeneral.potsConfig = DEFAULT_POTS_CONFIG;
   g_eeGeneral.switchConfig = DEFAULT_SWITCH_CONFIG;
@@ -1046,6 +1049,13 @@ void checkFailsafe()
     if (isModulePXX(i)) {
       ModuleData & moduleData = g_model.moduleData[i];
       if (HAS_RF_PROTOCOL_FAILSAFE(moduleData.rfProtocol) && moduleData.failsafeMode == FAILSAFE_NOT_SET) {
+        ALERT(STR_FAILSAFEWARN, STR_NO_FAILSAFE, AU_ERROR);
+        break;
+      }
+    }else if (isModuleFlysky(i))
+    {
+      ModuleData & moduleData = g_model.moduleData[i];
+      if (moduleData.failsafeMode == FAILSAFE_NOT_SET) {
         ALERT(STR_FAILSAFEWARN, STR_NO_FAILSAFE, AU_ERROR);
         break;
       }
@@ -2479,9 +2489,12 @@ void opentxInit(OPENTX_INIT_ARGS)
   //  * radios without CPU controlled power can only use Reset status register (if available)
   if (UNEXPECTED_SHUTDOWN()) {
     TRACE("Unexpected Shutdown detected");
+
     unexpectedShutdown = 1;
   }
-
+#if !defined(SIMU)
+  shutdownflag = 0x87654321;
+#endif
 #if defined(SDCARD) && !defined(PCBMEGA2560)
   // SDCARD related stuff, only done if not unexpectedShutdown
   if (!unexpectedShutdown) {
@@ -2573,6 +2586,7 @@ void opentxInit(OPENTX_INIT_ARGS)
 
 #if defined(COLORLCD)
   loadTheme();
+  loadFontCache();
 #endif
 
   if (g_eeGeneral.backlightMode != e_backlight_mode_off) {
@@ -2745,6 +2759,60 @@ int main()
 #if defined(SIMU)
   return NULL;
 #endif
+}
+extern STRUCT_TOUCH touchState; //definition in mainwindow.cpp
+static inline bool IspointInRect(coord_t x, coord_t y, rect_t & rect)
+{
+  return (x >= rect.x && x < rect.x + rect.w && y >= rect.y && y < rect.y + rect.h);
+}
+
+uint8_t UsbModeSelect( uint32_t index )
+{
+    uint8_t UsbModeTmp = 0;
+    rect_t rect1 = {70,195,200,40};
+    rect_t rect2 = {70,235,200,40};
+    rect_t rect3 = {70,275,200,40};
+    lcd->setOffset(0, 0);
+    lcd->clearClippingRect();
+    if(!index)
+    {
+        lcdDrawBlackOverlay();
+        lcd->drawFilledRect(70, 195, 200, 120, SOLID, HEADER_BGCOLOR);
+        const  char *s = STR_USBMODESELECT;
+        char length = *s++;
+        for(uint8_t i = 0; i < 3; i++ )
+        {
+            lcd->drawSizedText(80, 205+(40*i), s+(length*i), length, MENU_TITLE_COLOR);
+            lcd->drawHorizontalLine(70, 235+(40*i), 200, SOLID, MENU_TITLE_COLOR);
+        }
+        AUDIO_KEY_PRESS();
+    }
+    // force a refresh if the user stops the animation
+    mainWindow.invalidate();
+    if (touchState.Event == TE_UP)
+    {
+        if(IspointInRect(touchState.X,touchState.Y,rect1))
+        {
+            UsbModeTmp = USB_JOYSTICK_MODE;
+            AUDIO_KEY_PRESS();
+        }
+        else if(IspointInRect(touchState.X,touchState.Y,rect2))
+        {
+            UsbModeTmp = USB_SERIAL_MODE;
+            AUDIO_KEY_PRESS();
+        }
+        else if(IspointInRect(touchState.X,touchState.Y,rect3))
+        {
+            UsbModeTmp = USB_MASS_STORAGE_MODE;
+            AUDIO_KEY_PRESS();
+        }
+        else
+        {
+            UsbModeTmp = USB_UNSELECTED_MODE;
+        }
+        touchState.Event = TE_NONE;
+    }
+    return UsbModeTmp;
 }
 
 #if defined(PWR_BUTTON_PRESS)

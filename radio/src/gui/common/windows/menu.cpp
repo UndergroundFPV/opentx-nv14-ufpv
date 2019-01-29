@@ -36,6 +36,7 @@ void MenuWindow::select(int index)
 
 bool MenuWindow::onTouchEnd(coord_t x, coord_t y)
 {
+  AUDIO_KEY_PRESS();
   int index = y / lineHeight;
   lines[index].onPress();
   return false; // = close the menu (inverted so that click outside the menu closes it)

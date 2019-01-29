@@ -79,7 +79,7 @@ void RadioHardwarePage::build(Window * window)
 {
   GridLayout grid;
   grid.spacer(8);
-  grid.setLabelWidth(80);
+  grid.setLabelWidth(90);
 
   // Sticks
   #ifndef SUPER_SIMPLE_MENU
