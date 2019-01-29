@@ -54,13 +54,8 @@ uint16_t getBatteryVoltage()
 #if defined (SIMU)
   return 350 + g_eeGeneral.txVoltageCalibration;
 #else
-  int32_t t = getAnalogValue(TX_VOLTAGE) + g_eeGeneral.txVoltageCalibration;
-
-  t *= ( 3300 * 20);
-  t /= ( 4095 * 10);
-  t = ( t * 100  + 500 ) / 1000;
-
-  return t;
+  int32_t instant_vbat = anaIn(TX_VOLTAGE);  // using filtered ADC value on purpose
+  return (uint16_t)((instant_vbat * (1000 + g_eeGeneral.txVoltageCalibration)) / 2942);
 #endif
 }
 
