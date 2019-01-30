@@ -140,10 +140,15 @@ class LogicalSwitchEditWindow: public Page {
       }
       else {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(), STR_V1);
+
         new SourceChoice(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MIXSRC_LAST_TELEM, GET_DEFAULT(cs->v1),
                          [=](int32_t newValue) {
                            cs->v1 = newValue;
                            SET_DIRTY();
+                           int16_t min = 0, max = 0;
+                           getMixSrcRange(cs->v1, min, max);
+                           v2Edit->setMin(min);
+                           v2Edit->setMax(max);
                            v2Edit->invalidate();
                          });
         grid.nextLine();
@@ -151,7 +156,7 @@ class LogicalSwitchEditWindow: public Page {
         new StaticText(logicalSwitchOneWindow, grid.getLabelSlot(), STR_V2);
         int16_t v2_min = 0, v2_max = 0;
         getMixSrcRange(cs->v1, v2_min, v2_max);
-        v2Edit = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), 0, MAX_LS_DELAY, GET_SET_DEFAULT(cs->v2));
+        v2Edit = new NumberEdit(logicalSwitchOneWindow, grid.getFieldSlot(), v2_min, v2_max, GET_SET_DEFAULT(cs->v2));
         v2Edit->setDisplayHandler([=](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
           drawSourceCustomValue(2, 2, cs->v1, (cs->v1 <= MIXSRC_LAST_CH ? calc100toRESX(value) : value), flags);
         });
