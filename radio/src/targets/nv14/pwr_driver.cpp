@@ -91,6 +91,12 @@ void pwrOn()
   powerupState = BOARD_POWER_ON;
 }
 
+void pwrSoftReboot(){
+  shutdownflag = 0x12345678;
+  shutdownRequest = SHUTDOWN_REQUEST;
+  shutdownReason = NORMAL_POWER_OFF;
+  powerupState = BOARD_POWER_OFF;
+}
 void pwrOff()
 {
   // Shutdown the Haptic
