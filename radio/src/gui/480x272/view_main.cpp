@@ -212,7 +212,7 @@ void ViewMain::checkEvents()
 
 void ViewMain::paint(BitmapBuffer * dc)
 {
-  //theme->drawBackground();
+  theme->drawBackground();
 
   if (g_model.view >= getMainViewsCount()) {
     g_model.view = 0;

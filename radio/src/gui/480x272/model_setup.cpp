@@ -517,7 +517,6 @@ void onBindMenu(const char * result)
 
   moduleFlag[moduleIdx] = MODULE_BIND;
 }
-static char ModeName[20];
 void ModelSetupPage::build(Window * window)
 {
   GridLayout grid;
@@ -525,8 +524,6 @@ void ModelSetupPage::build(Window * window)
 
   // Model name
   new StaticText(window, grid.getLabelSlot(), STR_MODELNAME);
-  memcpy((void *)ModeName, (const void *)g_model.header.name, sizeof(g_model.header.name));
-  ModeName[sizeof(g_model.header.name)+2] = sizeof(g_model.header.name);
   new TextEdit(window, grid.getFieldSlot(), g_model.header.name, sizeof(g_model.header.name));
   grid.nextLine();
 
