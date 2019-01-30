@@ -30,7 +30,7 @@ char hex2zchar(uint8_t hex)
 
 char idx2char(int8_t idx)
 {
-  if (idx == 0 || idx == ' ' ) return ' ';
+  if (idx == 0) return ' ';
   if (idx < 0) {
     if (idx > -27) return 'a' - idx - 1;
     idx = -idx;
