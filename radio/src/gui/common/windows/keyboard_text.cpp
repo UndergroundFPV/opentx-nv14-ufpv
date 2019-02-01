@@ -26,7 +26,7 @@
 int8_t char2idx(char c);
 char idx2char(int8_t idx);
 
-constexpr coord_t KEYBOARD_HEIGHT = 160;
+#define KEYBOARD_HEIGHT     ((g_eeGeneral.displayLargeLines) ? 220 : 160)
 
 TextKeyboard * TextKeyboard::_instance = nullptr;
 
@@ -69,10 +69,26 @@ const char * const KEYBOARD_LOWERCASE[] = {
   "\204\t\n"
 };
 
+const char * const LARGE_KEYBOARD_LOWERCASE[] = {
+  "qwertyu",
+  "iopasdf",
+  "ghjklzx",
+  "\201cvbnm\200",
+  "\204\t\n"
+};
+
 const char * const KEYBOARD_UPPERCASE[] = {
   "QWERTYUIOP",
   " ASDFGHJKL",
   "\202ZXCVBNM\200",
+  "\204\t\n"
+};
+
+const char * const LARGE_KEYBOARD_UPPERCASE[] = {
+  "QWERTYU",
+  "IOPASDF",
+  "GHJKLZX",
+  "\202CVBNM\200",
   "\204\t\n"
 };
 
@@ -83,17 +99,46 @@ const char * const KEYBOARD_NUMBERS[] = {
   "\203\t\n"
 };
 
-const char * const * const KEYBOARD_LAYOUTS[] = {
+const char * const * KEYBOARD_LAYOUTS[] = {
   KEYBOARD_UPPERCASE,
   KEYBOARD_LOWERCASE,
   KEYBOARD_LOWERCASE,
   KEYBOARD_NUMBERS,
 };
 
+const char * const * LARGE_KEYBOARD_LAYOUTS[] = {
+  LARGE_KEYBOARD_UPPERCASE,
+  LARGE_KEYBOARD_LOWERCASE,
+  LARGE_KEYBOARD_LOWERCASE,
+  KEYBOARD_NUMBERS,
+};
+
 TextKeyboard::TextKeyboard():
   Keyboard<TextEdit>(KEYBOARD_HEIGHT),
-  layout(KEYBOARD_LOWERCASE)
+  layout(g_eeGeneral.displayLargeLines ? LARGE_KEYBOARD_LOWERCASE : KEYBOARD_LOWERCASE)
 {
+}
+
+void TextKeyboard::setSize()
+{
+  if (g_eeGeneral.displayLargeLines) {
+    layout = LARGE_KEYBOARD_LOWERCASE;
+    x_space = 30;
+    x_spacebar = 160;
+    x_special = 50;
+    x_regular = 45;
+    x_enter = 80;
+    lines = 5;
+  }
+  else {
+    layout = KEYBOARD_LOWERCASE;
+    x_space = 15;
+    x_spacebar = 135;
+    x_special = 45;
+    x_regular = 30;
+    x_enter = 80;
+    lines = 4;
+  }
 }
 
 TextKeyboard::~TextKeyboard()
@@ -128,32 +173,32 @@ void TextKeyboard::paint(BitmapBuffer * dc)
   lcdSetColor(RGB(0xE0, 0xE0, 0xE0));
   dc->clear(CUSTOM_COLOR);
 
-  for (uint8_t i=0; i<4; i++) {
+  for (uint8_t i=0; i<lines; i++) {
     coord_t y = 15 + i * 40;
     coord_t x = 15;
     const char * c = layout[i];
     while(*c) {
       if (*c == ' ') {
-        x += 15;
+        x += x_space;
       }
       else if (*c == '\t') {
         // spacebar
         dc->drawBitmapPattern(x, y, LBM_KEY_SPACEBAR, TEXT_COLOR);
-        x += 135;
+        x += x_spacebar;
       }
       else if (*c == '\n') {
         // enter
         dc->drawSolidFilledRect(x, y-2, 80, 25, TEXT_DISABLE_COLOR);
         dc->drawText(x+40, y, "ENTER", CENTERED);
-        x += 80;
+        x += x_enter;
       }
       else if (int8_t(*c) < 0) {
         dc->drawBitmapPattern(x, y, LBM_SPECIAL_KEYS[uint8_t(*c - 128)], TEXT_COLOR);
-        x += 45;
+        x += x_special;
       }
       else {
         dc->drawSizedText(x, y, c, 1);
-        x += 30;
+        x += x_regular;
       }
       c++;
     }
@@ -170,29 +215,29 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
 
   char c = 0;
 
-  uint8_t row = max<coord_t>(0, y - 5) / 40;
+  uint8_t row = max<coord_t>(0, y - lines) / 40;
   const char * key = layout[row];
   while(*key) {
     if (*key == ' '){
-      x -= 15;
+      x -= x_space;
     }
     else if (*key == '\t') {
-      if (x <= 135) {
+      if (x <= x_spacebar) {
         c = ' ';
         break;
       }
-      x -= 135;
+      x -= x_spacebar;
     }
     else if (*key == '\n') {
-      if (x <= 80) {
+      if (x <= x_enter) {
         // enter
         disable(true);
         return true;
       }
-      x -= 80;
+      x -= x_enter;
     }
     else if (int8_t(*key) < 0) {
-      if (x <= 45) {
+      if (x <= x_special) {
         uint8_t specialKey = *key;
         if (specialKey == 128) {
           // backspace
@@ -205,19 +250,20 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
           }
         }
         else {
-          layout = KEYBOARD_LAYOUTS[specialKey - 129];
+          layout = (g_eeGeneral.displayLargeLines ? LARGE_KEYBOARD_LAYOUTS : KEYBOARD_LAYOUTS)[specialKey - 129];
+          TRACE("HERE");
           invalidate();
         }
         break;
       }
-      x -= 45;
+      x -= x_special;
     }
     else {
-      if (x <= 30) {
+      if (x <= x_regular) {
         c = *key;
         break;
       }
-      x -= 30;
+      x -= x_regular;
     }
     key++;
   }
