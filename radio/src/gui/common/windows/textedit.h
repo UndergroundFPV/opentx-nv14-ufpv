@@ -27,7 +27,6 @@ uint8_t zlen(const char *str, uint8_t size);
 
 class TextEdit : public Window {
   friend class TextKeyboard;
-
   public:
     TextEdit(Window * parent, const rect_t &rect, char * value, uint8_t length, LcdFlags flags = 0) :
       Window(parent, rect),
@@ -43,6 +42,10 @@ class TextEdit : public Window {
     }
 #endif
 
+    void setTextChangedHandler(std::function<void(char*)> function)
+    {
+      textChangedFunction = std::move(function);
+    }
     uint8_t getMaxLength()
     {
       return length;
@@ -60,8 +63,10 @@ class TextEdit : public Window {
     void onFocusLost() override;
 
   protected:
+    void onTextChaged();
     char * value;
     uint8_t length;
+    std::function<void(char*)> textChangedFunction;
 };
 
 #endif // _TEXTEDIT_H_

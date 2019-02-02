@@ -68,3 +68,8 @@ void TextEdit::onFocusLost()
   storageDirty(EE_MODEL);
 }
 
+void TextEdit::onTextChaged(){
+	this->invalidate();
+	if (textChangedFunction) textChangedFunction(value);
+}
+

@@ -98,6 +98,12 @@ const char * const KEYBOARD_NUMBERS[] = {
   "                 \200",
   "\203\t\n"
 };
+const char * const LARGE_KEYBOARD_NUMBERS[] = {
+  "1234567",
+  "890_-",
+  "                 \200",
+  "\203\t\n"
+};
 
 const char * const * KEYBOARD_LAYOUTS[] = {
   KEYBOARD_UPPERCASE,
@@ -110,7 +116,7 @@ const char * const * LARGE_KEYBOARD_LAYOUTS[] = {
   LARGE_KEYBOARD_UPPERCASE,
   LARGE_KEYBOARD_LOWERCASE,
   LARGE_KEYBOARD_LOWERCASE,
-  KEYBOARD_NUMBERS,
+  LARGE_KEYBOARD_NUMBERS,
 };
 
 TextKeyboard::TextKeyboard():
@@ -155,10 +161,8 @@ void TextKeyboard::setCursorPos(coord_t x)
   char * data = field->getData();
   coord_t rest = x;
   for (cursorIndex = 0; cursorIndex < size; cursorIndex++) {
-    if (data[cursorIndex] == '\0')
-      break;
-    char c = data[cursorIndex];
-    c = idx2char(c);
+    char c = idx2char(static_cast<int8_t>(data[cursorIndex]));
+    if (c == '\0') break;
     uint8_t w = getCharWidth(c, fontspecsTable[0]);
     if (rest < w)
       break;
@@ -251,7 +255,6 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
         }
         else {
           layout = (g_eeGeneral.displayLargeLines ? LARGE_KEYBOARD_LAYOUTS : KEYBOARD_LAYOUTS)[specialKey - 129];
-          TRACE("HERE");
           invalidate();
         }
         break;
@@ -268,12 +271,13 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
     key++;
   }
 
-  if (c && zlen(data, size) < size) {
-    memmove(data + cursorIndex + 1, data + cursorIndex, size - cursorIndex - 1);
+  if (c && cursorIndex < size) {
+	//move data from right site of cursor
+	char* curPos = data + cursorIndex;
+	memmove(curPos + 1, curPos, size - cursorIndex - 1);
     data[cursorIndex++] = char2idx(c);
     cursorPos += getCharWidth(c, fontspecsTable[0]);
   }
-
-  field->invalidate();
+  field->onTextChaged();
   return true;
 }
