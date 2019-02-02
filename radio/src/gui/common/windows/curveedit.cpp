@@ -91,9 +91,8 @@ void CurveEdit::next()
 
 void CurveEdit::previous()
 {
-  if (--current < 0) {
-    current = points.size();
-  }
+  if (current == 0) current = points.size();
+  else current--;
   update();
 }
 
