@@ -59,103 +59,127 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 			if (currentFolder == folder && p->isVisible()) {
 				crossfire_data_type dt = p->dataType();
 				const xfire_data* val = p->getValue();
-				new StaticText(window, grid.getLabelSlot(), p->name);
+				if(dt <= INFO) new StaticText(window, grid.getLabelSlot(), p->name);
 				switch (dt) {
-				case FOLDER:
-					grid.nextLine();
-					createControls(grid, p->number, level + 1);
+					case FOLDER:
+					{
+						grid.nextLine();
+						createControls(grid, p->number, level + 1);
+					}
 					break;
-				case INFO:
-					new StaticText(window, grid.getFieldSlot(), std::string(p->getTextValue()));
+					case INFO:
+					{
+						new StaticText(window, grid.getFieldSlot(), std::string(p->getEditableTextBuffer()));
+					}
 					break;
-				case COMMAND: {
-					TextButton* btn = new TextButton(window, grid.getLineSlot(), p->name);
-					p->control = btn;
-					btn->setPressHandler([=]() -> uint8_t {
-						state = X_SAVING;
-						crossfire_cmd_status status = val->COMMAND.status;
-						if(status == XFIRE_READY) p->save(XFIRE_START);
-						if(status == XFIRE_CONFIRMATION_NEEDED) p->save(XFIRE_CONFIRM);
-						return status == XFIRE_READY;
-					});
-				}
+					case COMMAND:
+					{
+						TextButton* btn = new TextButton(window, grid.getLineSlot(), p->name);
+						p->control = btn;
+						btn->setPressHandler(
+							[=]() -> uint8_t {
+								state = X_SAVING;
+								crossfire_cmd_status status = val->COMMAND.status;
+								if(status == XFIRE_READY) p->save(XFIRE_START);
+								if(status == XFIRE_CONFIRMATION_NEEDED) p->save(XFIRE_CONFIRM);
+								return status == XFIRE_READY;
+							});
+						}
 					break;
-				case UINT8:
-					new StaticText(window, grid.getLabelSlot(), p->name);
-			        new NumberEdit(window, grid.getFieldSlot(), val->UINT8.minVal, val->UINT8.maxVal,
-			            [=]() -> int32_t {
-			        		return val->UINT8.value;
-			        	},
-						[=](int32_t x) {
-			        		state = X_SAVING;
-			            	p->save(static_cast<uint8_t>(x));
-			            },
-						PREC1);
-						break;
-				case INT8:
-					new StaticText(window, grid.getLabelSlot(), p->name);
-			        new NumberEdit(window, grid.getFieldSlot(), val->INT8.minVal, val->INT8.maxVal,
-			            [=]() -> int32_t {
-			        		return val->INT8.value;
-			        	},
-						[=](int32_t newValue) {
-			        		state = X_SAVING;
-							p->save(static_cast<int8_t>(newValue));
-						},
-			            PREC1);
-						break;
-				case UINT16:
-					new StaticText(window, grid.getLabelSlot(), p->name);
-			        new NumberEdit(window, grid.getFieldSlot(), static_cast<uint16_t>(__REV16(val->UINT16.minVal)), static_cast<uint16_t>(__REV16(val->UINT16.maxVal)),
-			            [=]() -> int32_t {
-			        		return static_cast<uint16_t>(__REV16(val->UINT16.value));
-						},
-						[=](int32_t newValue) {
-							state = X_SAVING;
-							p->save(static_cast<uint16_t>(__REV16(static_cast<uint16_t>(newValue))));
-						},
-			            PREC1);
-						break;
-				case INT16:
-					new StaticText(window, grid.getLabelSlot(), p->name);
-			        new NumberEdit(window, grid.getFieldSlot(), static_cast<int16_t>(__REVSH(val->INT16.minVal)), static_cast<int16_t>(__REVSH(val->INT16.maxVal)),
-			            [=]() -> int32_t {
-			        		return static_cast<int16_t>(__REVSH(val->INT16.value));
-						},
-						[=](int32_t newValue) {
-							state = X_SAVING;
-							p->save(static_cast<int16_t>(__REVSH(static_cast<int16_t>(newValue))));
-						},
-			            PREC1);
-						break;
-				case STRING:
-					new StaticText(window, grid.getLabelSlot(), p->name);
-					new TextEdit(window, grid.getFieldSlot(), p->getTextValue(),
+					case UINT8:
+					{
+						new NumberEdit(window, grid.getFieldSlot(),
+							val->UINT8.minVal, val->UINT8.maxVal,
+							[=]() -> int32_t {
+								return val->UINT8.value;
+							}, [=](int32_t x) {
+								state = X_SAVING;
+								p->save(static_cast<uint8_t>(x));
+							});
+					}
+					break;
+					case INT8:
+					{
+						new NumberEdit(window, grid.getFieldSlot(),
+							val->INT8.minVal, val->INT8.maxVal,
+							[=]() -> int32_t {
+								return val->INT8.value;
+							}, [=](int32_t newValue) {
+								state = X_SAVING;
+								p->save(static_cast<int8_t>(newValue));
+							});
+					}
+					break;
+					case UINT16:
+					{
+						new NumberEdit(window, grid.getFieldSlot(),
+							static_cast<uint16_t>(__REV16(val->UINT16.minVal)),
+							static_cast<uint16_t>(__REV16(val->UINT16.maxVal)),
+							[=]() -> int32_t {
+								return static_cast<uint16_t>(__REV16(val->UINT16.value));
+							},
+							[=](int32_t newValue) {
+								state = X_SAVING;
+								p->save(static_cast<uint16_t>(__REV16(static_cast<uint16_t>(newValue))));
+							});
+					}
+					break;
+					case INT16:
+					{
+						new NumberEdit(window, grid.getFieldSlot(),
+							static_cast<int16_t>(__REVSH(val->INT16.minVal)),
+							static_cast<int16_t>(__REVSH(val->INT16.maxVal)),
+							[=]() -> int32_t {
+								return static_cast<int16_t>(__REVSH(val->INT16.value));
+							},
+							[=](int32_t newValue) {
+								state = X_SAVING;
+								p->save(static_cast<int16_t>(__REVSH(static_cast<int16_t>(newValue))));
+							});
+					}
+					break;
+					case STRING:
+					{
+						TextEdit* te = new TextEdit(window, grid.getFieldSlot(),
+							p->getEditableTextBuffer(),
 							val->STRING.maxLength());
+						te->setTextChangedHandler(
+							[=](char* newValue) {
+								state = X_SAVING;
+								p->save(reinterpret_cast<uint8_t*>(newValue), strlen(newValue));
+							});
+					}
 					break;
-				case TEXT_SELECTION: {
-					new StaticText(window, grid.getLabelSlot(), p->name);
-					new Choice(window, grid.getFieldSlot(), p->getItemsList(),
+					case TEXT_SELECTION:
+					{
+						new Choice(window, grid.getFieldSlot(), p->getItemsList(),
 							(int16_t) val->TEXT_SELECTION.minVal(),
 							(int16_t) val->TEXT_SELECTION.maxVal(),
-							[=]() -> int16_t {
-								return val->TEXT_SELECTION.selected();
-							}, [=](int16_t newValue) {
+							[=]() -> int16_t {return val->TEXT_SELECTION.selected();},
+							[=](int16_t newValue) {
 								state = X_SAVING;
 								p->setSelectedItem(newValue);
 							});
-				}
+					}
 					break;
-					//new Choice()
-					//case STRING:
-					//case TEXT_SELECTION:
-					//	new StaticText(window, grid.getLabelSlot(), (*param)->name);
-					//
-					//	break;
-					//case UINT8:
-					//case INT8:
-					//	new StaticText(window, grid.getLabelSlot(), (*param)->name);
-					//	break;
+					case FLOAT:
+					{
+						LcdFlags lcdFlag = 0;
+						if (val->FLOAT.decimalPoint == 1) lcdFlag = PREC1;
+						if (val->FLOAT.decimalPoint == 2) lcdFlag = PREC2;
+
+						new NumberEdit(window, grid.getFieldSlot(),
+							static_cast<int32_t>(__REV(val->FLOAT.minVal)),
+							static_cast<int32_t>(__REV(val->FLOAT.maxVal)),
+							[=]() -> int32_t {
+								return static_cast<int32_t>(__REV(val->FLOAT.value));
+							},
+							[=](int32_t newValue) {
+								state = X_SAVING;
+								p->save(static_cast<int32_t>(__REV(static_cast<int32_t>(newValue))));
+							}, lcdFlag);
+					}
+					break;
 				default:
 					break;
 				}
@@ -167,14 +191,6 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 			}
 		}
 	}
-
-	/*
-	while (param != parameters.end()) {
-		if((*param)->isVisible() && (*param)->name.length() && (*param)->getFolder() == folder){
-			new StaticText(window, grid.getLineSlot(), (*param)->name);
-			grid.nextLine();
-		}
-		param++;*/
 	grid.setMarginLeft(6);
 }
 
@@ -334,32 +350,10 @@ void CrossfireMenu::update() {
 			}
 		}
 	}
-	/*
-	bool hasModule = false;
-	for (auto itr = devices.begin(); itr != devices.end(); itr++) {
-		if((*itr)->devAddress == MODULE_ADDRESS){
-			hasModule = true;
-			break;
-		}
-	}*/
 	if(now > timeout){
-		//timeout = now + hasModule ? 500 : 100;
 		timeout = now + 500;
 		crossfireSend(pingCommand, sizeof(pingCommand));
 	}
-	/*
-	while (itr != devices.end()) {
-		CrossfireDevice* device = *itr;
-		if (device->timeout <= now) {
-			//erase invalidates existing iterators,
-			//but it returns a new iterator pointing
-			//to the element after the one that was removed
-			itr = devices.erase(itr);
-			removePage(device->configPage);
-			delete device;
-		}
-		else itr++;
-	}*/
 }
 
 

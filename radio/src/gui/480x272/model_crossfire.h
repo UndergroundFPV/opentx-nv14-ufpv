@@ -220,7 +220,7 @@ public:
 
 	std::string name;
 	//copy of text - max length set - so it can be edited
-	char* buffer;
+	char* text_buffer;
 	char** items;
 	int items_count;
 	char* itemsList;
@@ -236,7 +236,7 @@ public:
 		this->tries = 0;
 		this->chunksRemaining = 1;
 		this->items_count = 0;
-		this->buffer = NULL;
+		this->text_buffer = NULL;
 		this->itemsList = NULL;
 		this->items = NULL;
 		this->control = NULL;
@@ -247,9 +247,9 @@ public:
 			delete[] itemsList;
 			itemsList = NULL;
 		}
-		if (buffer != NULL) {
-			delete[] buffer;
-			buffer = NULL;
+		if (text_buffer != NULL) {
+			delete[] text_buffer;
+			text_buffer = NULL;
 		}
 		if (items != NULL) {
 			for (int i = 0; i < items_count; i++) {
@@ -288,18 +288,16 @@ public:
 		return result;
 	}
 
-	//pointer to editable text
-	//valid for STRING FOLDER INFO
-	char* getTextValue(){
+	char* getEditableTextBuffer(){
 		if(!data) return 0;
 		const xfire_data* xdata = getValue();
-		if(buffer == NULL) {
+		if(text_buffer == NULL) {
 			size_t size = strlen(xdata->STRING.text);
 			if(dataType() == STRING) size = xdata->STRING.maxLength();
-			buffer = new char[size];
+			text_buffer = new char[size];
 		}
-		strcpy(buffer, xdata->STRING.text);
-		return buffer;
+		strcpy(text_buffer, xdata->STRING.text);
+		return text_buffer;
 	}
 
 	const xfire_data* getValue(){
@@ -314,15 +312,15 @@ public:
 			for (size_t i = 0; i < len+1; i++)
 				if (xdata->TEXT_SELECTION.text[i] == ';' || xdata->TEXT_SELECTION.text[i] == 0)
 					items_count++;
-			if (buffer == NULL) {
-				buffer = new char[len + 1];
+			if (text_buffer == NULL) {
+				text_buffer = new char[len + 1];
 				items = new char*[items_count];
 			}
-			strcpy(buffer, xdata->TEXT_SELECTION.text);
+			strcpy(text_buffer, xdata->TEXT_SELECTION.text);
 			for(size_t i= 0; i < len; i++){
-				if(buffer[i] < ' ' || buffer[i] > '~') buffer[i] = ' ';
+				if(text_buffer[i] < ' ' || text_buffer[i] > '~') text_buffer[i] = ' ';
 			}
-			xdata->TEXT_SELECTION.getItems(this->buffer, this->items, itemsCount);
+			xdata->TEXT_SELECTION.getItems(this->text_buffer, this->items, itemsCount);
 			return const_cast<const char**>(items);
 		}
 		return NULL;
@@ -466,10 +464,11 @@ public:
 		save(a, sizeof(data));
 	}
 
-	void save(uint8_t* data, size_t length){
+	void save(uint8_t* newData, size_t length){
 		size_t totalLength = 4 + length;
 		uint8_t payload[64] = { WRITE_SETTINGS_ID, devAddress, RADIO_ADDRESS, number };
-		memcpy(payload + 4, data, length);
+		memcpy(payload + 4, newData, length);
+		memcpy(getDataOffset(data), newData, length);
 		timeout = get_tmr10ms() + (dataType() == COMMAND ? getValue()->COMMAND.timout / 10: 200);
 		reset(X_SAVING);
 		crossfireSend(payload, totalLength);
