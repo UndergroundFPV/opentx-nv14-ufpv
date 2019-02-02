@@ -69,28 +69,14 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 					new StaticText(window, grid.getFieldSlot(), std::string(p->getTextValue()));
 					break;
 				case COMMAND: {
-					TextButton* btn = new TextButton(window, grid.getLineSlot(),
-							p->name);
+					TextButton* btn = new TextButton(window, grid.getLineSlot(), p->name);
 					p->control = btn;
 					btn->setPressHandler([=]() -> uint8_t {
 						state = X_SAVING;
-						switch(val->COMMAND.status) {
-							case XFIRE_READY:
-							{
-								btn->setText("Press to cancel");
-								p->getDataOffset()[0] = XFIRE_START;
-								p->save(XFIRE_START);
-							}
-							break;
-							default:
-							{
-								btn->setText("Canceling...");
-								p->save(XFIRE_CANCEL);
-							}
-							break;
-						}
-						if(val->COMMAND.status != XFIRE_READY) return 0;
-						return 1;
+						crossfire_cmd_status status = val->COMMAND.status;
+						if(status == XFIRE_READY) p->save(XFIRE_START);
+						if(status == XFIRE_CONFIRMATION_NEEDED) p->save(XFIRE_CONFIRM);
+						return status == XFIRE_READY;
 					});
 				}
 					break;
@@ -99,19 +85,21 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 			        new NumberEdit(window, grid.getFieldSlot(), val->UINT8.minVal, val->UINT8.maxVal,
 			            [=]() -> int32_t {
 			        		return val->UINT8.value;
-						},
-						[=](int32_t newValue) {
-							p->save(static_cast<uint8_t>(newValue));
-						},
-			            PREC1);
+			        	},
+						[=](int32_t x) {
+			        		state = X_SAVING;
+			            	p->save(static_cast<uint8_t>(x));
+			            },
+						PREC1);
 						break;
 				case INT8:
 					new StaticText(window, grid.getLabelSlot(), p->name);
 			        new NumberEdit(window, grid.getFieldSlot(), val->INT8.minVal, val->INT8.maxVal,
 			            [=]() -> int32_t {
 			        		return val->INT8.value;
-						},
+			        	},
 						[=](int32_t newValue) {
+			        		state = X_SAVING;
 							p->save(static_cast<int8_t>(newValue));
 						},
 			            PREC1);
@@ -123,18 +111,20 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 			        		return static_cast<uint16_t>(__REV16(val->UINT16.value));
 						},
 						[=](int32_t newValue) {
+							state = X_SAVING;
 							p->save(static_cast<uint16_t>(__REV16(static_cast<uint16_t>(newValue))));
 						},
 			            PREC1);
 						break;
 				case INT16:
 					new StaticText(window, grid.getLabelSlot(), p->name);
-			        new NumberEdit(window, grid.getFieldSlot(), static_cast<int16_t>(__REV16(val->INT16.minVal)), static_cast<int16_t>(__REV16(val->INT16.maxVal)),
+			        new NumberEdit(window, grid.getFieldSlot(), static_cast<int16_t>(__REVSH(val->INT16.minVal)), static_cast<int16_t>(__REVSH(val->INT16.maxVal)),
 			            [=]() -> int32_t {
-			        		return static_cast<int16_t>(__REV16(val->INT16.value));
+			        		return static_cast<int16_t>(__REVSH(val->INT16.value));
 						},
 						[=](int32_t newValue) {
-							p->save(static_cast<int16_t>(__REV16(static_cast<int16_t>(newValue))));
+							state = X_SAVING;
+							p->save(static_cast<int16_t>(__REVSH(static_cast<int16_t>(newValue))));
 						},
 			            PREC1);
 						break;
@@ -151,7 +141,7 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 							[=]() -> int16_t {
 								return val->TEXT_SELECTION.selected();
 							}, [=](int16_t newValue) {
-								//state = X_SAVING;
+								state = X_SAVING;
 								p->setSelectedItem(newValue);
 							});
 				}
@@ -208,6 +198,28 @@ void CrossfireMenu::removePage(PageTab * page){
 	}
 }
 
+
+void CrossfireConfigPage::updateHeaderStatus() {
+	char buff[100];
+	auto param = parameters.begin();
+	if(state == X_LOADING) {
+		int total = 0;
+		int loaded = 0;
+		while (param != parameters.end()) {
+			total++;
+			if((*param)->chunksRemaining == 0) loaded++;
+			param++;
+		}
+		sprintf(buff, "%s Loading %d/%d", device->devName.c_str(), loaded, total);
+		title = std::move(std::string(buff));
+	}
+	else if(state == X_SAVING){
+		title = std::move(std::string("Saving..."));
+	}
+	else title = std::move(std::string(device->devName));
+	if (xmenu != NULL) xmenu->setTitle(title.c_str());
+}
+
 void CrossfireConfigPage::update() {
 	uint16_t now = get_tmr10ms();
 	auto param = parameters.begin();
@@ -227,37 +239,26 @@ void CrossfireConfigPage::update() {
 	}
 	if (now > timoutSettings) {
 		timoutSettings = get_tmr10ms() + 200;
+		crossfire_state currentState = X_IDLE;
+		//Loading or saving
 		if (state >= X_LOADING) {
-			crossfire_state currentState = X_IDLE;
 			while (param != parameters.end()) {
-				(*param)->sendRequest();
+				if (state == X_LOADING) (*param)->load();
+				if (state == X_SAVING) (*param)->pool();
 				if ((*param)->getState() >= X_LOADING) {
 					currentState = (*param)->getState();
 					break;
 				}
 				param++;
 			}
-			if(currentState != state){
+			if (currentState != state) {
+				crossfire_state prevState = state;
+				//load saved values
 				state = currentState;
-				if(state == X_IDLE) rebuildPage();
+				if (state == X_IDLE && prevState == X_LOADING) rebuildPage();
 			}
 		}
-
-		if(state == X_LOADING) {
-			param = parameters.begin();
-			int total = 0;
-			int loaded = 0;
-			while (param != parameters.end()) {
-				total++;
-				if((*param)->chunksRemaining == 0) loaded++;
-				param++;
-			}
-			char buff[100];
-			sprintf(buff, "%s Loading %d/%d",device->devName.c_str(), loaded, total);
-			title = std::move(std::string(buff));
-		}
-		else title = std::move(std::string(device->devName));
-		if (xmenu != NULL) xmenu->setTitle(title.c_str());
+		updateHeaderStatus();
 	}
 	/*
 	std::list<CrossfireDevice*>::iterator itr = devices.begin();

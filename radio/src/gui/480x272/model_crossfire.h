@@ -54,8 +54,7 @@ enum crossfire_state : uint8_t {
 	X_RX_ERROR = 2,
 	X_TX_ERROR = 3,
 	X_LOADING = 4,
-	X_SAVING = 5,
-
+	X_SAVING = 5
 };
 
 enum crossfire_cmd_status : uint8_t {
@@ -283,8 +282,10 @@ public:
 		return static_cast<crossfire_data_type>(data[X_FIRE_TYPE_OFFSET] & 0x7F);
 	}
 
-	uint8_t* getDataOffset(){
-		return data  + X_FIRE_HEADER_LEN + name.length()+1;
+	uint8_t* getDataOffset(uint8_t* dataPtr){
+		uint8_t* result = dataPtr + X_FIRE_HEADER_LEN;
+		result += strlen(reinterpret_cast<char*>(result)) + 1;
+		return result;
 	}
 
 	//pointer to editable text
@@ -301,9 +302,8 @@ public:
 		return buffer;
 	}
 
-	//valid for UINT8, INT8, UINT16, INT16, FLOAT
 	const xfire_data* getValue(){
-		return reinterpret_cast<const xfire_data*>(getDataOffset());
+		return reinterpret_cast<const xfire_data*>(getDataOffset(data));
 	}
 
 	const char** getItems(size_t& itemsCount) {
@@ -370,7 +370,7 @@ public:
 
 	//valid for UINT8, INT8, UINT16, INT16, FLOAT
 	const char* getUnit(){
-		uint8_t* unit = getDataOffset();
+		uint8_t* unit = getDataOffset(data);
 		switch(dataType()){
 		case UINT8:
 		case INT8:
@@ -384,18 +384,20 @@ public:
 			unit += sizeof(xfire_float);
 			break;
 		}
-		return reinterpret_cast<const char*>(getDataOffset());
+		return reinterpret_cast<const char*>(getDataOffset(data));
 	}
 	void reset(crossfire_state targetState) {
 		tries = 0;
 		chunksRemaining = 1;
 		chunkActual = 0;
 		state = targetState;
+		/*
 		if (data != NULL) {
 			delete[] data;
 			data = NULL;
 			dataPtr = NULL;
 		}
+		*/
 	}
 	//data pointer to payload
 	void parse(uint8_t *payload, size_t length, uint16_t now){
@@ -403,67 +405,58 @@ public:
 		payload += 1;
 		//skip crc
 		length -= 2;
-
 		tries = 0;
 		timeout = now + 200;
 		chunksRemaining = payload[X_FIRE_CHUNKS_OFFSET];
-		if(data == NULL){
-			data = new uint8_t[X_FIRE_FRAME_LEN * (chunksRemaining + 1)];
-			dataPtr = data;
+		if (state == X_LOADING) {
+			if (data == NULL) {
+				data = new uint8_t[X_FIRE_FRAME_LEN * (chunksRemaining + 1)];
+				dataPtr = data;
+			} else {
+				length -= X_FIRE_NEXT_CHUNK_DATA;
+				payload += X_FIRE_NEXT_CHUNK_DATA;
+			}
+			memcpy(dataPtr, payload, length);
+			dataPtr += length;
+			const char* nameptr = reinterpret_cast<const char*>(data + X_FIRE_HEADER_LEN);
+			if (!chunkActual && name.length() == 0) name = std::string(nameptr);
+			chunkActual++;
+			if (chunksRemaining == 0) setState(X_IDLE);
 		}
-		else{
-			length -= X_FIRE_NEXT_CHUNK_DATA;
-			payload += X_FIRE_NEXT_CHUNK_DATA;
-		}
-		memcpy(dataPtr, payload, length);
-		dataPtr += length;
-		const char* nameptr = reinterpret_cast<const char*>(data + X_FIRE_HEADER_LEN);
-		if(!chunkActual && name.length() == 0) name = std::string(nameptr);
-		chunkActual++;
-
-
-
-		//if (getState() == X_SAVING) {
+		if(state == X_SAVING) {
 			if (dataType() == COMMAND) {
-				const xfire_data* data = getValue();
-				switch (data->COMMAND.status) {
+				xfire_data* currentData = reinterpret_cast<xfire_data*>(getDataOffset(data));
+				const xfire_data* xdata = reinterpret_cast<const xfire_data*>(getDataOffset(payload));
+				currentData->COMMAND.status = xdata->COMMAND.status;
+				switch (xdata->COMMAND.status) {
 				case XFIRE_PROGRESS:
-					if(strlen(data->COMMAND.info) > 0)  setText(data->COMMAND.info);
-					if(state == X_SAVING) save(XFIRE_POLL);
-					else save(XFIRE_CANCEL);
+					if (strlen(xdata->COMMAND.info) > 0) setText(xdata->COMMAND.info);
+					save(XFIRE_POLL);
 					break;
 				case XFIRE_CONFIRMATION_NEEDED:
-					if(strlen(data->COMMAND.info) > 0)  setText(data->COMMAND.info);
-					save(XFIRE_CONFIRM);
+					if (strlen(xdata->COMMAND.info) > 0) setText(xdata->COMMAND.info);
 					break;
 				case XFIRE_READY:
-					if(strlen(data->COMMAND.info) > 0)  setText(data->COMMAND.info);
-					else setText(nameptr);
+					if(strlen(xdata->COMMAND.info) > 0) setText(xdata->COMMAND.info);
+					else setText(name.c_str());
 					setState(X_IDLE);
 					break;
 				}
 			}
-		//}
-
-		if(chunksRemaining == 0){
-			setState(X_IDLE);
-			//loaded after save check if value saved
+			else if (chunksRemaining == 0) setState(X_IDLE);
 		}
 	}
 
-	void sendRequest(){
-		if(chunksRemaining <= 0){
-			setState(X_IDLE);
-			return;
+	void load(){
+		if(chunksRemaining <= 0) setState(X_IDLE);
+		else if(tries >= RETRY_COUNT) setState(X_RX_ERROR);
+		//else if(timeout >= get_tmr10ms()) setState(X_TX_ERROR);
+		else {
+			setState(X_LOADING);
+			tries++;
+			uint8_t payload[] = { READ_SETTINGS_ID, devAddress, RADIO_ADDRESS, number, chunkActual };
+			crossfireSend(payload, sizeof(payload));
 		}
-		else if(tries >= RETRY_COUNT) {
-			setState(X_RX_ERROR);
-			return;
-		}
-		setState(X_LOADING);
-		tries++;
-		uint8_t payload[] = { READ_SETTINGS_ID, devAddress, RADIO_ADDRESS, number, chunkActual };
-		crossfireSend(payload, sizeof(payload));
 	}
 
 	template<typename Type>
@@ -472,19 +465,23 @@ public:
 		uint8_t* a = reinterpret_cast<uint8_t*>(&data);
 		save(a, sizeof(data));
 	}
-	//make it generic!
-	void save(uint8_t data){
-		size_t totalLength = 4 + sizeof(data);
-		uint8_t payload[64] = { WRITE_SETTINGS_ID, devAddress, RADIO_ADDRESS, number, data };
-		reset(X_SAVING);
-		crossfireSend(payload, totalLength);
-	}
+
 	void save(uint8_t* data, size_t length){
 		size_t totalLength = 4 + length;
 		uint8_t payload[64] = { WRITE_SETTINGS_ID, devAddress, RADIO_ADDRESS, number };
 		memcpy(payload + 4, data, length);
+		timeout = get_tmr10ms() + (dataType() == COMMAND ? getValue()->COMMAND.timout / 10: 200);
 		reset(X_SAVING);
 		crossfireSend(payload, totalLength);
+	}
+
+	void pool(){
+		if(state == X_SAVING && dataType() == COMMAND){
+			const xfire_data* val = getValue();
+			if(val->COMMAND.status == XFIRE_START || val->COMMAND.status == XFIRE_PROGRESS){
+				save(XFIRE_POLL);
+			}
+		}
 	}
 
 	void setText(const char* text){
@@ -494,50 +491,6 @@ public:
 		if(t == NULL) return;
 		t->setText(std::string(text));
 	}
-
-
-	/*
-	{
-		size_t size = 4;
-		const xfire_data* data = getValue();
-		char* text = getTextValue();
-		uint8_t payload[64] = { WRITE_SETTINGS_ID, devAddress, RADIO_ADDRESS, number };
-		switch (dataType()) {
-		case UINT8:
-			payload[size++] = data->UINT8.value;
-			break;
-		case INT8:
-			payload[size++] = data->INT8.value;
-			break;
-		case UINT16:
-			//endianess!!!
-			payload[size++] = data->INT16.value && 0xFF;
-			payload[size++] = (data->INT16.value && 0xFF00) >> 8;
-			break;
-		case INT16:
-			//endianess!!!
-			payload[size++] = data->UINT16.value && 0xFF;
-			payload[size++] = (data->UINT16.value && 0xFF00) >> 8;
-			break;
-		case FLOAT:
-			//endianess!!!
-			payload[size++] = (data->FLOAT.value && 0xFF);
-			payload[size++] = (data->FLOAT.value && 0xFF00) >> 8;
-			payload[size++] = (data->FLOAT.value && 0xFF0000) >> 16;
-			payload[size++] = (data->FLOAT.value && 0xFF000000) >> 24;
-			break;
-		case STRING:
-			strcpy(reinterpret_cast<char*>(payload), text);
-			size += strlen(text);
-			break;
-		case TEXT_SELECTION:
-			payload[size++] = data->TEXT_SELECTION.selected();
-			break;
-		}
-
-		crossfireSend(payload, size);
-
-	}*/
 };
 
 
@@ -549,6 +502,7 @@ class CrossfireConfigPage: public PageTab {
 	CrossfireConfigPage(CrossfireDevice* device, CrossfireMenu* menu);
 	~CrossfireConfigPage();
 	void update();
+	void updateHeaderStatus();
 
 	void build(Window * window) override {
     	this->window = window;
