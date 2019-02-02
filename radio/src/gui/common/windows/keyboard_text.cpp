@@ -159,17 +159,26 @@ void TextKeyboard::setCursorPos(coord_t x)
 
   uint8_t size = field->getMaxLength();
   char * data = field->getData();
+  bool isZChar = (field->lcdFlags & ZCHAR) != 0;
   coord_t rest = x;
-  for (cursorIndex = 0; cursorIndex < size; cursorIndex++) {
-    char c = data[cursorIndex];
-    if((field->lcdFlags & ZCHAR)) c = idx2char(static_cast<int8_t>(c));
-    if (c == '\0') break;
-    uint8_t w = getCharWidth(c, fontspecsTable[0]);
-    if (rest < w)
-      break;
-    rest -= w;
+  if(strlen(data) == 0){
+	  if(!isZChar || zlen(data, size) ==0){
+		  cursorPos = 0;
+		  cursorIndex = 0;
+	  }
   }
-  cursorPos = x - rest;
+  else{
+	  for (cursorIndex = 0; cursorIndex < size; cursorIndex++) {
+		  char c = data[cursorIndex];
+		  if(isZChar) c = idx2char(static_cast<int8_t>(c));
+		  if (c == '\0') break;
+		  uint8_t w = getCharWidth(c, fontspecsTable[0]);
+		  if (rest < w)
+			  break;
+		  rest -= w;
+	  }
+	  cursorPos = x - rest;
+  }
   field->invalidate();
 }
 

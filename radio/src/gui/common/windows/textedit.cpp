@@ -36,7 +36,7 @@ void TextEdit::paint(BitmapBuffer * dc)
 
   if (!hasFocus && textLength == 0)
     dc->drawSizedText(3, Y_ENLARGEABLE, "---", length, CURVE_AXIS_COLOR);
-  else
+  else if(textLength > 0)
     dc->drawSizedText(3, Y_ENLARGEABLE, value, textLength, lcdFlags | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 
