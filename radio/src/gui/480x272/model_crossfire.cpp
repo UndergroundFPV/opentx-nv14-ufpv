@@ -157,7 +157,7 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 							[=]() -> int16_t {return val->TEXT_SELECTION.selected();},
 							[=](int16_t newValue) {
 								state = X_SAVING;
-								p->setSelectedItem(newValue);
+								p->save(newValue);
 							});
 					}
 					break;

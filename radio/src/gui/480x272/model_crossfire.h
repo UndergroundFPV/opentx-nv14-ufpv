@@ -329,14 +329,6 @@ public:
 		return NULL;
 	}
 
-	void setSelectedItem(uint8_t value){
-		const xfire_data* xdata = getValue();
-		uint8_t* target = const_cast<uint8_t*>(xdata->TEXT_SELECTION.selectedPtr());
-		*target = value;
-		save(target, 1);
-	}
-
-
 	//return items in format [len][item1][item2]..[itemN] no null termination
 	const char* getItemsList() {
 		//if (itemsList != NULL)
@@ -471,7 +463,12 @@ public:
 		size_t totalLength = 4 + length;
 		uint8_t payload[64] = { WRITE_SETTINGS_ID, devAddress, RADIO_ADDRESS, number };
 		memcpy(payload + 4, newData, length);
-		memcpy(getDataOffset(data), newData, length);
+		if(dataType() <= FLOAT || dataType() == COMMAND){
+			memcpy(getDataOffset(data), newData, length);
+		}
+		else if(dataType() == TEXT_SELECTION){
+			memcpy(const_cast<uint8_t*>(getValue()->TEXT_SELECTION.selectedPtr()), newData, length);
+		}
 		timeout = get_tmr10ms() + (dataType() == COMMAND ? getValue()->COMMAND.timout / 10: 200);
 		reset(X_SAVING);
 		crossfireSend(payload, totalLength);
