@@ -140,14 +140,13 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 					break;
 					case STRING:
 					{
-						TextEdit* te = new TextEdit(window, grid.getFieldSlot(),
+						new TextEdit(window, grid.getFieldSlot(),
 							p->getEditableTextBuffer(),
-							val->STRING.maxLength());
-						te->setTextChangedHandler(
-							[=](char* newValue) {
-								state = X_SAVING;
-								p->save(reinterpret_cast<uint8_t*>(newValue), strlen(newValue));
-							});
+							val->STRING.maxLength(), 0, [=](char* newValue) {
+							state = X_SAVING;
+							p->save(reinterpret_cast<uint8_t*>(newValue), strlen(newValue)+1);
+							}, false);
+
 					}
 					break;
 					case TEXT_SELECTION:
@@ -187,7 +186,6 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 					grid.spacer(8);
 					grid.nextLine();
 				}
-
 			}
 		}
 	}

@@ -161,7 +161,8 @@ void TextKeyboard::setCursorPos(coord_t x)
   char * data = field->getData();
   coord_t rest = x;
   for (cursorIndex = 0; cursorIndex < size; cursorIndex++) {
-    char c = idx2char(static_cast<int8_t>(data[cursorIndex]));
+    char c = data[cursorIndex];
+    if((field->lcdFlags & ZCHAR)) c = idx2char(static_cast<int8_t>(c));
     if (c == '\0') break;
     uint8_t w = getCharWidth(c, fontspecsTable[0]);
     if (rest < w)
@@ -235,6 +236,7 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
     else if (*key == '\n') {
       if (x <= x_enter) {
         // enter
+        field->onTextChaged();
         disable(true);
         return true;
       }
@@ -246,7 +248,8 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
         if (specialKey == 128) {
           // backspace
           if (cursorIndex > 0) {
-            char c = idx2char(data[cursorIndex - 1]);
+            char c = data[cursorIndex - 1];
+            if((field->lcdFlags & ZCHAR) != 0) c = idx2char(c);
             memmove(data + cursorIndex - 1, data + cursorIndex, size - cursorIndex);
             data[size - 1] = '\0';
             cursorPos -= getCharWidth(c, fontspecsTable[0]);
@@ -274,10 +277,13 @@ bool TextKeyboard::onTouchEnd(coord_t x, coord_t y)
   if (c && cursorIndex < size) {
 	//move data from right site of cursor
 	char* curPos = data + cursorIndex;
+	size_t toMove = size - cursorIndex;
+	if((field->lcdFlags & ZCHAR)) toMove--;
 	memmove(curPos + 1, curPos, size - cursorIndex - 1);
-    data[cursorIndex++] = char2idx(c);
+    if((field->lcdFlags & ZCHAR)) data[cursorIndex++] = char2idx(c);
+    else data[cursorIndex++] = c;
     cursorPos += getCharWidth(c, fontspecsTable[0]);
   }
-  field->onTextChaged();
+  field->invalidate();
   return true;
 }

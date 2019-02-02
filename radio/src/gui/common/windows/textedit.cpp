@@ -31,10 +31,13 @@ void TextEdit::paint(BitmapBuffer * dc)
     textColor = TEXT_INVERTED_BGCOLOR;
     lineColor = TEXT_INVERTED_BGCOLOR;
   }
-  if (!hasFocus && zlen(value, length) == 0)
+  size_t textLength = strlen(value);
+  if((lcdFlags & ZCHAR) != 0) textLength = zlen(value, length);
+
+  if (!hasFocus && textLength == 0)
     dc->drawSizedText(3, Y_ENLARGEABLE, "---", length, CURVE_AXIS_COLOR);
   else
-    dc->drawSizedText(3, Y_ENLARGEABLE, value, length, ZCHAR | textColor);
+    dc->drawSizedText(3, Y_ENLARGEABLE, value, textLength, lcdFlags | textColor);
   drawSolidRect(dc, 0, 0, rect.w, rect.h, 1, lineColor);
 
   auto keyboard = TextKeyboard::instance();
@@ -65,11 +68,10 @@ bool TextEdit::onTouchEnd(coord_t x, coord_t y)
 void TextEdit::onFocusLost()
 {
   TextKeyboard::instance()->disable(true);
-  storageDirty(EE_MODEL);
 }
 
 void TextEdit::onTextChaged(){
-	this->invalidate();
-	if (textChangedFunction) textChangedFunction(value);
+	if (modelData) storageDirty(EE_MODEL);
+	if (textChanged) textChanged(value);
 }
 

@@ -133,7 +133,10 @@ struct xfire_text {
 	const uint8_t maxLength() const {
 		const char* def = defaultText();
 		def += strlen(def) + 1;
-		return *reinterpret_cast<const uint8_t*>(def);
+		const uint8_t length = *reinterpret_cast<const uint8_t*>(def);
+		if(length > 128) return 128;
+		if(length == 0) return strlen(text);
+		return length;
 	}
 };
 
