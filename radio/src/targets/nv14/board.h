@@ -368,8 +368,7 @@ enum Analogs {
   POT1 = POT_FIRST,
   POT2,
   POT_LAST = POT2,
-  SWITCH_FIRST,
-  SWA = SWITCH_FIRST,
+  SWA,
   SWB,
   SWC,
   SWD,
@@ -377,11 +376,11 @@ enum Analogs {
   SWF,
   SWG,
   SWH,
-  SUB_ANALOG_POS = SWH,
-  SWITCH_END = SWH,
   TX_VOLTAGE,
   NUM_ANALOGS
 };
+
+#define NUM_SUB_ANALOGS 2
 
 #define DEFAULT_POTS_CONFIG (POT_WITHOUT_DETENT << 0) + (POT_WITHOUT_DETENT << 2) // 2 pots without detent
 
@@ -412,6 +411,7 @@ void adcInit(void);
 void adcRead(void);
 uint16_t getAnalogValue(uint8_t index);
 uint16_t getBatteryVoltage();   // returns current battery voltage in 10mV steps
+uint16_t getBattery2Voltage();   // returns current battery voltage in 10mV steps
 
 #define BATTERY_WARN                  37 // 3.7V
 #define BATTERY_MIN                   36 // 3.6V
