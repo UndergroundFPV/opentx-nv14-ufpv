@@ -70,10 +70,10 @@ const char * const KEYBOARD_LOWERCASE[] = {
 };
 
 const char * const LARGE_KEYBOARD_LOWERCASE[] = {
-  "qwertyu",
-  "iopasdf",
-  "ghjklzx",
-  "\201cvbnm\200",
+  "abcdefg",
+  "hijklmn",
+  "opqrstu",
+  "\201vwxyz\200",
   "\204\t\n"
 };
 
@@ -85,10 +85,10 @@ const char * const KEYBOARD_UPPERCASE[] = {
 };
 
 const char * const LARGE_KEYBOARD_UPPERCASE[] = {
-  "QWERTYU",
-  "IOPASDF",
-  "GHJKLZX",
-  "\202CVBNM\200",
+  "ABCDEFG",
+  "HIJKLMN",
+  "OPQRSTU",
+  "\202VWXYZ\200",
   "\204\t\n"
 };
 
