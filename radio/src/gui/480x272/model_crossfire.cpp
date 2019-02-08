@@ -113,28 +113,28 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 					case UINT16:
 					{
 						new NumberEdit(window, grid.getFieldSlot(),
-							static_cast<uint16_t>(__REV16(val->UINT16.minVal)),
-							static_cast<uint16_t>(__REV16(val->UINT16.maxVal)),
+							static_cast<uint16_t>(bswapu16(val->UINT16.minVal)),
+							static_cast<uint16_t>(bswapu16(val->UINT16.maxVal)),
 							[=]() -> int32_t {
-								return static_cast<uint16_t>(__REV16(val->UINT16.value));
+								return static_cast<uint16_t>(bswapu16(val->UINT16.value));
 							},
 							[=](int32_t newValue) {
 								state = X_SAVING;
-								p->save(static_cast<uint16_t>(__REV16(static_cast<uint16_t>(newValue))));
+								p->save(static_cast<uint16_t>(bswapu16(static_cast<uint16_t>(newValue))));
 							});
 					}
 					break;
 					case INT16:
 					{
 						new NumberEdit(window, grid.getFieldSlot(),
-							static_cast<int16_t>(__REVSH(val->INT16.minVal)),
-							static_cast<int16_t>(__REVSH(val->INT16.maxVal)),
+							static_cast<int16_t>(bswaps16(val->INT16.minVal)),
+							static_cast<int16_t>(bswaps16(val->INT16.maxVal)),
 							[=]() -> int32_t {
-								return static_cast<int16_t>(__REVSH(val->INT16.value));
+								return static_cast<int16_t>(bswaps16(val->INT16.value));
 							},
 							[=](int32_t newValue) {
 								state = X_SAVING;
-								p->save(static_cast<int16_t>(__REVSH(static_cast<int16_t>(newValue))));
+								p->save(static_cast<int16_t>(bswaps16(static_cast<int16_t>(newValue))));
 							});
 					}
 					break;
@@ -168,14 +168,14 @@ void CrossfireConfigPage::createControls(GridLayout& grid, uint8_t folder, uint8
 						if (val->FLOAT.decimalPoint == 2) lcdFlag = PREC2;
 
 						new NumberEdit(window, grid.getFieldSlot(),
-							static_cast<int32_t>(__REV(val->FLOAT.minVal)),
-							static_cast<int32_t>(__REV(val->FLOAT.maxVal)),
+							static_cast<int32_t>(bswapu32(val->FLOAT.minVal)),
+							static_cast<int32_t>(bswapu32(val->FLOAT.maxVal)),
 							[=]() -> int32_t {
-								return static_cast<int32_t>(__REV(val->FLOAT.value));
+								return static_cast<int32_t>(bswapu32(val->FLOAT.value));
 							},
 							[=](int32_t newValue) {
 								state = X_SAVING;
-								p->save(static_cast<int32_t>(__REV(static_cast<int32_t>(newValue))));
+								p->save(static_cast<int32_t>(bswapu32(static_cast<int32_t>(newValue))));
 							}, lcdFlag);
 					}
 					break;

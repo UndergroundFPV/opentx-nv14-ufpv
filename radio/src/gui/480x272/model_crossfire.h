@@ -29,6 +29,17 @@ class CrossfirePage;
 class CrossfireConfigPage;
 class CrossfireMenu;
 
+#if defined(SIMU)
+	#define bswapu16 __builtin_bswap16
+	#define bswaps16 __builtin_bswap16
+	#define bswapu32 __builtin_bswap32
+#else
+	#define bswapu16 __REV16
+	#define bswaps16 __REVSH
+	#define bswapu32 __REV
+#endif
+
+
 #define CRSF_ALL_DEVICES 0x00
 #define FRAME_TYPE_OFFSET 0
 #define FRAME_PARAM_NUM_OFFSET 3
@@ -125,25 +136,35 @@ struct xfire_comand {
 };
 
 struct xfire_text {
-	char text[];
+	char firstChar;
 
+	const char* text() const {
+		return &firstChar;
+	}
 	const char* defaultText() const {
-		return text + strlen(text) + 1;
+		return text() + strlen(text()) + 1;
 	}
 	const uint8_t maxLength() const {
 		const char* def = defaultText();
 		def += strlen(def) + 1;
 		const uint8_t length = *reinterpret_cast<const uint8_t*>(def);
 		if(length > 128) return 128;
-		if(length == 0) return strlen(text);
+		if(length == 0) return strlen(text());
 		return length;
 	}
 };
 
 struct xfire_text_select {
-	char text[];
+	char firstChar;
+
+	const char* text() const {
+		return &firstChar;
+	}
+	const uint8_t* data() const {
+		return reinterpret_cast<const uint8_t*>(text() + strlen(text()) + 1) ;
+	}
 	void getItems(char* buffer, char** result, size_t& count) const {
-		strcpy(buffer, text);
+		strcpy(buffer, text());
 		int index = 0;
 		result[index] = strtok(buffer, ";");
 		while (result[index]) {
@@ -151,22 +172,20 @@ struct xfire_text_select {
 			result[++index] = strtok(NULL, ";");
 		}
 	}
-
 	uint8_t* selectedPtr() const {
-		return const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(text + strlen(text) + 1));
+		return const_cast<uint8_t*>(data());
 	}
-
 	uint8_t selected() const {
-		return *(reinterpret_cast<const uint8_t*>(text + strlen(text) + 1));
+		return *data();
 	}
 	uint8_t minVal() const {
-		return *(reinterpret_cast<const uint8_t*>(text + strlen(text) + 2));
+		return *(data() + 1);
 	}
 	uint8_t maxVal() const {
-		return *(reinterpret_cast<const uint8_t*>(text + strlen(text) + 3));
+		return *(data() + 2);
 	}
 	uint8_t defVal() const {
-		return *(reinterpret_cast<const uint8_t*>(text + strlen(text) + 4));
+		return *(data() + 3);
 	}
 
 };
@@ -295,11 +314,11 @@ public:
 		if(!data) return 0;
 		const xfire_data* xdata = getValue();
 		if(text_buffer == NULL) {
-			size_t size = strlen(xdata->STRING.text);
+			size_t size = strlen(xdata->STRING.text());
 			if(dataType() == STRING) size = xdata->STRING.maxLength();
 			text_buffer = new char[size];
 		}
-		strcpy(text_buffer, xdata->STRING.text);
+		strcpy(text_buffer, xdata->STRING.text());
 		return text_buffer;
 	}
 
@@ -311,15 +330,15 @@ public:
 		const xfire_data* xdata = getValue();
 		if (dataType() == TEXT_SELECTION) {
 			items_count = 0;
-			size_t len = strlen(xdata->STRING.text);
+			size_t len = strlen(xdata->STRING.text());
 			for (size_t i = 0; i < len+1; i++)
-				if (xdata->TEXT_SELECTION.text[i] == ';' || xdata->TEXT_SELECTION.text[i] == 0)
+				if (xdata->TEXT_SELECTION.text()[i] == ';' || xdata->TEXT_SELECTION.text()[i] == 0)
 					items_count++;
 			if (text_buffer == NULL) {
 				text_buffer = new char[len + 1];
 				items = new char*[items_count];
 			}
-			strcpy(text_buffer, xdata->TEXT_SELECTION.text);
+			strcpy(text_buffer, xdata->TEXT_SELECTION.text());
 			for(size_t i= 0; i < len; i++){
 				if(text_buffer[i] < ' ' || text_buffer[i] > '~') text_buffer[i] = ' ';
 			}
