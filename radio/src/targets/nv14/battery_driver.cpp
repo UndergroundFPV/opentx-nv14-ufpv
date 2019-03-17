@@ -76,7 +76,7 @@ void handle_battery_charge()
 #if !defined(SIMU)
   static uint16_t chargeState = CHARGE_NONE;
   static uint32_t updateTime = 0;
-  if(powerupState != BOARD_POWER_OFF) return;
+  if(boardState != BOARD_POWER_OFF) return;
   if(get_battery_charge_state() == CHARGE_NONE)
   {
     if(chargeState != CHARGE_NONE)
@@ -108,29 +108,6 @@ void handle_battery_charge()
 
 uint16_t getBatteryVoltage()
 {
-#if defined (SIMU)
-  return 350 + g_eeGeneral.txVoltageCalibration;
-#else
   int32_t instant_vbat = anaIn(TX_VOLTAGE);  // using filtered ADC value on purpose
   return (uint16_t)((instant_vbat * (1000 + g_eeGeneral.txVoltageCalibration)) / 2942);
-#endif
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
